@@ -1,0 +1,10 @@
+*.d
+*.o
+*.out
+*.txt
+*.sh
+*.pdf
+*.vim
+docs/*
+sa/*
+webserv
