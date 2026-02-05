@@ -51,10 +51,10 @@ void log_internal(std::ostream &os, const std::string &color,
 void print_timestamp(std::ostream &os) {
   std::time_t ct_since_epoch = std::time(NULL);
   if (ct_since_epoch == (time_t)(-1))
-    throw std::runtime_error("failed to obtain system time");
+    return;
   std::tm *ct = std::localtime(&ct_since_epoch);
   if (ct == NULL)
-    throw std::runtime_error("failed to obtain system time");
+    return;
   os << ct->tm_year + 1900 << '-' << std::setfill('0') << std::setw(2)
      << (ct->tm_mon + 1) << '-' << std::setfill('0') << std::setw(2)
      << ct->tm_mday << ' ' << std::setfill('0') << std::setw(2) << ct->tm_hour
