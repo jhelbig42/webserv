@@ -7,6 +7,10 @@ OBJ_DIR		:= obj
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
+vpath %.cpp $(SRC_DIR)/logging
+SRC			+= Logging.cpp
+vpath %.cpp $(SRC_DIR)/config
+SRC			+= Config.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -64,11 +68,6 @@ ifeq ($(DEV), 1)
 	CXXFLAGS	+= -Wconversion
 	CXXFLAGS	+= -Wno-unused-parameter
 	CXXFLAGS	+= -Wno-unused-function
-endif
-
-CPPFLAGS	+= -DLOG
-ifeq ($(LOG), 0)
-	CPPFLAGS += -ULOG
 endif
 
 ifeq ($(DEBUG), 1)
