@@ -3,18 +3,16 @@
 #include <string>
 #include "Logging.hpp"
 
-class Config
+namespace Config
 {
-	public:
+	Log::t_log_level getLogLevel();
 
-		static Log::t_log_level getLogLevel();
-
-		/**
-		 * @fn static void fromFile(const std::string& file)
-		 *
-		 * @brief reads configuration from a file into memory
-		 *
-		 * @param file the configuration file to read from
-		 */
-		static void fromFile(const std::string& file);
-};
+	/**
+	 * @fn static void fromFile(const std::string& file)
+	 *
+	 * @brief reads configuration from a file into memory
+	 *
+	 * @param file the configuration file to read from
+	 */
+	void fromFile(const std::string& file);
+}
