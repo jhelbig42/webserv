@@ -36,7 +36,7 @@ void log_internal(std::ostream &os, const std::string &color,
                   const std::string &label, const std::string &msg) {
   os << color;
   print_timestamp(os);
-  os << ' ' << label << ' ' << msg << "\033[0m\n";
+  os << ' ' << label << ' ' << msg << "\033[0m\n" << std::flush;
 }
 
 /**
