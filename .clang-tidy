@@ -1,0 +1,12 @@
+Checks: >
+  -*,
+  llvm-*,
+  readability-*,
+  bugprone-*,
+  misc-*,
+  -modernize-*,
+  -cppcoreguidelines-*,
+  -google-*,
+  -hicpp-*
+
+WarningsAsErrors: '*'
