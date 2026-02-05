@@ -5,25 +5,13 @@
 #include <ctime>
 #include <iomanip>
 #include "Config.hpp"
+#include "LoggingDefines.hpp"
 
-#define DEBUG_STREAM std::cout
-#define DEBUG_COLOR ""
-#define DEBUG_LABEL "[DEBUG]  "
-
-#define LOG_STREAM std::cout
-#define LOG_COLOR ""
-#define LOG_LABEL "[LOG]    "
-
-#define WARNING_STREAM std::cerr
-#define WARNING_COLOR "\x1B[33m"
-#define WARNING_LABEL "[WARNING]"
-
-#define ERROR_STREAM std::cerr
-#define ERROR_COLOR "\x1B[31m"
-#define ERROR_LABEL "[ERROR]  "
-
-static void log_internal(std::ostream& os, const std::string& color, const std::string& label, const std::string& msg);
-static void print_timestamp(std::ostream& os);
+namespace
+{
+	void log_internal(std::ostream& os, const std::string& color, const std::string& label, const std::string& msg);
+	void print_timestamp(std::ostream& os);
+}
 
 void Log::log(const std::string& msg, const Log::t_log_level level)
 {
@@ -45,40 +33,44 @@ void Log::log(const std::string& msg, const Log::t_log_level level)
 	}
 }
 
-static void log_internal(std::ostream& os, const std::string& color, const std::string& label, const std::string& msg)
+namespace
 {
-	os << color;
-	print_timestamp(os);
-	os << ' ' << label << ' ' << msg << "\033[0m" << std::endl;
-}
+	void log_internal(std::ostream& os, const std::string& color,
+			const std::string& label, const std::string& msg)
+	{
+		os << color;
+		print_timestamp(os);
+		os << ' ' << label << ' ' << msg << "\033[0m\n";
+	}
 
-/**
- * @fn static void print_timestamp(std::ostream& os)
- *
- * @brief writes timestamp to output stream
- *
- * TODO: consider removing reduntant stream manipulators
- *
- * @param os output stream to write to
- */
-static void print_timestamp(std::ostream& os)
-{
-	std::time_t ct_since_epoch = std::time(NULL);
-	if (ct_since_epoch == (time_t)(-1))
-		throw std::runtime_error("failed to obtain system time");
-	std::tm* ct = std::localtime(&ct_since_epoch);
-	if (ct == NULL)
-		throw std::runtime_error("failed to obtain system time");
-	os
-		<< ct->tm_year + 1900
-		<< '-'
-		<< std::setfill('0') << std::setw(2) << (ct->tm_mon + 1)
-		<< '-'
-		<< std::setfill('0') << std::setw(2) << ct->tm_mday
-		<< ' '
-		<< std::setfill('0') << std::setw(2) << ct->tm_hour
-		<< ':'
-		<< std::setfill('0') << std::setw(2) << ct->tm_min
-		<< ':'
-		<< std::setfill('0') << std::setw(2) << ct->tm_sec;
+	/**
+	 * @fn void print_timestamp(std::ostream& os)
+	 *
+	 * @brief writes timestamp to output stream
+	 *
+	 * TODO: consider removing reduntant stream manipulators
+	 *
+	 * @param os output stream to write to
+	 */
+	void print_timestamp(std::ostream& os)
+	{
+		std::time_t ct_since_epoch = std::time(NULL);
+		if (ct_since_epoch == (time_t)(-1))
+			throw std::runtime_error("failed to obtain system time");
+		std::tm* ct = std::localtime(&ct_since_epoch);
+		if (ct == NULL)
+			throw std::runtime_error("failed to obtain system time");
+		os
+			<< ct->tm_year + 1900
+			<< '-'
+			<< std::setfill('0') << std::setw(2) << (ct->tm_mon + 1)
+			<< '-'
+			<< std::setfill('0') << std::setw(2) << ct->tm_mday
+			<< ' '
+			<< std::setfill('0') << std::setw(2) << ct->tm_hour
+			<< ':'
+			<< std::setfill('0') << std::setw(2) << ct->tm_min
+			<< ':'
+			<< std::setfill('0') << std::setw(2) << ct->tm_sec;
+	}
 }
