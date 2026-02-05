@@ -2,7 +2,7 @@
 
 #include <string>
 #include "Logging.hpp"
-#include "Defaults.hpp"
+#include "ConfigDefaults.hpp"
 
 namespace
 {
