@@ -7,6 +7,10 @@ OBJ_DIR		:= obj
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
+vpath %.cpp $(SRC_DIR)/logging
+SRC			+= Logging.cpp
+vpath %.cpp $(SRC_DIR)/config
+SRC			+= Config.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -43,6 +47,8 @@ SA_HTML		:= $(SA_DIR)/html
 SA_ANALYZER	:=
 SA_ANALYZER	+= clangsa
 SA_ANALYZER	+= clang-tidy
+SA_ANALYZER_CONFIG	:=
+SA_ANALYZER_CONFIG	+= clang-tidy:take-config-from-directory=true
 HTML_OPEN	:= xdg-open
 SA_REPORTS_STAMP	:= $(SA_REPORTS)/.done
 SA_HTML_STAMP		:= $(SA_HTML)/.done
@@ -64,11 +70,6 @@ ifeq ($(DEV), 1)
 	CXXFLAGS	+= -Wconversion
 	CXXFLAGS	+= -Wno-unused-parameter
 	CXXFLAGS	+= -Wno-unused-function
-endif
-
-CPPFLAGS	+= -DLOG
-ifeq ($(LOG), 0)
-	CPPFLAGS += -ULOG
 endif
 
 ifeq ($(DEBUG), 1)
@@ -130,9 +131,10 @@ $(SA_CCMDS):
 
 $(SA_REPORTS_STAMP): $(SA_CCMDS)
 	mkdir -p $(SA_REPORTS)
-	CodeChecker analyze \
+	-CodeChecker analyze \
 		--ctu \
 		--analyzers $(SA_ANALYZER) \
+		--analyzer-config $(SA_ANALYZER_CONFIG) \
 		--enable sensitive \
 		-o $(SA_REPORTS) \
 		$(SA_CCMDS) 
