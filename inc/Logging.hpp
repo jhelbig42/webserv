@@ -17,4 +17,4 @@ typedef enum { Debug, Info, Warning, Error } LogLevel;
 /// \param level minimum return value of Config::getLogLevel() to log this message
 void log(const std::string &Msg, const LogLevel Level);
 
-} // namespace Log
+} // namespace log

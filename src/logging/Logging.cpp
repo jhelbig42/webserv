@@ -8,6 +8,7 @@
 #include <string>
 
 #define RESET_COLOR "\033[0m" 
+#define REFERENCE_YEAR 1900
 
 static void logInternal(std::ostream &Os, const std::string &Color,
 				const std::string &Label, const std::string &Msg);
@@ -46,16 +47,16 @@ static void logInternal(std::ostream &Os, const std::string &Color,
 /// 
 /// \param os output stream to write to
 static void printTimestamp(std::ostream &Os) {
-  std::time_t ct_since_epoch = std::time(NULL);
-  if (ct_since_epoch == (time_t)(-1))
+  const std::time_t timeSinceEpoch = std::time(NULL);
+  if (timeSinceEpoch == (time_t)(-1))
     return;
-  std::tm *ct = std::localtime(&ct_since_epoch);
-  if (ct == NULL)
+  const std::tm *currentTime = std::localtime(&timeSinceEpoch);
+  if (currentTime == NULL)
     return;
-  Os << ct->tm_year + 1900;
-  Os << '-' << std::setfill('0') << std::setw(2) << (ct->tm_mon + 1);
-  Os << '-' << std::setfill('0') << std::setw(2) << ct->tm_mday;
-  Os << ' ' << std::setfill('0') << std::setw(2) << ct->tm_hour;
-  Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_min;
-  Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_sec;
+  Os << currentTime->tm_year + REFERENCE_YEAR;
+  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mon + 1;
+  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mday;
+  Os << ' ' << std::setfill('0') << std::setw(2) << currentTime->tm_hour;
+  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_min;
+  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_sec;
 }

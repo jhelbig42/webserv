@@ -14,4 +14,4 @@ log::LogLevel getLogLevel();
 /// \param file the configuration file to read from
 void fromFile(const std::string &File);
 
-} // namespace Config
+} // namespace config

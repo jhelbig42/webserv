@@ -1,0 +1,35 @@
+Checks: >
+  -*,
+  llvm-*,
+  -llvm-header-guard,
+  readability-identifier-naming,
+  readability-magic-numbers,
+  bugprone-*,
+  performance-*,
+  misc-*,
+  -misc-use-anonymous-namespace,
+  clang-analyzer-*,
+
+# Treat warnings as errors to enforce standards strictly
+WarningsAsErrors: '*'
+
+# Don't report diagnostics from system headers
+HeaderFilterRegex: '.*'
+
+# Options to help enforce naming conventions similar to LLVM style
+CheckOptions:
+  # Example: LLVM C++ uses CamelCase for types and lowerCamelCase for functions/variables
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+
+# Include any additional options here
