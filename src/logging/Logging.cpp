@@ -39,15 +39,13 @@ void log_internal(std::ostream &os, const std::string &color,
   os << ' ' << label << ' ' << msg << "\033[0m\n" << std::flush;
 }
 
-/**
- * @fn void print_timestamp(std::ostream& os)
- *
- * @brief writes timestamp to output stream
- *
- * TODO: consider removing reduntant stream manipulators
- *
- * @param os output stream to write to
- */
+/// \fn void print_timestamp(std::ostream& os)
+/// 
+/// \brief writes timestamp to output stream
+/// 
+/// TODO: consider removing reduntant stream manipulators
+/// 
+/// \param os output stream to write to
 void print_timestamp(std::ostream &os) {
   std::time_t ct_since_epoch = std::time(NULL);
   if (ct_since_epoch == (time_t)(-1))
