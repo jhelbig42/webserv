@@ -8,55 +8,60 @@
 #include <string>
 
 namespace {
-void log_internal(std::ostream &os, const std::string &color,
-                  const std::string &label, const std::string &msg);
-void print_timestamp(std::ostream &os);
+
+void logInternal(std::ostream &Os, const std::string &Color,
+                  const std::string &Label, const std::string &Msg);
+void printTimestamp(std::ostream &Os);
+
 } // namespace
 
-void Log::log(const std::string &msg, const Log::t_log_level level) {
-  if (level < Config::getLogLevel())
+void log::log(const std::string &Msg, const log::LogLevel Level) {
+  if (Level < config::getLogLevel())
     return;
-  switch (level) {
-  case DEBUG:
-    log_internal(DEBUG_STREAM, DEBUG_COLOR, DEBUG_LABEL, msg);
+  switch (Level) {
+  case Debug:
+    logInternal(DEBUG_STREAM, DEBUG_COLOR, DEBUG_LABEL, Msg);
     break;
-  case INFO:
-    log_internal(INFO_STREAM, INFO_COLOR, INFO_LABEL, msg);
+  case Info:
+    logInternal(INFO_STREAM, INFO_COLOR, INFO_LABEL, Msg);
     break;
-  case WARNING:
-    log_internal(WARNING_STREAM, WARNING_COLOR, WARNING_LABEL, msg);
+  case Warning:
+    logInternal(WARNING_STREAM, WARNING_COLOR, WARNING_LABEL, Msg);
     break;
-  case ERROR:
-    log_internal(ERROR_STREAM, ERROR_COLOR, ERROR_LABEL, msg);
+  case Error:
+    logInternal(ERROR_STREAM, ERROR_COLOR, ERROR_LABEL, Msg);
   }
 }
 
 namespace {
-void log_internal(std::ostream &os, const std::string &color,
-                  const std::string &label, const std::string &msg) {
-  os << color;
-  print_timestamp(os);
-  os << ' ' << label << ' ' << msg << "\033[0m\n" << std::flush;
+
+void logInternal(std::ostream &Os, const std::string &Color,
+                  const std::string &Label, const std::string &Msg) {
+  Os << Color;
+  printTimestamp(Os);
+  Os << ' ' << Label << ' ' << Msg << "\033[0m\n" << std::flush;
 }
 
-/// \fn void print_timestamp(std::ostream& os)
+/// \fn void printTimestamp(std::ostream& os)
 /// 
 /// \brief writes timestamp to output stream
 /// 
 /// TODO: consider removing reduntant stream manipulators
 /// 
 /// \param os output stream to write to
-void print_timestamp(std::ostream &os) {
+void printTimestamp(std::ostream &Os) {
   std::time_t ct_since_epoch = std::time(NULL);
   if (ct_since_epoch == (time_t)(-1))
     return;
   std::tm *ct = std::localtime(&ct_since_epoch);
   if (ct == NULL)
     return;
-  os << ct->tm_year + 1900 << '-' << std::setfill('0') << std::setw(2)
-     << (ct->tm_mon + 1) << '-' << std::setfill('0') << std::setw(2)
-     << ct->tm_mday << ' ' << std::setfill('0') << std::setw(2) << ct->tm_hour
-     << ':' << std::setfill('0') << std::setw(2) << ct->tm_min << ':'
-     << std::setfill('0') << std::setw(2) << ct->tm_sec;
+  Os << ct->tm_year + 1900;
+  Os << '-' << std::setfill('0') << std::setw(2) << (ct->tm_mon + 1);
+  Os << '-' << std::setfill('0') << std::setw(2) << ct->tm_mday;
+  Os << ' ' << std::setfill('0') << std::setw(2) << ct->tm_hour;
+  Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_min;
+  Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_sec;
 }
+
 } // namespace

@@ -2,9 +2,9 @@
 
 #include <string>
 
-namespace Log {
+namespace log {
 
-typedef enum log_level { DEBUG, INFO, WARNING, ERROR } t_log_level;
+typedef enum { Debug, Info, Warning, Error } LogLevel;
 
 /// \fn void log(const std::string& msg, const t_log_level level)
 ///
@@ -15,6 +15,6 @@ typedef enum log_level { DEBUG, INFO, WARNING, ERROR } t_log_level;
 ///
 /// \param msg Message to be logged
 /// \param level minimum return value of Config::getLogLevel() to log this message
-void log(const std::string &msg, const t_log_level level);
+void log(const std::string &Msg, const LogLevel Level);
 
 } // namespace Log

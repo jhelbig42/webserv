@@ -6,12 +6,12 @@
 
 namespace {
 
-/// \var Log::t_log_level LogLevel
+/// \var log::t_log_level LogLevel
 /// \brief defines the lowest log severity that is still printed
-Log::t_log_level LogLevel = DEFAULT_LOG_LEVEL;
+log::LogLevel GlobalLogLevel = DEFAULT_LOG_LEVEL;
 
 } // namespace
 
-Log::t_log_level Config::getLogLevel(void) { return LogLevel; }
+log::LogLevel config::getLogLevel(void) { return GlobalLogLevel; }
 
-void Config::fromFile(const std::string &file) { (void)file; }
+void config::fromFile(const std::string &File) { (void)File; }

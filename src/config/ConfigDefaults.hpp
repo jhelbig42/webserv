@@ -10,5 +10,5 @@
 /// \brief sets the default log level
 ///
 /// should be one of the following:
-/// Log::DEBUG, Log::INFO, Log::WARNING, Log::ERROR
-#define DEFAULT_LOG_LEVEL Log::INFO
+/// log::DEBUG, log::INFO, log::WARNING, log::ERROR
+#define DEFAULT_LOG_LEVEL log::Info
