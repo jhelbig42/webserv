@@ -4,9 +4,9 @@
 #define DEBUG_COLOR ""
 #define DEBUG_LABEL "[DEBUG]  "
 
-#define LOG_STREAM std::cout
-#define LOG_COLOR ""
-#define LOG_LABEL "[LOG]    "
+#define INFO_STREAM std::cout
+#define INFO_COLOR ""
+#define INFO_LABEL "[INFO]   "
 
 #define WARNING_STREAM std::cerr
 #define WARNING_COLOR "\x1B[33m"

@@ -20,8 +20,8 @@ void Log::log(const std::string &msg, const Log::t_log_level level) {
   case DEBUG:
     log_internal(DEBUG_STREAM, DEBUG_COLOR, DEBUG_LABEL, msg);
     break;
-  case LOG:
-    log_internal(LOG_STREAM, LOG_COLOR, LOG_LABEL, msg);
+  case INFO:
+    log_internal(INFO_STREAM, INFO_COLOR, INFO_LABEL, msg);
     break;
   case WARNING:
     log_internal(WARNING_STREAM, WARNING_COLOR, WARNING_LABEL, msg);

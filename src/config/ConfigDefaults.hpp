@@ -13,6 +13,6 @@
  * @brief sets the default log level
  *
  * should be one of the following:
- * Log::DEBUG, Log::LOG, Log::WARNING, Log::ERROR
+ * Log::DEBUG, Log::INFO, Log::WARNING, Log::ERROR
  */
 #define DEFAULT_LOG_LEVEL Log::DEBUG
