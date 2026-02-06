@@ -7,11 +7,11 @@
 #include <iostream>
 #include <string>
 
-#define RESET_COLOR "\033[0m" 
+#define RESET_COLOR "\033[0m"
 #define REFERENCE_YEAR 1900
 
 static void logInternal(std::ostream &Os, const std::string &Color,
-				const std::string &Label, const std::string &Msg);
+                        const std::string &Label, const std::string &Msg);
 static void printTimestamp(std::ostream &Os);
 
 void log::log(const std::string &Msg, const log::LogLevel Level) {
@@ -33,18 +33,18 @@ void log::log(const std::string &Msg, const log::LogLevel Level) {
 }
 
 static void logInternal(std::ostream &Os, const std::string &Color,
-                  const std::string &Label, const std::string &Msg) {
+                        const std::string &Label, const std::string &Msg) {
   Os << Color;
   printTimestamp(Os);
   Os << ' ' << Label << ' ' << Msg << RESET_COLOR << '\n' << std::flush;
 }
 
 /// \fn static void printTimestamp(std::ostream& os)
-/// 
+///
 /// \brief writes timestamp to output stream
-/// 
+///
 /// TODO: consider removing reduntant stream manipulators
-/// 
+///
 /// \param os output stream to write to
 static void printTimestamp(std::ostream &Os) {
   const std::time_t timeSinceEpoch = std::time(NULL);

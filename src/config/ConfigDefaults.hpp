@@ -1,7 +1,7 @@
 /// \file Defaults.hpp
-/// 
+///
 /// \brief defines default values for several configuration options
-/// 
+///
 /// should be included by Config.cpp
 #pragma once
 

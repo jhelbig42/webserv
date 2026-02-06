@@ -1,0 +1,14 @@
+BasedOnStyle: LLVM
+
+# Always use 2-space indentation (LLVM default)
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+# Enforce no tabs — consistent whitespace
+UseTab: Never
+
+# Formatting behavior
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+SortIncludes: true

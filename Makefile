@@ -106,7 +106,7 @@ clean:
 	$(RM) $(OBJ)
 	$(RM) $(OBJ_DIR)
 
-fclean: clean
+fclean: clean clean_sa
 	$(RM) $(NAME)
 
 re: fclean all
@@ -122,7 +122,7 @@ read: $(DOXY_TIMESTAMP)
 	$(HTML_OPEN) $(DOXY_DIR)/html/index.html
 
 # static analysis
-check: fclean clean_sa $(SA_HTML_STAMP)
+check: fclean $(SA_HTML_STAMP)
 	$(HTML_OPEN) $(SA_HTML)/index.html
 
 $(SA_CCMDS):
