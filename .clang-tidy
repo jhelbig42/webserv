@@ -5,10 +5,12 @@ Checks: >
   readability-identifier-naming,
   readability-magic-numbers,
   bugprone-*,
+  -bugprone-easily-swappable-parameters,
   performance-*,
   misc-*,
   -misc-use-anonymous-namespace,
   clang-analyzer-*,
+  google-explicit-constructor,
 
 # Treat warnings as errors to enforce standards strictly
 WarningsAsErrors: '*'
