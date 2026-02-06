@@ -7,13 +7,11 @@
 #include <iostream>
 #include <string>
 
-namespace {
+#define RESET_COLOR "\033[0m" 
 
-void logInternal(std::ostream &Os, const std::string &Color,
-                  const std::string &Label, const std::string &Msg);
-void printTimestamp(std::ostream &Os);
-
-} // namespace
+static void logInternal(std::ostream &Os, const std::string &Color,
+				const std::string &Label, const std::string &Msg);
+static void printTimestamp(std::ostream &Os);
 
 void log::log(const std::string &Msg, const log::LogLevel Level) {
   if (Level < config::getLogLevel())
@@ -33,23 +31,21 @@ void log::log(const std::string &Msg, const log::LogLevel Level) {
   }
 }
 
-namespace {
-
-void logInternal(std::ostream &Os, const std::string &Color,
+static void logInternal(std::ostream &Os, const std::string &Color,
                   const std::string &Label, const std::string &Msg) {
   Os << Color;
   printTimestamp(Os);
-  Os << ' ' << Label << ' ' << Msg << "\033[0m\n" << std::flush;
+  Os << ' ' << Label << ' ' << Msg << RESET_COLOR << '\n' << std::flush;
 }
 
-/// \fn void printTimestamp(std::ostream& os)
+/// \fn static void printTimestamp(std::ostream& os)
 /// 
 /// \brief writes timestamp to output stream
 /// 
 /// TODO: consider removing reduntant stream manipulators
 /// 
 /// \param os output stream to write to
-void printTimestamp(std::ostream &Os) {
+static void printTimestamp(std::ostream &Os) {
   std::time_t ct_since_epoch = std::time(NULL);
   if (ct_since_epoch == (time_t)(-1))
     return;
@@ -63,5 +59,3 @@ void printTimestamp(std::ostream &Os) {
   Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_min;
   Os << ':' << std::setfill('0') << std::setw(2) << ct->tm_sec;
 }
-
-} // namespace
