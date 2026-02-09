@@ -1,8 +1,8 @@
 #include "Logging.hpp"
 
 int main(void) {
-  log::log("great", log::Debug);
-  log::log("ok", log::Info);
-  log::log("bad", log::Warning);
-  log::log("terrible", log::Error);
+  logging::log("great", logging::Debug);
+  logging::log("ok", logging::Info);
+  logging::log("bad", logging::Warning);
+  logging::log("terrible", logging::Error);
 }

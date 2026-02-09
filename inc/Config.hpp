@@ -5,7 +5,7 @@
 
 namespace config {
 
-log::LogLevel getLogLevel();
+logging::LogLevel getLogLevel();
 
 /// \brief reads configuration from a file into memory
 ///

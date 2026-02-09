@@ -4,11 +4,11 @@
 #include "Logging.hpp"
 #include <string>
 
-/// \var static log::LogLevel GlobalLogLevel
+/// \var static logging::LogLevel GlobalLogLevel
 /// \brief defines the lowest log severity that is still printed
-static log::LogLevel globalLogLevel = DEFAULT_LOG_LEVEL;
+static logging::LogLevel globalLogLevel = DEFAULT_LOG_LEVEL;
 
-log::LogLevel config::getLogLevel(void) {
+logging::LogLevel config::getLogLevel(void) {
   return globalLogLevel;
 }
 

@@ -14,7 +14,7 @@ static void logInternal(std::ostream &Os, const std::string &Color,
                         const std::string &Label, const std::string &Msg);
 static void printTimestamp(std::ostream &Os);
 
-void log::log(const std::string &Msg, const log::LogLevel Level) {
+void logging::log(const std::string &Msg, const logging::LogLevel Level) {
   if (Level < config::getLogLevel())
     return;
   switch (Level) {

@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace log {
+namespace logging {
 
 typedef enum { Debug, Info, Warning, Error } LogLevel;
 
