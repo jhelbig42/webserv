@@ -72,6 +72,10 @@ ifeq ($(DEV), 1)
 	CXXFLAGS	+= -Wno-unused-function
 endif
 
+ifneq ($(LOG), 0)
+	CPPFLAGS	+= -DDEFAULT_LOG_LEVEL=log::$(LOG)
+endif
+
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
