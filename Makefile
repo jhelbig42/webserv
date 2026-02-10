@@ -12,7 +12,8 @@ SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
 vpath %.cpp $(SRC_DIR)/networking
-SRC			+= Networking.cpp
+SRC			+= Networking.cpp\
+			   Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))

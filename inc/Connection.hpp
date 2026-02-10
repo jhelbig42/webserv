@@ -13,14 +13,22 @@
 #pragma once
 
 #include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 class	Connection {
 
 	private:
 		int	socket_descriptor; // socket fd
-		int	new_sd; // another fd from accept() ?
-		struct addrinfo hints // should maybe belong to different class?
-
+		struct	addrinfo info;
+		// TODO OFC
+		// TODO OFC
 	public:
-		
-}
+		Connection();
+		~Connection();
+		int get_sock(void) const;
+		void print_addrinfo(void) const;
+
+		// There will later be many getters for addrinfo
+};
