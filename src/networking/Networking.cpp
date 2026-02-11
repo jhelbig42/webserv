@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/11 15:44:44 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/11 16:56:01 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,22 +20,29 @@ void	networking::start(void){
 	struct addrinfo *server_info;
 	
 	server_info = get_server_info();
-/*
-	struct addrinfo *temp;
+	struct addrinfo *p;
 	int ret = -1;
-	for (temp = server_info; temp != NULL; temp = temp->ai_next) {
-		// add debug attempting to bind
-		ret = bind(socket, temp->ai_addr, temp->ai_addrlen);
+	for (p = server_info; p != NULL; p = p->ai_next) {
+		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+		if (sock == -1){
+		//	std::string msg (gai_strerror(ret));
+		//	throw std::runtime_error("socket: " + msg);
+			std::cerr << "socket: " << gai_strerror(ret) << "\n";
+			continue;
+		}
+		/*
+		int ret = bind(socket, p->ai_addr, p->ai_addrlen);
 		if (ret != 0) {
 			std::cerr << "error in bind " << "\n";
 			// TODO throw exception and log error
 			exit (1);
 		}
 		temp = temp->ai_next;
+		*/
 	}
-*/
 	freeaddrinfo(server_info);
 	(void) sock;
+	(void) ret;
 }
 
 
@@ -49,21 +56,18 @@ struct addrinfo	networking::create_hints(void){
 	return (hints);
 }
 
-// This debug print function is a temporary solution.
-// Rather than printing directly, I would like to be able to pass
-// all of the debug text below as a single string to logging::log.
-// This is tricky however because macros are being printed.
-// Their values are correctly interpreted when redirected to
-// std::cout, but I don't know how to preserve this when
-// converting to a string. String stream needed?
 
-void	networking::print_addrinfo_str(struct addrinfo *info){
-		std::cout << "ai_flags = " << info->ai_flags << "\n";
-        std::cout << "ai_family = " << info->ai_family << "\n";
-        std::cout << "ai_socktype = " << info->ai_socktype << "\n";
-        std::cout << "ai_protocol = " <<  info->ai_protocol << "\n";
-        std::cout << "ai_addrlen = " << info->ai_addrlen << "\n";
+std::string	networking::get_addrinfo_str(struct addrinfo *info, std::string msg){
+	std::ostringstream oss;
+	oss << "\n\t" << msg << "\n"
+		<< "\tai_flags = " << info->ai_flags << "\n"
+		<< "\tai_family = " << info->ai_family << "\n"
+		<< "\tai_socktype = " << info->ai_socktype << "\n"
+		<< "\tai_protocol = " <<  info->ai_protocol << "\n"
+		<< "\tai_addrlen = " << info->ai_addrlen << "\n";
+		return (oss.str());
 }
+
 
 struct addrinfo	*networking::get_server_info(void){
 
@@ -77,9 +81,7 @@ struct addrinfo	*networking::get_server_info(void){
 		}
 		else {
 			logging::log("addrinfo server_info created", logging::Debug);
-			if (config::getLogLevel() <= logging::Debug){
-				print_addrinfo_str(info);
-			}
+			logging::log(get_addrinfo_str(info, "server_info:"), logging::Debug);
 		}
 		return (info);
 }
