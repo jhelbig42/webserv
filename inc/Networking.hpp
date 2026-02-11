@@ -22,6 +22,6 @@ namespace networking {
 	std::string    get_addrinfo_str(struct addrinfo *info, std::string msg);
 	void    print_addrinfo_str(struct addrinfo *info);
 	void    fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
-
+	int		get_server_socket(struct addrinfo *server_info);
 }
 

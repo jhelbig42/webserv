@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/11 18:08:36 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/11 18:30:34 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,51 +15,12 @@
 
 void	networking::start(void){
 
-	int sock;						// socket fd, listens for new connections
 	Connection connection[10];		// naive array of < 10 connections
-	struct addrinfo *server_info;
-	
-	server_info = get_server_info();
-
-	struct addrinfo *p;
-	int ret = -1;
-	for (p = server_info; p != NULL; p = p->ai_next) {
-		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if (sock == -1){
-			std::string msg (gai_strerror(ret));
-			logging::log("socket: " + msg + 
-				" (will continue trying sockets)", logging::Info);
-			std::cerr << "socket: " << gai_strerror(ret) << "\n";
-			continue;
-		}
-
-		// I believe this function is used to clear a previously-
-		// used port for re-use. Leaving it out for now to test.
-
-		int yes = 1;
-		ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-			&yes, sizeof(int));
-		if (ret == -1) {
-				std::cerr << "setsockopt: " << gai_strerror(ret) << "\n";
-				exit(1);
-		}
-
-		int ret = bind(sock, p->ai_addr, p->ai_addrlen);
-		if (ret != 0) {
-			close(sock);
-			std::cerr << "bind: " << gai_strerror(ret) << "\n";
-			// TODO throw exception and log error
-			continue;
-		}
-		else
-			std::cout << "success!\n";
-		break;
-	}
+	struct addrinfo *server_info =  get_server_info();
+	int sock = get_server_socket(server_info); 
 	freeaddrinfo(server_info);
-	if (p == NULL){
-		std::cout << "server failed to find a socket\n";
-		exit(1);
-	}
+	// add throw in get_server_socket		
+	(void) sock;
 }
 
 
@@ -103,3 +64,46 @@ struct addrinfo	*networking::get_server_info(void){
 		return (info);
 }
 
+int	networking::get_server_socket(struct addrinfo *server_info){
+	
+	int sock;
+	struct addrinfo *p;
+	int ret = -1;
+	for (p = server_info; p != NULL; p = p->ai_next) {
+		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+		if (sock == -1){
+			std::string msg (gai_strerror(ret));
+			logging::log("socket: " + msg + 
+				" (will continue trying sockets)", logging::Info);
+			std::cerr << "socket: " << gai_strerror(ret) << "\n";
+			continue;
+		}
+
+		// I believe this function is used to clear a previously-
+		// used port for re-use. Leaving it out for now to test.
+		/*
+		int yes = 1;
+		ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+			&yes, sizeof(int));
+		if (ret == -1) {
+				std::cerr << "setsockopt: " << gai_strerror(ret) << "\n";
+				exit(1);
+		}
+		*/
+
+		int ret = bind(sock, p->ai_addr, p->ai_addrlen);
+		if (ret != 0) {
+			close(sock);
+			std::cerr << "bind: " << gai_strerror(ret) << "\n";
+			// TODO throw exception and log error
+			continue;
+		}
+		std::cout << "success!\n";
+		break; // necessary?
+	}
+	if (p == NULL){
+		std::cout << "server failed to find a socket\n";
+		return (-1);
+	}
+	return (sock);
+}
