@@ -10,28 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Connection.hpp"
-#include <iostream>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <cstring> // for memset
-#include <cstdlib> // for exit
+#include "Networking.hpp"
+#include "NetworkingDefines.hpp"
 
-#define PORT "80"
-
-struct addrinfo	create_hints(void);
-struct addrinfo *get_server_info(void);
-void	print_addrinfo(struct addrinfo *info);
-void    fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
-
-void	init_networking(void){
+void	networking::start(void){
 
 	int sock;			// socket fd, listens for new connections
 	Connection connection[10];	// naive array of < 10 connections -- will be container?
 	struct addrinfo *server_info;
 	
 	server_info = get_server_info();
+	print_addrinfo(server_info);
 
 /*
 	struct addrinfo *temp;
@@ -52,7 +41,7 @@ void	init_networking(void){
 }
 
 
-struct addrinfo	create_hints(void){
+struct addrinfo	networking::create_hints(void){
 
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof hints); // init struct to empty;
@@ -62,7 +51,7 @@ struct addrinfo	create_hints(void){
 	return (hints);
 }
 
-void	print_addrinfo(struct addrinfo *info){
+void	networking::print_addrinfo(struct addrinfo *info){
 
         std::cout << "ai_flags = " << info->ai_flags << "\n";
         std::cout << "ai_family = " << info->ai_family << "\n";
@@ -72,7 +61,7 @@ void	print_addrinfo(struct addrinfo *info){
 
 }
 
-struct addrinfo	*get_server_info(void){
+struct addrinfo	*networking::get_server_info(void){
 
 		struct addrinfo hints = create_hints();
 		struct addrinfo *info;
