@@ -1,8 +1,19 @@
 #include "Logging.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
+#include <unistd.h>
+
+#define BYTES_PER_CHUNK 256
 
 int main(void) {
-  logging::log("great", logging::Debug);
-  logging::log("ok", logging::Info);
-  logging::log("bad", logging::Warning);
-  logging::log("terrible", logging::Error);
+  Request req(Get, "/home/alneuman/projects/webserv/Makefile", 1, 0, true);
+  Response res(req);
+  try {
+    while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
+      logging::log("hi", logging::Error);
+  } catch (std::exception &e) {
+    logging::log(e.what(), logging::Error);
+    return 1;
+  }
+  return 0;
 }

@@ -4,6 +4,9 @@
 // Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-11, License - CC BY-SA 4.0
 
+Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
+  : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
+
 std::vector<std::string> split(const std::string& s, const std::string& delimiter) 
 {
     std::vector<std::string> tokens;
@@ -88,22 +91,22 @@ void Request::parse(const char *buffer, const size_t bytes)
 	(void)bytes;
 }
 
-const bool Request::isValid() const {
+bool Request::isValid() const {
 	return _valid;
 }
 
-const unsigned int Request::getVersionMajor() const {
-	return _versionMajor;
+unsigned int Request::getMajorV() const {
+	return _majorVersion;
 }
 
-const unsigned int Request::getVersionMinor() const {
-	return _versionMinor;
+unsigned int Request::getMinorV() const {
+	return _minorVersion;
 }
 
 const std::string &Request::getResource() const {
 	return _resource;
 }
 
-const int Request::getMethod() const {
+HttpMethod Request::getMethod() const {
 	return _method;
 }
