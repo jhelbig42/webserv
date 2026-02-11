@@ -1,5 +1,5 @@
 #include "Response.hpp"
-#include "ReasonPhreases.hpp"
+#include "ReasonPhrases.hpp"
 #include "Request.hpp"
 #include <sstream>
 #include <string>
@@ -20,13 +20,13 @@ static std::string headersResp(const off_t length);
 
 bool Response::makeMetadata(const int Code) {
   _metaData = statusLineResp(Code, _req) + headersResp(_contentLength) + "\r\n";
-  _hasMetadata = true;
+  return true;
 }
 
 static std::string statusLineResp(const int Code, const Request &Req) {
   std::ostringstream oss;
-	oss << "HTTP/" << req.getMajorV() << '.';
-  oss << req.getMinorV() << ' ';
+	oss << "HTTP/" << Req.getMajorV() << '.';
+  oss << Req.getMinorV() << ' ';
   oss << Code << ' ';
 	switch (Code) {
 		case 200: oss << REASON_200; break;

@@ -1,4 +1,7 @@
 #include "Logging.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
+#include <unistd.h>
 
 #define BYTES_PER_CHUNK 256
 
@@ -7,7 +10,7 @@ int main(void) {
   Response res(req);
   try {
     while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
-      ;
+      logging::log("hi", logging::Error);
   } catch (std::exception &e) {
     logging::log(e.what(), logging::Error);
     return 1;

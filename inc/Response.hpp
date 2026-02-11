@@ -2,10 +2,11 @@
 
 #include "Request.hpp"
 #include <string>
+#include <sys/types.h>
 
 #define RESPONSE_BUFFSIZE 128
 
-class Response: {
+class Response {
 public:
   // Response();
   // Response(const Response&);
@@ -13,8 +14,6 @@ public:
   // ~Response();
 
   Response(const Request &Req);
-
-  bool init(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
   /// \brief continues processing a response object
@@ -35,16 +34,22 @@ public:
   bool process(const int Socket, const size_t Bytes);
 
 private:
+  bool init(const Request &Req);
+
+  bool initError(const int Code);
+  bool initGet();
 
   bool processHead(const int, const size_t);
-  bool makeMetadata(const int Code, const Request &req);
-  bool sendMetadata(); // still a dummy
+  bool makeMetadata(const int Code);
+  bool sendMetadata(const int Socket, const size_t Bytes);
   bool processGet(const int, const size_t);
   bool processDelete(const int, const size_t);
   bool sendBuffer(const int, const size_t);
   bool fillBufferFile(const size_t);
 
-  Request &_req;
+  const Request &_req;
+
+  HttpMethod _method;
 
   off_t _contentLength;
 
@@ -57,8 +62,8 @@ private:
   int _fdOut;
 
   // consider abstraction for buffer
+  static const size_t _buffSize = RESPONSE_BUFFSIZE;
   char _buffer[RESPONSE_BUFFSIZE];
-  size_t _buffSize = RESPONSE_BUFFSIZE;
   size_t _bufStart;
   size_t _bufEnd;
 

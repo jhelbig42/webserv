@@ -1,3 +1,10 @@
+#include "Response.hpp"
+#include "Request.hpp"
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 /// @brief initializes a processingState object so it can be used for chunkwise processing
 ///
 /// checked runtime errors:
@@ -13,23 +20,35 @@
 /// might delete files
 ///
 /// @param Req provides information for initialization
-bool Response::init(const Request &Req);
+bool Response::init(const Request &Req)
 {
+  _method = Generic;
+  _contentLength = 0;
+  _hasMetadata = false;
+  _metaDataSent = false;
+  _metaData = "";
+  _fdIn = -1;
+  _fdOut = -1;
+  _bufStart = 0;
+  _bufEnd = 0;
+  _eof = false;
+
 	if (!Req.isValid())
 		return initError(400);
 
 	// make more generic
-	if (Req.getVersionMajor != 1 || Req.getVersionMinor != 0)
+	if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
 		return initError(501); // correct?
 
-  _req = Req;
 	try {
-		switch (_req.getMethod) {
-			switch Get:
+		switch (_req.getMethod()) {
+			case Get:
 				return initGet();
-			switch Post:
+			case Post:
         return initError(501);
-			switch Delete:
+			case Delete:
+        return initError(501);
+      case Generic:
         return initError(501);
 		}
 	} catch (...) {
@@ -37,7 +56,7 @@ bool Response::init(const Request &Req);
 	}
 }
 
-Response::Response(const Request &Req) {
+Response::Response(const Request &Req): _req(Req) {
   init(Req);
 }
 
@@ -52,13 +71,13 @@ bool Response::initError(const int Code)
 bool Response::initGet()
 {
 	struct stat statbuf;
-	if (stat(Req.getResource().c_str(), &statbuf) < 0);
-		return initErrnoStat();
+	if (stat(_req.getResource().c_str(), &statbuf) < 0)
+		return initError(500);
 	
-	if ((_fdIn = open(eq.getResource().c_str(), O_RDONLY)) < 0)
-		return initErrnoOpen();
+	if ((_fdIn = open(_req.getResource().c_str(), O_RDONLY)) < 0)
+		return initError(500);
 
-	_contentLength = stat.st_size;
+	_contentLength = statbuf.st_size;
 	_bufStart = 0;
 	_bufEnd = 0;
   _hasMetadata = false;

@@ -13,6 +13,8 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
 vpath %.cpp $(SRC_DIR)/response
 SRC			+= Response.cpp
+SRC			+= Metadata.cpp
+SRC			+= ProcessResponse.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 

@@ -3,6 +3,7 @@
 #include <string>
 
 typedef enum {
+  Generic,
 	Get,
 	Post,
 	Delete
@@ -18,11 +19,11 @@ class Request {
     
     void parse(const char *, const size_t);
 
-		const bool isValid() const;
-		const unsigned int getMajorV() const;
-		const unsigned int getMinorV() const;
+		bool isValid() const;
+		unsigned int getMajorV() const;
+		unsigned int getMinorV() const;
 		const std::string &getResource() const;
-		const getMethod() const
+		HttpMethod getMethod() const;
 
 	private:
 		HttpMethod _method;

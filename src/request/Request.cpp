@@ -10,22 +10,22 @@ void Request::parse(const char *buffer, const size_t bytes) {
   (void)bytes;
 }
 
-const bool Request::isValid() const {
+bool Request::isValid() const {
 	return _valid;
 }
 
-const unsigned int Request::getVersionMajor() const {
-	return _versionMajor;
+unsigned int Request::getMajorV() const {
+	return _majorVersion;
 }
 
-const unsigned int Request::getVersionMinor() const {
-	return _versionMinor;
+unsigned int Request::getMinorV() const {
+	return _minorVersion;
 }
 
 const std::string &Request::getResource() const {
 	return _resource;
 }
 
-const Request::getMethod() const {
+HttpMethod Request::getMethod() const {
 	return _method;
 }
