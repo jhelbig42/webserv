@@ -16,48 +16,53 @@
 bool Response::init(const Request &Req);
 {
 	if (!Req.isValid())
-		return init400();
+		return initError(400);
 
 	// make more generic
 	if (Req.getVersionMajor != 1 || Req.getVersionMinor != 0)
-		return init501(); // correct?
+		return initError(501); // correct?
 
+  _req = Req;
 	try {
-		switch (Req.getMethod) {
+		switch (_req.getMethod) {
 			switch Get:
-				return initGet(Req);
+				return initGet();
 			switch Post:
-				return initPost(Req);
+        return initError(501);
 			switch Delete:
-				return initDelete(Req);
+        return initError(501);
 		}
 	} catch (...) {
-		return init500() // cases
+		return initError(500); // cases
 	}
 }
 
-bool Response::initGet(const Request &Req)
+Response::Response(const Request &Req) {
+  init(Req);
+}
+
+bool Response::initError(const int Code)
+{
+  makeMetadata(Code);
+  _hasMetadata = true;
+  return true;
+}
+
+/// TODO: check error handling
+bool Response::initGet()
 {
 	struct stat statbuf;
 	if (stat(Req.getResource().c_str(), &statbuf) < 0);
 		return initErrnoStat();
 	
-	// check permissions before open()
-	
 	if ((_fdIn = open(eq.getResource().c_str(), O_RDONLY)) < 0)
 		return initErrnoOpen();
 
-	// could be unsafe as st_size has type off_t
-	_remainingBytes = stat.st_size;
-
-	oss << "HTTP/1.0 200 OK\r\n";
-	// protection
-	_mode = Out;
+	_contentLength = stat.st_size;
 	_bufStart = 0;
 	_bufEnd = 0;
-	oss << "Content-Length: " << stat.st_size << "\r\n";	
-	// protection
+  _hasMetadata = false;
 	_fdOut = -1;
-	_method = Get;
-	oss << "\r\n";
+  _eof = false;
+  return true;
 }

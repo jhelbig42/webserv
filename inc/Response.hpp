@@ -12,7 +12,9 @@ public:
   // Response& operator=(const Response&);
   // ~Response();
 
-  bool init(const Request &);
+  Response(const Request &Req);
+
+  bool init(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
   /// \brief continues processing a response object
@@ -42,9 +44,9 @@ private:
   bool sendBuffer(const int, const size_t);
   bool fillBufferFile(const size_t);
 
-  Request _req;
+  Request &_req;
 
-  Headers _headers;
+  off_t _contentLength;
 
   // consider abstraction for metaData
   bool _hasMetadata;
@@ -63,6 +65,4 @@ private:
   // consider getting rid of _eof
   // as the information should already be included int _remainingFileSize 
   bool _eof;
-
-  size_t _remainingFileSize;
 };

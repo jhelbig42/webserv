@@ -16,16 +16,18 @@
 /// @param MinorV http minor version
 static std::string statusLineResp(const int Code, const Request &Req);
 
-static std::string headersResp(const Headers &Hdrs);
+static std::string headersResp(const off_t length);
 
 bool Response::makeMetadata(const int Code) {
-  _metaData = statusLineResp(Code, _req) + headersResp(_headers) + "\r\n";
+  _metaData = statusLineResp(Code, _req) + headersResp(_contentLength) + "\r\n";
   _hasMetadata = true;
 }
 
 static std::string statusLineResp(const int Code, const Request &Req) {
   std::ostringstream oss;
-	oss << "HTTP/" << req.getMajorV << '.' << req.getMinorV << ' ' << Code << ' ';
+	oss << "HTTP/" << req.getMajorV() << '.';
+  oss << req.getMinorV() << ' ';
+  oss << Code << ' ';
 	switch (Code) {
 		case 200: oss << REASON_200; break;
 		case 201: oss << REASON_201; break;
@@ -47,7 +49,8 @@ static std::string statusLineResp(const int Code, const Request &Req) {
 	return oss.str();
 }
 
-static std::string headersResp(const Headers &Hdrs) {
+static std::string headersResp(const off_t length) {
   std::ostringstream oss;
+  oss << "Content-Length: " << length << "\r\n";
 	return oss.str();
 }

@@ -14,6 +14,7 @@ class Request {
 		// request(const request&);
 		// request& operator=(const request&);
 		// ~request();
+    Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
     
     void parse(const char *, const size_t);
 
@@ -24,9 +25,9 @@ class Request {
 		const getMethod() const
 
 	private:
+		HttpMethod _method;
+		std::string _resource;
 		unsigned int _majorVersion;
 		unsigned int _minorVersion;
-		std::string _resource;
-		HttpMethod _method;
 		bool _valid;
 };
