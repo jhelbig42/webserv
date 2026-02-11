@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/11 18:30:34 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/11 18:38:06 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,11 +94,12 @@ int	networking::get_server_socket(struct addrinfo *server_info){
 		int ret = bind(sock, p->ai_addr, p->ai_addrlen);
 		if (ret != 0) {
 			close(sock);
-			std::cerr << "bind: " << gai_strerror(ret) << "\n";
-			// TODO throw exception and log error
+			std::string msg (gai_strerror(ret));
+			logging::log("bind: " + msg + "will continue trying sockets",
+				logging::Info);
 			continue;
 		}
-		std::cout << "success!\n";
+		logging::log("bind: success!", logging::Debug);
 		break; // necessary?
 	}
 	if (p == NULL){
