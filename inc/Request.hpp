@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <stdexcept>
+#include <iostream>
 
 typedef enum {
 	Get,
@@ -15,13 +18,16 @@ class Request {
 		// request& operator=(const request&);
 		// ~request();
     
-    void parse(const char *, const size_t);
+    	void parse(const char *, const size_t);
+		void parse_method(std::string token);
+		void parse_resource(std::string token);
+		void parse_http(std::string token);
 
 		const bool isValid() const;
 		const unsigned int getVersionMajor() const;
 		const unsigned int getVersionMinor() const;
 		const std::string &getResource() const;
-		const getMethod() const
+		const int getMethod() const;
 
 	private:
 		unsigned int _versionMajor;
@@ -30,3 +36,5 @@ class Request {
 		HttpMethod _method;
 		bool _valid;
 };
+
+std::vector<std::string> split(const std::string& s, const std::string& delimiter);
