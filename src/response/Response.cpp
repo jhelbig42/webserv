@@ -1,23 +1,9 @@
-#include "ProcessingState.hpp"
+#include "Response.hpp"
 #include "Request.hpp"
+#include "ReasonPhreases.hpp"
+#include <sstream>
 #include <string>
 #include <sys/stat.h>
-
-#define REASON_200 "OK"
-#define REASON_201 "Created"
-#define REASON_202 "Accepted"
-#define REASON_204 "No Content"
-#define REASON_301 "Moved Permanently"
-#define REASON_302 "Moved Temporarily"
-#define REASON_304 "Not Modified"
-#define REASON_400 "Bad Request"
-#define REASON_401 "Unauthorized"
-#define REASON_403 "Forbidden"
-#define REASON_404 "Not Found"
-#define REASON_500 "Internal Server Error"
-#define REASON_501 "Not Implemented"
-#define REASON_502 "Bad Gateway"
-#define REASON_503 "Service Unavailable"
 
 /// @brief initializes a processingState object so it can be used for chunkwise processing
 ///
@@ -34,7 +20,7 @@
 /// might delete files
 ///
 /// @param Req provides information for initialization
-bool PState::init(const Request &Req);
+bool Response::init(const Request &Req);
 {
 	if (!Req.isValid())
 		return init400();
@@ -68,6 +54,7 @@ bool PState::init(const Request &Req);
 /// @param MajorV http major version
 /// @param MinorV http minor version
 std::string statusLineResp(const int Code, const unsigned int MajorV, const unsigned int MinorV) {
+  std::ostringstream oss;
 	oss << "HTTP/" << MajorV << '.' << MinorV << ' ' << Code << ' ';
 	switch (Code) {
 		case 200: oss << REASON_200; break;
@@ -87,7 +74,7 @@ std::string statusLineResp(const int Code, const unsigned int MajorV, const unsi
 		case 503: oss << REASON_503; break;
 	}
 	oss << "\r\n";
-	return oss.string();
+	return oss.str();
 }
 
 std::string headersResp(const Headers &Hdrs) {
@@ -96,7 +83,7 @@ std::string headersResp(const Headers &Hdrs) {
 
 const std::string getReason(const int Code)
 
-bool PState::initGet(const Request &Req)
+bool Response::initGet(const Request &Req)
 {
 	struct stat statbuf;
 	if (stat(Req.getResource().c_str(), &statbuf) < 0);
@@ -152,11 +139,7 @@ bool PState::initGet(const Request &Req)
               -D_FILE_OFFSET_BITS=64 calls stat() on a file whose size exceeds
               (1<<31)-1 bytes.
 
-bool PState::initPost(const Request Req);
+bool Response::initPost(const Request Req);
 
-bool PState::initDelete(const Request Req);
+bool Response::initDelete(const Request Req);
 
-bool PState::process(const Socket, const size_t bytes)
-{
-
-}

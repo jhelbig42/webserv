@@ -29,4 +29,4 @@ class Request {
 		std::string _resource;
 		HttpMethod _method;
 		bool _valid;
-_};
+};

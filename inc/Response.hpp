@@ -3,34 +3,64 @@
 #include "Request.hpp"
 #include <string>
 
-#define STATE_BUFFSIZE 128
+#define RESPONSE_BUFFSIZE 128
 
-class PState:
-{
-	public:
-		PState();
-		PState(const PState&);
-		PState& operator=(const PState&);
-		~PState();
+class Response: {
+public:
+  // Response();
+  // Response(const Response&);
+  // Response& operator=(const Response&);
+  // ~Response();
 
-		bool init(const Request &Req);
-		bool process(const Socket, const size_t bytes);
+  bool init(const Request &);
 
-	private:
-		typedef enum { In, Out, Transfer, Cgi } ProcessMode;
+  /// \fn bool process(const int Socket, const size_t Bytes);
+  /// \brief continues processing a response object
+  ///
+  /// Although Bytes gives a hint on how many Bytes should be processed,
+  /// this is not a guarantee.
+  /// process() will decide by itself what is most convenient.
+  ///
+  /// This means:
+  /// Usually only one system call or other heavy operation will be performed.
+  /// When any read() or write() call happens,
+  /// usually no more than Bytes bytes will be processed by such call.
+  ///
+  /// \param Socket socket associated with response
+  /// \param Bytes the maximum amount of Bytes to process by system calls
+  ///
+  /// \return true if response got fully processed otherwise false
+  bool process(const int Socket, const size_t Bytes);
 
-		bool initGet(const Request &Req);
-		bool initPost(const Request &Req);
-		bool initDelete(const Request &Req);
+private:
 
-		HttpMethod _method;
-		std::string _metaData;
-		int _fdIn;
-		int _fdOut;
-		int _buffSize = STATE_BUFFSIZE;
-		char _buffer[STATE_BUFFSIZE];
-		int _bufStart;
-		int _bufEnd;
-		size_t _remainingBytes;
-		ProcessMode _mode;
+  bool processHead(const int, const size_t);
+  bool makeMetadata(); // still a dummy
+  bool sendMetadata(); // still a dummy
+  bool processGet(const int, const size_t);
+  bool processDelete(const int, const size_t);
+  bool sendBuffer(const int, const size_t);
+  bool fillBufferFile(const size_t);
+
+  HttpMethod _method;
+
+  // consider abstraction for metaData
+  bool _hasMetadata;
+  bool _metaDataSent;
+  std::string _metaData;
+
+  int _fdIn;
+  int _fdOut;
+
+  // consider abstraction for buffer
+  char _buffer[RESPONSE_BUFFSIZE];
+  size_t _buffSize = RESPONSE_BUFFSIZE;
+  size_t _bufStart;
+  size_t _bufEnd;
+
+  // consider getting rid of _eof
+  // as the information should already be included int _remainingFileSize 
+  bool _eof;
+
+  size_t _remainingFileSize;
 };
