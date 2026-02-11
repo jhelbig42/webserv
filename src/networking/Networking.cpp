@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/10 18:38:14 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/11 15:44:44 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,21 +15,19 @@
 
 void	networking::start(void){
 
-	int sock;			// socket fd, listens for new connections
-	Connection connection[10];	// naive array of < 10 connections -- will be container?
+	int sock;						// socket fd, listens for new connections
+	Connection connection[10];		// naive array of < 10 connections
 	struct addrinfo *server_info;
 	
 	server_info = get_server_info();
-	print_addrinfo(server_info);
-
 /*
 	struct addrinfo *temp;
 	int ret = -1;
-	for (temp = info; temp != NULL, temp = temp->ai_next) {
+	for (temp = server_info; temp != NULL; temp = temp->ai_next) {
 		// add debug attempting to bind
-		status = bind(sd, temp->ai_addr, temp->ai_addrlen);
+		ret = bind(socket, temp->ai_addr, temp->ai_addrlen);
 		if (ret != 0) {
-			std::cerr << "error in bind " << "\n" std::cout;
+			std::cerr << "error in bind " << "\n";
 			// TODO throw exception and log error
 			exit (1);
 		}
@@ -51,14 +49,20 @@ struct addrinfo	networking::create_hints(void){
 	return (hints);
 }
 
-void	networking::print_addrinfo(struct addrinfo *info){
+// This debug print function is a temporary solution.
+// Rather than printing directly, I would like to be able to pass
+// all of the debug text below as a single string to logging::log.
+// This is tricky however because macros are being printed.
+// Their values are correctly interpreted when redirected to
+// std::cout, but I don't know how to preserve this when
+// converting to a string. String stream needed?
 
-        std::cout << "ai_flags = " << info->ai_flags << "\n";
+void	networking::print_addrinfo_str(struct addrinfo *info){
+		std::cout << "ai_flags = " << info->ai_flags << "\n";
         std::cout << "ai_family = " << info->ai_family << "\n";
         std::cout << "ai_socktype = " << info->ai_socktype << "\n";
         std::cout << "ai_protocol = " <<  info->ai_protocol << "\n";
         std::cout << "ai_addrlen = " << info->ai_addrlen << "\n";
-
 }
 
 struct addrinfo	*networking::get_server_info(void){
@@ -67,11 +71,15 @@ struct addrinfo	*networking::get_server_info(void){
 		struct addrinfo *info;
 
 		int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
-        	if (ret != 0) {
-			// fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-			// TODO call error logging and throw exception
-			std::cerr << "getaddrinfo: " << gai_strerror(ret);
-			exit(1);
+        if (ret != 0) {
+			std::string msg (gai_strerror(ret));
+			throw std::runtime_error("getaddrinfo: " + msg);
+		}
+		else {
+			logging::log("addrinfo server_info created", logging::Debug);
+			if (config::getLogLevel() <= logging::Debug){
+				print_addrinfo_str(info);
+			}
 		}
 		return (info);
 }
