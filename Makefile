@@ -11,6 +11,10 @@ vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
+vpath %.cpp $(SRC_DIR)/response
+SRC			+= Response.cpp
+vpath %.cpp $(SRC_DIR)/request
+SRC			+= Request.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
