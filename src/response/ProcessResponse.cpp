@@ -18,6 +18,7 @@ bool Response::processHead(const int Socket, const size_t Bytes) {
 /// still a dummy
 bool Response::makeMetadata(void) {
   _hasMetadata = true;
+  return false;
 }
 
 /// still a dummy

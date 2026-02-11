@@ -35,14 +35,16 @@ public:
 private:
 
   bool processHead(const int, const size_t);
-  bool makeMetadata(); // still a dummy
+  bool makeMetadata(const int Code, const Request &req);
   bool sendMetadata(); // still a dummy
   bool processGet(const int, const size_t);
   bool processDelete(const int, const size_t);
   bool sendBuffer(const int, const size_t);
   bool fillBufferFile(const size_t);
 
-  HttpMethod _method;
+  Request _req;
+
+  Headers _headers;
 
   // consider abstraction for metaData
   bool _hasMetadata;

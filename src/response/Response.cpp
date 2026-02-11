@@ -1,10 +1,3 @@
-#include "Response.hpp"
-#include "Request.hpp"
-#include "ReasonPhreases.hpp"
-#include <sstream>
-#include <string>
-#include <sys/stat.h>
-
 /// @brief initializes a processingState object so it can be used for chunkwise processing
 ///
 /// checked runtime errors:
@@ -43,46 +36,6 @@ bool Response::init(const Request &Req);
 	}
 }
 
-/// @brief returns a string that holds the status line of a response
-///
-/// unchecked runtime errors:
-/// Code is not a status code explicitly listed in rfc1945 section 6.1.1
-///
-/// no sideeffects
-///
-/// @param Code http status code as in rfc1945
-/// @param MajorV http major version
-/// @param MinorV http minor version
-std::string statusLineResp(const int Code, const unsigned int MajorV, const unsigned int MinorV) {
-  std::ostringstream oss;
-	oss << "HTTP/" << MajorV << '.' << MinorV << ' ' << Code << ' ';
-	switch (Code) {
-		case 200: oss << REASON_200; break;
-		case 201: oss << REASON_201; break;
-		case 202: oss << REASON_204; break;
-		case 204: oss << REASON_301; break;
-		case 301: oss << REASON_301; break;
-		case 302: oss << REASON_302; break;
-		case 304: oss << REASON_304; break;
-		case 400: oss << REASON_400; break;
-		case 401: oss << REASON_401; break;
-		case 403: oss << REASON_403; break;
-		case 404: oss << REASON_404; break;
-		case 500: oss << REASON_500; break;
-		case 501: oss << REASON_501; break;
-		case 502: oss << REASON_502; break;
-		case 503: oss << REASON_503; break;
-	}
-	oss << "\r\n";
-	return oss.str();
-}
-
-std::string headersResp(const Headers &Hdrs) {
-	return oss;
-}
-
-const std::string getReason(const int Code)
-
 bool Response::initGet(const Request &Req)
 {
 	struct stat statbuf;
@@ -108,38 +61,3 @@ bool Response::initGet(const Request &Req)
 	_method = Get;
 	oss << "\r\n";
 }
-
-
-       EACCES Search permission is denied for one of the directories in the
-              path prefix of path.  (See also path_resolution(7).)
-
-       EFAULT Bad address.
-
-       ELOOP  Too many symbolic links encountered while traversing the path.
-
-       ENAMETOOLONG
-              path is too long.
-
-       ENOENT A component of path does not exist or is a dangling symbolic
-              link.
-
-       ENOENT path is an empty string and AT_EMPTY_PATH was not specified in
-              flags.
-
-       ENOMEM Out of memory (i.e., kernel memory).
-
-       ENOTDIR
-              A component of the path prefix of path is not a directory.
-
-       EOVERFLOW
-              path or fd refers to a file whose size, inode number, or number
-              of blocks cannot be represented in, respectively, the types
-              off_t, ino_t, or blkcnt_t.  This error can occur when, for
-              example, an application compiled on a 32-bit platform without
-              -D_FILE_OFFSET_BITS=64 calls stat() on a file whose size exceeds
-              (1<<31)-1 bytes.
-
-bool Response::initPost(const Request Req);
-
-bool Response::initDelete(const Request Req);
-
