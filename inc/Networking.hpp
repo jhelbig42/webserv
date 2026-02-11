@@ -12,6 +12,7 @@
 #include <cstring> // for memset
 #include <cstdlib> // for exit
 #include <stdexcept> // for runtime_error
+#include <unistd.h> // for close
 
 namespace networking {
 

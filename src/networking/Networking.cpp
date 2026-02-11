@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/11 16:56:01 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/11 18:08:36 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,29 +20,46 @@ void	networking::start(void){
 	struct addrinfo *server_info;
 	
 	server_info = get_server_info();
+
 	struct addrinfo *p;
 	int ret = -1;
 	for (p = server_info; p != NULL; p = p->ai_next) {
 		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 		if (sock == -1){
-		//	std::string msg (gai_strerror(ret));
-		//	throw std::runtime_error("socket: " + msg);
+			std::string msg (gai_strerror(ret));
+			logging::log("socket: " + msg + 
+				" (will continue trying sockets)", logging::Info);
 			std::cerr << "socket: " << gai_strerror(ret) << "\n";
 			continue;
 		}
-		/*
-		int ret = bind(socket, p->ai_addr, p->ai_addrlen);
-		if (ret != 0) {
-			std::cerr << "error in bind " << "\n";
-			// TODO throw exception and log error
-			exit (1);
+
+		// I believe this function is used to clear a previously-
+		// used port for re-use. Leaving it out for now to test.
+
+		int yes = 1;
+		ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+			&yes, sizeof(int));
+		if (ret == -1) {
+				std::cerr << "setsockopt: " << gai_strerror(ret) << "\n";
+				exit(1);
 		}
-		temp = temp->ai_next;
-		*/
+
+		int ret = bind(sock, p->ai_addr, p->ai_addrlen);
+		if (ret != 0) {
+			close(sock);
+			std::cerr << "bind: " << gai_strerror(ret) << "\n";
+			// TODO throw exception and log error
+			continue;
+		}
+		else
+			std::cout << "success!\n";
+		break;
 	}
 	freeaddrinfo(server_info);
-	(void) sock;
-	(void) ret;
+	if (p == NULL){
+		std::cout << "server failed to find a socket\n";
+		exit(1);
+	}
 }
 
 
