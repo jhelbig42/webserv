@@ -1,9 +1,8 @@
-#include "Response.hpp"
+#include "ReasonPhrases.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 /// @brief initializes a processingState object so it can be used for chunkwise processing
 ///
@@ -34,25 +33,23 @@ bool Response::init(const Request &Req)
   _eof = false;
 
 	if (!Req.isValid())
-		return initError(400);
+		return initError(CODE_400);
 
 	// make more generic
 	if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
-		return initError(501); // correct?
+		return initError(CODE_501); // correct?
 
 	try {
 		switch (_req.getMethod()) {
 			case Get:
 				return initGet();
 			case Post:
-        return initError(501);
 			case Delete:
-        return initError(501);
       case Generic:
-        return initError(501);
+        return initError(CODE_501);
 		}
 	} catch (...) {
-		return initError(500); // cases
+		return initError(CODE_500); // cases
 	}
 }
 
@@ -72,10 +69,11 @@ bool Response::initGet()
 {
 	struct stat statbuf;
 	if (stat(_req.getResource().c_str(), &statbuf) < 0)
-		return initError(500);
+		return initError(CODE_500);
 	
-	if ((_fdIn = open(_req.getResource().c_str(), O_RDONLY)) < 0)
-		return initError(500);
+	_fdIn = open(_req.getResource().c_str(), O_RDONLY);
+	if (_fdIn < 0)
+		return initError(CODE_500);
 
 	_contentLength = statbuf.st_size;
 	_bufStart = 0;

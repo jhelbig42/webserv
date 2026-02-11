@@ -1,4 +1,6 @@
 #include "Request.hpp"
+#include <cstddef>
+#include <string>
 
 Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
   : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {

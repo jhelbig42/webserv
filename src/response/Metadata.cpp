@@ -3,6 +3,7 @@
 #include "Request.hpp"
 #include <sstream>
 #include <string>
+#include <sys/types.h>
 
 /// @brief returns a string that holds the status line of a response
 ///
@@ -29,21 +30,22 @@ static std::string statusLineResp(const int Code, const Request &Req) {
   oss << Req.getMinorV() << ' ';
   oss << Code << ' ';
 	switch (Code) {
-		case 200: oss << REASON_200; break;
-		case 201: oss << REASON_201; break;
-		case 202: oss << REASON_204; break;
-		case 204: oss << REASON_301; break;
-		case 301: oss << REASON_301; break;
-		case 302: oss << REASON_302; break;
-		case 304: oss << REASON_304; break;
-		case 400: oss << REASON_400; break;
-		case 401: oss << REASON_401; break;
-		case 403: oss << REASON_403; break;
-		case 404: oss << REASON_404; break;
-		case 500: oss << REASON_500; break;
-		case 501: oss << REASON_501; break;
-		case 502: oss << REASON_502; break;
-		case 503: oss << REASON_503; break;
+		case CODE_200: oss << REASON_200; break;
+		case CODE_201: oss << REASON_201; break;
+		case CODE_202: oss << REASON_202; break;
+		case CODE_204: oss << REASON_204; break;
+		case CODE_301: oss << REASON_301; break;
+		case CODE_302: oss << REASON_302; break;
+		case CODE_304: oss << REASON_304; break;
+		case CODE_400: oss << REASON_400; break;
+		case CODE_401: oss << REASON_401; break;
+		case CODE_403: oss << REASON_403; break;
+		case CODE_404: oss << REASON_404; break;
+		case CODE_500: oss << REASON_500; break;
+		case CODE_501: oss << REASON_501; break;
+		case CODE_502: oss << REASON_502; break;
+		case CODE_503: oss << REASON_503; break;
+    default: break;
 	}
 	oss << "\r\n";
 	return oss.str();

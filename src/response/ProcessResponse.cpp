@@ -1,7 +1,11 @@
+#include "ReasonPhrases.hpp"
+#include "Request.hpp"
 #include "Response.hpp"
+#include <algorithm>
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
+#include <sys/types.h>
 #include <unistd.h>
 
 bool Response::process(const int Socket, const size_t Bytes)
@@ -25,13 +29,15 @@ bool Response::process(const int Socket, const size_t Bytes)
 
 /// still a dummy
 bool Response::sendMetadata(const int Socket, const size_t Bytes) {
+  (void)Socket;
+  (void)Bytes;
   return true;
 }
 
 bool Response::processGet(const int Socket, const size_t Bytes)
 {
   if (!_hasMetadata) {
-    _hasMetadata = makeMetadata(200);
+    _hasMetadata = makeMetadata(CODE_200);
     return false;
   }
   if (!_metaDataSent) {
@@ -53,9 +59,9 @@ bool Response::processGet(const int Socket, const size_t Bytes)
 // }
 
 bool Response::sendBuffer(const int Socket, const size_t Bytes) {
-  ssize_t rc = write(Socket, _buffer + _bufStart, std::min(_bufEnd - _bufStart, Bytes));
+  const ssize_t rc = write(Socket, _buffer + _bufStart, std::min(_bufEnd - _bufStart, Bytes));
   if (rc < 0) {
-    int err = errno;
+    const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }  
@@ -67,13 +73,13 @@ bool Response::sendBuffer(const int Socket, const size_t Bytes) {
 
 // TODO: in case of error, what is the correct action with regards to the client?
 bool Response::fillBufferFile(const size_t Bytes) {
-  ssize_t rc = read(_fdIn, _buffer, std::min(Bytes, (size_t)_buffSize));
+  const ssize_t rc = read(_fdIn, _buffer, std::min(Bytes, (size_t)buffSize));
   if (rc < 0) {
-    int err = errno;
+    const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }  
-  if ((size_t)rc < std::min(Bytes, (size_t)_buffSize))
+  if ((size_t)rc < std::min(Bytes, (size_t)buffSize))
     _eof = true;
   if (rc == 0)
     return true;

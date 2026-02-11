@@ -13,7 +13,7 @@ public:
   // Response& operator=(const Response&);
   // ~Response();
 
-  Response(const Request &Req);
+  explicit Response(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
   /// \brief continues processing a response object
@@ -62,7 +62,7 @@ private:
   int _fdOut;
 
   // consider abstraction for buffer
-  static const size_t _buffSize = RESPONSE_BUFFSIZE;
+  static const size_t buffSize = RESPONSE_BUFFSIZE;
   char _buffer[RESPONSE_BUFFSIZE];
   size_t _bufStart;
   size_t _bufEnd;

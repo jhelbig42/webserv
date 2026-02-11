@@ -1,5 +1,21 @@
 #pragma once
 
+#define CODE_200 200
+#define CODE_201 201
+#define CODE_202 202
+#define CODE_204 204
+#define CODE_301 301
+#define CODE_302 302
+#define CODE_304 304
+#define CODE_400 400
+#define CODE_401 401
+#define CODE_403 403
+#define CODE_404 404
+#define CODE_500 500
+#define CODE_501 501
+#define CODE_502 502
+#define CODE_503 503
+
 #define REASON_200 "OK"
 #define REASON_201 "Created"
 #define REASON_202 "Accepted"

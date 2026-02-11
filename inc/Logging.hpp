@@ -18,4 +18,4 @@ typedef enum { Debug, Info, Warning, Error } LogLevel;
 /// message
 void log(const std::string &Msg, const LogLevel Level);
 
-} // namespace log
+} // namespace logging
