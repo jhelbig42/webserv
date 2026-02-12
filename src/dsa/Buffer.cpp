@@ -1,4 +1,5 @@
 #include "Buffer.hpp"
+#include "Logging.hpp"
 #include <errno.h>
 #include <unistd.h>
 #include <cstring>
@@ -47,23 +48,29 @@ size_t Buffer::getFree(void) const {
 }
 
 ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
-  const size_t amount = std::min(Bytes, getUsed());
+  const size_t amount = std::min(Bytes, getFree());
   ssize_t rc;
   if (isSocket(Fd))
     rc = recv(Fd, _buffer + _end, amount, MSG_DONTWAIT);
-  else
+  else {
+    logging::log(logging::Debug, "Buffer::fill: read()");
     rc = read(Fd, _buffer + _end, amount);
+    logging::log2(logging::Debug, "Buffer::fill: rc after read(): ", rc);
+  }
   if (rc < 0)
   {
     int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }
+  logging::log2(logging::Debug, "Buffer::fill: rc: ", rc);
   _end += (size_t)rc;
   return rc;
 }
 
 ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
+  logging::log2(logging::Debug, "Buffer::empty: _start: ", _start);
+  logging::log2(logging::Debug, "Buffer::empty: _end:   ", _end);
   const size_t amount = std::min(Bytes, getUsed());
   ssize_t rc;
   if (isSocket(Fd))
@@ -81,9 +88,10 @@ ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
 }
 
 void Buffer::optimize(const size_t Bytes) {
-  if (getFree() + getUsed() <= Bytes)
+  if (getFree() + getUsed() >= Bytes)
     return;
   memmove(_buffer, _buffer + _start, getUsed());
+  reset();
 }
 
 void Buffer::reset(void) {
