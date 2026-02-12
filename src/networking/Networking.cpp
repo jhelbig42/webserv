@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/11 18:38:06 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/12 15:15:42 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,21 +64,27 @@ struct addrinfo	*networking::get_server_info(void){
 		return (info);
 }
 
+int networking::create_socket(struct addrinfo *server_info, struct addrinfo *p){
+		
+		int sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol); // could set ai_protocol manually to TCP?
+		if (sock == -1){
+			std::ostringstream msg;
+			msg << "socket: " << std::strerror(errno)
+				<< " (will continue trying sockets)";
+			logging::log(msg.str(), logging::Info);
+		}
+		return (sock);
+}
+
 int	networking::get_server_socket(struct addrinfo *server_info){
 	
 	int sock;
 	struct addrinfo *p;
-	int ret = -1;
 	for (p = server_info; p != NULL; p = p->ai_next) {
-		sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+		sock = create_socket(server_info, p);
 		if (sock == -1){
-			std::string msg (gai_strerror(ret));
-			logging::log("socket: " + msg + 
-				" (will continue trying sockets)", logging::Info);
-			std::cerr << "socket: " << gai_strerror(ret) << "\n";
 			continue;
 		}
-
 		// I believe this function is used to clear a previously-
 		// used port for re-use. Leaving it out for now to test.
 		/*

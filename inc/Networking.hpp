@@ -13,6 +13,7 @@
 #include <cstdlib> // for exit
 #include <stdexcept> // for runtime_error
 #include <unistd.h> // for close
+#include <cerrno> // for errno
 
 namespace networking {
 
@@ -23,5 +24,6 @@ namespace networking {
 	void    print_addrinfo_str(struct addrinfo *info);
 	void    fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
 	int		get_server_socket(struct addrinfo *server_info);
+	int		create_socket(struct addrinfo *server_info, struct addrinfo *p);
 }
 
