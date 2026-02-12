@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/12 15:53:27 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/12 16:23:24 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ void networking::start(void) {
   struct addrinfo *server_info = get_server_info();
   int sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
-  // add throw in get_server_socket
   (void)sock;
 }
 
@@ -29,7 +28,7 @@ struct addrinfo networking::create_hints(void) {
   memset(&hints, 0, sizeof hints); // init struct to empty;
   hints.ai_family = AF_UNSPEC;     // allows either IPv4 or IPv6
   hints.ai_socktype = SOCK_STREAM; // for TCP stream sockets
-  hints.ai_flags = AI_PASSIVE;     // autofill IP
+  hints.ai_flags = AI_PASSIVE;     // autofill my IP
   return (hints);
 }
 
@@ -75,28 +74,27 @@ int networking::create_socket(struct addrinfo *server_info,
   return (sock);
 }
 
-int	networking::clear_socket(int sock) {
-    int yes = 1;
-    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            &yes, sizeof(int));
-    if (ret == -1) {
-    	std::ostringstream msg;
-    	msg << "setsockopt: " << std::strerror(errno);
-    	logging::log(logging::Error, msg.str());
-	}
-	return (ret);
+int networking::clear_socket(int sock) {
+  int yes = 1;
+  int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+  if (ret == -1) {
+    std::ostringstream msg;
+    msg << "setsockopt: " << std::strerror(errno);
+    logging::log(logging::Error, msg.str());
+  }
+  return (ret);
 }
 
-int	networking::bind_to_ip(int sock, struct addrinfo *p) {
-    
-	int ret = bind(sock, p->ai_addr, p->ai_addrlen);
-    if (ret != 0) {
-      close(sock);
-      std::string msg(gai_strerror(ret));
-      logging::log(logging::Info,
-                   "bind: " + msg + "will continue trying sockets");
-    }
-	return (ret);
+int networking::bind_to_ip(int sock, struct addrinfo *p) {
+
+  int ret = bind(sock, p->ai_addr, p->ai_addrlen);
+  if (ret != 0) {
+    close(sock);
+    std::string msg(gai_strerror(ret));
+    logging::log(logging::Info,
+                 "bind: " + msg + "will continue trying sockets");
+  }
+  return (ret);
 }
 
 int networking::get_server_socket(struct addrinfo *server_info) {
@@ -109,18 +107,18 @@ int networking::get_server_socket(struct addrinfo *server_info) {
       continue;
     }
 
-	//clear_socket(sock); // not necessary until we have multiple connections?
+    // clear_socket(sock); // not necessary until we have multiple connections?
 
-	if (bind_to_ip(sock, p) == -1){
-		continue;
-	}
-
-    logging::log(logging::Debug, "bind: success!");
-    break; // necessary?
+    if (bind_to_ip(sock, p) == -1) {
+      continue;
+    }
+    break;
   }
   if (p == NULL) {
-    std::cout << "server failed to find a socket\n";
-    return (-1);
+  	freeaddrinfo(server_info);
+    throw std::runtime_error("server failed to find a socket");
+  } else {
+    logging::log(logging::Debug, "sever found socket. bind: success");
   }
   return (sock);
 }

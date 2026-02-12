@@ -1,31 +1,30 @@
 #pragma once
 
-#include "Logging.hpp"
-#include "Connection.hpp"
 #include "Config.hpp"
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <cstring> // for memset
+#include "Connection.hpp"
+#include "Logging.hpp"
+#include <cerrno>  // for errno
 #include <cstdlib> // for exit
+#include <cstring> // for memset
+#include <iostream>
+#include <netdb.h>
+#include <sstream>
 #include <stdexcept> // for runtime_error
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h> // for close
-#include <cerrno> // for errno
 
 namespace networking {
 
-	void	start(void);	
-	struct addrinfo create_hints(void);
-	struct  addrinfo *get_server_info(void);
-	std::string    get_addrinfo_str(struct addrinfo *info, std::string msg);
-	void    print_addrinfo_str(struct addrinfo *info);
-	void    fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
-	int		get_server_socket(struct addrinfo *server_info);
-	int		create_socket(struct addrinfo *server_info, struct addrinfo *p);
-	int		clear_socket(int sock);
-	int		bind_to_ip(int sock, struct addrinfo *p);
-}
-
+void start(void);
+struct addrinfo create_hints(void);
+struct addrinfo *get_server_info(void);
+std::string get_addrinfo_str(struct addrinfo *info, std::string msg);
+void print_addrinfo_str(struct addrinfo *info);
+void fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
+int get_server_socket(struct addrinfo *server_info);
+int create_socket(struct addrinfo *server_info, struct addrinfo *p);
+int clear_socket(int sock);
+int bind_to_ip(int sock, struct addrinfo *p);
+} // namespace networking
