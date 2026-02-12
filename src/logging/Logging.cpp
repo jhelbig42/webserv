@@ -30,8 +30,7 @@ void logging::logString(const logging::LogLevel Level, const std::string &Msg) {
   case Error:
     logInternal(ERROR_STREAM, ERROR_COLOR, ERROR_LABEL, Msg);
     break;
-  case Off:
-    ;
+  case Off:;
   }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace logging {
 
@@ -17,11 +17,10 @@ void logString(const LogLevel Level, const std::string &Msg);
 /// \param Level minimum return value of config::getLogLevel() to log this
 /// message
 /// \param Msg Message to be logged
-template <typename T>
-void log(const LogLevel Level, const T Msg) {
+template <typename T> void log(const LogLevel Level, const T Msg) {
   std::ostringstream oss;
   oss << Msg;
   logString(Level, oss.str());
 }
 
-} // namespace log
+} // namespace logging
