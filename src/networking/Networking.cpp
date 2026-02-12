@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/12 16:47:51 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/12 17:31:01 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,40 @@
 
 void networking::start(void) {
 
-  Connection connection[10]; // naive array of < 10 connections
   struct addrinfo *server_info = get_server_info();
-  int sock = get_server_socket(server_info);
+  int sock;
+
+//  *server_info = get_server_info();
+  sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
   set_to_listen(sock);
+  
+  // signal handling goes here?
+ 
+  accept_clients(sock);
+}
+
+void	networking::accept_clients(int sock){
+  
+  	Connection connection[BACKLOG]; // naive array of connections
+	static int active_clients; // counter for # of active clients, temp solution
+	struct sockaddr_storage addr;
+	socklen_t	addr_size;
+	int		client_sock;
+
+	while (1) {
+		
+		addr_size = sizeof addr;
+		client_sock = accept(sock, (struct sockaddr *)&addr, &addr_size);
+		if (client_sock == -1) {
+    		std::ostringstream msg;
+    		msg << "accept: " << std::strerror(errno) <<
+				" (will continue trying to accept connections";
+  			logging::log(logging::Error, msg.str());
+			continue;
+		}
+	}
+	(void)active_clients;
 }
 
 void	networking::set_to_listen(int sock){
@@ -29,6 +58,7 @@ void	networking::set_to_listen(int sock){
     	msg << "listen: " << std::strerror(errno);
   		throw std::runtime_error(msg.str());
 	}
+  logging::log(logging::Debug, "server is listening for connections...");
 }
 
 struct addrinfo networking::create_hints(void) {
