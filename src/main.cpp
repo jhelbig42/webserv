@@ -1,4 +1,5 @@
 #include "Logging.hpp"
+#include "Buffer.hpp"
 
 int main(void) {
   logging::log("great", logging::Debug);
