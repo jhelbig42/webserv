@@ -1,11 +1,20 @@
 #include "Logging.hpp"
 #include "Networking.hpp"
+#include <iostream>
 
 int main(void) {
-//  logging::log("great", logging::Debug);
-//  logging::log("ok", logging::Info);
-//  logging::log("bad", logging::Warning);
-//  logging::log("terrible", logging::Error);
+  
+  logging::log(logging::Debug, "great");
+  logging::log(logging::Info, "ok");
+  logging::log(logging::Warning, "bad");
+  logging::log(logging::Error, "terrible");
+
+  std::cout << '\n';
+
+  logging::log(logging::Debug, 1);
+  logging::log(logging::Info, 2);
+  logging::log(logging::Warning, 3);
+  logging::log(logging::Error, 4);
 
   try { 
   	networking::start();
