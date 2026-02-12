@@ -44,9 +44,11 @@ bool Response::processGet(const int Socket, const size_t Bytes)
     _metaDataSent = sendMetadata(Socket, Bytes);
     return false;
   }
-  if (_bufStart != _bufEnd)
-    return sendBuffer(Socket, Bytes);
-  return fillBufferFile(Bytes);
+  if (_bufStart != _bufEnd && sendBuffer(Socket, Bytes))
+      return true
+  }
+  else
+    fillBufferFile(Bytes);
 }
 
 // bool Response::processDelete(const int Socket, const size_t Bytes)
@@ -58,6 +60,14 @@ bool Response::processGet(const int Socket, const size_t Bytes)
 //   return sendMetadata(Socket, Bytes);
 // }
 
+Response::transferBytes(const int Socket, const size_t Bytes)
+
+/// \brief attempts to send a certain amount of bytes from the buffers content
+/// to a socket
+///
+/// \param Socket to send data to
+/// \param Bytes amount of bytes that is maximally read send
+/// The actual amount depends on buffer content and Socket's readiness to receive
 bool Response::sendBuffer(const int Socket, const size_t Bytes) {
   const ssize_t rc = write(Socket, _buffer + _bufStart, std::min(_bufEnd - _bufStart, Bytes));
   if (rc < 0) {
@@ -71,18 +81,35 @@ bool Response::sendBuffer(const int Socket, const size_t Bytes) {
   return (_eof);
 }
 
-// TODO: in case of error, what is the correct action with regards to the client?
+/// \brief reads up to Bytes bytes from file to _buffer
+/// actual bytes read are limited by buffer size and the amount of bytes that
+/// can be read from file
+///
+/// sideeffects:
+/// usually overwrites part of buffer
+/// usually advances _bufEnd
+/// exception to this: read() returns <= 0
+/// sets _eof to true if nothing more to read from file
+///
+/// TODO: doublecheck error handling
+///
+/// \param Bytes amount of bytes that is maximally read into _buffer
+/// The actual amount depends on the remaining space in buffer and read().
+///
+/// \returns true if nothing more to read from file
+/// \returns false if still stuff to read from file
 bool Response::fillBufferFile(const size_t Bytes) {
-  const ssize_t rc = read(_fdIn, _buffer, std::min(Bytes, (size_t)buffSize));
+  size_t amount = std::min(Bytes, (size_t)buffSize);
+  const ssize_t rc = read(_fdIn, _buffer, amount);
   if (rc < 0) {
     const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }  
-  if ((size_t)rc < std::min(Bytes, (size_t)buffSize))
+  if ((size_t)rc < amount) {
     _eof = true;
-  if (rc == 0)
     return true;
+  }
   _bufEnd += (size_t)rc;
   return false;
 }
