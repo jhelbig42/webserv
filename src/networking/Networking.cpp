@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/12 16:23:24 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/12 16:47:51 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,16 @@ void networking::start(void) {
   struct addrinfo *server_info = get_server_info();
   int sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
-  (void)sock;
+  set_to_listen(sock);
+}
+
+void	networking::set_to_listen(int sock){
+  
+  if (listen(sock, BACKLOG == -1)) {
+    	std::ostringstream msg;
+    	msg << "listen: " << std::strerror(errno);
+  		throw std::runtime_error(msg.str());
+	}
 }
 
 struct addrinfo networking::create_hints(void) {

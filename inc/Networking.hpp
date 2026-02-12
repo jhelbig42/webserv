@@ -27,4 +27,5 @@ int get_server_socket(struct addrinfo *server_info);
 int create_socket(struct addrinfo *server_info, struct addrinfo *p);
 int clear_socket(int sock);
 int bind_to_ip(int sock, struct addrinfo *p);
+void set_to_listen(int sock);
 } // namespace networking
