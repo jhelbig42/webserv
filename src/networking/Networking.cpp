@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/12 15:15:42 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/12 15:39:21 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,8 @@ struct addrinfo	*networking::get_server_info(void){
 			throw std::runtime_error("getaddrinfo: " + msg);
 		}
 		else {
-			logging::log("addrinfo server_info created", logging::Debug);
-			logging::log(get_addrinfo_str(info, "server_info:"), logging::Debug);
+			logging::log(logging::Debug, "addrinfo server_info created");
+			logging::log(logging::Debug, get_addrinfo_str(info, "server_info:"));
 		}
 		return (info);
 }
@@ -71,7 +71,7 @@ int networking::create_socket(struct addrinfo *server_info, struct addrinfo *p){
 			std::ostringstream msg;
 			msg << "socket: " << std::strerror(errno)
 				<< " (will continue trying sockets)";
-			logging::log(msg.str(), logging::Info);
+			logging::log(logging::Info, msg.str());
 		}
 		return (sock);
 }
@@ -101,11 +101,11 @@ int	networking::get_server_socket(struct addrinfo *server_info){
 		if (ret != 0) {
 			close(sock);
 			std::string msg (gai_strerror(ret));
-			logging::log("bind: " + msg + "will continue trying sockets",
-				logging::Info);
+			logging::log(logging::Info, "bind: " + msg
+				+ "will continue trying sockets");
 			continue;
 		}
-		logging::log("bind: success!", logging::Debug);
+		logging::log(logging::Debug, "bind: success!");
 		break; // necessary?
 	}
 	if (p == NULL){
