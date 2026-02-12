@@ -50,8 +50,7 @@ int main(void) {
       errno = 0;
       throw std::runtime_error(strerror(err));
     }
-    while (1)
-    {
+    while (1) {
       buf.fill(fdin, CHUNK_SIZE);
       if (buf.empty(fdout, CHUNK_SIZE) == 0 && buf.getUsed() == 0)
         break;

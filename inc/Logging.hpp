@@ -23,13 +23,15 @@ template <typename T> void log(const LogLevel Level, const T Msg1) {
   logString(Level, oss.str());
 }
 
-template <typename T, typename U> void log2(const LogLevel Level, const T Msg1, const U Msg2) {
+template <typename T, typename U>
+void log2(const LogLevel Level, const T Msg1, const U Msg2) {
   std::ostringstream oss;
   oss << Msg1 << Msg2;
   logString(Level, oss.str());
 }
 
-template <typename T, typename U, typename V> void log3(const LogLevel Level, const T Msg1, const U Msg2, const V Msg3) {
+template <typename T, typename U, typename V>
+void log3(const LogLevel Level, const T Msg1, const U Msg2, const V Msg3) {
   std::ostringstream oss;
   oss << Msg1 << Msg2 << Msg3;
   logString(Level, oss.str());

@@ -2,8 +2,8 @@
 ///
 /// \brief Contains Values that should be fixed at compile time.
 ///
-/// These are not just defaults which could be overwritten by a parsed config file.
-/// Instead these are values that could have program wide repurcussions
+/// These are not just defaults which could be overwritten by a parsed config
+/// file. Instead these are values that could have program wide repurcussions
 /// but should not be changeable at runtime.
 #pragma once
 
