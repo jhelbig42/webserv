@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompileTimeConstants.hpp"
+#include <sys/types.h>
 
 class Buffer {
 public:
@@ -43,13 +44,16 @@ public:
   /// \return amounts of bytes emptied into Fd
   ssize_t empty(const int Fd, const size_t Bytes);
 
+  /// \brief resets the buffer
+  void reset(void);
+
   /// \brief optimizes Buffer for an attempt to transfer Bytes bytes through it
   ///
   /// So far this is an extremely simple algorithm
-  void optimize(void);
+  void optimize(const size_t Bytes);
 
 private:
-  char _buffer[BUFFER_SIZE]
+  char _buffer[BUFFER_SIZE];
   size_t _start;
   size_t _end;
 };

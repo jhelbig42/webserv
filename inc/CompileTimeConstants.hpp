@@ -9,6 +9,6 @@
 
 /// \def BUFFER_SIZE
 /// \brief defines the size for class Buffer objects
-#ifndef
+#ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
 #endif
