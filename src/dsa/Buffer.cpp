@@ -1,11 +1,12 @@
 #include "Buffer.hpp"
 #include "Logging.hpp"
-#include <errno.h>
-#include <unistd.h>
+#include <algorithm>
 #include <cstring>
+#include <errno.h>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 /// \brief checks if a file descriptor references a socket
 static bool isSocket(const int Fd);
@@ -59,7 +60,7 @@ ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
   }
   if (rc < 0)
   {
-    int err = errno;
+    const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }
@@ -79,7 +80,7 @@ ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
     rc = write(Fd, _buffer + _start, amount);
   if (rc < 0)
   {
-    int err = errno;
+    const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }
@@ -104,7 +105,7 @@ static bool isSocket(const int Fd) {
   if (getsockname(Fd, &dummy, &len) == 0)
     return true;
   if (errno != ENOTSOCK) {
-    int err = errno;
+    const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }
