@@ -68,7 +68,7 @@ public:
   /// \brief access the used part of the buffer
   ///
   /// unchecked runtime errors:
-  /// index < 0 or index >= getUsed()
+  /// index >= getUsed()
   char &operator[](size_type i);
   const char &operator[](size_type i) const;
 
@@ -94,22 +94,22 @@ public:
 
   /// \brief reads up to Bytes bytes from Fd and fills them into the Buffer
   ///
-  /// This is non blocking.
-  ///
-  /// on error throws exception, otherwise returns amount of bytes filled
+  /// throws exception on error
   ///
   /// \return amounts of bytes filled into buffer
+  /// Caveat: if 0 is returned there are two possible reasons:
+  /// 1) buffer was already full
+  /// 2) Nothing to read from Fd
   size_type fill(const int Fd, const size_t Bytes);
 
   /// \brief reads Bytes bytes from Buffer and sends them to Fd
   ///
-  /// This is non blocking.
-  /// When SIGPIPE would be sent instead an exception is thrown.
-  ///
-  /// on error throws exception, otherwise returns amount of bytes emptied into
-  /// Fd
-  ///
   /// \return amounts of bytes emptied into Fd
+  /// throws exception on error
+  ///
+  /// Caveat: if 0 is returned there are two possible reasons:
+  /// 1) buffer was already empty
+  /// 2) Fd does not accept input atm
   size_type empty(const int Fd, const size_t Bytes);
 
   /// \brief moves meaningful data to the front of the buffer.
