@@ -11,8 +11,6 @@ vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
-vpath %.cpp $(SRC_DIR)/dsa
-SRC			+= Buffer.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
