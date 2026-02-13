@@ -103,11 +103,22 @@ void Buffer::optimize(const size_t Bytes) {
   if (getFree() + getUsed() > Bytes / thresholdDivisor &&
       getFree() + getBlocked() < Bytes)
     return;
+  format();
+}
+
+void Buffer::reset(void) {
+  _start = _end = 0;
+}
+
+void Buffer::format(void) {
   memmove(_buffer, _buffer + _start, getUsed());
   _end = getUsed();
   _start = 0;
 }
 
-void Buffer::reset(void) {
-  _start = _end = 0;
+void Buffer::deleteFront(const size_t Bytes) {
+  if (Bytes > size || _start > size - Bytes || _start + Bytes > _end)
+    reset();
+  else
+    _start += Bytes;
 }

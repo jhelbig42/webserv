@@ -10,6 +10,7 @@
 
 #define FILE_MODE 0600
 #define CHUNK_SIZE 128
+#define DELETE_FRONT 3
 
 int main(void) {
   Buffer buf;
@@ -71,6 +72,10 @@ int main(void) {
   logging::log(logging::Info, "string:");
   std::cout << s;
   logging::log(logging::Info, "indexing:");
+  for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
+    std::cout << buf[i];
+  buf.deleteFront(DELETE_FRONT);
+  logging::log3(logging::Info, "first ", DELETE_FRONT, " characters deleted:");
   for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
     std::cout << buf[i];
 }

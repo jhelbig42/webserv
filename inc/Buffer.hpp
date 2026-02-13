@@ -4,6 +4,15 @@
 #include <string>
 #include <sys/types.h>
 
+/// \class Buffer
+/// \ brief This is a simple character buffer that can be filled from
+/// and emptied into file descriptors.
+///
+/// Maybe some of the function names are not fully intuitive.
+/// Make sure to read the comments.
+///
+/// You can make a string from a buffers content by calling
+/// std::string s(buf.begin(), buf.end());
 class Buffer {
 public:
   Buffer(void);
@@ -23,8 +32,6 @@ public:
 
   iterator end(void);
   const_iterator end(void) const;
-
-  std::string str(void) const;
 
   const static size_type size = BUFFER_SIZE;
 
@@ -60,13 +67,19 @@ public:
   /// \return amounts of bytes emptied into Fd
   size_type empty(const int Fd, const size_t Bytes);
 
-  /// \brief resets the buffer
-  void reset(void);
+  /// \brief moves meaningful data to the front of the buffer.
+  void format(void);
 
-  /// \brief optimizes Buffer for an attempt to transfer Bytes bytes through it
+  /// \brief formats buffer if it is deemed wise for performance gains
   ///
   /// So far this is an extremely simple algorithm
   void optimize(const size_t Bytes);
+
+  /// \brief resets the buffer
+  void reset(void);
+
+  /// \deletes the first Bytes meaningful bytes from the buffer
+  void deleteFront(const size_t Bytes);
 
 private:
   char _buffer[BUFFER_SIZE];
