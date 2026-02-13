@@ -112,15 +112,14 @@ void Buffer::optimize(const size_t Bytes) {
   // don't format if both:
   // 1) formatting is expensive
   // 2) there is enough capacity for the next call to empty()
-  if (getUsed() > size / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2
-    && capacity >= Bytes)
+  if (getUsed() > size / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2 &&
+      capacity >= Bytes)
     return;
   // don't format if both:
   // 1) there is still a certain amount of capacity in the buffer
   // 2) formatting will not dramatically increase the capacity
-  if (capacity > Bytes / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2
-    && capacity + getBlocked()
-    <= capacity / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2)
+  if (capacity > Bytes / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2 &&
+      capacity + getBlocked() <= capacity / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2)
     return;
   format();
 }
