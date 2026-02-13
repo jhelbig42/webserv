@@ -48,12 +48,7 @@ size_t Buffer::getFree(void) const {
 
 ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
-  ssize_t rc;
-  if (isSocket(Fd))
-    rc = recv(Fd, _buffer + _end, amount, MSG_DONTWAIT);
-  else {
-    rc = read(Fd, _buffer + _end, amount);
-  }
+  const ssize_t rc = read(Fd, _buffer + _end, amount);
   if (rc < 0) {
     const int err = errno;
     errno = 0;
@@ -65,41 +60,35 @@ ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
 
 ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getUsed());
-  ssize_t rc;
-  if (isSocket(Fd))
-    rc = send(Fd, _buffer + _start, amount, MSG_DONTWAIT | MSG_NOSIGNAL);
-  else
-    rc = write(Fd, _buffer + _start, amount);
+  const ssize_t rc = write(Fd, _buffer + _start, amount);
   if (rc < 0) {
     const int err = errno;
     errno = 0;
     throw std::runtime_error(strerror(err));
   }
   _start += (size_t)rc;
+  if (_start == _end)
+    reset();
   return rc;
 }
 
+/// badly handled edgecase:
+/// getFree() + getUsed() < Bytes && getFree() + getBlocked() < Bytes
 void Buffer::optimize(const size_t Bytes) {
-  if (getFree() + getUsed() >= Bytes)
+  const size_t thresholdDivisor = 8;
+  if (_start < size / thresholdDivisor)
+    return;
+  if (getUsed() > size / thresholdDivisor
+    && getFree() + getUsed() >= Bytes)
+    return;
+  if (getFree() + getUsed() > Bytes / thresholdDivisor
+    && getFree() + getBlocked() < Bytes)
     return;
   memmove(_buffer, _buffer + _start, getUsed());
-  reset();
+  _end = getUsed();
+  _start = 0;
 }
 
 void Buffer::reset(void) {
   _start = _end = 0;
-}
-
-static bool isSocket(const int Fd) {
-  struct sockaddr dummy;
-  socklen_t len = sizeof(struct sockaddr);
-  if (getsockname(Fd, &dummy, &len) == 0)
-    return true;
-  if (errno != ENOTSOCK) {
-    const int err = errno;
-    errno = 0;
-    throw std::runtime_error(strerror(err));
-  }
-  errno = 0;
-  return false;
 }
