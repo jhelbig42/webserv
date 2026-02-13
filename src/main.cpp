@@ -55,8 +55,8 @@ int main(void) {
       buf.fill(fdin, CHUNK_SIZE);
       if (buf.empty(fdout, CHUNK_SIZE) == 0 && buf.getUsed() == 0)
         break;
-      logging::log2(logging::Info, "_start:", buf.getBlocked());
-      logging::log2(logging::Info, "_end:", buf.getOccupied());
+      // logging::log2(logging::Info, "_start:", buf.getBlocked());
+      // logging::log2(logging::Info, "_end:", buf.getOccupied());
       buf.optimize(CHUNK_SIZE);
     }
   } catch (std::exception &e) {
@@ -65,10 +65,11 @@ int main(void) {
   close(fdin);
   close(fdout);
   buf.reset();
-  std::cout << "> " << std::flush;
+  std::cout << "\n> " << std::flush;
   buf.fill(STDIN_FILENO, CHUNK_SIZE);
   std::string s(buf.begin(), buf.end());
-  logging::log2(logging::Info, "string:\n", s);
+  logging::log(logging::Info, "string:");
+    std::cout << s;
   logging::log(logging::Info, "indexing:");
   for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
     std::cout << buf[i];
