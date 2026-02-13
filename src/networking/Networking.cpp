@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/13 15:32:21 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/13 16:10:44 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ void networking::start(void) {
 
 void	networking::accept_clients(int sock){
   
-  	Connection connection[BACKLOG]; // naive array of connections
+//  	Connection connection[BACKLOG]; // naive array of connections
 	static int active_clients; // counter for # of active clients, temp solution
-	int i = 0; // iterator for connection array
+//	int i = 0; // iterator for connection array
 
 //	static struct sockaddr_storage addr;
 //	socklen_t	addr_size = sizeof addr;
@@ -40,8 +40,13 @@ void	networking::accept_clients(int sock){
 	while (1) {
 		
 		while (active_clients < BACKLOG){
-			if (connection[i].accept_new(sock) == -1){
-					continue;
+			try {
+				Connection new_connection(sock);
+			}
+			catch (const std::runtime_error &e) {
+				logging::log(logging::Error, e.what());
+				// may later be downgraded to Warning, Info, or even Debug
+				continue;
 			}
 		}
 		/*

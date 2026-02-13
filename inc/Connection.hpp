@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/13 15:34:54 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/13 17:16:04 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <iostream> // for temp debug print in constructor
 #include <string.h> // for memset
 #include <cerrno> // for errno
 #include <cstring> // for std::strerror
+#include <string.h> // for memcpy
 
 class	Connection {
 	private:
@@ -33,7 +35,16 @@ class	Connection {
 		char _request_buffer[1024];
 
 	public:
+
+		Connection *create_connection(int sock);
+		// attempts to accept() incoming connections.
+		// calls Connection constructor only if accept()
+		// is successful
+
+		Connection *next;
 		Connection();
+		Connection(int server_sock);
+		Connection(int sock, sockaddr_storage &addr, socklen_t addr_size);
 		~Connection();
 		void print_addrinfo(void) const;
 		
@@ -45,6 +56,5 @@ class	Connection {
 		// setters
 		void clear_connection(void); // reset all fields to empty
 		int fill_request_buffer(char *src, int bytes);
-			
 		int accept_new(int sock);
 };

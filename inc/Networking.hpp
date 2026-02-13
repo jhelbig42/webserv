@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Config.hpp"
 #include "Connection.hpp"
+#include "Config.hpp"
 #include "Logging.hpp"
 #include <cerrno>  // for errno
 #include <cstdlib> // for exit
