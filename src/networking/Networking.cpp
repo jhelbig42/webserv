@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/12 17:31:01 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/13 13:06:21 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,13 @@ void	networking::accept_clients(int sock){
   			logging::log(logging::Error, msg.str());
 			continue;
 		}
+		active_clients++;
+		std::cout << "Webserv got connection\n";
+		std::cout << "Number of active clients: " << active_clients << "\n";
+		std::cout << "<process request>\n";
+		std::cout << "<response>\n";
+		close(client_sock);
+		std::cout << "Client sock closed\n";
 	}
 	(void)active_clients;
 }
@@ -131,7 +138,7 @@ int networking::bind_to_ip(int sock, struct addrinfo *p) {
     close(sock);
     std::string msg(gai_strerror(ret));
     logging::log(logging::Info,
-                 "bind: " + msg + "will continue trying sockets");
+                 "bind: " + msg + " will continue trying sockets");
   }
   return (ret);
 }
@@ -146,7 +153,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
       continue;
     }
 
-    // clear_socket(sock); // not necessary until we have multiple connections?
+    clear_socket(sock); // not necessary until we have multiple connections?
 
     if (bind_to_ip(sock, p) == -1) {
       continue;
