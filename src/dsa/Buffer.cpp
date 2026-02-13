@@ -7,9 +7,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-/// \brief checks if a file descriptor references a socket
-static bool isSocket(const int Fd);
-
 Buffer::Buffer(void) : _start(0), _end(0) {
 }
 
