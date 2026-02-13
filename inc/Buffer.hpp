@@ -5,14 +5,39 @@
 #include <sys/types.h>
 
 /// \class Buffer
-/// \ brief This is a simple character buffer that can be filled from
+/// \brief This is a simple character buffer that can be filled from
 /// and emptied into file descriptors.
 ///
-/// Maybe some of the function names are not fully intuitive.
-/// Make sure to read the comments.
+/// Should mostly be usable without much thinking
 ///
-/// You can make a string from a buffers content by calling
+/// Make sure to not confuse what the following funcionts return
+/// Buffer::getOccupied()
+/// Buffer::getUsed()
+/// Buffer::getFree()
+/// Buffer::getBlocked()
+/// If you have better suggestions for names, let me know.
+///
+/// Good to know:
+/// You can make a string from a buffer's content by calling
 /// std::string s(buf.begin(), buf.end());
+/// You can delete the first n bytes from a buffer by calling
+/// buf.deleteFront(n);
+///
+/// Caveat:
+/// When Buffer::empty() or Buffer::fill() returns 0 it is unknown if this is
+/// because the buffer was empty/full or because the fd did not take input or
+/// give output. You can call Buffer::getFree() or Buffer::getUsed() to
+/// determine the reason.
+///
+/// If you care about performance:
+/// If you have removed a sizable amount of data from the buffer it
+/// can be good to manually call Buffer::format() instead of relying on
+/// optimization built into Buffer::fill(), depending on your needs.
+/// Buffer::fill() does only format the buffer to make more space available
+/// if this is not considered too expensive relative to the new space made
+/// accessible through formatting.
+/// The algorithm employed for deciding is the one implemented in
+/// Buffer::optimize().
 class Buffer {
 public:
   Buffer(void);

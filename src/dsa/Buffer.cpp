@@ -1,4 +1,5 @@
 #include "Buffer.hpp"
+#include "CompileTimeConstants.hpp"
 #include <algorithm>
 #include <cstring>
 #include <errno.h>
@@ -69,6 +70,7 @@ Buffer::size_type Buffer::getFree(void) const {
 }
 
 Buffer::size_type Buffer::fill(const int Fd, const size_t Bytes) {
+  optimize(Bytes);
   const size_t amount = std::min(Bytes, getFree());
   const ssize_t rc = read(Fd, _buffer + _end, amount);
   if (rc < 0) {
@@ -94,14 +96,33 @@ Buffer::size_type Buffer::empty(const int Fd, const size_t Bytes) {
   return (size_t)rc;
 }
 
+// to understand this better:
+//
+// 1) getUsed() is the amount of bytes getting moved when formatting
+// i.e. how expensive format() is.
+//
+// 2) getFree() + getUsed() is the the maximum amount of bytes that can
+// be in the buffer after the next call to fill()
+//
+// 3) getBlocked() is the maximum amount of free bytes that can be made
+// available by a call to format()
 void Buffer::optimize(const size_t Bytes) {
-  const size_t thresholdDivisor = 8;
-  if (_start < size / thresholdDivisor)
+  // don't format if buffer is almost empty
+  if (_start < size / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_1)
     return;
-  if (getUsed() > size / thresholdDivisor && getFree() + getUsed() >= Bytes)
+  const size_type capacity = getFree() + getUsed();
+  // don't format if both:
+  // 1) formatting is expensive
+  // 2) there is enough capacity for the next call to empty()
+  if (getUsed() > size / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2
+    && capacity >= Bytes)
     return;
-  if (getFree() + getUsed() > Bytes / thresholdDivisor &&
-      getFree() + getBlocked() < Bytes)
+  // don't format if both:
+  // 1) there is still a certain amount of capacity in the buffer
+  // 2) formatting will not dramatically increase the capacity
+  if (capacity > Bytes / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2
+    && capacity + getBlocked()
+    <= capacity / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_2)
     return;
   format();
 }
