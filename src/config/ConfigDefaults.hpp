@@ -13,8 +13,8 @@
 /// logging::DEBUG, logging::INFO, logging::WARNING, logging::ERROR
 #ifndef LOG_LEVEL
 #define LOG_LEVEL logging::Info
-#endif //DEFAULT_LOG_LEVEL
+#endif // DEFAULT_LOG_LEVEL
 
 #ifndef LOG_COLORED
 #define LOG_COLORED true
-#endif //LOG_USE_COLOR
+#endif // LOG_USE_COLOR
