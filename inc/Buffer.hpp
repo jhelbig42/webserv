@@ -10,34 +10,50 @@
 ///
 /// Should mostly be usable without much thinking
 ///
-/// Make sure to not confuse what the following funcionts return
-/// Buffer::getOccupied()
-/// Buffer::getUsed()
-/// Buffer::getFree()
-/// Buffer::getBlocked()
+///
+/// Make sure to not confuse what the following funcionts do
+/// getOccupied()
+/// getUsed()
+/// getFree()
+/// getBlocked()
 /// If you have better suggestions for names, let me know.
 ///
+///
 /// Good to know:
+///
 /// You can make a string from a buffer's content by calling
 /// std::string s(buf.begin(), buf.end());
+///
 /// You can delete the first n bytes from a buffer by calling
 /// buf.deleteFront(n);
 ///
-/// Caveat:
-/// When Buffer::empty() or Buffer::fill() returns 0 it is unknown if this is
-/// because the buffer was empty/full or because the fd did not take input or
-/// give output. You can call Buffer::getFree() or Buffer::getUsed() to
-/// determine the reason.
 ///
-/// If you care about performance:
-/// If you have removed a sizable amount of data from the buffer it
-/// can be good to manually call Buffer::format() instead of relying on
-/// optimization built into Buffer::fill(), depending on your needs.
-/// Buffer::fill() does only format the buffer to make more space available
-/// if this is not considered too expensive relative to the new space made
-/// accessible through formatting.
-/// The algorithm employed for deciding is the one implemented in
-/// Buffer::optimize().
+/// Caveat:
+///
+/// When empty() or fill() returns 0 it is unknown if this is because the
+/// buffer was empty/full or because the fd did not take input or give output.
+/// You can call getFree() or getUsed() to determine the reason.
+///
+///
+/// Improving performance:
+///
+/// The main performance consideration is to when to format the buffer
+/// i.e. whenn to move all of it's data to the beginning of it.
+///
+/// fill() by itself only formats in the most naive cases.
+///
+/// 1) Usecase: for fixed n: fill(n) -> empty(n) loop
+/// Use optimize() before each new call to fill().
+/// optimize() is designed for this usecase and will format whenever
+/// its algorithms deems it appropriate. You can look at it's implementation
+/// to figure out the ideas or improve on them.
+///
+/// 2) Usecase: fill() -> remove data from buffer loop
+/// Use format() when sensible i.e. when little data is in the buffer
+/// and/or the data is close to the end of the buffer and/or there is a lot
+/// to gain from formatting.
+/// You can use getUsed(), getFree() and getBlocked() to figure these things out
+/// or just use some heuristic.
 class Buffer {
 public:
   Buffer(void);

@@ -70,7 +70,8 @@ Buffer::size_type Buffer::getFree(void) const {
 }
 
 Buffer::size_type Buffer::fill(const int Fd, const size_t Bytes) {
-  optimize(Bytes);
+  if (getUsed() == 0 || (getFree() == 0 && getBlocked() != 0))
+    format();
   const size_t amount = std::min(Bytes, getFree());
   const ssize_t rc = read(Fd, _buffer + _end, amount);
   if (rc < 0) {
