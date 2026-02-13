@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/13 13:06:21 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/13 15:32:21 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ void networking::start(void) {
   struct addrinfo *server_info = get_server_info();
   int sock;
 
-//  *server_info = get_server_info();
   sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
   set_to_listen(sock);
@@ -32,21 +31,20 @@ void	networking::accept_clients(int sock){
   
   	Connection connection[BACKLOG]; // naive array of connections
 	static int active_clients; // counter for # of active clients, temp solution
-	struct sockaddr_storage addr;
-	socklen_t	addr_size;
-	int		client_sock;
+	int i = 0; // iterator for connection array
+
+//	static struct sockaddr_storage addr;
+//	socklen_t	addr_size = sizeof addr;
+//	int		client_sock;
 
 	while (1) {
 		
-		addr_size = sizeof addr;
-		client_sock = accept(sock, (struct sockaddr *)&addr, &addr_size);
-		if (client_sock == -1) {
-    		std::ostringstream msg;
-    		msg << "accept: " << std::strerror(errno) <<
-				" (will continue trying to accept connections";
-  			logging::log(logging::Error, msg.str());
-			continue;
+		while (active_clients < BACKLOG){
+			if (connection[i].accept_new(sock) == -1){
+					continue;
+			}
 		}
+		/*
 		active_clients++;
 		std::cout << "Webserv got connection\n";
 		std::cout << "Number of active clients: " << active_clients << "\n";
@@ -54,8 +52,11 @@ void	networking::accept_clients(int sock){
 		std::cout << "<response>\n";
 		close(client_sock);
 		std::cout << "Client sock closed\n";
+		}
 	}
 	(void)active_clients;
+	*/
+	}
 }
 
 void	networking::set_to_listen(int sock){
