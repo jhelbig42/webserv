@@ -1,10 +1,8 @@
 #include "Buffer.hpp"
-#include "Logging.hpp"
 #include <algorithm>
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -100,11 +98,10 @@ void Buffer::optimize(const size_t Bytes) {
   const size_t thresholdDivisor = 8;
   if (_start < size / thresholdDivisor)
     return;
-  if (getUsed() > size / thresholdDivisor
-    && getFree() + getUsed() >= Bytes)
+  if (getUsed() > size / thresholdDivisor && getFree() + getUsed() >= Bytes)
     return;
-  if (getFree() + getUsed() > Bytes / thresholdDivisor
-    && getFree() + getBlocked() < Bytes)
+  if (getFree() + getUsed() > Bytes / thresholdDivisor &&
+      getFree() + getBlocked() < Bytes)
     return;
   memmove(_buffer, _buffer + _start, getUsed());
   _end = getUsed();

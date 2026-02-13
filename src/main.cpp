@@ -67,9 +67,9 @@ int main(void) {
   buf.reset();
   std::cout << "\n> " << std::flush;
   buf.fill(STDIN_FILENO, CHUNK_SIZE);
-  std::string s(buf.begin(), buf.end());
+  const std::string s(buf.begin(), buf.end());
   logging::log(logging::Info, "string:");
-    std::cout << s;
+  std::cout << s;
   logging::log(logging::Info, "indexing:");
   for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
     std::cout << buf[i];
