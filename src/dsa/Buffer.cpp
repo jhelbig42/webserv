@@ -30,23 +30,47 @@ Buffer &Buffer::operator=(const Buffer &other) {
 Buffer::~Buffer(void) {
 }
 
-size_t Buffer::getUsed(void) const {
+char &Buffer::operator[](Buffer::size_type i) {
+  return _buffer[_start + i];
+}
+
+const char &Buffer::operator[](Buffer::size_type i) const {
+  return _buffer[_start + i];
+}
+
+Buffer::iterator Buffer::begin() {
+  return _buffer + _start;
+}
+
+Buffer::const_iterator Buffer::begin() const {
+  return _buffer + _start;
+}
+
+Buffer::iterator Buffer::end() {
+  return _buffer + _end;
+}
+
+Buffer::const_iterator Buffer::end() const {
+  return _buffer + _end;
+}
+
+Buffer::size_type Buffer::getUsed(void) const {
   return _end - _start;
 }
 
-size_t Buffer::getOccupied(void) const {
+Buffer::size_type Buffer::getOccupied(void) const {
   return _end;
 }
 
-size_t Buffer::getBlocked(void) const {
+Buffer::size_type Buffer::getBlocked(void) const {
   return _start;
 }
 
-size_t Buffer::getFree(void) const {
+Buffer::size_type Buffer::getFree(void) const {
   return size - _end;
 }
 
-ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
+Buffer::size_type Buffer::fill(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   const ssize_t rc = read(Fd, _buffer + _end, amount);
   if (rc < 0) {
@@ -55,10 +79,10 @@ ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
     throw std::runtime_error(strerror(err));
   }
   _end += (size_t)rc;
-  return rc;
+  return (size_t)rc;
 }
 
-ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
+Buffer::size_type Buffer::empty(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getUsed());
   const ssize_t rc = write(Fd, _buffer + _start, amount);
   if (rc < 0) {
@@ -69,11 +93,9 @@ ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
   _start += (size_t)rc;
   if (_start == _end)
     reset();
-  return rc;
+  return (size_t)rc;
 }
 
-/// badly handled edgecase:
-/// getFree() + getUsed() < Bytes && getFree() + getBlocked() < Bytes
 void Buffer::optimize(const size_t Bytes) {
   const size_t thresholdDivisor = 8;
   if (_start < size / thresholdDivisor)

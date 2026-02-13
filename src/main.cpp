@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <exception>
 #include <fcntl.h>
+#include <iostream>
 #include <stdexcept>
 #include <unistd.h>
 
@@ -63,4 +64,12 @@ int main(void) {
   }
   close(fdin);
   close(fdout);
+  buf.reset();
+  std::cout << "> " << std::flush;
+  buf.fill(STDIN_FILENO, CHUNK_SIZE);
+  std::string s(buf.begin(), buf.end());
+  logging::log2(logging::Info, "string:\n", s);
+  logging::log(logging::Info, "indexing:");
+  for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
+    std::cout << buf[i];
 }
