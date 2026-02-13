@@ -45,7 +45,7 @@ bool Response::processGet(const int Socket, const size_t Bytes)
     return false;
   }
   if (_bufStart != _bufEnd && sendBuffer(Socket, Bytes))
-      return true
+      return true;
   }
   else
     fillBufferFile(Bytes);
@@ -60,7 +60,7 @@ bool Response::processGet(const int Socket, const size_t Bytes)
 //   return sendMetadata(Socket, Bytes);
 // }
 
-Response::transferBytes(const int Socket, const size_t Bytes)
+Response::transferBytes(const int Socket, const size_t Bytes);
 
 /// \brief attempts to send a certain amount of bytes from the buffers content
 /// to a socket

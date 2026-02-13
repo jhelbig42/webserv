@@ -17,6 +17,8 @@ SRC			+= Metadata.cpp
 SRC			+= ProcessResponse.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
+vpath %.cpp $(SRC_DIR)/dsa
+SRC			+= Buffer.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -78,8 +80,12 @@ ifeq ($(DEV), 1)
 	CXXFLAGS	+= -Wno-unused-function
 endif
 
-ifdef LOG
-	CPPFLAGS	+= -DDEFAULT_LOG_LEVEL="logging::$(LOG)"
+ifdef LOGLVL
+	CPPFLAGS	+= -DLOG_LEVEL="logging::$(LOGLVL)"
+endif
+
+ifeq ($(LOGCOLOR), 0)
+	CPPFLAGS	+= -DLOG_COLORED="false"
 endif
 
 ifeq ($(DEBUG), 1)

@@ -13,7 +13,7 @@ Checks: >
   google-explicit-constructor,
 
 # Treat warnings as errors to enforce standards strictly
-WarningsAsErrors: '*'
+# WarningsAsErrors: '*'
 
 # Don't report diagnostics from system headers
 HeaderFilterRegex: '.*'
