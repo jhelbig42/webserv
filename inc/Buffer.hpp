@@ -65,6 +65,10 @@ public:
   typedef char *iterator;
   typedef const char *const_iterator;
 
+  /// \brief access the used part of the buffer
+  ///
+  /// unchecked runtime errors:
+  /// index < 0 or index >= getUsed()
   char &operator[](size_type i);
   const char &operator[](size_type i) const;
 
