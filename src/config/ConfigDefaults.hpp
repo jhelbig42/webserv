@@ -11,6 +11,10 @@
 ///
 /// should be one of the following:
 /// logging::DEBUG, logging::INFO, logging::WARNING, logging::ERROR
-#ifndef DEFAULT_LOG_LEVEL
-#define DEFAULT_LOG_LEVEL logging::Info
+#ifndef LOG_LEVEL
+#define LOG_LEVEL logging::Info
 #endif //DEFAULT_LOG_LEVEL
+
+#ifndef LOG_COLORED
+#define LOG_COLORED true
+#endif //LOG_USE_COLOR
