@@ -68,6 +68,7 @@ DEV			:= 1
 ifeq ($(DEV), 1)
 	ASAN		:= 1
 	UBSAN		:= 1
+	DEBUG		:= 1
 	CXXFLAGS	+= -pedantic
 	CXXFLAGS	+= -Wconversion
 	CXXFLAGS	+= -Wno-unused-parameter

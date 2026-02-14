@@ -27,14 +27,6 @@
 /// You can delete the first n bytes from a buffer by calling
 /// buf.deleteFront(n);
 ///
-///
-/// Caveat:
-///
-/// When empty() or fill() returns 0 it is unknown if this is because the
-/// buffer was empty/full or because the fd did not take input or give output.
-/// You can call getFree() or getUsed() to determine the reason.
-///
-///
 /// Improving performance:
 ///
 /// The main performance consideration is to when to format the buffer
@@ -94,23 +86,17 @@ public:
 
   /// \brief reads up to Bytes bytes from Fd and fills them into the Buffer
   ///
+  /// \returns -1 if buffer is full
+  /// \returns amount of bytes filled into buffer otherwise
   /// throws exception on error
-  ///
-  /// \return amounts of bytes filled into buffer
-  /// Caveat: if 0 is returned there are two possible reasons:
-  /// 1) buffer was already full
-  /// 2) Nothing to read from Fd
-  size_type fill(const int Fd, const size_t Bytes);
+  ssize_t fill(const int Fd, const size_t Bytes);
 
   /// \brief reads Bytes bytes from Buffer and sends them to Fd
   ///
-  /// \return amounts of bytes emptied into Fd
+  /// \returns -1 if buffer is empty
+  /// \returns amount of bytes emptied into Fd otherwise
   /// throws exception on error
-  ///
-  /// Caveat: if 0 is returned there are two possible reasons:
-  /// 1) buffer was already empty
-  /// 2) Fd does not accept input atm
-  size_type empty(const int Fd, const size_t Bytes);
+  ssize_t empty(const int Fd, const size_t Bytes);
 
   /// \brief moves meaningful data to the front of the buffer.
   void format(void);

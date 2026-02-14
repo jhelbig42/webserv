@@ -66,7 +66,9 @@ Buffer::size_type Buffer::getFree(void) const {
   return size - _end;
 }
 
-Buffer::size_type Buffer::fill(const int Fd, const size_t Bytes) {
+ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
+  if (getUsed() == size)
+    return -1;
   if (getUsed() == 0 || (getFree() == 0 && getBlocked() != 0))
     format();
   const size_t amount = std::min(Bytes, getFree());
@@ -77,10 +79,12 @@ Buffer::size_type Buffer::fill(const int Fd, const size_t Bytes) {
     throw std::runtime_error(strerror(err));
   }
   _end += (size_t)rc;
-  return (size_t)rc;
+  return rc;
 }
 
-Buffer::size_type Buffer::empty(const int Fd, const size_t Bytes) {
+ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
+  if (getUsed() == 0)
+    return -1;
   const size_t amount = std::min(Bytes, getUsed());
   const ssize_t rc = write(Fd, _buffer + _start, amount);
   if (rc < 0) {
@@ -91,7 +95,7 @@ Buffer::size_type Buffer::empty(const int Fd, const size_t Bytes) {
   _start += (size_t)rc;
   if (_start == _end)
     reset();
-  return (size_t)rc;
+  return rc;
 }
 
 // to understand this better:
@@ -129,7 +133,8 @@ void Buffer::reset(void) {
 }
 
 void Buffer::format(void) {
-  memmove(_buffer, _buffer + _start, getUsed());
+  if (getUsed() > 0)
+	  memmove(_buffer, _buffer + _start, getUsed());
   _end = getUsed();
   _start = 0;
 }

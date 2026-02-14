@@ -52,12 +52,12 @@ int main(void) {
       errno = 0;
       throw std::runtime_error(strerror(err));
     }
+    buf.fill(fdin, CHUNK_SIZE);
     while (1) {
-      buf.fill(fdin, CHUNK_SIZE);
-      if (buf.empty(fdout, CHUNK_SIZE) == 0 && buf.getUsed() == 0)
+      if (buf.empty(fdout, CHUNK_SIZE) < 0 && buf.fill(fdin, CHUNK_SIZE) == 0)
         break;
-      // logging::log2(logging::Info, "_start:", buf.getBlocked());
-      // logging::log2(logging::Info, "_end:", buf.getOccupied());
+      logging::log2(logging::Info, "_start:", buf.getBlocked());
+      logging::log2(logging::Info, "_end:", buf.getOccupied());
       buf.optimize(CHUNK_SIZE);
     }
   } catch (std::exception &e) {
@@ -78,4 +78,5 @@ int main(void) {
   logging::log3(logging::Info, "first ", DELETE_FRONT, " characters deleted:");
   for (Buffer::size_type i = 0; i < buf.getUsed(); ++i)
     std::cout << buf[i];
+  return 0;
 }
