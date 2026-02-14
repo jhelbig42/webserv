@@ -26,11 +26,11 @@ Buffer &Buffer::operator=(const Buffer &other) {
 Buffer::~Buffer(void) {
 }
 
-char &Buffer::operator[](Buffer::size_type i) {
+char &Buffer::operator[](size_t i) {
   return _buffer[_start + i];
 }
 
-const char &Buffer::operator[](Buffer::size_type i) const {
+const char &Buffer::operator[](size_t i) const {
   return _buffer[_start + i];
 }
 
@@ -50,19 +50,19 @@ Buffer::const_iterator Buffer::end() const {
   return _buffer + _end;
 }
 
-Buffer::size_type Buffer::getUsed(void) const {
+size_t Buffer::getUsed(void) const {
   return _end - _start;
 }
 
-Buffer::size_type Buffer::getOccupied(void) const {
+size_t Buffer::getOccupied(void) const {
   return _end;
 }
 
-Buffer::size_type Buffer::getBlocked(void) const {
+size_t Buffer::getBlocked(void) const {
   return _start;
 }
 
-Buffer::size_type Buffer::getFree(void) const {
+size_t Buffer::getFree(void) const {
   return size - _end;
 }
 
@@ -112,7 +112,7 @@ void Buffer::optimize(const size_t Bytes) {
   // don't format if buffer is almost empty
   if (_start < size / BUFFER_OPTIMIZE_THRESHOLD_DIVISOR_1)
     return;
-  const size_type capacity = getFree() + getUsed();
+  const size_t capacity = getFree() + getUsed();
   // don't format if both:
   // 1) formatting is expensive
   // 2) there is enough capacity for the next call to empty()
