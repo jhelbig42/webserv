@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CompileTimeConstants.hpp"
-#include <string>
+#include <cstddef>
 #include <sys/types.h>
 
 /// \class Buffer
@@ -26,14 +26,6 @@
 ///
 /// You can delete the first n bytes from a buffer by calling
 /// buf.deleteFront(n);
-///
-///
-/// Caveat:
-///
-/// When empty() or fill() returns 0 it is unknown if this is because the
-/// buffer was empty/full or because the fd did not take input or give output.
-/// You can call getFree() or getUsed() to determine the reason.
-///
 ///
 /// Improving performance:
 ///
@@ -68,7 +60,7 @@ public:
   /// \brief access the used part of the buffer
   ///
   /// unchecked runtime errors:
-  /// index < 0 or index >= getUsed()
+  /// index >= getUsed()
   char &operator[](size_type i);
   const char &operator[](size_type i) const;
 
@@ -94,23 +86,17 @@ public:
 
   /// \brief reads up to Bytes bytes from Fd and fills them into the Buffer
   ///
-  /// This is non blocking.
-  ///
-  /// on error throws exception, otherwise returns amount of bytes filled
-  ///
-  /// \return amounts of bytes filled into buffer
-  size_type fill(const int Fd, const size_t Bytes);
+  /// \returns -1 if buffer is full
+  /// \returns amount of bytes filled into buffer otherwise
+  /// throws exception on error
+  ssize_t fill(const int Fd, const size_t Bytes);
 
   /// \brief reads Bytes bytes from Buffer and sends them to Fd
   ///
-  /// This is non blocking.
-  /// When SIGPIPE would be sent instead an exception is thrown.
-  ///
-  /// on error throws exception, otherwise returns amount of bytes emptied into
-  /// Fd
-  ///
-  /// \return amounts of bytes emptied into Fd
-  size_type empty(const int Fd, const size_t Bytes);
+  /// \returns -1 if buffer is empty
+  /// \returns amount of bytes emptied into Fd otherwise
+  /// throws exception on error
+  ssize_t empty(const int Fd, const size_t Bytes);
 
   /// \brief moves meaningful data to the front of the buffer.
   void format(void);
