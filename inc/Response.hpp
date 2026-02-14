@@ -38,7 +38,7 @@ private:
   bool init(const Request &Req);
 
   bool initError(const int Code);
-  bool initGet();
+  bool initGet(void);
 
   bool processHead(const int, const size_t);
   bool makeMetadata(const int Code);
