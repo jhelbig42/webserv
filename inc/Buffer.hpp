@@ -53,7 +53,6 @@ public:
   Buffer &operator=(const Buffer &other);
   ~Buffer(void);
 
-  typedef size_t size_type;
   typedef char *iterator;
   typedef const char *const_iterator;
 
@@ -61,8 +60,8 @@ public:
   ///
   /// unchecked runtime errors:
   /// index >= getUsed()
-  char &operator[](size_type i);
-  const char &operator[](size_type i) const;
+  char &operator[](size_t i);
+  const char &operator[](size_t i) const;
 
   iterator begin(void);
   const_iterator begin(void) const;
@@ -70,19 +69,19 @@ public:
   iterator end(void);
   const_iterator end(void) const;
 
-  const static size_type size = BUFFER_SIZE;
+  const static size_t size = BUFFER_SIZE;
 
   /// \brief get currently occupied storage in Buffer
-  size_type getOccupied(void) const;
+  size_t getOccupied(void) const;
 
   /// \brief gets currently meaningfully occupied storage in Buffer
-  size_type getUsed(void) const;
+  size_t getUsed(void) const;
 
   /// \brief gets currently free storage in Buffer
-  size_type getFree(void) const;
+  size_t getFree(void) const;
 
   /// \brief get storage that is blocked by garbage
-  size_type getBlocked(void) const;
+  size_t getBlocked(void) const;
 
   /// \brief reads up to Bytes bytes from Fd and fills them into the Buffer
   ///
@@ -114,6 +113,6 @@ public:
 
 private:
   char _buffer[BUFFER_SIZE];
-  size_type _start;
-  size_type _end;
+  size_t _start;
+  size_t _end;
 };
