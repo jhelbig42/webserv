@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CompileTimeConstants.hpp"
-#include <string>
+#include <cstddef>
 #include <sys/types.h>
 
 /// \class Buffer
