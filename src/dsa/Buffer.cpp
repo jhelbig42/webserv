@@ -134,7 +134,7 @@ void Buffer::reset(void) {
 
 void Buffer::format(void) {
   if (getUsed() > 0)
-	  memmove(_buffer, _buffer + _start, getUsed());
+    memmove(_buffer, _buffer + _start, getUsed());
   _end = getUsed();
   _start = 0;
 }
