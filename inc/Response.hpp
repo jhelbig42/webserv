@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Buffer.hpp"
 #include "Request.hpp"
 #include <string>
 #include <sys/types.h>
@@ -62,10 +63,7 @@ private:
   int _fdOut;
 
   // consider abstraction for buffer
-  static const size_t buffSize = RESPONSE_BUFFSIZE;
-  char _buffer[RESPONSE_BUFFSIZE];
-  size_t _bufStart;
-  size_t _bufEnd;
+  Buffer _buffer;
 
   // consider getting rid of _eof
   // as the information should already be included int _remainingFileSize 

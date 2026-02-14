@@ -36,19 +36,36 @@ bool Response::sendMetadata(const int Socket, const size_t Bytes) {
 
 bool Response::processGet(const int Socket, const size_t Bytes)
 {
-  if (!_hasMetadata) {
+  if (!_hasMetadata)
     _hasMetadata = makeMetadata(CODE_200);
-    return false;
-  }
+  if (!_hasMetadata)
+	  return false;
   if (!_metaDataSent) {
     _metaDataSent = sendMetadata(Socket, Bytes);
     return false;
   }
-  if (_bufStart != _bufEnd && sendBuffer(Socket, Bytes))
-      return true;
+  return dataTransferGet(Socket, Bytes);
+}
+
+bool Response::dataTransferGet(const int Socket, const int Bytes) {
+  if (_fdIn >= 0) {
+    _buffer.optimize();
+	// edgecase = _fdIn empties by exactly filling up _buffer. Then empty _fdIn would be passed one more time;
+	// theory: does not matter as _fdIn will spill just 0 next iteration and no exception will be thrown
+    if (_buffer.fill(_fdIn, Bytes) < Bytes
+	  && _buffer.getFree() > 0
+	  && close(_fdIn) < 0) {
+        logging::log2(logging::Error, "close: ", strerror(errrno));
+        errno = 0;
+        _fdIn = -1;
+    }
   }
-  else
-    fillBufferFile(Bytes);
+  const size_t used = _buffer.getUsed();
+  if (used == 0)
+	  return true;
+  if (_fdIn == -1 && _buffer.empty(Socket, Bytes) == used)
+	  return true;
+  return false;
 }
 
 // bool Response::processDelete(const int Socket, const size_t Bytes)
