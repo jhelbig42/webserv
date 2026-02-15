@@ -13,6 +13,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <poll.h>
 #include <unistd.h> // for close
 #include <map>
 

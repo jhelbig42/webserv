@@ -16,13 +16,11 @@
 void networking::start(void) {
 
   struct addrinfo *server_info = get_server_info();
-  // TODO put this and delete in get_server_socket?
   int sock;
-//  static int active_clients; // counter for # of active clients, temp solution
-//  Connection *new_connection; // temp pointer for newly accepted connections
-
   sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
+
+  accept_clients(sock);
   set_to_listen(sock);
   
   // signal handling goes here?
@@ -30,6 +28,45 @@ void networking::start(void) {
   accept_clients(sock);
 }
 
+void	networking::accept_clients(int sock){
+  
+	static int client_count; // counter for # of active clients
+	std::map<int, Connection> c_map; // empty map of Connection objects
+	std::vector<pollfd> poll_fds; // empty vector of poll_fd structs (see <poll.h>)
+	
+	pollfd listener = {sock, POLLIN, 0}; // create pollfd for listening socket
+	poll_fds.push_back(listener); // add to vector
+
+	(void) client_count;
+	(void) c_map;
+	(void) poll_fds;
+//	Connection *new_connection; // temp pointer for newly accepted connections
+
+/*
+	while (1) {
+		while (active_clients < BACKLOG) { // if queue isn't full
+			new_connection = create_connection(sock);
+			if (new_connection == NULL) {
+				continue;
+			}
+			c_map.insert(std::make_pair(new_connection->get_sock(), *new_connection));
+			active_clients++;
+			std::cout << "Number of active clients: "
+				<< active_clients << "\n";
+
+			std::cout << "<process request>\n";
+			std::cout << "<response>\n";
+		}
+
+		break;
+		// close all sockets
+	}
+*/
+}
+
+
+// OLD
+/*
 void	networking::accept_clients(int sock){
   
 	static int active_clients; // counter for # of active clients, temp solution
@@ -55,6 +92,7 @@ void	networking::accept_clients(int sock){
 		// close all sockets
 	}
 }
+*/
 
 void	networking::set_to_listen(int sock){
   
