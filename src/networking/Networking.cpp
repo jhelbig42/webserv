@@ -32,48 +32,36 @@ void	networking::accept_clients(int sock){
   
 	static int fd_count; // counter for # of active clients
 	std::map<int, Connection> c_map; // empty map of Connection objects
-	std::vector<pollfd> poll_fds; // empty vector of poll_fd structs (see <poll.h>)
+	std::vector<pollfd> fds; // empty vector of poll_fd structs (see <poll.h>)
 	
 	pollfd listener = {sock, POLLIN, 0}; // create pollfd for listening socket
-	poll_fds.push_back(listener); // add to vector
+	fds.push_back(listener); // add to vector
 	fd_count++;
 
 	(void) c_map;
-	(void) poll_fds;
 
 	while (1) {
-		int res = poll(poll_fds.data(), fd_count, -1); // poll indefinitely (allowed?)
+		int res = poll(fds.data(), fd_count, -1); // poll indefinitely (allowed?)
 		if (res == -1) {
 			//logging::log(Error, "poll: ", std:sterror(errno)); // TODO after merge
 			logging::log(logging::Error, "poll: ");
 			exit(1); // Should exit or continue?
 		}
-	//	process(sock, &fd_count, &poll_fds);
+		process(sock, &fd_count, fds);
 	}
-//	Connection *new_connection; // temp pointer for newly accepted connections
-
-/*
-	while (1) {
-		while (active_clients < BACKLOG) { // if queue isn't full
-			new_connection = create_connection(sock);
-			if (new_connection == NULL) {
-				continue;
-			}
-			c_map.insert(std::make_pair(new_connection->get_sock(), *new_connection));
-			active_clients++;
-			std::cout << "Number of active clients: "
-				<< active_clients << "\n";
-
-			std::cout << "<process request>\n";
-			std::cout << "<response>\n";
-		}
-
-		break;
-		// close all sockets
-	}
-*/
 }
 
+void networking::process(int sock, int *fd_count, std::vector<pollfd> &fds){
+	(void) sock;
+	(void) fd_count;
+	(void) fds;
+
+	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
+		if (it->revents & (POLLIN | POLLHUP)) { // fd is ready for I/O
+			std::cout << "fd is ready for I/O\n";
+		}
+	}
+}
 
 // OLD
 /*

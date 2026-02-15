@@ -31,5 +31,6 @@ int clear_socket(int sock);
 int bind_to_ip(int sock, struct addrinfo *p);
 void set_to_listen(int sock);
 void accept_clients(int sock);
+void process(int sock, int *fd_count, std::vector<pollfd> &fds);
 static Connection *create_connection(int sock); // attempts to accept() incoming connections. calls Connection constructor only if accept() is successful
 } // namespace networking
