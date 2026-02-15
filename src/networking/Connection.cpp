@@ -45,8 +45,9 @@ Connection::Connection(int sock, sockaddr_storage &addr, socklen_t addr_size): _
 	
 	memset(&_info, 0, sizeof _info); // unneccessary? delete?
 	memset(&_request_buffer, '\0', sizeof _request_buffer);
-	memcpy(&_addr, &addr, addr_size);
+	memcpy(&_addr, &addr, addr_size); 
 
+	
 	logging::log(logging::Debug, "Connection created");
 }
 	

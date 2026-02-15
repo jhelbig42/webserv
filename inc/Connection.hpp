@@ -13,7 +13,6 @@
 #pragma once
 
 #include "Logging.hpp"
-#include "SimpleBuffer.hpp"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,6 +22,7 @@
 #include <cerrno> // for errno
 #include <cstring> // for std::strerror
 #include <string.h> // for memcpy
+#include <vector>
 
 class	Connection {
 	private:
@@ -54,5 +54,5 @@ class	Connection {
 		int accept_new(int sock);
 
 		// input buffer
-		SimpleBuffer *buf;
+		std::vector<char> read_buf;
 };
