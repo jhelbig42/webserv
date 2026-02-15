@@ -29,23 +29,25 @@ struct client_addr {
 };
 
 void start(void);
+
+// Networking_init_server.cpp
 struct addrinfo create_hints(void);
 struct addrinfo *get_server_info(void);
 std::string get_addrinfo_str(struct addrinfo *info, std::string msg);
-void print_addrinfo_str(struct addrinfo *info);
-void fill_addrinfo(char *node, struct addrinfo *hints, struct addrinfo *info);
+
+// Networking_init_socket.cpp
 int get_server_socket(struct addrinfo *server_info);
 int create_socket(struct addrinfo *server_info, struct addrinfo *p);
 int clear_socket(int sock);
 int bind_to_ip(int sock, struct addrinfo *p);
 void set_to_listen(int sock);
-void accept_clients(int sock);
-void process(int listen_sock, std::map<int, Connection> &c_map, int *fd_count, std::vector<pollfd> &fds);
+
+// Networking.cpp (for now)
+void poll_loop(int sock);
+void process(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
 int accept_connection(int listen_sock, struct client_addr *candidate);
 void add_connection_to_map(struct client_addr &candidate, std::map<int, Connection> &c_map);
-void handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, int *fd_count, std::vector<pollfd> &fds);
-void handle_existing_connection(int listen_sock, std::map<int, Connection> &c_map, int *fd_count, std::vector<pollfd> &fds);
-// Is there any way to make these container declarations less ugly?
-static Connection *create_connection(int sock); // attempts to accept() incoming connections. calls Connection constructor only if accept() is successful
+void handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
+void handle_existing_connection(int listen_sock, std::map<int, Connection> &c_map,  std::vector<pollfd> &fds);
 } // namespace networking
 

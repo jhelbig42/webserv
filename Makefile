@@ -13,6 +13,8 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
 vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
+			   Networking_init_socket.cpp\
+			   Networking_init_server.cpp\
 			   Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
