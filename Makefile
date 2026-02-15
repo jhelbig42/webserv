@@ -86,8 +86,8 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(ASAN), 1)
-	LDFLAGS += -fsanitize=address
-	CPPFLAGS += -fsanitize=address
+	LDFLAGS += -fsanitize=address -g
+	CPPFLAGS += -fsanitize=address -g
 endif
 
 ifeq ($(UBSAN), 1)
