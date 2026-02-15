@@ -47,7 +47,7 @@ void poll_loop(int sock);
 void process(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
 int accept_connection(int listen_sock, struct client_addr *candidate);
 void add_connection_to_map(struct client_addr &candidate, std::map<int, Connection> &c_map);
-void handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
-void handle_existing_connection(int listen_sock, std::map<int, Connection> &c_map,  std::vector<pollfd> &fds);
+//void handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
+void read_data(int listen_sock, int client_sock, Connection  &connection,  std::vector<pollfd> &fds);
 } // namespace networking
 

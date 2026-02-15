@@ -27,6 +27,16 @@ void networking::start(void) {
   poll_loop(sock);
 }
 
+void	networking::read_data(int listen_sock, int client_sock, Connection &connection, std::vector<pollfd> &fds){
+
+	// client_sock is contained in the containers but let's
+	// see if we get rid of them here
+	
+	ssize_t bytes_read = recv(client_sock, &connection.read_buf[0], MAX_REQUEST, 0);
+	(void) bytes_read;
+
+}
+
 void	networking::poll_loop(int sock){
   
 	static int fd_count; // counter for # of active clients
@@ -49,6 +59,8 @@ void	networking::poll_loop(int sock){
 		process(sock, c_map, fds); // process results of poll
 	}
 }
+
+
 
 // This function follows Beej closely
 void networking::process(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds){
@@ -74,17 +86,17 @@ void networking::process(int listen_sock, std::map<int, Connection> &c_map, std:
 				}
 			}
 			else {
-				handle_existing_connection(listen_sock, c_map, fds);
+				std::map<int, Connection>::iterator c_it = c_map.find(it->fd);
+				if (c_it != c_map.end()) {
+					read_data(listen_sock, it->fd, c_it->second, fds);
+				}
+				else {
+					logging::log(logging::Error, "process: Connection not found in map container (This should never happen)");
+				}
 			}
 		}
 	}
 	fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
-}
-
-
-void	networking::handle_existing_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds) {
-	std::cout << "here client data is handled\n";
-	exit(1);
 }
 
 int	networking::accept_connection(int listen_sock, client_addr *candidate){ 
@@ -101,6 +113,7 @@ int	networking::accept_connection(int listen_sock, client_addr *candidate){
 	return (0);
 }
 
+/*
 void networking::handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds) {
 	
 	struct sockaddr_storage addr;
@@ -124,6 +137,7 @@ void networking::handle_new_connection(int listen_sock, std::map<int, Connection
 	//return (new_fd);
 	(void)new_fd;
 }
+*/
 
 void networking::add_connection_to_map(struct client_addr &candidate, std::map<int, Connection> &c_map) {
 	
