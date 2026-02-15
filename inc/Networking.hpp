@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h> // for close
+#include <map>
 
 namespace networking {
 
@@ -29,4 +30,5 @@ int clear_socket(int sock);
 int bind_to_ip(int sock, struct addrinfo *p);
 void set_to_listen(int sock);
 void accept_clients(int sock);
+static Connection *create_connection(int sock); // attempts to accept() incoming connections. calls Connection constructor only if accept() is successful
 } // namespace networking

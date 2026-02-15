@@ -29,38 +29,25 @@ void networking::start(void) {
 
 void	networking::accept_clients(int sock){
   
-//  	Connection connection[BACKLOG]; // naive array of connections
 	static int active_clients; // counter for # of active clients, temp solution
-//	int i = 0; // iterator for connection array
+	Connection *new_connection; // temp pointer for newly accepted connections
 
-//	static struct sockaddr_storage addr;
-//	socklen_t	addr_size = sizeof addr;
-//	int		client_sock;
-
+	std::map<int, Connection> c_map; // Declare empty map
 	while (1) {
-		
-		while (active_clients < BACKLOG){
-			try {
-				Connection new_connection(sock);
-			}
-			catch (const std::runtime_error &e) {
-				logging::log(logging::Error, e.what());
-				// may later be downgraded to Warning, Info, or even Debug
+		while (active_clients < BACKLOG) { // if queue isn't full
+			new_connection = create_connection(sock);
+			if (new_connection == NULL) {
 				continue;
 			}
+			c_map.insert(std::make_pair(new_connection->get_sock(), *new_connection));
+			active_clients++;
+			std::cout << "Number of active clients: "
+				<< active_clients << "\n";
+			std::cout << "<process request>\n";
+			std::cout << "<response>\n";
 		}
-		/*
-		active_clients++;
-		std::cout << "Webserv got connection\n";
-		std::cout << "Number of active clients: " << active_clients << "\n";
-		std::cout << "<process request>\n";
-		std::cout << "<response>\n";
-		close(client_sock);
-		std::cout << "Client sock closed\n";
-		}
-	}
-	(void)active_clients;
-	*/
+		break;
+		// close all sockets
 	}
 }
 
@@ -174,3 +161,24 @@ int networking::get_server_socket(struct addrinfo *server_info) {
   }
   return (sock);
 }
+
+Connection *networking::create_connection(int server_sock){
+	
+	struct sockaddr_storage addr;
+	int		client_sock;
+	socklen_t addr_size = sizeof addr;
+
+	client_sock = accept(server_sock, (struct sockaddr *)&addr, &addr_size);
+	if (client_sock == -1){
+		std::ostringstream msg;
+		msg << "accept: " << std::strerror(errno) <<
+			" (can continue trying to accept connections)";
+		logging::log(logging::Error, msg.str()); // may downgrade log level at some point
+		return (NULL);
+	}
+	Connection *new_connection = new Connection(client_sock, addr, addr_size);
+	std::cout << "\nConnection accepted on socket " << client_sock << "\n\n";
+//	logging::log3(logging:Debug, "Connection accepted on socket ", _sock, "\n");
+	return (new_connection);
+}
+

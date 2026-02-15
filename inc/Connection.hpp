@@ -13,6 +13,7 @@
 #pragma once
 
 #include "Logging.hpp"
+#include "SimpleBuffer.hpp"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -35,12 +36,6 @@ class	Connection {
 		char _request_buffer[1024];
 
 	public:
-
-		Connection *create_connection(int sock);
-		// attempts to accept() incoming connections.
-		// calls Connection constructor only if accept()
-		// is successful
-
 		Connection *next;
 		Connection();
 		Connection(int server_sock);
@@ -57,4 +52,7 @@ class	Connection {
 		void clear_connection(void); // reset all fields to empty
 		int fill_request_buffer(char *src, int bytes);
 		int accept_new(int sock);
+
+		// input buffer
+		SimpleBuffer *buf;
 };
