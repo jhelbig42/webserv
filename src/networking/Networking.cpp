@@ -30,16 +30,26 @@ void networking::start(void) {
 
 void	networking::accept_clients(int sock){
   
-	static int client_count; // counter for # of active clients
+	static int fd_count; // counter for # of active clients
 	std::map<int, Connection> c_map; // empty map of Connection objects
 	std::vector<pollfd> poll_fds; // empty vector of poll_fd structs (see <poll.h>)
 	
 	pollfd listener = {sock, POLLIN, 0}; // create pollfd for listening socket
 	poll_fds.push_back(listener); // add to vector
+	fd_count++;
 
-	(void) client_count;
 	(void) c_map;
 	(void) poll_fds;
+
+	while (1) {
+		int res = poll(poll_fds.data(), fd_count, -1); // poll indefinitely (allowed?)
+		if (res == -1) {
+			//logging::log(Error, "poll: ", std:sterror(errno)); // TODO after merge
+			logging::log(logging::Error, "poll: ");
+			exit(1); // Should exit or continue?
+		}
+	//	process(sock, &fd_count, &poll_fds);
+	}
 //	Connection *new_connection; // temp pointer for newly accepted connections
 
 /*
