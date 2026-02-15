@@ -46,7 +46,7 @@ void	networking::poll_loop(int sock){
 			logging::log(logging::Error, "poll: ");
 			exit(1); // Should exit or continue?
 		}
-		process(sock, c_map, fds);
+		process(sock, c_map, fds); // process results of poll
 	}
 }
 
@@ -78,6 +78,7 @@ void networking::process(int listen_sock, std::map<int, Connection> &c_map, std:
 			}
 		}
 	}
+	fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
 }
 
 
