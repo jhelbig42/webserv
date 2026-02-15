@@ -33,7 +33,6 @@ class	Connection {
 		struct	addrinfo _info;
 		struct sockaddr_storage _addr; // client's IP 
 		socklen_t	_addr_size;
-		char _request_buffer[1024];
 
 	public:
 		Connection *next;

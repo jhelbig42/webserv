@@ -44,7 +44,6 @@ Connection::Connection(int server_sock): _index(-42), _active(false), _sock(-1),
 Connection::Connection(int sock, sockaddr_storage &addr, socklen_t addr_size): _index(-42), _active(true), _sock(sock), _addr_size(sizeof _addr){
 	
 	memset(&_info, 0, sizeof _info); // unneccessary? delete?
-	memset(&_request_buffer, '\0', sizeof _request_buffer);
 	memcpy(&_addr, &addr, addr_size); 
 
 	
@@ -66,7 +65,6 @@ void Connection::clear_connection(){
 	_sock = -1;
 	_addr_size = sizeof _addr;
 	memset(&_info, 0, sizeof _info);
-	memset(&_request_buffer, '\0', sizeof _request_buffer);
 }
 
 // accept

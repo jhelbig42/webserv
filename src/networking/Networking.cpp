@@ -16,7 +16,10 @@
 void networking::start(void) {
 
   struct addrinfo *server_info = get_server_info();
+  // TODO put this and delete in get_server_socket?
   int sock;
+//  static int active_clients; // counter for # of active clients, temp solution
+//  Connection *new_connection; // temp pointer for newly accepted connections
 
   sock = get_server_socket(server_info);
   freeaddrinfo(server_info);
@@ -43,9 +46,11 @@ void	networking::accept_clients(int sock){
 			active_clients++;
 			std::cout << "Number of active clients: "
 				<< active_clients << "\n";
+
 			std::cout << "<process request>\n";
 			std::cout << "<response>\n";
 		}
+
 		break;
 		// close all sockets
 	}
