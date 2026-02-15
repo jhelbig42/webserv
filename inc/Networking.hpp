@@ -3,6 +3,7 @@
 #include "Connection.hpp"
 #include "Config.hpp"
 #include "Logging.hpp"
+// #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler complains
 #include <cerrno>  // for errno
 #include <cstdlib> // for exit
 #include <cstring> // for memset
@@ -31,6 +32,7 @@ int clear_socket(int sock);
 int bind_to_ip(int sock, struct addrinfo *p);
 void set_to_listen(int sock);
 void accept_clients(int sock);
-void process(int sock, int *fd_count, std::vector<pollfd> &fds);
+void process(int listen_sock, int *fd_count, std::vector<pollfd> &fds);
+void handle_new_connection(int listen_sock, int *fd_count, std::vector<pollfd> &fds);
 static Connection *create_connection(int sock); // attempts to accept() incoming connections. calls Connection constructor only if accept() is successful
 } // namespace networking

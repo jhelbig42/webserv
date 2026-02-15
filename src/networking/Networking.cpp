@@ -51,14 +51,22 @@ void	networking::accept_clients(int sock){
 	}
 }
 
-void networking::process(int sock, int *fd_count, std::vector<pollfd> &fds){
-	(void) sock;
-	(void) fd_count;
-	(void) fds;
-
+// This function follows Beej closely
+void networking::process(int listen_sock, int *fd_count, std::vector<pollfd> &fds){
+	
+	// does fd_count need to remain in this function?
 	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
-		if (it->revents & (POLLIN | POLLHUP)) { // fd is ready for I/O
-			std::cout << "fd is ready for I/O\n";
+		if (it->revents & POLLNVAL || it->revents & POLLERR) {
+			logging::log(logging::Error, "polling file descriptor gave unexpected results");
+			// TODO print fd after merge
+			// TODO more robust and granular error-handling, see additional flags in 			// the man pages & double-check subject, re: errno reactions
+			exit(1);
+		}
+		if (it->revents & (POLLIN | POLLHUP)) {
+			// is there something to read, or did someone hang up on us?
+			if (it->fd == listen_sock) {// listening socket got new connection
+				handle_new_connection(listen_sock, fd_count, fds);
+			}
 		}
 	}
 }
@@ -91,6 +99,12 @@ void	networking::accept_clients(int sock){
 	}
 }
 */
+
+void	networking::handle_new_connection(int listen_sock, int *fd_count, std::vector<pollfd> &fds) {
+	(void) listen_sock;
+	(void) fd_count;
+	(void) fds;
+}
 
 void	networking::set_to_listen(int sock){
   
