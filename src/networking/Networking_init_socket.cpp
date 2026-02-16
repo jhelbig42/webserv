@@ -4,7 +4,17 @@
 #include "NetworkingDefines.hpp"
 
 
-int networking::clear_socket(int sock) {
+// clear_socket() is a wrapper for setsockopt()
+// This function is meant to clear a socket, just in case the same socket
+// was in use minutes ago, and hasn't yet been systematically cleared by the OS.
+// 
+// NOTE: setsockopt() is still largely a black box. I need read to more about the
+// arguments. I also have yet to encounter a situation where it's clearly
+// necessary to clear a socket, but apparently it happens.
+// I am only including this step because Beej's Guide deems it necessary /
+// useful. TODO read more.
+
+int networking::clear_socket(const int sock) {
   int yes = 1;
   int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
   if (ret == -1) {
@@ -15,7 +25,16 @@ int networking::clear_socket(int sock) {
   return (ret);
 }
 
-int networking::bind_to_ip(int sock, const struct addrinfo *p) {
+// bind_to_ip() is a wrapper for bind().
+// This function assigns the listening socket to server's ip
+// using bind() and logs an error if bind() fails.
+//
+// NOTE: Assumes that addrinfo is initialized, but if it wasn't,
+// bind() would fail anyway.
+//
+// RETURN: the result of bind(): 0 on success, -1 on failure
+
+int networking::bind_to_ip(const int sock, const struct addrinfo *p) {
 
   int ret = bind(sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
