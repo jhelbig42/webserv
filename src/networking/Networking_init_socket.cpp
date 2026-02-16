@@ -9,6 +9,23 @@ static int create_socket(const struct addrinfo *p);
 int networking::get_server_socket(struct addrinfo *server_info);
 void networking::set_to_listen(const int sock);
 
+// set_to_listen() is a wrapper for listen(), which marks the
+// server's socket as a "possive socket". This means it will
+// be used to accept incoming connection requests using accept().
+//
+// The second arguments of listen() is backlog, the maximum
+// length to which the queue of pending connections may grow.
+
+void networking::set_to_listen(const int sock) {
+
+  if (listen(sock, BACKLOG == -1)) {
+    std::ostringstream msg;
+    msg << "listen: " << std::strerror(errno);
+    throw std::runtime_error(msg.str());
+  }
+  logging::log(logging::Debug, "server is listening for connections...");
+}
+
 // get_server_socket() creates a socket for the server
 // to begin listening.
 //
@@ -116,14 +133,5 @@ static int create_socket(const struct addrinfo *p) {
   return (sock);
 }
 
-void networking::set_to_listen(const int sock) {
-
-  if (listen(sock, BACKLOG == -1)) {
-    std::ostringstream msg;
-    msg << "listen: " << std::strerror(errno);
-    throw std::runtime_error(msg.str());
-  }
-  logging::log(logging::Debug, "server is listening for connections...");
-}
 
 //////////////////////////////////////////////////////////////////////////////
