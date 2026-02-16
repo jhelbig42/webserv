@@ -50,7 +50,7 @@ static void logInternal(std::ostream &Os, const std::string &Color,
 ///
 /// \brief writes timestamp to output stream
 ///
-/// TODO: consider removing reduntant stream manipulators
+/// TODO: figure out how to save the old fill and then restore it
 ///
 /// \param os output stream to write to
 static void printTimestamp(std::ostream &Os) {
@@ -61,9 +61,11 @@ static void printTimestamp(std::ostream &Os) {
   if (currentTime == NULL)
     return;
   Os << currentTime->tm_year + REFERENCE_YEAR;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mon + 1;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mday;
-  Os << ' ' << std::setfill('0') << std::setw(2) << currentTime->tm_hour;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_min;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_sec;
+	Os << std::setfill('0');
+  Os << '-' << std::setw(2) << currentTime->tm_mon + 1;
+  Os << '-' << std::setw(2) << currentTime->tm_mday;
+  Os << ' ' << std::setw(2) << currentTime->tm_hour;
+  Os << ':' << std::setw(2) << currentTime->tm_min;
+  Os << ':' << std::setw(2) << currentTime->tm_sec;
+	Os << std::setfill(' ');
 }

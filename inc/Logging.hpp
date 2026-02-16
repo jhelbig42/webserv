@@ -17,21 +17,21 @@ void logString(const LogLevel Level, const std::string &Msg);
 /// \param Level minimum return value of config::getLogLevel() to log this
 /// message
 /// \param Msg Message to be logged
-template <typename T> void log(const LogLevel Level, const T Msg1) {
+template <typename T> void log(const LogLevel Level, const T &Msg1) {
   std::ostringstream oss;
   oss << Msg1;
   logString(Level, oss.str());
 }
 
 template <typename T, typename U>
-void log2(const LogLevel Level, const T Msg1, const U Msg2) {
+void log2(const LogLevel Level, const T &Msg1, const U &Msg2) {
   std::ostringstream oss;
   oss << Msg1 << Msg2;
   logString(Level, oss.str());
 }
 
 template <typename T, typename U, typename V>
-void log3(const LogLevel Level, const T Msg1, const U Msg2, const V Msg3) {
+void log3(const LogLevel Level, const T &Msg1, const U &Msg2, const V &Msg3) {
   std::ostringstream oss;
   oss << Msg1 << Msg2 << Msg3;
   logString(Level, oss.str());
