@@ -1,11 +1,8 @@
+// TODO add 42 header
+
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 
-// Networking init: Functions related to initial server setup,
-// Expected to be used only on program start
-// TODO change several functions to static
-
-//////////////////////////////////////////////////////////////////////////////
 
 int networking::clear_socket(int sock) {
   int yes = 1;
@@ -30,6 +27,14 @@ int networking::bind_to_ip(int sock, struct addrinfo *p) {
   return (ret);
 }
 
+// create_socket() is a wrapper for library function socket()
+// This function logs an error if socket() fails.
+//
+// TODO: Currently, we using the contents of addrinfo to set protocol.
+// The contents should always specfiy TCP thanks to our "hints" input
+// (see Networking_server_init.cpp). If we wanted to, we could also
+// hardcode TCP here. What's cleaner?
+
 int networking::create_socket(struct addrinfo *server_info,
                               struct addrinfo *p) {
 
@@ -44,7 +49,25 @@ int networking::create_socket(struct addrinfo *server_info,
   return (sock);
 }
 
-// starts the process of obtaining server (listening) socket
+// get_server_socket() creates a socket for the server
+// to begin listening.
+//
+// NOTE: Assumes that argument server_info has already been initialized.
+// The function iterates through the server's linked list of addrinfo structs,
+// until it is either able to create a socket or reaches the end.
+//
+// If no socket it found, an exception will be thrown. Server_info
+// will first be freed, because this exception throws us back to main().
+//
+// If a socket IS found, it will be cleared (just in case the same socket
+// was in use minutes ago, and hasn't yet been systematically cleared by the OS
+// ... TODO read a bit more about this.) The socket will then be bound to
+// the server's IP address. In the case that bind() fails, the function
+// will continue trying to create, clear, and bind a socket with any
+// remaining addrinfos.
+//
+// RETURNS: file descriptor for available socket
+//
 int networking::get_server_socket(struct addrinfo *server_info) {
 
   int sock;
@@ -54,9 +77,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
     if (sock == -1) {
       continue;
     }
-
-    clear_socket(sock); // not necessary until we have multiple connections?
-
+    clear_socket(sock);
     if (bind_to_ip(sock, p) == -1) {
       continue;
     }

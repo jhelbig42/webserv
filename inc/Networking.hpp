@@ -31,9 +31,7 @@ struct client_addr {
 void start(void);
 
 // Networking_init_server.cpp
-struct addrinfo create_hints(void);
 struct addrinfo *get_server_info(void);
-std::string get_addrinfo_str(struct addrinfo *info, std::string msg);
 
 // Networking_init_socket.cpp
 int get_server_socket(struct addrinfo *server_info);
@@ -47,7 +45,6 @@ void poll_loop(int sock);
 void process(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
 int accept_connection(int listen_sock, struct client_addr *candidate);
 void add_connection_to_map(struct client_addr &candidate, std::map<int, Connection> &c_map);
-//void handle_new_connection(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
 void read_data(int listen_sock, int client_sock, Connection  &connection,  std::vector<pollfd> &fds);
 } // namespace networking
 
