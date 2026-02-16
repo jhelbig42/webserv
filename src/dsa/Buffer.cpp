@@ -69,6 +69,12 @@ size_t Buffer::getFree(void) const {
 ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
   if (getUsed() == size)
     return -1;
+  // the following the second part of the or condition could turn out to
+  // be a problem in the following case:
+  // 1. getBlocked() is small
+  // 2. getUsed() is big
+  // It could be better to skip filling all together in this case.
+  // Probably shoud be handled somewhere else though
   if (getUsed() == 0 || (getFree() == 0 && getBlocked() != 0))
     format();
   const size_t amount = std::min(Bytes, getFree());

@@ -35,7 +35,13 @@ public:
   bool process(const int Socket, const size_t Bytes);
 
 private:
+  typedef enum { SendFile, ReceiveFile, Cgi } ProcessType;
+
   bool init(const Request &Req);
+
+  // sending files + metadata
+  bool process(const int Socket, const size_t Bytes);
+  bool sendFile(const int Socket, const size_t Bytes);
 
   bool initError(const int Code);
   bool initGet(void);
@@ -43,14 +49,11 @@ private:
   bool processHead(const int, const size_t);
   bool makeMetadata(const int Code);
   bool sendMetadata(const int Socket, const size_t Bytes);
-  bool processGet(const int, const size_t);
   bool processDelete(const int, const size_t);
   bool sendBuffer(const int, const size_t);
   bool fillBufferFile(const size_t);
 
-  const Request &_req;
-
-  HttpMethod _method;
+  ProcessType _ptype;
 
   off_t _contentLength;
 
