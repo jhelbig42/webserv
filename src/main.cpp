@@ -13,6 +13,7 @@
 #define DELETE_FRONT 3
 
 int main(void) {
+<<<<<<< HEAD
   Buffer buf;
   logging::log(logging::Info, "Buffer created");
 

@@ -1,0 +1,7 @@
+
+--std=c++03
+--enable=warning,performance,portability
+--inconclusive
+--force
+--inline-suppr
+--check-level=exhaustive
