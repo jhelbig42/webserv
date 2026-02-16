@@ -8,31 +8,31 @@ void networking::poll_loop(const int sock);
 // poll_loop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
 //
-// • Creates a map of clients (key = fd, value = Connection object)
-// • Creates a vector of fd structs
-//  - These structs are library-defined and required by poll()
-//  - Placing them in a vector is useful for constant re-sizing of fd collection,
+// • Declares c_map, a map of clients (key = fd, value = Connection object)
+// • Declares fds, a vector of pollfd structs
+//  - Pollfd structs are library-defined and required by poll()
+//  - Placing pollfds in a vector is useful for constant re-sizing,
 //    as well as keeping constant track of the collection size.
-//
-// polls all existing connections via their corrsponding sockets,
-// interchangeably referred to as fds, to check if any one is ready for I/O
-//
+//    Can ALSO be used as a normal array, which poll() expects.
+// • Adds the server's listening socket as the first member of pollfd vector
+// • Enters the polling loop, which
+// 	- continuously checks and marks which pollfds are ready for I/O
+// 	- processes the ones that are marked
 
 void networking::poll_loop(const int sock) {
 
-  std::map<int, Connection> c_map; // empty map of Connection objects
-  std::vector<pollfd> fds; // empty vector of poll_fd structs (see <poll.h>)
+  std::map<int, Connection> c_map;	// empty map of Connection objects
+  std::vector<pollfd> fds;		// empty vector of pollfd structs
 
-  pollfd listener = {sock, POLLIN, 0}; // create pollfd for listening socket
-  fds.push_back(listener);             // add to vector
-
-  (void)c_map;
+  pollfd listener = {sock, POLLIN, 0};
+  fds.push_back(listener);
 
   while (1) {
-    int res = poll(fds.data(), fds.size(), -1); // poll indefinitely (allowed?)
+    int res = poll(fds.data(), fds.size(), -1); // -1 means poll indefinitely
     if (res == -1) {
-      // logging::log(Error, "poll: ", std:sterror(errno)); // TODO after merge
-      logging::log(logging::Error, "poll: ");
+    	std::ostringstream msg;
+    	msg << "poll: " << std::strerror(errno);
+      logging::log(logging::Error, msg.str());
       exit(1); // Should exit or continue?
     }
     process(sock, c_map, fds); // process results of poll
