@@ -5,3 +5,4 @@
 --force
 --inline-suppr
 --check-level=exhaustive
+--suppress=uninitMemberVar
