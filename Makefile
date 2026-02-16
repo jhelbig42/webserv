@@ -15,7 +15,7 @@ vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
 			   Networking_init_server.cpp\
-			   Networking_poll.cpp\
+			   Networking_run.cpp\
 			   Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
