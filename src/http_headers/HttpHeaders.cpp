@@ -3,15 +3,14 @@
 #include <iostream>
 #include <sys/types.h>
 
-HttpHeaders::HttpHeaders(void)
-  : _headersSet(0) {
+HttpHeaders::HttpHeaders(void) : _headersSet(0) {
 }
 
-HttpHeaders::HttpHeaders(const HttpHeaders& other)
-  : _headersSet(other._headersSet), _contentLength(other._contentLength) {
+HttpHeaders::HttpHeaders(const HttpHeaders &other)
+    : _headersSet(other._headersSet), _contentLength(other._contentLength) {
 }
 
-HttpHeaders& HttpHeaders::operator=(const HttpHeaders& other) {
+HttpHeaders &HttpHeaders::operator=(const HttpHeaders &other) {
   if (this != &other) {
     _headersSet = other._headersSet;
     _contentLength = other._contentLength;
