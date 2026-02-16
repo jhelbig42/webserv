@@ -28,8 +28,6 @@ bool Response::init(const Request &Req)
   _metaData = "";
   _fdIn = -1;
   _fdOut = -1;
-  _bufStart = 0;
-  _bufEnd = 0;
   _eof = false;
 
 	if (!Req.isValid())
@@ -76,8 +74,6 @@ bool Response::initGet()
 		return initError(CODE_500);
 
 	_contentLength = statbuf.st_size;
-	_bufStart = 0;
-	_bufEnd = 0;
   _hasMetadata = false;
 	_fdOut = -1;
   _eof = false;

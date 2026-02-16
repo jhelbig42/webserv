@@ -8,6 +8,24 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+// TODO: Compare data sent with header Content-Length instead of only relying on read() return values
+
+/// \brief attempts to transfer Bytes from FileFd to Socket, using Buf as an intermefiary and to save state
+///
+/// Expects Buf to not be modified by other parts of the program between calls
+///
+/// sideffects:
+/// calls read on FileFd
+/// calls write() on Socket
+/// modifies Buf
+/// can call close() on FileFd and set it to -1
+///
+/// \param Socket socket to write to
+/// \param FileFd fd to read from (should be a file on disk)
+/// \param Buf buffer to be used as an intermediary and to save state between calls
+/// \param Bytes amount of bytes which is attempted to be transferred
+static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf, const size_t Bytes);
+
 bool Response::process(const int Socket, const size_t Bytes)
 {
   if (_req.getMethod() != Get)
@@ -36,19 +54,36 @@ bool Response::sendMetadata(const int Socket, const size_t Bytes) {
 
 bool Response::processGet(const int Socket, const size_t Bytes)
 {
-  if (!_hasMetadata) {
+  if (!_hasMetadata)
     _hasMetadata = makeMetadata(CODE_200);
-    return false;
-  }
+  if (!_hasMetadata)
+	  return false;
   if (!_metaDataSent) {
     _metaDataSent = sendMetadata(Socket, Bytes);
     return false;
   }
-  if (_bufStart != _bufEnd && sendBuffer(Socket, Bytes))
-      return true
+  return dataTransferGet(Socket, _fdIn, _buffer, Bytes);
+}
+
+static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf, const size_t Bytes) {
+  if (FileFd >= 0) {
+    Buf.optimize(Bytes);
+	// edgecase = FileFd empties by exactly filling up Buf. Then empty FileFd would be passed one more time;
+	// theory: does not matter as FileFd will spill just 0 next iteration and no exception will be thrown
+    if (Buf.fill(FileFd, Bytes) < Bytes
+	  && Buf.getFree() > 0
+	  && close(FileFd) < 0) {
+        logging::log2(logging::Error, "close: ", strerror(errrno));
+        errno = 0;
+        FileFd = -1;
+    }
   }
-  else
-    fillBufferFile(Bytes);
+  const size_t used = Buf.getUsed();
+  if (used == 0)
+	  return true;
+  if (fileFd == -1 && Buf.empty(Socket, Bytes) == used)
+	  return true;
+  return false;
 }
 
 // bool Response::processDelete(const int Socket, const size_t Bytes)
@@ -60,7 +95,7 @@ bool Response::processGet(const int Socket, const size_t Bytes)
 //   return sendMetadata(Socket, Bytes);
 // }
 
-Response::transferBytes(const int Socket, const size_t Bytes)
+Response::transferBytes(const int Socket, const size_t Bytes);
 
 /// \brief attempts to send a certain amount of bytes from the buffers content
 /// to a socket
