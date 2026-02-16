@@ -38,7 +38,7 @@ class	Connection {
 		Connection *next;
 		Connection();
 		Connection(int server_sock);
-		Connection(int sock, sockaddr_storage &addr, socklen_t addr_size);
+		Connection(const int sock, const sockaddr_storage &addr, const socklen_t addr_size);
 		~Connection();
 		void print_addrinfo(void) const;
 		

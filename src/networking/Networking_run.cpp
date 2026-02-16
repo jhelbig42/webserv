@@ -10,11 +10,11 @@
 // Decide on most elegant arrangement.
 
 void networking::poll_loop(const int sock);
-void networking::process(int listen_sock,
+void networking::process(const int listen_sock,
 		std::map<int, Connection> &c_map,
 		std::vector<pollfd> &fds);
-int networking::accept_connection(int listen_sock, client_addr *candidate);
-void networking::add_connection_to_map(struct client_addr &candidate,
+int networking::accept_connection(const int listen_sock, client_addr *candidate);
+void networking::add_connection_to_map(const struct client_addr &candidate,
                                        std::map<int, Connection> &c_map);
 
 // poll_loop() introduces the while(1) networking loop that will run
@@ -68,7 +68,7 @@ void networking::poll_loop(const int sock) {
 // We may want to downgrade some errors to warnings.
 // We may want to drop connections with certain errors / flags? TBD.
 
-void networking::process(int listen_sock, std::map<int, Connection> &c_map,
+void networking::process(const int listen_sock, std::map<int, Connection> &c_map,
                          std::vector<pollfd> &fds) {
 
   std::vector<pollfd> new_fd_batch;
@@ -111,7 +111,7 @@ void networking::process(int listen_sock, std::map<int, Connection> &c_map,
 //
 // RETURNS: fd for new socket
 
-int networking::accept_connection(int listen_sock, client_addr *candidate) {
+int networking::accept_connection(const int listen_sock, client_addr *candidate) {
 
   candidate->client_sock = accept(
       listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addr_size);
@@ -128,7 +128,7 @@ int networking::accept_connection(int listen_sock, client_addr *candidate) {
   return (0);
 }
 
-void networking::add_connection_to_map(struct client_addr &candidate,
+void networking::add_connection_to_map(const struct client_addr &candidate,
                                        std::map<int, Connection> &c_map) {
 
   Connection new_connection =

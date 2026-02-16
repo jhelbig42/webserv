@@ -46,7 +46,7 @@ _sock, "\n");
 }
 */
 
-Connection::Connection(int sock, sockaddr_storage &addr, socklen_t addr_size)
+Connection::Connection(const int sock, const sockaddr_storage &addr, const socklen_t addr_size)
     : _index(-42), _active(true), _sock(sock), _addr_size(sizeof _addr) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?

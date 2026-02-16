@@ -39,9 +39,9 @@ void set_to_listen(const int sock);
 
 // Networking_run.cpp
 void poll_loop(const int sock);
-void process(int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
-int accept_connection(int listen_sock, struct client_addr *candidate);
-void add_connection_to_map(struct client_addr &candidate, std::map<int, Connection> &c_map);
+void process(const int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
+int accept_connection(const int listen_sock, struct client_addr *candidate);
+void add_connection_to_map(const struct client_addr &candidate, std::map<int, Connection> &c_map);
 
 // Networking.cpp (for now)
 void read_data(int listen_sock, int client_sock, Connection  &connection,  std::vector<pollfd> &fds);
