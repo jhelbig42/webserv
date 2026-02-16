@@ -5,6 +5,19 @@
 
 void networking::poll_loop(const int sock);
 
+// poll_loop() introduces the while(1) networking loop that will run
+// for the duration of the webserver. This function:
+//
+// • Creates a map of clients (key = fd, value = Connection object)
+// • Creates a vector of fd structs
+//  - These structs are library-defined and required by poll()
+//  - Placing them in a vector is useful for constant re-sizing of fd collection,
+//    as well as keeping constant track of the collection size.
+//
+// polls all existing connections via their corrsponding sockets,
+// interchangeably referred to as fds, to check if any one is ready for I/O
+//
+
 void networking::poll_loop(const int sock) {
 
   static int fd_count;             // counter for # of active clients
