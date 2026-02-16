@@ -15,7 +15,7 @@ int networking::clear_socket(int sock) {
   return (ret);
 }
 
-int networking::bind_to_ip(int sock, struct addrinfo *p) {
+int networking::bind_to_ip(int sock, const struct addrinfo *p) {
 
   int ret = bind(sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
@@ -35,7 +35,7 @@ int networking::bind_to_ip(int sock, struct addrinfo *p) {
 // (see Networking_server_init.cpp). If we wanted to, we could also
 // hardcode TCP here. What's cleaner?
 
-int networking::create_socket(struct addrinfo *p) {
+int networking::create_socket(const struct addrinfo *p) {
 
   int sock = socket(p->ai_family, p->ai_socktype,
                     p->ai_protocol); // could set ai_protocol manually to TCP?
@@ -70,7 +70,7 @@ int networking::create_socket(struct addrinfo *p) {
 int networking::get_server_socket(struct addrinfo *server_info) {
 
   int sock;
-  struct addrinfo *p;
+  const struct addrinfo *p;
   for (p = server_info; p != NULL; p = p->ai_next) {
     sock = create_socket(p);
     if (sock == -1) {
@@ -91,7 +91,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
   return (sock);
 }
 
-void networking::set_to_listen(int sock) {
+void networking::set_to_listen(const int sock) {
 
   if (listen(sock, BACKLOG == -1)) {
     std::ostringstream msg;
