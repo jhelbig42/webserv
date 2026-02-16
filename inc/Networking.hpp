@@ -35,9 +35,9 @@ struct addrinfo *get_server_info(void);
 
 // Networking_init_socket.cpp
 int get_server_socket(struct addrinfo *server_info);
-int create_socket(const struct addrinfo *p);
-int clear_socket(int sock);
-int bind_to_ip(const int sock, const struct addrinfo *p);
+//int create_socket(const struct addrinfo *p);
+// int clear_socket(int sock);
+// int bind_to_ip(const int sock, const struct addrinfo *p);
 void set_to_listen(const int sock);
 
 // Networking.cpp (for now)
