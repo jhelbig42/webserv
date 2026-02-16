@@ -20,13 +20,11 @@ void networking::poll_loop(const int sock);
 
 void networking::poll_loop(const int sock) {
 
-  static int fd_count;             // counter for # of active clients
   std::map<int, Connection> c_map; // empty map of Connection objects
   std::vector<pollfd> fds; // empty vector of poll_fd structs (see <poll.h>)
 
   pollfd listener = {sock, POLLIN, 0}; // create pollfd for listening socket
   fds.push_back(listener);             // add to vector
-  fd_count++;
 
   (void)c_map;
 
