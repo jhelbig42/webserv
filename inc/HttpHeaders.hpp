@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <sys/types.h>
+
 class HttpHeaders {
   public:
     HttpHeaders();
@@ -9,13 +12,13 @@ class HttpHeaders {
 
     typedef enum { ContentLength = (1u << 0) } HeaderType;
 
-    bool isSet(const HeaderType Hdr);
+    bool isSet(const HeaderType Hdr) const;
     void setContentLength(const off_t Length);
-    off_t getContentLength(void);
+    off_t getContentLength(void) const;
 
   private:
     unsigned long _headersSet;
     off_t _contentLength;
 };
 
-std::ostring &operator<<(std::ostring &Os, const HttpHeaders &Hdrs);
+std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs);
