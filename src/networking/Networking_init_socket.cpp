@@ -18,7 +18,6 @@ int networking::clear_socket(int sock) {
   return (ret);
 }
 
-
 int networking::bind_to_ip(int sock, struct addrinfo *p) {
 
   int ret = bind(sock, p->ai_addr, p->ai_addrlen);
@@ -64,7 +63,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
     break;
   }
   if (p == NULL) {
-  	freeaddrinfo(server_info);
+    freeaddrinfo(server_info);
     throw std::runtime_error("server failed to find a socket");
   } else {
     logging::log(logging::Debug, "sever found socket. bind: success");
@@ -72,13 +71,13 @@ int networking::get_server_socket(struct addrinfo *server_info) {
   return (sock);
 }
 
-void	networking::set_to_listen(int sock){
-  
+void networking::set_to_listen(int sock) {
+
   if (listen(sock, BACKLOG == -1)) {
-    	std::ostringstream msg;
-    	msg << "listen: " << std::strerror(errno);
-  		throw std::runtime_error(msg.str());
-	}
+    std::ostringstream msg;
+    msg << "listen: " << std::strerror(errno);
+    throw std::runtime_error(msg.str());
+  }
   logging::log(logging::Debug, "server is listening for connections...");
 }
 
