@@ -53,8 +53,10 @@ SA_HTML		:= $(SA_DIR)/html
 SA_ANALYZER	:=
 SA_ANALYZER	+= clangsa
 SA_ANALYZER	+= clang-tidy
+SA_ANALYZER	+= cppcheck
 SA_ANALYZER_CONFIG	:=
-SA_ANALYZER_CONFIG	+= clang-tidy:take-config-from-directory=true
+SA_ANALYZER_CONFIG	+= clang-tidy:take-config-from-directory=true 
+SA_ANALYZER_CONFIG	+= cppcheck:cc-verbatim-args-file=.cppcheck
 HTML_OPEN	:= xdg-open
 SA_REPORTS_STAMP	:= $(SA_REPORTS)/.done
 SA_HTML_STAMP		:= $(SA_HTML)/.done
