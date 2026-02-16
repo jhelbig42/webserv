@@ -3,6 +3,37 @@
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 
+struct addrinfo *networking::get_server_info(void);
+static struct addrinfo create_hints(void);
+static std::string addrinfo_to_str(struct addrinfo *info, std::string msg);
+
+// get_server_info() creates an addrinfo struct (standard, from <sys/socket.h>)
+// with information about the server's own address & our chosen I/O settings.
+// We need this struct to find a usable socket for listening.
+//
+// On error, resulting from library function call failure, an exception is
+// thrown. Otherwise,
+//
+// RETURNS: ptr to an allocated addrinfo struct.
+// Allocation is not our choice, but the result of system call getaddrinfo().
+// The addrinfo MUST later be freed by system call freeaddrinfo()... easy.
+
+struct addrinfo *networking::get_server_info(void) {
+
+  struct addrinfo hints = create_hints();
+  struct addrinfo *info;
+
+  int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
+  if (ret != 0) {
+    std::string msg(gai_strerror(ret));
+    throw std::runtime_error("getaddrinfo: " + msg);
+  } else {
+    logging::log(logging::Debug, "addrinfo server_info created");
+    logging::log(logging::Debug, addrinfo_to_str(info, "server_info:"));
+  }
+  return (info);
+}
+
 // create_hints() is a helper function for get_server_info,
 // which creates a "hints" addrinfo struct. "hints" contains the address
 // info and I/O settings that we want to specify ourselves, when
@@ -48,29 +79,3 @@ static std::string addrinfo_to_str(struct addrinfo *info, std::string msg) {
   return (oss.str());
 }
 
-// get_server_info() creates an addrinfo struct (standard, from <sys/socket.h>)
-// with information about the server's own address & our chosen I/O settings.
-// We need this struct to find a usable socket for listening.
-//
-// On error, resulting from library function call failure, an exception is
-// thrown. Otherwise,
-//
-// RETURNS: ptr to an allocated addrinfo struct.
-// Allocation is not our choice, but the result of system call getaddrinfo().
-// The addrinfo MUST later be freed by system call freeaddrinfo()... easy.
-
-struct addrinfo *networking::get_server_info(void) {
-
-  struct addrinfo hints = create_hints();
-  struct addrinfo *info;
-
-  int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
-  if (ret != 0) {
-    std::string msg(gai_strerror(ret));
-    throw std::runtime_error("getaddrinfo: " + msg);
-  } else {
-    logging::log(logging::Debug, "addrinfo server_info created");
-    logging::log(logging::Debug, addrinfo_to_str(info, "server_info:"));
-  }
-  return (info);
-}
