@@ -1,14 +1,16 @@
 #include "HttpHeaders.hpp"
+#include "HttpHeadersDefines.hpp"
+#include <iostream>
+#include <sys/types.h>
 
-HttpHeaders::HttpHeaders(void)
-  : _headersSet(0) {
+HttpHeaders::HttpHeaders(void) : _headersSet(0) {
 }
 
-HttpHeaders::HttpHeaders(const HttpHeaders& other)
-  : _headersSet(other._headersSet), _contentLength(other._contentLength) {
+HttpHeaders::HttpHeaders(const HttpHeaders &other)
+    : _headersSet(other._headersSet), _contentLength(other._contentLength) {
 }
 
-HttpHeaders& HttpHeaders::operator=(const HttpHeaders& other) {
+HttpHeaders &HttpHeaders::operator=(const HttpHeaders &other) {
   if (this != &other) {
     _headersSet = other._headersSet;
     _contentLength = other._contentLength;
@@ -19,7 +21,7 @@ HttpHeaders& HttpHeaders::operator=(const HttpHeaders& other) {
 HttpHeaders::~HttpHeaders(void) {
 }
 
-bool HttpHeaders::isSet(const HttpHeaders::HeaderType Hdr) {
+bool HttpHeaders::isSet(const HttpHeaders::HeaderType Hdr) const {
   return Hdr & _headersSet;
 }
 
@@ -28,12 +30,13 @@ void HttpHeaders::setContentLength(const off_t Length) {
   _contentLength = Length;
 }
 
-off_t HttpHeaders::getContentLength(void) {
+off_t HttpHeaders::getContentLength(void) const {
   return _contentLength;
 }
 
-std::ostring &HttpHeaders::operator<<(std::ostring &Os, const HttpHeaders &Hdrs) {
-  if (Hdrs.isSet(HttpHeaders::ContentLength)
+std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs) {
+  if (Hdrs.isSet(HttpHeaders::ContentLength))
     Os << NAME_CONTENT_LENGTH << ": " << Hdrs.getContentLength() << "\r\n";
   // other headers
+  return Os;
 }

@@ -100,6 +100,5 @@ int main(void) {
   for (size_t i = 0; i < buf.getUsed(); ++i)
     std::cout << buf[i];
   return 0;
->>>>>>> refs/remotes/origin/response_initialization
 }
 */

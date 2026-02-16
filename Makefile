@@ -19,6 +19,8 @@ vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
+vpath %.cpp $(SRC_DIR)/http_headers
+SRC			+= HttpHeaders.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
