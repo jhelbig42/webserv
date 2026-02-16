@@ -3,7 +3,19 @@
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 
+// TODO These functions could be made static:
+// process(), accept_connection(), add_connection_to_map()
+// But then they would lose sight of networking::client_addr struct
+// and netoworking::read_data().
+// Decide on most elegant arrangement.
+
 void networking::poll_loop(const int sock);
+void networking::process(int listen_sock,
+		std::map<int, Connection> &c_map,
+		std::vector<pollfd> &fds);
+int networking::accept_connection(int listen_sock, client_addr *candidate);
+void networking::add_connection_to_map(struct client_addr &candidate,
+                                       std::map<int, Connection> &c_map);
 
 // poll_loop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
@@ -21,8 +33,8 @@ void networking::poll_loop(const int sock);
 
 void networking::poll_loop(const int sock) {
 
-  std::map<int, Connection> c_map;	// empty map of Connection objects
-  std::vector<pollfd> fds;		// empty vector of pollfd structs
+  std::map<int, Connection> c_map;
+  std::vector<pollfd> fds;
 
   pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
@@ -33,28 +45,41 @@ void networking::poll_loop(const int sock) {
     	std::ostringstream msg;
     	msg << "poll: " << std::strerror(errno);
       logging::log(logging::Error, msg.str());
-      exit(1); // Should exit or continue?
+      exit(1); 
+      
+      // TODO How to best handle poll() failure?
+      // Currently, logging error and exiting
+      // Could also log Warning and continue.
     }
-    process(sock, c_map, fds); // process results of poll
+    process(sock, c_map, fds);
   }
 }
 
-// This function follows Beej closely
+// process() iterates through the vector of fds and handles the flags
+// that were set by poll() in fd[i]->events & fd[i]->revents.
+//
+// If the listening socket got a new connection, we attempt to accept the connection.
+// If accept is successful, the connection is added to the map of connections
+// and its fd is added to a stash. This stash will be appended to the fds vector
+// after all current fds have been handled. 
+//
+// TODO More robust and granular error-handling, see additional flags in man pages
+// Currently, the server logs Error and continues normally.
+// We may want to downgrade some errors to warnings.
+// We may want to drop connections with certain errors / flags? TBD.
+
 void networking::process(int listen_sock, std::map<int, Connection> &c_map,
                          std::vector<pollfd> &fds) {
 
   std::vector<pollfd> new_fd_batch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
-    if (it->revents & POLLNVAL || it->revents & POLLERR) {
-      logging::log(logging::Error,
-                   "polling file descriptor gave unexpected results");
-      // TODO print fd after merge
-      // TODO more robust and granular error-handling, see additional flags in
-      // the man pages & double-check subject, re: errno reactions
-      exit(1);
+    if (it->revents & POLLNVAL || it->revents & POLLERR) { // error
+    	std::ostringstream msg;
+    	msg << "process: " << "poll() resulted in unexpected results for fd " << it->fd
+		<< " : POLLNVAL or POLLERR";
+      logging::log(logging::Error, msg.str());
     }
-    if (it->revents & (POLLIN | POLLHUP)) {
-      // is there something to read, or did someone hang up on us?
+    if (it->revents & (POLLIN | POLLHUP)) { // data to read | hang-up
       if (it->fd == listen_sock) { // listening socket got new connection
 
         client_addr candidate;
@@ -70,12 +95,21 @@ void networking::process(int listen_sock, std::map<int, Connection> &c_map,
         } else {
           logging::log(logging::Error, "process: Connection not found in map "
                                        "container (This should never happen)");
+	  				// could be removed after thorough testing
         }
       }
     }
   }
   fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
 }
+
+
+// accept_connections() is a a wrapper for accept(), which extracts
+// the first connection request on the queue of pending connections
+// for the listening socket. Creates new socket for the 
+// incoming connection.
+//
+// RETURNS: fd for new socket
 
 int networking::accept_connection(int listen_sock, client_addr *candidate) {
 
