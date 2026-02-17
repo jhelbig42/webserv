@@ -1,21 +1,40 @@
 #pragma once
 
+#include <sstream>
 #include <string>
 
 namespace logging {
 
-typedef enum { Debug, Info, Warning, Error } LogLevel;
+typedef enum { Debug, Info, Warning, Error, Off } LogLevel;
 
-/// \fn void log(const std::string& msg, const t_log_level level)
-///
-/// \brief logs string if INFOLVL is larger or equal to level
+void logString(const LogLevel Level, const std::string &Msg);
+
+/// \brief Msg if config::getLogLevel() returns larger or equal to Level
 ///
 /// unchecked runtime errors:
-/// level > ERROR || level < DEBUG
+/// level > Off || level < DEBUG
 ///
-/// \param msg Message to be logged
-/// \param level minimum return value of Config::getLogLevel() to log this
+/// \param Level minimum return value of config::getLogLevel() to log this
 /// message
-void log(const std::string &Msg, const LogLevel Level);
+/// \param Msg Message to be logged
+template <typename T> void log(const LogLevel Level, const T &Msg1) {
+  std::ostringstream oss;
+  oss << Msg1;
+  logString(Level, oss.str());
+}
 
-} // namespace log
+template <typename T, typename U>
+void log2(const LogLevel Level, const T &Msg1, const U &Msg2) {
+  std::ostringstream oss;
+  oss << Msg1 << Msg2;
+  logString(Level, oss.str());
+}
+
+template <typename T, typename U, typename V>
+void log3(const LogLevel Level, const T &Msg1, const U &Msg2, const V &Msg3) {
+  std::ostringstream oss;
+  oss << Msg1 << Msg2 << Msg3;
+  logString(Level, oss.str());
+}
+
+} // namespace logging
