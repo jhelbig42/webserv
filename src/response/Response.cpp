@@ -52,7 +52,24 @@ bool Response::init(const Request &Req)
 }
 
 void Response::initSendFile(const int Code, const char *File) {
-  
+  struct stat statbuf;
+  if (File != NULL) {
+    if (stat(File, &statbuf) < 0) {
+      if (Code == CODE_500)
+        return initSendFile(CODE_500, NULL)
+      return initSendFile(CODE_500, FILE_500);
+    }
+  }
+	
+	_fdIn = open(_req.getResource().c_str(), O_RDONLY);
+	if (_fdIn < 0)
+		return initError(CODE_500);
+
+	_contentLength = statbuf.st_size;
+  _hasMetadata = false;
+	_fdOut = -1;
+  _eof = false;
+  return true;
 }
 
 Response::Response(const Request &Req): _req(Req) {
