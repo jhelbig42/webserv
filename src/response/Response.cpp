@@ -51,6 +51,10 @@ bool Response::init(const Request &Req)
 	}
 }
 
+void Response::initSendFile(const int Code, const char *File) {
+  
+}
+
 Response::Response(const Request &Req): _req(Req) {
   init(Req);
 }

@@ -44,18 +44,17 @@ private:
   bool sendFile(const int Socket, const size_t Bytes);
 
   bool initError(const int Code);
-  bool initGet(void);
+  void initSendFile(const int Code, const char *File);
 
-  bool processHead(const int, const size_t);
   bool makeMetadata(const int Code);
   bool sendMetadata(const int Socket, const size_t Bytes);
   bool processDelete(const int, const size_t);
   bool sendBuffer(const int, const size_t);
   bool fillBufferFile(const size_t);
 
-  ProcessType _ptype;
+  HttpHeaders _headers;
 
-  off_t _contentLength;
+  ProcessType _ptype;
 
   // consider abstraction for metaData
   bool _hasMetadata;
@@ -67,8 +66,4 @@ private:
 
   // consider abstraction for buffer
   Buffer _buffer;
-
-  // consider getting rid of _eof
-  // as the information should already be included int _remainingFileSize 
-  bool _eof;
 };
