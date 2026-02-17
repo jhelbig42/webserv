@@ -50,8 +50,6 @@ static void logInternal(std::ostream &Os, const std::string &Color,
 ///
 /// \brief writes timestamp to output stream
 ///
-/// TODO: consider removing reduntant stream manipulators
-///
 /// \param os output stream to write to
 static void printTimestamp(std::ostream &Os) {
   const std::time_t timeSinceEpoch = std::time(NULL);
@@ -60,10 +58,12 @@ static void printTimestamp(std::ostream &Os) {
   const std::tm *currentTime = std::localtime(&timeSinceEpoch);
   if (currentTime == NULL)
     return;
+  const char fill = Os.fill('0');
   Os << currentTime->tm_year + REFERENCE_YEAR;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mon + 1;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mday;
-  Os << ' ' << std::setfill('0') << std::setw(2) << currentTime->tm_hour;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_min;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_sec;
+  Os << '-' << std::setw(2) << currentTime->tm_mon + 1;
+  Os << '-' << std::setw(2) << currentTime->tm_mday;
+  Os << ' ' << std::setw(2) << currentTime->tm_hour;
+  Os << ':' << std::setw(2) << currentTime->tm_min;
+  Os << ':' << std::setw(2) << currentTime->tm_sec;
+  Os.fill(fill);
 }

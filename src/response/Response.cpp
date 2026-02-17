@@ -30,6 +30,7 @@ Response::Response(const Request &Req)
         return;
 			case Post:
 			case Delete:
+			case Generic:
         initSendFile(CODE_501, FILE_501);
         return;
 		}
@@ -55,7 +56,7 @@ void Response::initSendFile(const int Code, const char *File) {
 	
   if (File != NULL)
     _fdIn = open(File, O_RDONLY);
-	if (_fdIn < 0) {
+	if (_fdIn < 0 && File != NULL) {
     if (Code == CODE_500)
       return initSendFile(CODE_500, NULL);
     return initSendFile(CODE_500, FILE_500);
