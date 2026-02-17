@@ -13,14 +13,14 @@ int main(void) {
  
     while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
     {
-      logging::log(req.getResource(), logging::Debug);
+      logging::log(logging::Debug, req.getResource());
       if (req.isValid() != true)
-        logging::log("Request invalid", logging::Error);
+        logging::log(logging::Error, "Request invalid");
     }
   } 
   catch (std::exception &e)
   {
-    logging::log(e.what(), logging::Error);
+    logging::log(logging::Error, e.what());
     return 1;
   }
   return 0;

@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include "Logging.hpp"
 
 // Source - https://stackoverflow.com/a/14266139
 // Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
@@ -34,7 +35,7 @@ std::vector<std::string> split(const std::string& s, const std::string& delimite
 		last = next + delimiter.length();
     }
     tokens.push_back(s.substr(last)); 
-	logging::log("parse status_line: split Successfull", logging::Debug);
+	logging::log(logging::Debug, "parse status_line: split Successfull");
     return tokens;
 }
 
@@ -48,7 +49,7 @@ void Request::parseMethod(std::string token)
 		this->_method = Delete;
 	else
 		throw std::runtime_error("invalid Method");
-	logging::log("parse status_line: got method successfully", logging::Debug);
+	logging::log(logging::Debug, "parse status_line: got method successfully");
 }
 
 void Request::parseResource(std::string token)
@@ -56,7 +57,7 @@ void Request::parseResource(std::string token)
 	if (token[0] != '/')
 		throw std::runtime_error("requestURI not given as absolute path");
 	this->_resource = token;
-	logging::log("parse status_line: parse resource successfully", logging::Debug);
+	logging::log(logging::Debug, "parse status_line: parse resource successfully");
 }
 /**
  * \brief Parses the HTTP-version and sets this Version as Request attributes.
@@ -81,7 +82,7 @@ void Request::parseHttp(std::string token)
 	if (!(sminor >> this->_minorVersion) || !sminor.eof())
     	throw std::runtime_error("no HTTP version given");
 
-	logging::log("parse status_line: parse http version successfully", logging::Debug);
+	logging::log(logging::Debug, "parse status_line: parse http version successfully");
 }
 /**
  * \brief Parses the status line to construct a Request instance. 
