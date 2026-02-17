@@ -14,6 +14,7 @@ Request::Request(const HttpMethod Method, const std::string &Resource, const uns
  * Does not need the amount of sent bytes yet, but will likely do so,
  * when the headers are sent and need to be parsed later on.
  * 
+ * \return fills the Request attributes. On error _valid attribute will remain false
  */
 Request::Request(const char *input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
@@ -58,8 +59,10 @@ void Request::parseResource(std::string token)
 	logging::log("parse status_line: parse resource successfully", logging::Debug);
 }
 /**
- * parseHttp uses stringstream into size as this gives the option to catch
- * invalid inputs like 1.1a(by ) which is more diffiult with atoi
+ * \brief Parses the HTTP-version and sets this Version as Request attributes.
+ * parseHttp uses stringstream into size_t as this gives the option to catch
+ * invalid inputs like 1.1a(by setting the failbit) which is more diffiult with atoi(which would just return 0 on error, where further checks are necessary)
+ * \return nothing but fills the Request attributes _majorVersion and _minorVersion. On error exceptions are thrown, that will be caught in parseStatusLine()
  */
 void Request::parseHttp(std::string token)
 {
@@ -84,6 +87,10 @@ void Request::parseHttp(std::string token)
  * \brief Parses the status line to construct a Request instance. 
  * On any invalid syntax within the status line Request remains invalid. 
  * So before generating a Response, it shall be checked if the Request is valid at all. 
+ * 
+ * \returns nothing. On success Request instance will be initialized with _valid set to true. On error _valid will remain false.
+ * 
+ * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
  */
 void Request::parseStatusLine(const char *buffer, const size_t bytes)
 {
