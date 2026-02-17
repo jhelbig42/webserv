@@ -37,8 +37,8 @@ bool Response::init(const Request &Req)
 		return initError(400);
 
 	// make more generic
-	if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
-		return initError(501); // correct?
+	//if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
+	//	return initError(501); // correct?
 
 	try {
 		switch (_req.getMethod()) {
@@ -54,6 +54,7 @@ bool Response::init(const Request &Req)
 	} catch (...) {
 		return initError(500); // cases
 	}
+	return true;
 }
 
 Response::Response(const Request &Req): _req(Req) {

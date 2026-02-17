@@ -12,5 +12,5 @@
 /// should be one of the following:
 /// logging::DEBUG, logging::INFO, logging::WARNING, logging::ERROR
 #ifndef DEFAULT_LOG_LEVEL
-#define DEFAULT_LOG_LEVEL logging::Info
+#define DEFAULT_LOG_LEVEL logging::Debug
 #endif //DEFAULT_LOG_LEVEL
