@@ -15,7 +15,7 @@ static void logInternal(std::ostream &Os, const std::string &Color,
 static void printTimestamp(std::ostream &Os);
 
 void logging::logString(const logging::LogLevel Level, const std::string &Msg) {
-  if (Level < config::getLogLevel())
+  if (Level < config::logLevel())
     return;
   switch (Level) {
   case Debug:
@@ -36,16 +36,19 @@ void logging::logString(const logging::LogLevel Level, const std::string &Msg) {
 
 static void logInternal(std::ostream &Os, const std::string &Color,
                         const std::string &Label, const std::string &Msg) {
-  Os << Color;
+  const bool colored = config::logColored();
+  if (colored)
+    Os << Color;
   printTimestamp(Os);
-  Os << ' ' << Label << ' ' << Msg << RESET_COLOR << '\n' << std::flush;
+  Os << ' ' << Label << ' ' << Msg;
+  if (colored)
+    Os << RESET_COLOR;
+  Os << '\n' << std::flush;
 }
 
 /// \fn static void printTimestamp(std::ostream& os)
 ///
 /// \brief writes timestamp to output stream
-///
-/// TODO: consider removing reduntant stream manipulators
 ///
 /// \param os output stream to write to
 static void printTimestamp(std::ostream &Os) {
@@ -55,10 +58,12 @@ static void printTimestamp(std::ostream &Os) {
   const std::tm *currentTime = std::localtime(&timeSinceEpoch);
   if (currentTime == NULL)
     return;
+  const char fill = Os.fill('0');
   Os << currentTime->tm_year + REFERENCE_YEAR;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mon + 1;
-  Os << '-' << std::setfill('0') << std::setw(2) << currentTime->tm_mday;
-  Os << ' ' << std::setfill('0') << std::setw(2) << currentTime->tm_hour;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_min;
-  Os << ':' << std::setfill('0') << std::setw(2) << currentTime->tm_sec;
+  Os << '-' << std::setw(2) << currentTime->tm_mon + 1;
+  Os << '-' << std::setw(2) << currentTime->tm_mday;
+  Os << ' ' << std::setw(2) << currentTime->tm_hour;
+  Os << ':' << std::setw(2) << currentTime->tm_min;
+  Os << ':' << std::setw(2) << currentTime->tm_sec;
+  Os.fill(fill);
 }
