@@ -1,54 +1,41 @@
-#include "ReasonPhrases.hpp"
-#include "Request.hpp"
 #include "Response.hpp"
+
+#include "Logging.hpp"
+#include "Request.hpp"
+#include "StatusCodes.hpp"
 #include <fcntl.h>
+#include <sstream>
 #include <sys/stat.h>
+#include <sys/types.h>
 
-Response::Response(Request &Req)
-  : _ptype(None), _metaDataSent(false), _fdIn(-1), _fdOut(-1) {
-}
+Response::Response(const Request &Req)
+  : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
 
-/// @brief initializes a processingState object so it can be used for chunkwise processing
-///
-/// checked runtime errors:
-/// semantic falsety of Req
-/// system call failure
-///
-/// unchecked runtime errors:
-/// syntactic falsety of Req
-///
-/// side effects:
-/// rewrites all attributes of object
-/// might open files
-/// might delete files
-///
-/// @param Req provides information for initialization
-bool Response::init(const Request &Req)
-{
-  _metaDataSent = false;
-  _metaData = "";
-  _fdIn = -1;
-  _fdOut = -1;
-  _eof = false;
-
-	if (!Req.isValid())
-		return initSendFile(CODE_400, FILE_400);
+  logging::log2(logging::Debug, __func__, " called");
+	if (!Req.isValid()) {
+		initSendFile(CODE_400, FILE_400);
+    return;
+  }
 
 	// make more generic
-	if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
-		return initError(CODE_501); // correct?
+	if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
+		initSendFile(CODE_501, FILE_501); // correct?
+    return;
+  }
 
 	try {
-		switch (_req.getMethod()) {
+		switch (Req.getMethod()) {
 			case Get:
-				return initGet();
+				initSendFile(CODE_200, Req.getResource().c_str());
+        return;
 			case Post:
 			case Delete:
-      case Generic:
-        return initError(CODE_501);
+        initSendFile(CODE_501, FILE_501);
+        return;
 		}
 	} catch (...) {
-		return initError(CODE_500); // cases
+		initSendFile(CODE_500, FILE_500);
+    return;
 	}
 }
 
@@ -58,7 +45,7 @@ void Response::initSendFile(const int Code, const char *File) {
   if (File != NULL) {
     if (stat(File, &statbuf) < 0) {
       if (Code == CODE_500)
-        return initSendFile(CODE_500, NULL)
+        return initSendFile(CODE_500, NULL);
       return initSendFile(CODE_500, FILE_500);
     }
   }
@@ -66,19 +53,17 @@ void Response::initSendFile(const int Code, const char *File) {
 	_fdIn = open(File, O_RDONLY);
 	if (_fdIn < 0) {
     if (Code == CODE_500)
-      return initSendFile(CODE_500, NULL)
+      return initSendFile(CODE_500, NULL);
     return initSendFile(CODE_500, FILE_500);
   }
 
   if (File != NULL)
-    setContentLength = statbuf.st_size;
+    _headers.setContentLength(statbuf.st_size);
 
+  std::ostringstream oss;
+  oss << _headers;
+  _metadata = oss.str();
 	_fdOut = -1;
   _ptype = SendFile;
-  _metaDataSent = false;
-  return true;
-}
-
-Response::Response(const Request &Req): _req(Req) {
-  init(Req);
+  _metadataSent = false;
 }

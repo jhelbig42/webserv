@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include "HttpHeaders.hpp"
 #include "Request.hpp"
 #include <string>
 #include <sys/types.h>
@@ -35,28 +36,17 @@ public:
 private:
   typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
-  bool init(const Request &Req);
-
   // sending files + metadata
-  bool process(const int Socket, const size_t Bytes);
   bool sendFile(const int Socket, const size_t Bytes);
-
-  bool initError(const int Code);
   void initSendFile(const int Code, const char *File);
-
-  bool makeMetadata(const int Code);
-  bool sendMetadata(const int Socket, const size_t Bytes);
-  bool processDelete(const int, const size_t);
-  bool sendBuffer(const int, const size_t);
-  bool fillBufferFile(const size_t);
 
   HttpHeaders _headers;
 
   ProcessType _ptype;
 
   // consider abstraction for metaData
-  bool _metaDataSent;
-  std::string _metaData;
+  bool _metadataSent;
+  std::string _metadata;
 
   int _fdIn;
   int _fdOut;

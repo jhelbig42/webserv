@@ -3,7 +3,6 @@
 #include <string>
 
 typedef enum {
-  Generic,
 	Get,
 	Post,
 	Delete

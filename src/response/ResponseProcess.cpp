@@ -1,7 +1,10 @@
-#include "ReasonPhrases.hpp"
-#include "Request.hpp"
 #include "Response.hpp"
+
+#include "Logging.hpp"
+#include "StatusCodes.hpp"
+#include "Request.hpp"
 #include <algorithm>
+#include <cerrno>
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
@@ -45,32 +48,34 @@ static bool stringToSocket(const int Socket, std::string &Str, const size_t Byte
 
 bool Response::process(const int Socket, const size_t Bytes)
 {
-  if (_ptype SendFile)
+  if (_ptype == SendFile)
     return sendFile(Socket, Bytes);
   throw std::runtime_error("Unknown process type");
 }
 
 bool Response::sendFile(const int Socket, const size_t Bytes)
 {
-  if (!_metaDataSent) {
-    _metaDataSent = stringToSocket(Socket, _metadata&, Bytes);
+  if (!_metadataSent) {
+    _metadataSent = stringToSocket(Socket, _metadata, Bytes);
     return false;
   }
-  return dataTransferGet(Socket, _fdIn, _buffer, Bytes);
+  return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
 // TODO: catching SIGPIPE still missing
+// TODO: handle rc < 0
 static bool stringToSocket(const int Socket, std::string &Str, const size_t Bytes) {
   if (Str.empty())
     return true;
   const size_t amount = std::min(Bytes, Str.size());
   const ssize_t rc = write(Socket, Str.c_str(), amount);
-  if (rc == amount)
-    return true;
   if (rc < 0) {
     logging::log3(logging::Error, __func__, ": ", strerror(errno));
+    return false;
   }
-  Str.erase(0, rc);
+  else if ((size_t)rc == amount) // cast is safe because rc > 0
+    return true;
+  Str.erase(0, (size_t)rc); // cast is safe because rc > 0
   return false;
 }
 
@@ -81,9 +86,10 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf, const size_
     Buf.optimize(Bytes);
 	// edgecase = FileFd empties by exactly filling up Buf. Then empty FileFd would be passed one more time;
 	// theory: does not matter as FileFd will spill just 0 next iteration and no exception will be thrown
-    if (Buf.fill(FileFd, Bytes) < Bytes && Buf.getFree() > 0) {
+    const ssize_t rc = Buf.fill(FileFd, Bytes);
+    if (rc < 0 || ((size_t)rc < Bytes && Buf.getFree() > 0)) {
 	    if (close(FileFd) < 0) {
-        logging::log2(logging::Error, "close: ", strerror(errrno));
+        logging::log2(logging::Error, "close: ", strerror(errno));
         errno = 0;
       }
       FileFd = -1;
@@ -92,7 +98,8 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf, const size_
   const size_t used = Buf.getUsed();
   if (used == 0) // nothing read from FileFd and no residue from last time
 	  return true;
-  if (fileFd == -1 && Buf.empty(Socket, Bytes) == used)
+  const ssize_t rc = Buf.empty(Socket, Bytes);
+  if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used))
 	  return true;
   return false;
 }
