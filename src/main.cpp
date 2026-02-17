@@ -1,10 +1,11 @@
 #include "Logging.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include <exception>
 #include <unistd.h>
 
 #define METHOD "GET"
-#define PATH "/home/alneuman/projects/webserv/Makefile"
+#define PATH "/home/alneuman/projects/webserv/.gitignore"
 #define VERSION "HTTP/1.0"
 
 #define BYTES_PER_CHUNK 256
