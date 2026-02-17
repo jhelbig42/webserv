@@ -57,7 +57,10 @@ void Request::parseResource(std::string token)
 	this->_resource = token;
 	logging::log("parse status_line: parse resource successfully", logging::Debug);
 }
-// TO DO: catch invalid inputs like HTTP/1.0a - atoi does not do that
+/**
+ * parseHttp uses stringstream into size as this gives the option to catch
+ * invalid inputs like 1.1a(by ) which is more diffiult with atoi
+ */
 void Request::parseHttp(std::string token)
 {
 	if (token.substr(0, 5) != "HTTP/")
@@ -66,14 +69,15 @@ void Request::parseHttp(std::string token)
 	size_t pos = token.find(".");
 	if (pos == std::string::npos || pos <= 5 || pos == tback - 1 ) //no . or no other char before .
 		throw std::runtime_error("no HTTP version given");
-	std::string smajor = token.substr(5, pos - 5);
-	int major = atoi(smajor.c_str());
-	std::string sminor = token.substr(pos + 1, tback - pos - 1);
-	int minor = atoi(sminor.c_str());
-	if ((major == 0 && smajor != "0") || (minor == 0 && sminor != "0") || major < 0 || minor < 0)
-		throw std::runtime_error("no HTTP version given");
-	this->_majorVersion = major;
-	this->_minorVersion = minor;
+	
+	std::stringstream smajor(token.substr(5, pos - 5));
+	if (!(smajor >> this->_majorVersion) || !smajor.eof())
+    	throw std::runtime_error("no HTTP version given");
+
+	std::stringstream sminor(token.substr(pos + 1));
+	if (!(sminor >> this->_minorVersion) || !sminor.eof())
+    	throw std::runtime_error("no HTTP version given");
+
 	logging::log("parse status_line: parse http version successfully", logging::Debug);
 }
 /**

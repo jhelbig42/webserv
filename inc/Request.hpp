@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <stdlib.h>
+#include <sstream>
 #include "Logging.hpp"
 
 typedef enum {
