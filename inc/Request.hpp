@@ -23,10 +23,10 @@ class Request {
     	Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
 		Request(const char *input);
     	
-		void parse(const char *, const size_t);
-		void parse_method(std::string token);
-		void parse_resource(std::string token);
-		void parse_http(std::string token);
+		void parseStatusLine(const char *, const size_t);
+		void parseMethod(std::string token);
+		void parseResource(std::string token);
+		void parseHttp(std::string token);
 
 		bool isValid() const;
 		size_t getMajorV() const;

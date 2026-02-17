@@ -7,11 +7,18 @@
 Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
   : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
 
-
+/**
+ * \brief Request Constructor called on given input.
+ * This should be used if the status line. Later: called on first buffer.
+ * Calls parse() that parses the statusline.
+ * Does not need the amount of sent bytes yet, but will likely do so,
+ * when the headers are sent and need to be parsed later on.
+ * 
+ */
 Request::Request(const char *input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {
-	this->parse(input, 100);
+	this->parseStatusLine(input, 100);
 }  
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter) 
@@ -25,12 +32,12 @@ std::vector<std::string> split(const std::string& s, const std::string& delimite
         tokens.push_back(token);
 		last = next + delimiter.length();
     }
-    tokens.push_back(s.substr(last)); // last string added here
+    tokens.push_back(s.substr(last)); 
 	logging::log("parse status_line: split Successfull", logging::Debug);
     return tokens;
 }
 
-void Request::parse_method(std::string token)
+void Request::parseMethod(std::string token)
 {
 	if (token == "GET")
 		this->_method = Get;
@@ -43,14 +50,15 @@ void Request::parse_method(std::string token)
 	logging::log("parse status_line: got method successfully", logging::Debug);
 }
 
-void Request::parse_resource(std::string token)
+void Request::parseResource(std::string token)
 {
 	if (token[0] != '/')
 		throw std::runtime_error("requestURI not given as absolute path");
 	this->_resource = token;
 	logging::log("parse status_line: parse resource successfully", logging::Debug);
 }
-void Request::parse_http(std::string token)
+// TO DO: catch invalid inputs like HTTP/1.0a - atoi does not do that
+void Request::parseHttp(std::string token)
 {
 	if (token.substr(0, 5) != "HTTP/")
 		throw std::runtime_error("invalid HTTP version");
@@ -68,15 +76,14 @@ void Request::parse_http(std::string token)
 	this->_minorVersion = minor;
 	logging::log("parse status_line: parse http version successfully", logging::Debug);
 }
-
-//   GET /TheProject.html HTTP/1.0
-void Request::parse(const char *buffer, const size_t bytes)
+/**
+ * \brief Parses the status line to construct a Request instance. 
+ * On any invalid syntax within the status line Request remains invalid. 
+ * So before generating a Response, it shall be checked if the Request is valid at all. 
+ */
+void Request::parseStatusLine(const char *buffer, const size_t bytes)
 {
-	//assuming I am getting just the status line
-
-	//correct amount of SP? ; always just one space 
 	std::vector<std::string> status = split(buffer, " ");
-	//status line with exactly 3 tokens
 	if (status.size() != 3)
 	{
 		this->_valid =false;
@@ -84,16 +91,14 @@ void Request::parse(const char *buffer, const size_t bytes)
 	}
 	try
 	{
-		parse_method(status[0]);
-		parse_resource(status[1]);
-		parse_http(status[2]);
+		parseMethod(status[0]);
+		parseResource(status[1]);
+		parseHttp(status[2]);
 		this->_valid = true;
 	}
 	catch (std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
-		this->_valid = false;
-		throw (e);
 		return ;
 	}
 	(void)bytes;
