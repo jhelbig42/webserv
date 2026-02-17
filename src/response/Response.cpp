@@ -4,6 +4,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+Response::Response(Request &Req)
+  : _ptype(None), _metaDataSent(false), _fdIn(-1), _fdOut(-1) {
+}
+
 /// @brief initializes a processingState object so it can be used for chunkwise processing
 ///
 /// checked runtime errors:
@@ -21,9 +25,6 @@
 /// @param Req provides information for initialization
 bool Response::init(const Request &Req)
 {
-  _method = Generic;
-  _contentLength = 0;
-  _hasMetadata = false;
   _metaDataSent = false;
   _metaData = "";
   _fdIn = -1;
@@ -31,7 +32,7 @@ bool Response::init(const Request &Req)
   _eof = false;
 
 	if (!Req.isValid())
-		return initError(CODE_400);
+		return initSendFile(CODE_400, FILE_400);
 
 	// make more generic
 	if (Req.getMajorV() != 1 || Req.getMinorV() != 0)
@@ -52,6 +53,7 @@ bool Response::init(const Request &Req)
 }
 
 void Response::initSendFile(const int Code, const char *File) {
+
   struct stat statbuf;
   if (File != NULL) {
     if (stat(File, &statbuf) < 0) {
@@ -61,42 +63,22 @@ void Response::initSendFile(const int Code, const char *File) {
     }
   }
 	
-	_fdIn = open(_req.getResource().c_str(), O_RDONLY);
-	if (_fdIn < 0)
-		return initError(CODE_500);
+	_fdIn = open(File, O_RDONLY);
+	if (_fdIn < 0) {
+    if (Code == CODE_500)
+      return initSendFile(CODE_500, NULL)
+    return initSendFile(CODE_500, FILE_500);
+  }
 
-	_contentLength = statbuf.st_size;
-  _hasMetadata = false;
+  if (File != NULL)
+    setContentLength = statbuf.st_size;
+
 	_fdOut = -1;
-  _eof = false;
+  _ptype = SendFile;
+  _metaDataSent = false;
   return true;
 }
 
 Response::Response(const Request &Req): _req(Req) {
   init(Req);
-}
-
-bool Response::initError(const int Code)
-{
-  makeMetadata(Code);
-  _hasMetadata = true;
-  return true;
-}
-
-/// TODO: check error handling
-bool Response::initGet()
-{
-	struct stat statbuf;
-	if (stat(_req.getResource().c_str(), &statbuf) < 0)
-		return initError(CODE_500);
-	
-	_fdIn = open(_req.getResource().c_str(), O_RDONLY);
-	if (_fdIn < 0)
-		return initError(CODE_500);
-
-	_contentLength = statbuf.st_size;
-  _hasMetadata = false;
-	_fdOut = -1;
-  _eof = false;
-  return true;
 }

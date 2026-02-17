@@ -5,8 +5,6 @@
 #include <string>
 #include <sys/types.h>
 
-#define RESPONSE_BUFFSIZE 128
-
 class Response {
 public:
   // Response();
@@ -35,7 +33,7 @@ public:
   bool process(const int Socket, const size_t Bytes);
 
 private:
-  typedef enum { SendFile, ReceiveFile, Cgi } ProcessType;
+  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
   bool init(const Request &Req);
 
@@ -57,7 +55,6 @@ private:
   ProcessType _ptype;
 
   // consider abstraction for metaData
-  bool _hasMetadata;
   bool _metaDataSent;
   std::string _metaData;
 
