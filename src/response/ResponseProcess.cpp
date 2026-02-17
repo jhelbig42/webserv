@@ -1,13 +1,13 @@
 #include "Response.hpp"
 
+#include "Buffer.hpp"
 #include "Logging.hpp"
-#include "StatusCodes.hpp"
-#include "Request.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
+#include <string>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -64,6 +64,7 @@ bool Response::sendFile(const int Socket, const size_t Bytes)
 
 // TODO: catching SIGPIPE still missing
 // TODO: handle rc < 0
+// TODO: doublecheck error handling
 static bool stringToSocket(const int Socket, std::string &Str, const size_t Bytes) {
   if (Str.empty())
     return true;
@@ -73,7 +74,7 @@ static bool stringToSocket(const int Socket, std::string &Str, const size_t Byte
     logging::log3(logging::Error, __func__, ": ", strerror(errno));
     return false;
   }
-  else if ((size_t)rc == amount) // cast is safe because rc > 0
+  if ((size_t)rc == amount) // cast is safe because rc > 0
     return true;
   Str.erase(0, (size_t)rc); // cast is safe because rc > 0
   return false;

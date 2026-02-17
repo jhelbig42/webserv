@@ -1,4 +1,3 @@
-#include "Buffer.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -12,7 +11,7 @@ int main(void) {
   Response res(req);
   try {
     while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
-      logging::log(logging::Error, "hi");
+      ;
   } catch (std::exception &e) {
     logging::log(logging::Error, e.what());
     return 1;
