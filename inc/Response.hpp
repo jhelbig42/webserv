@@ -40,7 +40,7 @@ private:
   bool sendFile(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
   bool statbufPopulate(const int Code, const char *File, struct stat &statbuf);
-  bool setFdIn(const int Code, const char *File);
+  bool setFdIn(const char *File);
   bool initError(const int Errno);
 
   HttpHeaders _headers;
