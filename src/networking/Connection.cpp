@@ -6,48 +6,17 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/13 17:19:02 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/17 19:28:16 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Logging.hpp"
 #include "Connection.hpp"
 
 // Construct & Destruct
 
-/*
-Connection::Connection(void): _index(-42), _active(false), _sock(-1),
-_addr_size(sizeof _addr), next (NULL){ memset(&_info, 0, sizeof _info);
-        memset(&_request_buffer, '\0', sizeof _request_buffer);
-}
-
-Connection::Connection(int server_sock): _index(-42), _active(false), _sock(-1),
-_addr_size(sizeof _addr){
-
-        memset(&_info, 0, sizeof _info); // unneccessary? delete?
-        memset(&_request_buffer, '\0', sizeof _request_buffer);
-
-        _sock = accept(server_sock, (struct sockaddr *)&_addr, &_addr_size);
-        if (_sock == -1){
-                std::ostringstream msg;
-                msg << "accept: " << std::strerror(errno) <<
-                        " (may continue trying to accept connections)";
-                        throw std::runtime_error(msg.str()); // is it safe to
-throw exception in constructor?
-                        // or do we need a function that performs accept &
-checks validity of results?
-        }
-        else {
-                _active = true;
-                std::cout << "\nConnection accepted on socket " << _sock <<
-"\n\n";
-//		logging::log3(logging:Debug, "Connection accepted on socket ",
-_sock, "\n");
-        }
-}
-*/
-
 Connection::Connection(const int sock, const sockaddr_storage &addr, const socklen_t addr_size)
-    : _index(-42), _active(true), _sock(sock), _addr_size(sizeof _addr) {
+    : _sock(sock), _addr_size(sizeof _addr) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &addr, addr_size);
@@ -61,26 +30,33 @@ Connection::~Connection(void) {}
 
 int Connection::get_sock(void) const { return (_sock); }
 
-// setters
 
-void Connection::clear_connection() {
-  _active = false;
-  _sock = -1;
-  _addr_size = sizeof _addr;
-  memset(&_info, 0, sizeof _info);
-}
+void Connection::read_data(void){
 
-// accept
+	logging::log(logging::Debug, "read_data()\n");
+	ssize_t bytes_read = recv(_sock, &_read_buf, MAX_REQUEST, 0);
+	
+	if (bytes_read == MAX_REQUEST){
+		logging::log(logging::Info,
+			"read_data(): bytes_read == MAX REQUEST");
+			// May happen frequently, will be handled in chunks
+			// Logging for debug purposes as we build.
+	}
+	if (bytes_read == 0){
+		logging::log(logging::Warning,
+			"read_data(): bytes_read == 0");
+		return;
+			// This can indicate client hangup.
+			// We will need to remove client from fds & connections
+	}
+	if (bytes_read < 0) {
+		std::ostringstream msg;
+		msg << "recv: " << std::strerror(errno);
+		logging::log(logging::Warning, msg.str());
+		return;
+	}
 
-int Connection::accept_new(int server_sock) {
-  _sock = accept(server_sock, (struct sockaddr *)&_addr, &_addr_size);
-  if (_sock == -1) {
-    std::ostringstream msg;
-    msg << "accept: " << std::strerror(errno)
-        << " (may continue trying to accept connections)";
-    logging::log(logging::Error, msg.str());
-  } else {
-    _active = true;
-  }
-  return (_sock);
+	std::string str = _read_buf;
+	logging::log(logging::Debug, "read_buf = ");
+	logging::log(logging::Debug, _read_buf);
 }

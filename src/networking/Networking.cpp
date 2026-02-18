@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/13 16:10:44 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/17 19:12:55 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,3 @@ void networking::start(void) {
 
   poll_loop(sock);
 }
-
-void networking::read_data(int listen_sock, int client_sock,
-                           Connection &connection, std::vector<pollfd> &fds) {
-
-  // client_sock is contained in the containers but let's
-  // see if we get rid of them here
-
-  ssize_t bytes_read =
-      recv(client_sock, &connection.read_buf[0], MAX_REQUEST, 0);
-  (void)bytes_read;
-}
-
-

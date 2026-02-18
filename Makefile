@@ -94,8 +94,8 @@ ifeq ($(ASAN), 1)
 endif
 
 ifeq ($(UBSAN), 1)
-	LDFLAGS += -fsanitize=undefined
-	CPPFLAGS += -fsanitize=undefined
+	LDFLAGS += -fsanitize=undefined -g
+	CPPFLAGS += -fsanitize=undefined -g
 endif
 
 # rules
