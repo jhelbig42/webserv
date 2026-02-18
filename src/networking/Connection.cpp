@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/17 19:28:16 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/18 17:24:34 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ void Connection::read_data(void){
 		return;
 			// This can indicate client hangup.
 			// We will need to remove client from fds & connections
+			// likely by setting a flag in Connection that networking
+			// loop will handle
 	}
 	if (bytes_read < 0) {
 		std::ostringstream msg;

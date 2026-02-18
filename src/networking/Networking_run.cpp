@@ -54,6 +54,9 @@ void networking::poll_loop(const int sock) {
   }
 }
 
+
+void networking::handle_revents_errors(std::map<int, Connection> &c_map)
+
 // process() iterates through the vector of fds and handles the flags
 // that were set by poll() in fd[i]->events & fd[i]->revents.
 //
