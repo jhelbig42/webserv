@@ -23,5 +23,12 @@ int main(void) {
     logging::log(logging::Error, e.what());
     return 1;
   }
-  return 0;
+
+  try { 
+  	networking::start();
+  }
+  catch (const std::runtime_error & e){
+  	logging::log(logging::Error, e.what());
+  }
+
 }

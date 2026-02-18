@@ -17,6 +17,12 @@ SRC			+= Metadata.cpp
 SRC			+= ProcessResponse.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
+vpath %.cpp $(SRC_DIR)/networking
+SRC			+= Networking.cpp\
+			   Networking_init_socket.cpp\
+			   Networking_init_server.cpp\
+			   Networking_run.cpp\
+			   Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -95,13 +101,13 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(ASAN), 1)
-	LDFLAGS += -fsanitize=address
-	CPPFLAGS += -fsanitize=address
+	LDFLAGS += -fsanitize=address -g
+	CPPFLAGS += -fsanitize=address -g
 endif
 
 ifeq ($(UBSAN), 1)
-	LDFLAGS += -fsanitize=undefined
-	CPPFLAGS += -fsanitize=undefined
+	LDFLAGS += -fsanitize=undefined -g
+	CPPFLAGS += -fsanitize=undefined -g
 endif
 
 # rules
