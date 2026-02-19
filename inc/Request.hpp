@@ -21,8 +21,8 @@ class Request {
 		// request(const request&);
 		// request& operator=(const request&);
 		// ~request();
-    	Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
-		Request(const char *input);
+    	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
+		explicit Request(const char *input);
     	
 		void parseStatusLine(const char *, const size_t);
 		void parseMethod(std::string token);

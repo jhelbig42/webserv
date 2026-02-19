@@ -13,10 +13,13 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
 vpath %.cpp $(SRC_DIR)/response
 SRC			+= Response.cpp
-SRC			+= Metadata.cpp
-SRC			+= ProcessResponse.cpp
+SRC			+= ResponseProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
+vpath %.cpp $(SRC_DIR)/dsa
+SRC			+= Buffer.cpp
+vpath %.cpp $(SRC_DIR)/http_headers
+SRC			+= HttpHeaders.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -74,6 +77,7 @@ DEV			:= 1
 ifeq ($(DEV), 1)
 	ASAN		:= 1
 	UBSAN		:= 1
+	DEBUG		:= 1
 	CXXFLAGS	+= -pedantic
 	CXXFLAGS	+= -Wconversion
 	CXXFLAGS	+= -Wno-unused-parameter
