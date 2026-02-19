@@ -5,8 +5,8 @@
 // Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-11, License - CC BY-SA 4.0
 
-Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
-  : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
+// Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
+//   : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
 
 /**
  * \brief Request Constructor called on given input.

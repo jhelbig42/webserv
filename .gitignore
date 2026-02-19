@@ -6,6 +6,7 @@
 *.pdf
 *.vim
 *.swp
+*.orig
 docs/*
 sa/*
 webserv

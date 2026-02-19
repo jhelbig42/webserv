@@ -1,9 +1,14 @@
 #include "Logging.hpp"
 #include "Networking.hpp"
 #include <iostream>
-#include "Response.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
+#include <exception>
 #include <unistd.h>
+
+#define METHOD "GET"
+#define PATH "/home/alneuman/projects/webserv/.gitignore"
+#define VERSION "HTTP/1.0"
 
 #define BYTES_PER_CHUNK 256
 
@@ -17,19 +22,11 @@ int main(void) {
   }
   
   try {
-  Request req("GET /home/julia/projects/webserv/Makefile HTTP/1.0");
-  //Request req(Get, "/home/julia/projects/webserv/Makefile", 0, 9, true);
+  const Request req(METHOD " " PATH " " VERSION);
   Response res(req);
- 
-    while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
-    {
-      logging::log(logging::Debug, req.getResource());
-      if (req.isValid() != true)
-        logging::log(logging::Error, "Request invalid");
-    }
-  } 
-  catch (std::exception &e)
-  {
+  while (!res.process(STDOUT_FILENO, BYTES_PER_CHUNK))
+    ;
+  } catch (std::exception &e) {
     logging::log(logging::Error, e.what());
     return 1;
   }
