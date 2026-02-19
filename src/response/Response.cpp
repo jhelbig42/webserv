@@ -12,6 +12,33 @@
 
 static std::string getReasonPhrase(const int Code);
 
+Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {}
+
+void Response::init(const Request &Req){
+
+  logging::log2(logging::Debug, __func__, " called");
+  if (!Req.isValid()) {
+    initSendFile(CODE_400, FILE_400);
+    return;
+  }
+
+  // make more generic
+  if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
+    initSendFile(CODE_501, FILE_501); // correct?
+    return;
+  }
+
+  switch (Req.getMethod()) {
+  case Get:
+    initSendFile(CODE_200, Req.getResource().c_str());
+    return;
+  case Post:
+  case Delete:
+  case Generic:
+    initSendFile(CODE_501, FILE_501);
+    return;
+  }
+}
 Response::Response(const Request &Req)
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
 

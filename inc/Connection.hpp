@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/17 19:24:48 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/19 16:07:42 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -40,6 +42,9 @@ class	Connection {
 	public:
 		Connection(const int sock, const sockaddr_storage &addr, const socklen_t addr_size);
 		~Connection();
+
+		Request _req;
+		Response _res;
 		
 		// getters
 		int get_sock(void) const;

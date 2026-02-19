@@ -8,12 +8,13 @@
 
 class Response {
 public:
-  // Response();
+  Response();
   // Response(const Response&);
   // Response& operator=(const Response&);
   // ~Response();
 
   explicit Response(const Request &Req);
+  void init(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
   /// \brief continues processing a response object

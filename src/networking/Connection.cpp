@@ -6,12 +6,17 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/18 17:24:34 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/19 16:20:28 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logging.hpp"
 #include "Connection.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
+
+#define BYTES_PER_CHUNK 256
+
 
 // Construct & Destruct
 
@@ -20,7 +25,7 @@ Connection::Connection(const int sock, const sockaddr_storage &addr, const sockl
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &addr, addr_size);
-
+  memset(&_read_buf, 0, MAX_REQUEST);
   logging::log(logging::Debug, "Connection created");
 }
 
@@ -57,8 +62,11 @@ void Connection::read_data(void){
 		logging::log(logging::Warning, msg.str());
 		return;
 	}
-
-	std::string str = _read_buf;
+	_read_buf[bytes_read] = '\0';
+	_req.init(_read_buf);
+	_res.init(_req);
+	  while (!_res.process(_sock, BYTES_PER_CHUNK))
+		;
 	logging::log(logging::Debug, "read_buf = ");
 	logging::log(logging::Debug, _read_buf);
 }
