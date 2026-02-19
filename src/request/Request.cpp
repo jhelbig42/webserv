@@ -18,7 +18,8 @@
  * \return fills the Request attributes. On error _valid attribute will remain false
  */
 
-Request::Request() {}
+Request::Request() : _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
+{}  
 
 void Request::init(const char *input) {
 	this->parseStatusLine(input, 100);

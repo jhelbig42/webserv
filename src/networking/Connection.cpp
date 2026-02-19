@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/19 16:20:28 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/19 16:35:21 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Connection.hpp"
 #include "Response.hpp"
 #include "Request.hpp"
+#include <stdio.h> // for puts
 
 #define BYTES_PER_CHUNK 256
 
@@ -62,7 +63,9 @@ void Connection::read_data(void){
 		logging::log(logging::Warning, msg.str());
 		return;
 	}
-	_read_buf[bytes_read] = '\0';
+	_read_buf[bytes_read - 1] = '\0';
+//	puts(_read_buf);
+	//_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
 	_req.init(_read_buf);
 	_res.init(_req);
 	  while (!_res.process(_sock, BYTES_PER_CHUNK))
