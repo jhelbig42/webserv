@@ -92,7 +92,7 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     // would be passed one more time; theory: does not matter as FileFd will
     // spill just 0 next iteration and no exception will be thrown
     const ssize_t rc = Buf.fill(FileFd, Bytes);
-    if (rc < 0 || ((size_t)rc < Bytes && Buf.getFree() > 0)) {
+    if ((size_t)rc < Bytes && Buf.getFree() > 0) {
       if (close(FileFd) < 0) {
         logging::log2(logging::Error, "close: ", strerror(errno));
         errno = 0;
