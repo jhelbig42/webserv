@@ -54,6 +54,17 @@ void networking::poll_loop(const int sock) {
   }
 }
 
+void handle_pollnval(int fd){
+    	std::ostringstream msg;
+      logging::log2(logging::Error,
+	  	"networking::process(): POLLNAL.\n\tpoll() tried to read invalid fd. fd = ", fd);
+}
+
+void handle_pollerr(int fd){
+    	std::ostringstream msg;
+      logging::log2(logging::Error,
+	  	"networking::process(): POLLERR \n\tclient may have disconnected abruptly using RST, or socket is broken.\n fd = ", fd); // downgrade to Warning?
+}
 
 
 // process() iterates through the vector of fds and handles the flags
@@ -75,13 +86,12 @@ void networking::process(const int listen_sock, std::map<int, Connection> &c_map
   std::vector<pollfd> new_fd_batch;
   std::vector<int> delete_list;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
-	if (it->revents & POLLNVAL || it->revents & POLLERR) { // error
-    	std::ostringstream msg;
-    	msg << "process: " << "poll() resulted in unexpected results for fd " << it->fd
-		<< " : POLLNVAL or POLLERR";
-      logging::log(logging::Error, msg.str());
-    }
-
+	if (it->revents & POLLNVAL){
+		handle_pollnval(it->fd);
+	}
+	if (it->revents & POLLERR) {
+		handle_pollerr(it->fd);
+	}
     if (it->revents & (POLLIN | POLLHUP)) { // data to read | hang-up
       
 	  std::cout << "POLLIN | POLLHUP : fd : " << it->fd << "\n";
