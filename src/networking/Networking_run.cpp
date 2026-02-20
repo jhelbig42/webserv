@@ -54,6 +54,18 @@ void networking::poll_loop(const int sock) {
   }
 }
 
+void handle_pollnval(int fd){
+    	std::ostringstream msg;
+      logging::log2(logging::Error, 
+	  	"networking::process(): POLLNAL.\n\tpoll() tried to read invalid fd. fd = ", fd);
+}
+
+void handle_pollerr(int fd){
+    	std::ostringstream msg;
+      logging::log2(logging::Error, 
+	  	"networking::process(): POLLERR \n\tclient may have disconnected abruptly using RST, or socket is broken.\n fd = ", fd); // downgrade to Warning?
+}
+
 // process() iterates through the vector of fds and handles the flags
 // that were set by poll() in fd[i]->events & fd[i]->revents.
 //
@@ -73,7 +85,42 @@ void networking::process(const int listen_sock, std::map<int, Connection> &c_map
   std::vector<pollfd> new_fd_batch;
   std::vector<int> delete_list;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
+	if (it->revents & POLLERR) {
+    	handle_pollerr(it->fd);
+		continue;
+	}
+	if (it->revents & POLLNVAL) {
+    	handle_pollnval(it->fd);
+		continue;
+	}
 
+    if (it->revents & (POLLIN | POLLHUP)) { // data to read | hang-up
+      
+	  std::cout << "POLLIN | POLLHUP : fd : " << it->fd << "\n";
+	  if (it->fd == listen_sock) { // listening socket got new connection
+	    std::cout << "is listener\n";
+        client_addr candidate;
+        if (accept_connection(listen_sock, &candidate) != -1) {
+          add_connection_to_map(candidate, c_map);
+          pollfd new_fd = {candidate.client_sock, POLLIN, 0};
+          new_fd_batch.push_back(new_fd);
+        }
+      }
+	
+	else {
+
+	    std::cout << "is client\n";
+        std::map<int, Connection>::iterator c_it = c_map.find(it->fd);
+        if (c_it != c_map.end()) {
+          (c_it->second).read_data();
+		} else {
+          logging::log(logging::Error, "process: Connection not found in map "
+                                       "container (This should never happen)");
+	  				// could be removed after thorough testing
+        }
+      }
+    }
+/*
 	if (it->revents & POLLNVAL || it->revents & POLLERR) { // error
     	std::ostringstream msg;
     	msg << "process: " << "poll() resulted in unexpected results for fd " << it->fd
@@ -107,6 +154,7 @@ void networking::process(const int listen_sock, std::map<int, Connection> &c_map
         }
       }
     }
+	*/
   }
   /*
   for (std::vector<int>::iterator it = delete_list.begin();
