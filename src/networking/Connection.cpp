@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/19 16:35:21 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/20 13:53:30 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 // Construct & Destruct
 
 Connection::Connection(const int sock, const sockaddr_storage &addr, const socklen_t addr_size)
-    : _sock(sock), _addr_size(sizeof _addr) {
+    : _sock(sock), _addr_size(sizeof _addr), _delete(false) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &addr, addr_size);
@@ -72,4 +72,10 @@ void Connection::read_data(void){
 		;
 	logging::log(logging::Debug, "read_buf = ");
 	logging::log(logging::Debug, _read_buf);
+}
+
+// setters
+
+void Connection::schedule_for_demolition(void){
+	_delete = false;
 }

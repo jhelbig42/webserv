@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/19 16:07:42 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/20 13:57:00 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class	Connection {
 	private:
 		int		_sock; // client socket fd
 		char	_read_buf[MAX_REQUEST]; // or vector?
+		bool	_delete;
 
 		// Relevant to accept(), maybe more
 		struct	addrinfo _info;
@@ -48,6 +49,9 @@ class	Connection {
 		
 		// getters
 		int get_sock(void) const;
+
+		// setters
+		void schedule_for_demoltion(void);
 		
 		// read from socket
 		void read_data(void);
