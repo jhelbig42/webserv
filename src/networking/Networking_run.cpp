@@ -1,7 +1,18 @@
-// TODO add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking_run.cpp                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/20 16:41:56 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
+
 
 // TODO These functions could be made static:
 // process(), accept_connection(), add_connection_to_map()
@@ -50,9 +61,16 @@ void networking::poll_loop(const int sock) {
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-    process(sock, c_map, fds);
+//    process(sock, c_map, fds);
+//	remove_disconnects(c_map, fds);
   }
 }
+/*
+void	remove_disconnects(std::map<int, Connection> &c_map, std::vector<pollfd> &fds){
+	
+	for 
+}
+*/
 
 void handle_pollnval(int fd, std::map<int, Connection> &c_map){
       logging::log2(logging::Error,
@@ -99,13 +117,19 @@ void networking::process(const int listen_sock, std::map<int, Connection> &c_map
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
 	if (it->revents & POLLNVAL){
 		handle_pollnval(it->fd, c_map);
+		exit(1); // temp
 	}
 	if (it->revents & POLLERR) {
 		handle_pollerr(it->fd, c_map);
+		exit(1); // temp
 	}
-    if (it->revents & (POLLIN | POLLHUP)) { // data to read | hang-up
+    if (it->revents & POLLHUP) {
+		logging::log2(logging::Debug, "Hangup from fd ", it->fd);
+		exit(1); // temp
+	}
+    if (it->revents & POLLIN) { // data to read | hang-up
       
-	  std::cout << "POLLIN | POLLHUP : fd : " << it->fd << "\n";
+	  std::cout << "POLLIN: fd : " << it->fd << "\n";
 	  if (it->fd == listen_sock) { // listening socket got new connection
 	    std::cout << "is listener\n";
         client_addr candidate;
