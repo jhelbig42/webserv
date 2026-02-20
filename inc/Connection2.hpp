@@ -18,11 +18,10 @@ public:
   int get_sock(void) const;
 
   bool serve(const size_t Bytes);
+  Conditions getConditions() const;
 
 private:
   Connection(); // should not be possible
-
-  bool _requesting = true;
 
   bool _delete = false;
 

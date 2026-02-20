@@ -1,7 +1,6 @@
 bool serve(const size_t Bytes) {
   if (_requesting && _conditionsFulfilled & _req.conditions())
-    if (_req.process(_sock, Bytes))
-      _requesting = false;
+    _req.process(_sock, Bytes);
     return false;
   }
   _res.init(_req);
@@ -15,4 +14,10 @@ Response::process(const int Socket, const int SocketForward, const size_t Bytes)
     //call something
   if (conditions & SockRead)
     //call something
+}
+
+Conditions Connection::getConditions() const {
+  if (_req.isFullyParsed())
+    return _req.conditions();
+  return _res.conditions();
 }
