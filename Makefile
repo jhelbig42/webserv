@@ -107,13 +107,15 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(ASAN), 1)
-	LDFLAGS += -fsanitize=address -g
-	CPPFLAGS += -fsanitize=address -g
+	LDFLAGS += -fsanitize=address
+	CPPFLAGS += -fsanitize=address
+	CPPFLAGS += -g3
 endif
 
 ifeq ($(UBSAN), 1)
-	LDFLAGS += -fsanitize=undefined -g
-	CPPFLAGS += -fsanitize=undefined -g
+	LDFLAGS += -fsanitize=undefined
+	CPPFLAGS += -fsanitize=undefined
+	CPPFLAGS += -g3
 endif
 
 # rules
