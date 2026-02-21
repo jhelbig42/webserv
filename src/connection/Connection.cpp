@@ -18,6 +18,6 @@ bool Connection::serve(const size_t Bytes) {
 
 Conditions Connection::getConditions(void) const {
   if (_req.isFullyParsed())
-    return _req.getConditions();
-  return _res.getConditions();
+		return _res.getConditions();
+	return _req.getConditions();
 }
