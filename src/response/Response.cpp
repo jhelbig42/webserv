@@ -1,5 +1,6 @@
 #include "Response.hpp"
 
+#include "Conditions.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
@@ -20,6 +21,7 @@ void Response::setDefaults(void) {
 	_fdIn = -1;
 	_fdOut = -1;
 	_headers.unsetAll();
+	_conditions = Unconditional;
 }
 
 Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
@@ -90,6 +92,7 @@ void Response::initSendFile(const int Code, const char *File) {
   _fdOut = -1;
   _ptype = SendFile;
   _metadataSent = false;
+	_conditions = SockWrite;
 }
 
 bool Response::statbufPopulate(const int Code, const char *File,

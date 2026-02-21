@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
-#include <errno.h>
 #include <stdexcept>
 #include <string>
 #include <sys/types.h>
