@@ -100,6 +100,7 @@ bool Response::statbufPopulate(const int Code, const char *File,
   if (stat(File, &statbuf) == 0)
     return true;
   if (hasDefaultFile(Code)) {
+		logging::log3(logging::Warning, "Code ", Code, ": Default file not accessible. Only sending status line.");
     initSendFile(Code, NULL);
 		return false;
   }
@@ -114,6 +115,7 @@ bool Response::setFdIn(const int Code, const char *File) {
   if (_fdIn >= 0)
     return true;
   if (hasDefaultFile(Code)) {
+		logging::log3(logging::Warning, "Code ", Code, ": Default file not accessible. Only sending status line.");
     initSendFile(Code, NULL);
 		return false;
   }
