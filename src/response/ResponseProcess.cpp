@@ -100,10 +100,8 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     // spill just 0 next iteration and no exception will be thrown
     const ssize_t rc = Buf.fill(FileFd, Bytes);
     if ((size_t)rc < Bytes && Buf.getFree() > 0) {
-      if (close(FileFd) < 0) {
+      if (close(FileFd) < 0)
         logging::log2(logging::Error, "close: ", strerror(errno));
-        errno = 0;
-      }
       FileFd = -1;
     }
   }

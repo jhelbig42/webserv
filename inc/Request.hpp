@@ -11,6 +11,7 @@
 
 typedef enum {
   Generic,
+	Head,
 	Get,
 	Post,
 	Delete

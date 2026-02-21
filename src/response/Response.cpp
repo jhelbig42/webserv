@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
@@ -45,9 +46,15 @@ void Response::init(const Request &Req){
   }
 
   switch (Req.getMethod()) {
+	case Head:
   case Get:
     initSendFile(CODE_200, Req.getResource().c_str());
-    return;
+		if (Req.getMethod() == Get)
+			return;
+		if (_fdIn >= 0 && close(_fdIn) < 0)
+			logging::log2(logging::Error, "close: ", strerror(errno));
+		_fdIn = -1;
+		return;
   case Post:
   case Delete:
   case Generic:
