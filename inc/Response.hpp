@@ -46,6 +46,7 @@ private:
   bool statbufPopulate(const int Code, const char *File, struct stat &statbuf);
   bool setFdIn(const char *File);
   bool initError(const int Errno);
+	void setDefaults(void);
 
 	Conditions _conditions;
 

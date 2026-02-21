@@ -11,14 +11,26 @@
 #include <sys/stat.h>
 
 static std::string getReasonPhrase(const int Code);
+static bool hasDefaultFile(const int Code);
 
-Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {}
+void Response::setDefaults(void) {
+	_ptype = None;
+	_metadataSent = false;
+	_fdIn = -1;
+	_fdOut = -1;
+	_headers.unsetAll();
+}
+
+Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+  _headers.unsetAll();
+}
 
 Conditions Response::getConditions(void) const {
 	return _conditions;
 }
 
 void Response::init(const Request &Req){
+	setDefaults();
 
   logging::log2(logging::Debug, __func__, " called");
   if (!Req.isValid()) {
@@ -43,31 +55,10 @@ void Response::init(const Request &Req){
     return;
   }
 }
+
 Response::Response(const Request &Req)
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
-
-  logging::log2(logging::Debug, __func__, " called");
-  if (!Req.isValid()) {
-    initSendFile(CODE_400, FILE_400);
-    return;
-  }
-
-  // make more generic
-  if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
-    initSendFile(CODE_501, FILE_501); // correct?
-    return;
-  }
-
-  switch (Req.getMethod()) {
-  case Get:
-    initSendFile(CODE_200, Req.getResource().c_str());
-    return;
-  case Post:
-  case Delete:
-  case Generic:
-    initSendFile(CODE_501, FILE_501);
-    return;
-  }
+	init(Req);
 }
 
 // TODO:
@@ -98,32 +89,34 @@ bool Response::statbufPopulate(const int Code, const char *File,
                                struct stat &statbuf) {
   if (File == NULL)
     return true;
+	errno = 0;
   if (stat(File, &statbuf) == 0)
     return true;
   if (Code == CODE_500) {
     errno = 0;
     initSendFile(CODE_500, NULL);
   }
-  const int err = errno;
-  errno = 0;
-  return initError(err);
+  return initError(errno);
 }
 
 bool Response::setFdIn(const char *File) {
   if (File == NULL)
     return true;
+	errno = 0;
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
-  const int err = errno;
-  errno = 0;
-  return initError(err);
+  return initError(errno);
+}
+
+static bool hasDefaultFile(const int Code) {
+	return Code != CODE_200;
 }
 
 bool Response::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
-    initSendFile(CODE_401, FILE_401);
+    initSendFile(CODE_403, FILE_403);
     return false;
   case ENOENT:
     initSendFile(CODE_404, FILE_404);

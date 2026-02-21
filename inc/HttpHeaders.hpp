@@ -16,6 +16,8 @@ public:
   void setContentLength(const off_t Length);
   off_t getContentLength(void) const;
 
+	void unsetAll(void);
+
 private:
   unsigned long _headersSet;
   off_t _contentLength;

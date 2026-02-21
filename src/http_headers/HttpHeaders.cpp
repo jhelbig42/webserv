@@ -21,6 +21,10 @@ HttpHeaders &HttpHeaders::operator=(const HttpHeaders &other) {
 HttpHeaders::~HttpHeaders(void) {
 }
 
+void HttpHeaders::unsetAll(void) {
+	_headersSet = 0;
+}
+
 bool HttpHeaders::isSet(const HttpHeaders::HeaderType Hdr) const {
   return Hdr & _headersSet;
 }
