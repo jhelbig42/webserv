@@ -70,7 +70,7 @@ void Response::initSendFile(const int Code, const char *File) {
   if (!statbufPopulate(Code, File, statbuf))
     return;
 
-  if (!setFdIn(File))
+  if (!setFdIn(Code, File))
     return;
 
   if (File != NULL)
@@ -92,20 +92,24 @@ bool Response::statbufPopulate(const int Code, const char *File,
 	errno = 0;
   if (stat(File, &statbuf) == 0)
     return true;
-  if (Code == CODE_500) {
-    errno = 0;
-    initSendFile(CODE_500, NULL);
+  if (hasDefaultFile(Code)) {
+    initSendFile(Code, NULL);
+		return false;
   }
   return initError(errno);
 }
 
-bool Response::setFdIn(const char *File) {
+bool Response::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
 	errno = 0;
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
+  if (hasDefaultFile(Code)) {
+    initSendFile(Code, NULL);
+		return false;
+  }
   return initError(errno);
 }
 
