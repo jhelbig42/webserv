@@ -78,12 +78,10 @@ ssize_t Buffer::fill(const int Fd, const size_t Bytes) {
   if (getUsed() == 0 || (getFree() == 0 && getBlocked() != 0))
     format();
   const size_t amount = std::min(Bytes, getFree());
+	errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
-  if (rc < 0) {
-    const int err = errno;
-    errno = 0;
-    throw std::runtime_error(strerror(err));
-  }
+  if (rc < 0)
+    throw std::runtime_error(strerror(errno));
   _end += (size_t)rc;
   return rc;
 }
@@ -92,12 +90,10 @@ ssize_t Buffer::empty(const int Fd, const size_t Bytes) {
   if (getUsed() == 0)
     return -1;
   const size_t amount = std::min(Bytes, getUsed());
+	errno = 0;
   const ssize_t rc = write(Fd, _buffer + _start, amount);
-  if (rc < 0) {
-    const int err = errno;
-    errno = 0;
-    throw std::runtime_error(strerror(err));
-  }
+  if (rc < 0)
+    throw std::runtime_error(strerror(errno));
   _start += (size_t)rc;
   if (_start == _end)
     reset();
