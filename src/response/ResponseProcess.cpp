@@ -37,6 +37,13 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
+// Response::process(const int Socket, const int SocketForward, const size_t Bytes) {
+//   if (conditions & SockRead)
+//     //call something
+//   if (conditions & SockRead)
+//     //call something
+// }
+
 /// \brief writes the content of an std::string object to a socket
 ///
 /// side effects:
@@ -49,7 +56,7 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Response::process(const int Socket, const size_t Bytes) {
+bool Response::process(const int Socket, const int ForwardSocket, const size_t Bytes) {
   if (_ptype == SendFile)
     return sendFile(Socket, Bytes);
   throw std::runtime_error("Unknown process type");

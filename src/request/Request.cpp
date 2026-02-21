@@ -143,3 +143,15 @@ const std::string &Request::getResource() const {
 HttpMethod Request::getMethod() const {
 	return _method;
 }
+
+bool Request::isFullyParsed(void) const {
+	return _fullyParsed;
+}
+
+Conditions Request::getConditions(void) const {
+	return _conditions;
+}
+
+bool Request::process(const int Socket, const size_t Bytes) {
+	return false;
+}

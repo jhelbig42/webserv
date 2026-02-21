@@ -14,6 +14,10 @@ static std::string getReasonPhrase(const int Code);
 
 Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {}
 
+Conditions Response::getConditions(void) const {
+	return _conditions;
+}
+
 void Response::init(const Request &Req){
 
   logging::log2(logging::Debug, __func__, " called");

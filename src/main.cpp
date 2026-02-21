@@ -6,10 +6,24 @@
 #include <exception>
 #include <unistd.h>
 
+#define OFFLINE
+
+#define CHUNK_SIZE 1024
+
 #define METHOD "GET"
-#define PATH "/home/alneuman/projects/webserv/.gitignore"
+#define PATH "/data/data/com.termux/files/home/code/webserv/.gitignore"
 #define VERSION "HTTP/1.0"
 
+#ifdef OFFLINE
+
+int main(void) {
+	Request req(METHOD " " PATH " " VERSION);
+	Response res(req);
+	while (!res.process(STDOUT_FILENO, -1, CHUNK_SIZE))
+		;
+}
+
+#else	
 
 int main(void) {
 
@@ -20,3 +34,5 @@ int main(void) {
   	logging::log(logging::Error, e.what());
   }
 }
+
+#endif // OFLINE

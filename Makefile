@@ -16,7 +16,7 @@ SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
 			   Networking_init_server.cpp\
 			   Networking_run.cpp\
-			   Connection.cpp
+			   ConnectionOld.cpp
 vpath %.cpp $(SRC_DIR)/response
 SRC			+= Response.cpp
 SRC			+= ResponseProcess.cpp
@@ -26,6 +26,8 @@ vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
 vpath %.cpp $(SRC_DIR)/http_headers
 SRC			+= HttpHeaders.cpp
+vpath %.cpp $(SRC_DIR)/connection
+SRC			+= Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))

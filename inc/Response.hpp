@@ -12,6 +12,8 @@ public:
   // Response(const Response&);
   // Response& operator=(const Response&);
   // ~Response();
+	
+  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
   explicit Response(const Request &Req);
   void init(const Request &Req);
@@ -32,10 +34,11 @@ public:
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
   /// \return true if response got fully processed otherwise false
-  bool process(const int Socket, const size_t Bytes);
+  bool process(const int Socket, const int ForwardSocket, const size_t Bytes);
+		
+	Conditions getConditions(void) const;
 
 private:
-  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
@@ -43,6 +46,8 @@ private:
   bool statbufPopulate(const int Code, const char *File, struct stat &statbuf);
   bool setFdIn(const char *File);
   bool initError(const int Errno);
+
+	Conditions _conditions;
 
   HttpHeaders _headers;
 
