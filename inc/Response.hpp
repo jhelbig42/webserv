@@ -34,7 +34,7 @@ public:
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
   /// \return true if response got fully processed otherwise false
-  bool process(const int Socket, const int ForwardSocket, const size_t Bytes);
+  bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
 		
 	Conditions getConditions(void) const;
 

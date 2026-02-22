@@ -19,7 +19,8 @@
 int main(void) {
 	Request req(METHOD " " PATH " " VERSION);
 	Response res(req);
-	while (!res.process(STDOUT_FILENO, -1, CHUNK_SIZE))
+  int dummy = -1;
+	while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
 		;
 }
 

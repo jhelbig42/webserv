@@ -68,7 +68,8 @@ void Connection::read_data(void){
 	//_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
 	_req.init(_read_buf);
 	_res.init(_req);
-	  while (!_res.process(_sock, -1, BYTES_PER_CHUNK))
+  int dummy = -1;
+	  while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
 		;
 	logging::log(logging::Debug, "read_buf = ");
 	logging::log(logging::Debug, _read_buf);
