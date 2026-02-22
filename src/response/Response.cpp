@@ -14,6 +14,7 @@
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
+static void setMetadata(std::string &Metadata, const int Code, const HttpHeaders &Hdrs);
 
 void Response::setDefaults(void) {
 	_ptype = None;
@@ -32,7 +33,7 @@ Conditions Response::getConditions(void) const {
 	return _conditions;
 }
 
-void Response::init(const Request &Req){
+void Response::init(const Request &Req) {
 	setDefaults();
 
   logging::log2(logging::Debug, __func__, " called");
@@ -41,9 +42,9 @@ void Response::init(const Request &Req){
     return;
   }
 
-  // make more generic
+  // TODO: make more generic
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
-    initSendFile(CODE_501, FILE_501); // correct?
+    initSendFile(CODE_501, FILE_501);
     return;
   }
 
@@ -54,22 +55,24 @@ void Response::initMethod(const Request &Req) {
   switch (Req.getMethod()) {
 	case Head:
   case Get:
-    initSendFile(CODE_200, Req.getResource().c_str());
-		if (Req.getMethod() == Get)
-			return;
-		if (_fdIn >= 0) {
-      errno = 0;
-      if (close(_fdIn) < 0)
-        logging::log2(logging::Error, "close: ", strerror(errno));
-		_fdIn = -1;
-    }
+    initHeadGet(Req);
 		return;
-  case Post:
   case Delete:
+  case Post:
   case Generic:
     initSendFile(CODE_501, FILE_501);
     return;
   }
+}
+
+void Response::initHeadGet(const Request &Req) {
+    initSendFile(CODE_200, Req.getResource().c_str());
+		if (Req.getMethod() == Get || _fdIn < 0)
+			return;
+    errno = 0;
+    if (close(_fdIn) < 0)
+      logging::log2(logging::Error, "close: ", strerror(errno));
+		_fdIn = -1;
 }
 
 Response::Response(const Request &Req)
@@ -92,14 +95,18 @@ void Response::initSendFile(const int Code, const char *File) {
   if (File != NULL)
     _headers.setContentLength(statbuf.st_size);
 
-  std::ostringstream oss;
-  oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
-  oss << _headers << "\r\n";
-  _metadata += oss.str();
+  setMetadata(_metadata, Code, _headers);
+  _metadataSent = false;
   _fdOut = -1;
   _ptype = SendFile;
-  _metadataSent = false;
 	_conditions = SockWrite;
+}
+
+static void setMetadata(std::string &Metadata, const int Code, const HttpHeaders &Hdrs) {
+  std::ostringstream oss;
+  oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
+  oss << Hdrs << "\r\n";
+  Metadata = oss.str();
 }
 
 bool Response::statbufPopulate(const int Code, const char *File,
