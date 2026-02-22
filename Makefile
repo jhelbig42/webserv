@@ -26,6 +26,7 @@ vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
 vpath %.cpp $(SRC_DIR)/http_headers
 SRC			+= HttpHeaders.cpp
+SRC			+= HttpHeadersOutput.cpp
 vpath %.cpp $(SRC_DIR)/connection
 SRC			+= Connection.cpp
 
