@@ -47,15 +47,22 @@ void Response::init(const Request &Req){
     return;
   }
 
+  initMethod(Req);
+}
+
+void Response::initMethod(const Request &Req) {
   switch (Req.getMethod()) {
 	case Head:
   case Get:
     initSendFile(CODE_200, Req.getResource().c_str());
 		if (Req.getMethod() == Get)
 			return;
-		if (_fdIn >= 0 && close(_fdIn) < 0)
-			logging::log2(logging::Error, "close: ", strerror(errno));
+		if (_fdIn >= 0) {
+      errno = 0;
+      if (close(_fdIn) < 0)
+        logging::log2(logging::Error, "close: ", strerror(errno));
 		_fdIn = -1;
+    }
 		return;
   case Post:
   case Delete:

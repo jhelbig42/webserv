@@ -47,6 +47,7 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
 	void setDefaults(void);
+  void initMethod(const Request &Req);
 
 	Conditions _conditions;
 
