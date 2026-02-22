@@ -56,7 +56,7 @@ static void writeMediaType(std::ostream &Os, const HttpHeaders::MediaType Type) 
     Os << "text/plain";
     break;
     case HttpHeaders::Unknown:
-    Os << "application/octet-stream";
+    Os << "application/octet-stream"; // see rfc1945 section 7.2.1
     break;
   }
 }
