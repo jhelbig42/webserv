@@ -1,8 +1,9 @@
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Networking.hpp"
 #include <unistd.h>
 
-#define OFFLINE
+//#define OFFLINE
 
 #define CHUNK_SIZE 1024
 

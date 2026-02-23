@@ -6,12 +6,13 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 14:35:41 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:43:40 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "NetworkingDefines.hpp"
 #include "Conditions.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -39,9 +40,6 @@ public:
 		
 		// read from socket
 		void read_data(void);
-		
-		// read from socket
-		void read_data(void);
 
 private:
   Connection(); // should not be possible
@@ -59,4 +57,6 @@ private:
 
   Request _req;
   Response _res;
+
+  char	_read_buf[MAX_REQUEST];
 };
