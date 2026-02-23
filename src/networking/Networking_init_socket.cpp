@@ -1,22 +1,32 @@
-// TODO add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking_init_socket.cpp                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/23 19:00:32 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 
-static int clear_socket(const int sock);
-static int bind_to_ip(const int sock, const struct addrinfo *p);
-static int create_socket(const struct addrinfo *p);
-int networking::get_server_socket(struct addrinfo *server_info);
-void networking::set_to_listen(const int sock);
+static int clearSocket(const int sock);
+static int bindToIP(const int sock, const struct addrinfo *p);
+static int createSocket(const struct addrinfo *p);
+int networking::getServerSocket(struct addrinfo *server_info);
+void networking::setToListen(const int sock);
 
-// set_to_listen() is a wrapper for listen(), which marks the
+// setToListen() is a wrapper for listen(), which marks the
 // server's socket as a "possive socket". This means it will
 // be used to accept incoming connection requests using accept().
 //
 // The second arguments of listen() is backlog, the maximum
 // length to which the queue of pending connections may grow.
 
-void networking::set_to_listen(const int sock) {
+void networking::setToListen(const int sock) {
 
   if (listen(sock, BACKLOG == -1)) {
     std::ostringstream msg;
@@ -26,7 +36,7 @@ void networking::set_to_listen(const int sock) {
   logging::log(logging::Debug, "server is listening for connections...");
 }
 
-// get_server_socket() creates a socket for the server
+// getServerSocket() creates a socket for the server
 // to begin listening.
 //
 // NOTE: Assumes that server_info has already been initialized.
@@ -44,17 +54,17 @@ void networking::set_to_listen(const int sock) {
 //
 // RETURNS: file descriptor for server's listening socket
 
-int networking::get_server_socket(struct addrinfo *server_info) {
+int networking::getServerSocket(struct addrinfo *server_info) {
 
   int sock;
   const struct addrinfo *p;
   for (p = server_info; p != NULL; p = p->ai_next) {
-    sock = create_socket(p);
+    sock = createSocket(p);
     if (sock == -1) {
       continue;
     }
-    clear_socket(sock);
-    if (bind_to_ip(sock, p) == -1) {
+    clearSocket(sock);
+    if (bindToIP(sock, p) == -1) {
       continue;
     }
     break;
@@ -68,7 +78,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
   return (sock);
 }
 
-// clear_socket() is a wrapper for setsockopt()
+// clearSocket() is a wrapper for setsockopt()
 // This function is meant to clear a socket, just in case the same socket
 // was in use minutes ago, and hasn't yet been systematically cleared by the OS?
 //
@@ -80,7 +90,7 @@ int networking::get_server_socket(struct addrinfo *server_info) {
 //
 // RETURN: the result of setsockopt(): 0 on success, -1 on failure
 
-static int clear_socket(const int sock) {
+static int clearSocket(const int sock) {
   int yes = 1;
   int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
   if (ret == -1) {
@@ -91,7 +101,7 @@ static int clear_socket(const int sock) {
   return (ret);
 }
 
-// bind_to_ip() is a wrapper for bind().
+// bindToIP() is a wrapper for bind().
 // This function assigns the listening socket to server's ip
 // using bind() and logs an error if bind() fails.
 //
@@ -100,7 +110,7 @@ static int clear_socket(const int sock) {
 //
 // RETURN: the result of bind(): 0 on success, -1 on failure
 
-static int bind_to_ip(const int sock, const struct addrinfo *p) {
+static int bindToIP(const int sock, const struct addrinfo *p) {
 
   int ret = bind(sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
@@ -112,7 +122,7 @@ static int bind_to_ip(const int sock, const struct addrinfo *p) {
   return (ret);
 }
 
-// create_socket() is a wrapper for library function socket()
+// createSocket() is a wrapper for library function socket()
 // This function logs an error if socket() fails.
 //
 // TODO: Currently, I'm using the contents of addrinfo to set
@@ -120,7 +130,7 @@ static int bind_to_ip(const int sock, const struct addrinfo *p) {
 // (see Networking_server_init.cpp). If we wanted to, we could also
 // hardcode TCP here. What's cleaner?
 
-static int create_socket(const struct addrinfo *p) {
+static int createSocket(const struct addrinfo *p) {
 
   int sock = socket(p->ai_family, p->ai_socktype,
                     p->ai_protocol); // could set ai_protocol manually to TCP?

@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/18 17:20:44 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 18:44:54 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,14 @@
 
 void networking::start(void) {
 
-  struct addrinfo *server_info = get_server_info();
+  struct addrinfo *server_info = getServerInfo();
   int sock;
-  sock = get_server_socket(server_info);
+  sock = getServerSocket(server_info);
   freeaddrinfo(server_info);
 
-  set_to_listen(sock);
+  setToListen(sock);
 
   // signal handling goes here
 
-  poll_loop(sock);
+  pollLoop(sock);
 }

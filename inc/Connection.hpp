@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:00:20 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 17:24:16 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 17:43:28 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,18 @@ public:
   
   bool _delete; // placement in public is temporary
   
-  Connection(const int sock, const sockaddr_storage &addr,
-             const socklen_t addr_size);
+  Connection(const int Sock, const sockaddr_storage &Addr,
+             const socklen_t addrSize);
   ~Connection();
 
   // getters
-  int get_sock(void) const;
+  int getSock(void) const;
 
   // setters
-  void schedule_for_demolition(void);
+  void scheduleForDemolition(void);
 
   // send & receive
-  void read_data(void);
+  void readData(void);
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
 
@@ -52,10 +52,10 @@ private:
   // networking
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
-  socklen_t _addr_size;
+  socklen_t _addrSize;
 
   Request _req;
   Response _res;
   
-  char _read_buf[MAX_REQUEST];
+  char _readBuf[MAX_REQUEST];
 };

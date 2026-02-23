@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 17:27:18 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 18:50:52 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,21 @@
 #include "NetworkingDefines.hpp"
 
 // TODO These functions could be made static:
-// process(), accept_connection(), add_connection_to_map()
+// process(), acceptConnection(), addConnectionToMap()
 // But then they would lose sight of networking::client_addr struct
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
-void networking::poll_loop(const int sock);
+void networking::pollLoop(const int sock);
 void networking::process(const int listen_sock,
                          std::map<int, Connection> &c_map,
                          std::vector<pollfd> &fds);
-int networking::accept_connection(const int listen_sock,
+int networking::acceptConnection(const int listen_sock,
                                   client_addr *candidate);
-void networking::add_connection_to_map(const struct client_addr &candidate,
+void networking::addConnectionToMap(const struct client_addr &candidate,
                                        std::map<int, Connection> &c_map);
 
-// poll_loop() introduces the while(1) networking loop that will run
+// pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
 //
 // • Declares c_map, a map of clients (key = fd, value = Connection object)
@@ -42,7 +42,7 @@ void networking::add_connection_to_map(const struct client_addr &candidate,
 // 	- continuously checks and marks which pollfds are ready for I/O
 // 	- processes the ones that are marked
 
-void networking::poll_loop(const int sock) {
+void networking::pollLoop(const int sock) {
 
   std::map<int, Connection> c_map;
   std::vector<pollfd> fds;
@@ -86,11 +86,11 @@ void networking::process(const int listen_sock,
   std::vector<pollfd> new_fd_batch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (it->revents & POLLNVAL) {
-      handle_pollnval(it->fd, c_map);
+      handlePollnval(it->fd, c_map);
       exit(1);
     }
     if (it->revents & POLLERR) {
-      handle_pollerr(it->fd, c_map);
+      handlePollerr(it->fd, c_map);
       exit(1);
     }
     if (it->revents & POLLHUP) {
@@ -98,7 +98,7 @@ void networking::process(const int listen_sock,
       exit(1);
     }
     if (it->revents & POLLIN) { // data to read | hang-up
-      handle_pollin(it->fd, c_map, listen_sock, new_fd_batch);
+      handlePollin(it->fd, c_map, listen_sock, new_fd_batch);
     }
     // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && c_map.at(it->fd)._delete == true) {
@@ -112,19 +112,19 @@ void networking::process(const int listen_sock,
   fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
 }
 
-// accept_connections() is a a wrapper for accept(), which extracts
+// acceptConnections() is a a wrapper for accept(), which extracts
 // the first connection request on the queue of pending connections
 // for the listening socket. Creates new socket for the
 // incoming connection.
 //
 // RETURNS: fd for new socket
 
-int networking::accept_connection(const int listen_sock,
+int networking::acceptConnection(const int listen_sock,
                                   client_addr *candidate) {
 
-  candidate->client_sock = accept(
-      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addr_size);
-  if (candidate->client_sock == -1) {
+  candidate->clientSock = accept(
+      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
+  if (candidate->clientSock == -1) {
     std::ostringstream msg;
     msg << "accept: " << std::strerror(errno)
         << " (can continue trying to accept connections)";
@@ -132,14 +132,14 @@ int networking::accept_connection(const int listen_sock,
                  msg.str()); // may downgrade log level at some point
     return (-1);
   }
-  logging::log2(logging::Debug, "Connection accepted on socket ", candidate->client_sock);
+  logging::log2(logging::Debug, "Connection accepted on socket ", candidate->clientSock);
   return (0);
 }
 
-void networking::add_connection_to_map(const struct client_addr &candidate,
+void networking::addConnectionToMap(const struct client_addr &candidate,
                                        std::map<int, Connection> &c_map) {
 
   Connection new_connection =
-      Connection(candidate.client_sock, candidate.addr, candidate.addr_size);
-  c_map.insert(std::make_pair(candidate.client_sock, new_connection));
+      Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
+  c_map.insert(std::make_pair(candidate.clientSock, new_connection));
 }

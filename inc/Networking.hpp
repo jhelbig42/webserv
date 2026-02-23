@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/23 18:47:08 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include "Config.hpp"
@@ -24,30 +36,30 @@ namespace networking {
 struct client_addr {
 
   struct sockaddr_storage addr;
-  int client_sock;
-  socklen_t addr_size;
+  int clientSock;
+  socklen_t addrSize;
   // char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
 };
 
 void start(void);
 
 // Networking_init_server.cpp
-struct addrinfo *get_server_info(void);
+struct addrinfo *getServerInfo(void);
 
 // Networking_init_socket.cpp
-int get_server_socket(struct addrinfo *server_info);
-void set_to_listen(const int sock);
+int getServerSocket(struct addrinfo *server_info);
+void setToListen(const int sock);
 
 // Networking_run.cpp
-void poll_loop(const int sock);
+void pollLoop(const int sock);
 void process(const int listen_sock, std::map<int, Connection> &c_map,
              std::vector<pollfd> &fds);
-int accept_connection(const int listen_sock, struct client_addr *candidate);
-void add_connection_to_map(const struct client_addr &candidate,
+int acceptConnection(const int listen_sock, struct client_addr *candidate);
+void addConnectionToMap(const struct client_addr &candidate,
                            std::map<int, Connection> &c_map);
 
-void handle_pollnval(int fd, std::map<int, Connection> &c_map);
-void handle_pollerr(int fd, std::map<int, Connection> &c_map);
-void handle_pollin(int fd, std::map<int, Connection> &c_map,
+void handlePollnval(int fd, std::map<int, Connection> &c_map);
+void handlePollerr(int fd, std::map<int, Connection> &c_map);
+void handlePollin(int fd, std::map<int, Connection> &c_map,
                    const int &listen_sock, std::vector<pollfd> &new_fd_batch);
 } // namespace networking

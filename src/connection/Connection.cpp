@@ -6,30 +6,33 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 17:29:56 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 19:04:05 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Connection.hpp"
 #include "Conditions.hpp"
 #include "Logging.hpp"
-#include "Networking.hpp"
+//#include "Networking.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include <stdio.h> // for puts
 #include <stddef.h>
+#include <string.h> // for memcpy
+#include <cstring> // for strerror
+#include <cerrno> // for errno
 
 #define BYTES_PER_CHUNK 256
 
 // Construct & Destruct
 
-Connection::Connection(const int sock, const sockaddr_storage &addr,
-                       const socklen_t addr_size)
-    : _delete(false), _sock(sock), _addr_size(sizeof _addr) {
+Connection::Connection(const int Sock, const sockaddr_storage &Addr,
+                       const socklen_t Addr_size)
+    : _delete(false), _sock(Sock), _addrSize(sizeof _addr) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
-  memcpy(&_addr, &addr, addr_size);
-  memset(&_read_buf, 0, MAX_REQUEST);
+  memcpy(&_addr, &Addr, Addr_size);
+  memset(&_readBuf, 0, MAX_REQUEST);
   logging::log(logging::Debug, "Connection created");
 }
 
@@ -38,7 +41,7 @@ Connection::Connection(const int sock, const sockaddr_storage &addr,
 Connection::~Connection(void) {
 }
 
-int Connection::get_sock(void) const {
+int Connection::getSock(void) const {
   return (_sock);
 }
 
@@ -50,16 +53,16 @@ Conditions Connection::getConditions(void) const {
 
 // Setters
 
-void Connection::schedule_for_demolition(void) {
+void Connection::scheduleForDemolition(void) {
   _delete = false;
 }
 
 // Send & Receive
 
-void Connection::read_data(void) {
+void Connection::readData(void) {
 
   logging::log(logging::Debug, "read_data()");
-  ssize_t bytes_read = recv(_sock, &_read_buf, MAX_REQUEST, 0);
+  ssize_t bytes_read = recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
   if (bytes_read == MAX_REQUEST) {
     logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
@@ -78,16 +81,16 @@ void Connection::read_data(void) {
     logging::log(logging::Warning, msg.str());
     return;
   }
-  _read_buf[bytes_read - 1] = '\0';
+  _readBuf[bytes_read - 1] = '\0';
   //	puts(_read_buf);
   //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
-  _req.init(_read_buf);
+  _req.init(_readBuf);
   _res.init(_req);
   int dummy = -1;
   while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
     ;
   logging::log(logging::Debug, "read_buf = ");
-  logging::log(logging::Debug, _read_buf);
+  logging::log(logging::Debug, _readBuf);
 }
 
 bool Connection::serve(const size_t Bytes) {
