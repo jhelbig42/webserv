@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
-#include "ConnectionOld.hpp"
+#include "Connection.hpp"
 #include "Logging.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains

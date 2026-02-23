@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 16:47:22 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 17:27:18 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,8 +132,7 @@ int networking::accept_connection(const int listen_sock,
                  msg.str()); // may downgrade log level at some point
     return (-1);
   }
-  std::cout << "\nConnection accepted on socket " << candidate->client_sock
-            << "\n\n"; // TODO move to debug
+  logging::log2(logging::Debug, "Connection accepted on socket ", candidate->client_sock);
   return (0);
 }
 
