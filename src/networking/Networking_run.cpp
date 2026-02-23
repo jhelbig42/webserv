@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/20 16:41:56 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 12:43:46 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	remove_disconnects(std::map<int, Connection> &c_map, std::vector<pollfd> &f
 }
 */
 
-void handle_pollnval(int fd, std::map<int, Connection> &c_map){
+void networking::handle_pollnval(int fd, std::map<int, Connection> &c_map){
       logging::log2(logging::Error,
 	  	"networking::process(): POLLNAL.\n\tpoll() tried to read invalid fd. fd = ", fd);
 		try {
@@ -83,7 +83,7 @@ void handle_pollnval(int fd, std::map<int, Connection> &c_map){
 		}
 }
 
-void handle_pollerr(int fd, std::map<int, Connection> &c_map){
+void networking::handle_pollerr(int fd, std::map<int, Connection> &c_map){
     	std::ostringstream msg;
       logging::log2(logging::Error,
 	  	"networking::process(): POLLERR \n\tclient may have disconnected abruptly using RST, or socket is broken.\n fd = ", fd); // downgrade to Warning?
@@ -93,6 +93,32 @@ void handle_pollerr(int fd, std::map<int, Connection> &c_map){
 		catch (std::out_of_range &e){
 			logging::log(logging::Error, "Connection could not be marked for deletion because there is no Connection with this fd.");
 		}
+}
+
+void networking::handle_pollin(int fd, std::map<int, Connection> &c_map, const int &listen_sock, std::vector<pollfd> new_fd_batch){
+	  std::cout << "POLLIN: fd : " << fd << "\n";
+	  if (fd == listen_sock) { // listening socket got new connection
+	    std::cout << "is listener\n";
+        client_addr candidate;
+        if (accept_connection(listen_sock, &candidate) != -1) {
+          add_connection_to_map(candidate, c_map);
+          pollfd new_fd = {candidate.client_sock, POLLIN, 0};
+          new_fd_batch.push_back(new_fd);
+        }
+      }
+	
+	else {
+
+	    std::cout << "is client\n";
+        std::map<int, Connection>::iterator c_it = c_map.find(fd);
+        if (c_it != c_map.end()) {
+          (c_it->second).read_data();
+		} else {
+          logging::log(logging::Error, "process: Connection not found in map "
+                                       "container (This should never happen)");
+	  				// could be removed after thorough testing
+        }
+      }
 }
 
 
@@ -128,31 +154,8 @@ void networking::process(const int listen_sock, std::map<int, Connection> &c_map
 		exit(1); // temp
 	}
     if (it->revents & POLLIN) { // data to read | hang-up
-      
-	  std::cout << "POLLIN: fd : " << it->fd << "\n";
-	  if (it->fd == listen_sock) { // listening socket got new connection
-	    std::cout << "is listener\n";
-        client_addr candidate;
-        if (accept_connection(listen_sock, &candidate) != -1) {
-          add_connection_to_map(candidate, c_map);
-          pollfd new_fd = {candidate.client_sock, POLLIN, 0};
-          new_fd_batch.push_back(new_fd);
-        }
-      }
-	
-	else {
-
-	    std::cout << "is client\n";
-        std::map<int, Connection>::iterator c_it = c_map.find(it->fd);
-        if (c_it != c_map.end()) {
-          (c_it->second).read_data();
-		} else {
-          logging::log(logging::Error, "process: Connection not found in map "
-                                       "container (This should never happen)");
-	  				// could be removed after thorough testing
-        }
-      }
-    }
+    	handle_pollin(it->fd, c_map, listen_sock, new_fd_batch);
+	}
   }
   /*
   for (std::vector<int>::iterator it = delete_list.begin();

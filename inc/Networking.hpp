@@ -43,5 +43,8 @@ void process(const int listen_sock, std::map<int, Connection> &c_map, std::vecto
 int accept_connection(const int listen_sock, struct client_addr *candidate);
 void add_connection_to_map(const struct client_addr &candidate, std::map<int, Connection> &c_map);
 
-} // namespace networking
+void handle_pollnval(int fd, std::map<int, Connection> &c_map);
+void handle_pollerr(int fd, std::map<int, Connection> &c_map);
+void handle_pollin(int fd, std::map<int, Connection> &c_map, const int &listen_sock, std::vector<pollfd> new_fd_batch);
+}// namespace networking
 

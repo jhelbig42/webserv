@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/20 16:39:17 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 12:16:51 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "Connection.hpp"
 #include "Response.hpp"
 #include "Request.hpp"
+#include "Networking.hpp"
 #include <stdio.h> // for puts
 
 #define BYTES_PER_CHUNK 256
@@ -52,7 +53,6 @@ void Connection::read_data(void){
 			"read_data(): bytes_read == 0");
 		_delete = true; // important to coordinate with Julia / parsing
 		logging::log(logging::Warning, "client appears to have hung up.");
-		fds_to_remove.push_back(_sock);
 		return;
 	}
 	if (bytes_read < 0) {
