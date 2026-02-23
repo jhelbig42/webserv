@@ -6,17 +6,18 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 16:46:21 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 16:52:20 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 
-void networking::handle_pollnval(int fd, std::map<int, Connection> &c_map);
-void networking::handle_pollerr(int fd, std::map<int, Connection> &c_map);
-void networking::handle_pollin(int fd, std::map<int, Connection> &c_map;
-void networking::handle_pollin(int fd, std::map<int, Connection> &c_map;
+void handle_pollnval(int fd, std::map<int, Connection> &c_map);
+void handle_pollerr(int fd, std::map<int, Connection> &c_map);
+void handle_pollin(int fd, std::map<int, Connection> &c_map,
+                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+
 
 void networking::handle_pollnval(int fd, std::map<int, Connection> &c_map) {
   logging::log2(logging::Error,
