@@ -78,7 +78,7 @@ void Response::initDelete(const Request &Req) {
     initError(errno);
     return;
   }
-  initSendFile(CODE_202, FILE_202);
+  initSendFile(CODE_202, NULL);
 }
 
 void Response::initHeadGet(const Request &Req) {
