@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/20 16:43:59 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 12:54:49 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,6 @@ class	Connection {
 		struct sockaddr_storage _addr; // client's IP 
 		socklen_t	_addr_size;
 		
-		// Marked for destruction
-		bool	_delete;
 		
 		Connection(); // should not be possible
 
@@ -48,6 +46,10 @@ class	Connection {
 
 		Request _req;
 		Response _res;
+		
+		// Marked for destruction
+		bool	_delete;
+		// making public for now, could also be private with getter
 		
 		// getters
 		int get_sock(void) const;

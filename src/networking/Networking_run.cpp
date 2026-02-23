@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 12:43:46 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 13:28:04 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void networking::poll_loop(const int sock) {
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-//    process(sock, c_map, fds);
+    process(sock, c_map, fds);
 //	remove_disconnects(c_map, fds);
   }
 }
@@ -95,7 +95,7 @@ void networking::handle_pollerr(int fd, std::map<int, Connection> &c_map){
 		}
 }
 
-void networking::handle_pollin(int fd, std::map<int, Connection> &c_map, const int &listen_sock, std::vector<pollfd> new_fd_batch){
+void networking::handle_pollin(int fd, std::map<int, Connection> &c_map, const int &listen_sock, std::vector<pollfd> &new_fd_batch){
 	  std::cout << "POLLIN: fd : " << fd << "\n";
 	  if (fd == listen_sock) { // listening socket got new connection
 	    std::cout << "is listener\n";
@@ -138,23 +138,35 @@ void networking::handle_pollin(int fd, std::map<int, Connection> &c_map, const i
 void networking::process(const int listen_sock, std::map<int, Connection> &c_map,
                          std::vector<pollfd> &fds) {
 
+	logging::log(logging::Debug, "Process()");
+
   std::vector<pollfd> new_fd_batch;
   std::vector<int> delete_list;
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
+  
+ // for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
+  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
 	if (it->revents & POLLNVAL){
 		handle_pollnval(it->fd, c_map);
-		exit(1); // temp
+		exit(1);
 	}
 	if (it->revents & POLLERR) {
 		handle_pollerr(it->fd, c_map);
-		exit(1); // temp
+		exit(1);
 	}
     if (it->revents & POLLHUP) {
 		logging::log2(logging::Debug, "Hangup from fd ", it->fd);
-		exit(1); // temp
+		exit(1);
 	}
     if (it->revents & POLLIN) { // data to read | hang-up
     	handle_pollin(it->fd, c_map, listen_sock, new_fd_batch);
+	}
+	// CHECK IF CONNECTION SHOULD BE DELETED
+	if (it->fd != listen_sock && c_map.at(it->fd)._delete == true){
+		c_map.erase(it->fd);
+		it = fds.erase(it);
+	}
+	else {
+		it++;
 	}
   }
   /*
