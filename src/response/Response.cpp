@@ -1,20 +1,44 @@
 #include "Response.hpp"
 
+#include "Conditions.hpp"
+#include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <fcntl.h>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static std::string getReasonPhrase(const int Code);
+static bool hasDefaultFile(const int Code);
+static void setMetadata(std::string &Metadata, const int Code,
+                        const HttpHeaders &Hdrs);
 
-Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {}
+void Response::setDefaults(void) {
+  _ptype = None;
+  _metadataSent = false;
+  _fdIn = -1;
+  _fdOut = -1;
+  _headers.unsetAll();
+  _conditions = Unconditional;
+}
 
-void Response::init(const Request &Req){
+Response::Response()
+    : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+  _headers.unsetAll();
+}
+
+Conditions Response::getConditions(void) const {
+  return _conditions;
+}
+
+void Response::init(const Request &Req) {
+  setDefaults();
 
   logging::log2(logging::Debug, __func__, " called");
   if (!Req.isValid()) {
@@ -22,48 +46,42 @@ void Response::init(const Request &Req){
     return;
   }
 
-  // make more generic
+  // TODO: make more generic
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
-    initSendFile(CODE_501, FILE_501); // correct?
+    initSendFile(CODE_501, FILE_501);
     return;
   }
 
+  initMethod(Req);
+}
+
+void Response::initMethod(const Request &Req) {
   switch (Req.getMethod()) {
+  case Head:
   case Get:
-    initSendFile(CODE_200, Req.getResource().c_str());
+    initHeadGet(Req);
     return;
-  case Post:
   case Delete:
+  case Post:
   case Generic:
     initSendFile(CODE_501, FILE_501);
     return;
   }
 }
+
+void Response::initHeadGet(const Request &Req) {
+  initSendFile(CODE_200, Req.getResource().c_str());
+  if (Req.getMethod() == Get || _fdIn < 0)
+    return;
+  errno = 0;
+  if (close(_fdIn) < 0)
+    logging::log2(logging::Error, "close: ", strerror(errno));
+  _fdIn = -1;
+}
+
 Response::Response(const Request &Req)
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
-
-  logging::log2(logging::Debug, __func__, " called");
-  if (!Req.isValid()) {
-    initSendFile(CODE_400, FILE_400);
-    return;
-  }
-
-  // make more generic
-  if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
-    initSendFile(CODE_501, FILE_501); // correct?
-    return;
-  }
-
-  switch (Req.getMethod()) {
-  case Get:
-    initSendFile(CODE_200, Req.getResource().c_str());
-    return;
-  case Post:
-  case Delete:
-  case Generic:
-    initSendFile(CODE_501, FILE_501);
-    return;
-  }
+  init(Req);
 }
 
 // TODO:
@@ -75,51 +93,69 @@ void Response::initSendFile(const int Code, const char *File) {
   if (!statbufPopulate(Code, File, statbuf))
     return;
 
-  if (!setFdIn(File))
+  if (!setFdIn(Code, File))
     return;
 
-  if (File != NULL)
+  if (File != NULL) {
     _headers.setContentLength(statbuf.st_size);
+    _headers.setContentType(strrchr(File, '.'));
+  }
 
-  std::ostringstream oss;
-  oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
-  oss << _headers << "\r\n";
-  _metadata += oss.str();
+  setMetadata(_metadata, Code, _headers);
+  _metadataSent = false;
   _fdOut = -1;
   _ptype = SendFile;
-  _metadataSent = false;
+  _conditions = SockWrite;
+}
+
+static void setMetadata(std::string &Metadata, const int Code,
+                        const HttpHeaders &Hdrs) {
+  std::ostringstream oss;
+  oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
+  oss << Hdrs << "\r\n";
+  Metadata = oss.str();
 }
 
 bool Response::statbufPopulate(const int Code, const char *File,
-                               struct stat &statbuf) {
+                               struct stat &Statbuf) {
   if (File == NULL)
     return true;
-  if (stat(File, &statbuf) == 0)
-    return true;
-  if (Code == CODE_500) {
-    errno = 0;
-    initSendFile(CODE_500, NULL);
-  }
-  const int err = errno;
   errno = 0;
-  return initError(err);
+  if (stat(File, &Statbuf) == 0)
+    return true;
+  if (hasDefaultFile(Code)) {
+    logging::log3(logging::Warning, "Code ", Code,
+                  ": Default file not accessible. Only sending status line.");
+    initSendFile(Code, NULL);
+    return false;
+  }
+  return initError(errno);
 }
 
-bool Response::setFdIn(const char *File) {
+bool Response::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
+  errno = 0;
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
-  const int err = errno;
-  errno = 0;
-  return initError(err);
+  if (hasDefaultFile(Code)) {
+    logging::log3(logging::Warning, "Code ", Code,
+                  ": Default file not accessible. Only sending status line.");
+    initSendFile(Code, NULL);
+    return false;
+  }
+  return initError(errno);
+}
+
+static bool hasDefaultFile(const int Code) {
+  return Code != CODE_200;
 }
 
 bool Response::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
-    initSendFile(CODE_401, FILE_401);
+    initSendFile(CODE_403, FILE_403);
     return false;
   case ENOENT:
     initSendFile(CODE_404, FILE_404);
