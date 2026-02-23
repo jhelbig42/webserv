@@ -3,8 +3,8 @@
 #include "Conditions.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include <sys/socket.h>
 #include <netdb.h>
+#include <sys/socket.h>
 
 class Connection {
 public:

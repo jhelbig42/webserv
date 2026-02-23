@@ -22,7 +22,7 @@ public:
   off_t getContentLength(void) const;
 
 
-  void setContentType(const std::string &extension);
+  void setContentType(const char *extension);
   MediaType getContentType(void) const;
 
 private:

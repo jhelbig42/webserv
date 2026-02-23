@@ -1,5 +1,7 @@
 #include "HttpHeaders.hpp"
 
+#include <cstddef>
+#include <cstring>
 #include <sys/types.h>
 
 static const struct { std::string extension; HttpHeaders::MediaType type; } globalMime[] = 
@@ -24,13 +26,14 @@ HttpHeaders::HttpHeaders(void) : _headersSet(0) {
 }
 
 HttpHeaders::HttpHeaders(const HttpHeaders &other)
-    : _headersSet(other._headersSet), _contentLength(other._contentLength) {
+    : _headersSet(other._headersSet), _contentLength(other._contentLength), _contentType(other._contentType) {
 }
 
 HttpHeaders &HttpHeaders::operator=(const HttpHeaders &other) {
   if (this != &other) {
     _headersSet = other._headersSet;
     _contentLength = other._contentLength;
+    _contentType = other._contentType;
   }
   return *this;
 }
@@ -55,15 +58,15 @@ off_t HttpHeaders::getContentLength(void) const {
   return _contentLength;
 }
 
-void HttpHeaders::setContentType(const std::string &extension) {
+void HttpHeaders::setContentType(const char *extension) {
   _headersSet |= ContentType;
-  for (size_t i = 0; i != globalMimeSize; ++i) {
-    if (globalMime[i].extension == extension) {
-      _contentType = globalMime[i].type;
-      return;
-    }
-  }
   _contentType = Unknown;
+  if (extension == NULL)
+    return;
+  for (size_t i = 0; i != globalMimeSize; ++i) {
+    if (strcmp(extension, globalMime[i].extension.c_str()) == 0)
+      _contentType = globalMime[i].type;
+  }
   return;
 }
 

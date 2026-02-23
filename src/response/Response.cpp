@@ -1,11 +1,13 @@
 #include "Response.hpp"
 
 #include "Conditions.hpp"
+#include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include <cerrno>
 #include <cstddef>
+#include <cstring>
 #include <fcntl.h>
 #include <sstream>
 #include <string>
@@ -92,8 +94,10 @@ void Response::initSendFile(const int Code, const char *File) {
   if (!setFdIn(Code, File))
     return;
 
-  if (File != NULL)
+  if (File != NULL) {
     _headers.setContentLength(statbuf.st_size);
+    _headers.setContentType(strrchr(File, '.'));
+  }
 
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
@@ -110,11 +114,11 @@ static void setMetadata(std::string &Metadata, const int Code, const HttpHeaders
 }
 
 bool Response::statbufPopulate(const int Code, const char *File,
-                               struct stat &statbuf) {
+                               struct stat &Statbuf) {
   if (File == NULL)
     return true;
 	errno = 0;
-  if (stat(File, &statbuf) == 0)
+  if (stat(File, &Statbuf) == 0)
     return true;
   if (hasDefaultFile(Code)) {
 		logging::log3(logging::Warning, "Code ", Code, ": Default file not accessible. Only sending status line.");
