@@ -6,14 +6,14 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 16:48:05 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 14:43:40 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 15:27:56 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "NetworkingDefines.hpp"
 #include "Conditions.hpp"
+#include "NetworkingDefines.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include <netdb.h>
@@ -28,18 +28,18 @@ public:
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
 
-		// Marked for destruction
-		bool	_delete;
-		// making public for now, could also be private with getter
-		
-		// getters
-		int get_sock(void) const;
+  // Marked for destruction
+  bool _delete;
+  // making public for now, could also be private with getter
 
-		// setters
-		void schedule_for_demolition(void);
-		
-		// read from socket
-		void read_data(void);
+  // getters
+  int get_sock(void) const;
+
+  // setters
+  void schedule_for_demolition(void);
+
+  // read from socket
+  void read_data(void);
 
 private:
   Connection(); // should not be possible
@@ -58,5 +58,5 @@ private:
   Request _req;
   Response _res;
 
-  char	_read_buf[MAX_REQUEST];
+  char _read_buf[MAX_REQUEST];
 };

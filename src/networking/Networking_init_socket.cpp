@@ -30,7 +30,7 @@ void networking::set_to_listen(const int sock) {
 // to begin listening.
 //
 // NOTE: Assumes that server_info has already been initialized.
-// 
+//
 // Iterates through the server's linked list of addrinfo structs,
 // until either able to create a socket or reaches the end.
 // If no socket found, an exception is thrown. Server_info
@@ -71,9 +71,9 @@ int networking::get_server_socket(struct addrinfo *server_info) {
 // clear_socket() is a wrapper for setsockopt()
 // This function is meant to clear a socket, just in case the same socket
 // was in use minutes ago, and hasn't yet been systematically cleared by the OS?
-// 
-// NOTE: setsockopt() is still largely a black box. I need read to more about the
-// arguments. I also have yet to encounter a situation where it's clearly
+//
+// NOTE: setsockopt() is still largely a black box. I need read to more about
+// the arguments. I also have yet to encounter a situation where it's clearly
 // necessary to clear a socket, but apparently it happens.
 // I am only including this step because Beej's Guide deems it necessary /
 // useful. TODO read more.
@@ -132,6 +132,5 @@ static int create_socket(const struct addrinfo *p) {
   }
   return (sock);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////

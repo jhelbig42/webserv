@@ -5,7 +5,8 @@
 
 struct addrinfo *networking::get_server_info(void);
 static struct addrinfo create_hints(void);
-static std::string addrinfo_to_str(const struct addrinfo *info, const std::string msg);
+static std::string addrinfo_to_str(const struct addrinfo *info,
+                                   const std::string msg);
 
 // get_server_info() creates an addrinfo struct (standard, from <sys/socket.h>)
 // with information about the server's own address & our chosen I/O settings.
@@ -68,7 +69,8 @@ static struct addrinfo create_hints(void) {
 //
 // RETURNS: a string with all info to be printed
 
-static std::string addrinfo_to_str(const struct addrinfo *info, const std::string msg) {
+static std::string addrinfo_to_str(const struct addrinfo *info,
+                                   const std::string msg) {
   std::ostringstream oss;
   oss << "\n\t" << msg << "\n"
       << "\tai_flags = " << info->ai_flags << "\n"
@@ -78,4 +80,3 @@ static std::string addrinfo_to_str(const struct addrinfo *info, const std::strin
       << "\tai_addrlen = " << info->ai_addrlen << "\n";
   return (oss.str());
 }
-

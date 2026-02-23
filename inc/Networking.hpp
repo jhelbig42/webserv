@@ -1,31 +1,32 @@
 #pragma once
 
-#include "ConnectionOld.hpp"
 #include "Config.hpp"
+#include "ConnectionOld.hpp"
 #include "Logging.hpp"
-// #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler complains
+// #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
+// complains
 #include <cerrno>  // for errno
 #include <cstdlib> // for exit
 #include <cstring> // for memset
 #include <iostream>
+#include <map>
 #include <netdb.h>
+#include <poll.h>
 #include <sstream>
 #include <stdexcept> // for runtime_error
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <poll.h>
 #include <unistd.h> // for close
-#include <map>
 
 namespace networking {
 
 struct client_addr {
 
-	struct sockaddr_storage addr;
-	int client_sock;
-	socklen_t addr_size;
-	// char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
+  struct sockaddr_storage addr;
+  int client_sock;
+  socklen_t addr_size;
+  // char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
 };
 
 void start(void);
@@ -39,12 +40,14 @@ void set_to_listen(const int sock);
 
 // Networking_run.cpp
 void poll_loop(const int sock);
-void process(const int listen_sock, std::map<int, Connection> &c_map, std::vector<pollfd> &fds);
+void process(const int listen_sock, std::map<int, Connection> &c_map,
+             std::vector<pollfd> &fds);
 int accept_connection(const int listen_sock, struct client_addr *candidate);
-void add_connection_to_map(const struct client_addr &candidate, std::map<int, Connection> &c_map);
+void add_connection_to_map(const struct client_addr &candidate,
+                           std::map<int, Connection> &c_map);
 
 void handle_pollnval(int fd, std::map<int, Connection> &c_map);
 void handle_pollerr(int fd, std::map<int, Connection> &c_map);
-void handle_pollin(int fd, std::map<int, Connection> &c_map, const int &listen_sock, std::vector<pollfd> &new_fd_batch);
-}// namespace networking
-
+void handle_pollin(int fd, std::map<int, Connection> &c_map,
+                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+} // namespace networking
