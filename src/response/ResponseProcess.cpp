@@ -36,7 +36,8 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
-// Response::process(const int Socket, const int SocketForward, const size_t Bytes) {
+// Response::process(const int Socket, const int SocketForward, const size_t
+// Bytes) {
 //   if (conditions & SockRead)
 //     //call something
 //   if (conditions & SockRead)
@@ -55,7 +56,8 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Response::process(const int Socket, int &ForwardSocket, const size_t Bytes) {
+bool Response::process(const int Socket, int &ForwardSocket,
+                       const size_t Bytes) {
   (void)ForwardSocket;
   if (_ptype == SendFile)
     return sendFile(Socket, Bytes);

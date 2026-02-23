@@ -17,45 +17,46 @@ std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs) {
   return Os;
 }
 
-static void writeMediaType(std::ostream &Os, const HttpHeaders::MediaType Type) {
+static void writeMediaType(std::ostream &Os,
+                           const HttpHeaders::MediaType Type) {
   switch (Type) {
-    case HttpHeaders::TextCss:
+  case HttpHeaders::TextCss:
     Os << "text/css";
     break;
-    case HttpHeaders::TextCsv:
+  case HttpHeaders::TextCsv:
     Os << "text/csv";
     break;
-    case HttpHeaders::ImageGif:
+  case HttpHeaders::ImageGif:
     Os << "image/gif";
     break;
-    case HttpHeaders::TextHtml:
+  case HttpHeaders::TextHtml:
     Os << "text/html";
     break;
-    case HttpHeaders::ImageXIcon:
+  case HttpHeaders::ImageXIcon:
     Os << "image/x-icon";
     break;
-    case HttpHeaders::ImageJpeg:
+  case HttpHeaders::ImageJpeg:
     Os << "image/jpeg";
     break;
-    case HttpHeaders::ApplicationJavascript:
+  case HttpHeaders::ApplicationJavascript:
     Os << "application/javascript";
     break;
-    case HttpHeaders::ApplicationJson:
+  case HttpHeaders::ApplicationJson:
     Os << "application/json";
     break;
-    case HttpHeaders::ImagePng:
+  case HttpHeaders::ImagePng:
     Os << "image/png";
     break;
-    case HttpHeaders::ApplicationPdf:
+  case HttpHeaders::ApplicationPdf:
     Os << "application/pdf";
     break;
-    case HttpHeaders::ImageSvgXml:
+  case HttpHeaders::ImageSvgXml:
     Os << "image/svg+xml";
     break;
-    case HttpHeaders::TextPlain:
+  case HttpHeaders::TextPlain:
     Os << "text/plain";
     break;
-    case HttpHeaders::Unknown:
+  case HttpHeaders::Unknown:
     Os << "application/octet-stream"; // see rfc1945 section 7.2.1
     break;
   }

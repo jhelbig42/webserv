@@ -16,27 +16,29 @@
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
-static void setMetadata(std::string &Metadata, const int Code, const HttpHeaders &Hdrs);
+static void setMetadata(std::string &Metadata, const int Code,
+                        const HttpHeaders &Hdrs);
 
 void Response::setDefaults(void) {
-	_ptype = None;
-	_metadataSent = false;
-	_fdIn = -1;
-	_fdOut = -1;
-	_headers.unsetAll();
-	_conditions = Unconditional;
+  _ptype = None;
+  _metadataSent = false;
+  _fdIn = -1;
+  _fdOut = -1;
+  _headers.unsetAll();
+  _conditions = Unconditional;
 }
 
-Response::Response(): _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+Response::Response()
+    : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
   _headers.unsetAll();
 }
 
 Conditions Response::getConditions(void) const {
-	return _conditions;
+  return _conditions;
 }
 
 void Response::init(const Request &Req) {
-	setDefaults();
+  setDefaults();
 
   logging::log2(logging::Debug, __func__, " called");
   if (!Req.isValid()) {
@@ -55,10 +57,10 @@ void Response::init(const Request &Req) {
 
 void Response::initMethod(const Request &Req) {
   switch (Req.getMethod()) {
-	case Head:
+  case Head:
   case Get:
     initHeadGet(Req);
-		return;
+    return;
   case Delete:
   case Post:
   case Generic:
@@ -68,18 +70,18 @@ void Response::initMethod(const Request &Req) {
 }
 
 void Response::initHeadGet(const Request &Req) {
-    initSendFile(CODE_200, Req.getResource().c_str());
-		if (Req.getMethod() == Get || _fdIn < 0)
-			return;
-    errno = 0;
-    if (close(_fdIn) < 0)
-      logging::log2(logging::Error, "close: ", strerror(errno));
-		_fdIn = -1;
+  initSendFile(CODE_200, Req.getResource().c_str());
+  if (Req.getMethod() == Get || _fdIn < 0)
+    return;
+  errno = 0;
+  if (close(_fdIn) < 0)
+    logging::log2(logging::Error, "close: ", strerror(errno));
+  _fdIn = -1;
 }
 
 Response::Response(const Request &Req)
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
-	init(Req);
+  init(Req);
 }
 
 // TODO:
@@ -103,10 +105,11 @@ void Response::initSendFile(const int Code, const char *File) {
   _metadataSent = false;
   _fdOut = -1;
   _ptype = SendFile;
-	_conditions = SockWrite;
+  _conditions = SockWrite;
 }
 
-static void setMetadata(std::string &Metadata, const int Code, const HttpHeaders &Hdrs) {
+static void setMetadata(std::string &Metadata, const int Code,
+                        const HttpHeaders &Hdrs) {
   std::ostringstream oss;
   oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
   oss << Hdrs << "\r\n";
@@ -117,13 +120,14 @@ bool Response::statbufPopulate(const int Code, const char *File,
                                struct stat &Statbuf) {
   if (File == NULL)
     return true;
-	errno = 0;
+  errno = 0;
   if (stat(File, &Statbuf) == 0)
     return true;
   if (hasDefaultFile(Code)) {
-		logging::log3(logging::Warning, "Code ", Code, ": Default file not accessible. Only sending status line.");
+    logging::log3(logging::Warning, "Code ", Code,
+                  ": Default file not accessible. Only sending status line.");
     initSendFile(Code, NULL);
-		return false;
+    return false;
   }
   return initError(errno);
 }
@@ -131,20 +135,21 @@ bool Response::statbufPopulate(const int Code, const char *File,
 bool Response::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
-	errno = 0;
+  errno = 0;
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
   if (hasDefaultFile(Code)) {
-		logging::log3(logging::Warning, "Code ", Code, ": Default file not accessible. Only sending status line.");
+    logging::log3(logging::Warning, "Code ", Code,
+                  ": Default file not accessible. Only sending status line.");
     initSendFile(Code, NULL);
-		return false;
+    return false;
   }
   return initError(errno);
 }
 
 static bool hasDefaultFile(const int Code) {
-	return Code != CODE_200;
+  return Code != CODE_200;
 }
 
 bool Response::initError(const int Errno) {

@@ -4,21 +4,23 @@
 #include <cstring>
 #include <sys/types.h>
 
-static const struct { std::string extension; HttpHeaders::MediaType type; } globalMime[] = 
-{ {".css", HttpHeaders::TextCss},
-{".csv", HttpHeaders::TextCsv},
-{".gif", HttpHeaders::ImageGif},
-{".htm", HttpHeaders::TextHtml},
-{".html", HttpHeaders::TextHtml},
-{".ico", HttpHeaders::ImageXIcon},
-{".jpeg", HttpHeaders::ImageJpeg},
-{".jpg", HttpHeaders::ImageJpeg},
-{".js", HttpHeaders::ApplicationJavascript},
-{".json", HttpHeaders::ApplicationJson},
-{".png", HttpHeaders::ImagePng},
-{".pdf", HttpHeaders::ApplicationPdf},
-{".svg", HttpHeaders::ImageSvgXml},
-{".txt", HttpHeaders::TextPlain} };
+static const struct {
+  std::string extension;
+  HttpHeaders::MediaType type;
+} globalMime[] = {{".css", HttpHeaders::TextCss},
+                  {".csv", HttpHeaders::TextCsv},
+                  {".gif", HttpHeaders::ImageGif},
+                  {".htm", HttpHeaders::TextHtml},
+                  {".html", HttpHeaders::TextHtml},
+                  {".ico", HttpHeaders::ImageXIcon},
+                  {".jpeg", HttpHeaders::ImageJpeg},
+                  {".jpg", HttpHeaders::ImageJpeg},
+                  {".js", HttpHeaders::ApplicationJavascript},
+                  {".json", HttpHeaders::ApplicationJson},
+                  {".png", HttpHeaders::ImagePng},
+                  {".pdf", HttpHeaders::ApplicationPdf},
+                  {".svg", HttpHeaders::ImageSvgXml},
+                  {".txt", HttpHeaders::TextPlain}};
 
 static const size_t globalMimeSize = sizeof(globalMime) / sizeof(*globalMime);
 
@@ -26,7 +28,8 @@ HttpHeaders::HttpHeaders(void) : _headersSet(0) {
 }
 
 HttpHeaders::HttpHeaders(const HttpHeaders &other)
-    : _headersSet(other._headersSet), _contentLength(other._contentLength), _contentType(other._contentType) {
+    : _headersSet(other._headersSet), _contentLength(other._contentLength),
+      _contentType(other._contentType) {
 }
 
 HttpHeaders &HttpHeaders::operator=(const HttpHeaders &other) {
@@ -46,7 +49,7 @@ bool HttpHeaders::isSet(const HttpHeaders::HeaderType Hdr) const {
 }
 
 void HttpHeaders::unsetAll(void) {
-	_headersSet = 0;
+  _headersSet = 0;
 }
 
 void HttpHeaders::setContentLength(const off_t Length) {

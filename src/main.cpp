@@ -13,22 +13,21 @@
 #ifdef OFFLINE
 
 int main(void) {
-	const Request req(METHOD " " PATH " " VERSION);
-	Response res(req);
+  const Request req(METHOD " " PATH " " VERSION);
+  Response res(req);
   int dummy = -1;
-	while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
-		;
+  while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
+    ;
 }
 
-#else	
+#else
 
 int main(void) {
 
-  try { 
-  	networking::start();
-  }
-  catch (const std::runtime_error & e){
-  	logging::log(logging::Error, e.what());
+  try {
+    networking::start();
+  } catch (const std::runtime_error &e) {
+    logging::log(logging::Error, e.what());
   }
 }
 

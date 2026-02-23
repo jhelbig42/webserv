@@ -12,7 +12,7 @@ public:
   // Response(const Response&);
   // Response& operator=(const Response&);
   // ~Response();
-	
+
   typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
   explicit Response(const Request &Req);
@@ -35,22 +35,21 @@ public:
   ///
   /// \return true if response got fully processed otherwise false
   bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
-		
-	Conditions getConditions(void) const;
+
+  Conditions getConditions(void) const;
 
 private:
-
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
   bool statbufPopulate(const int Code, const char *File, struct stat &Statbuf);
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
-	void setDefaults(void);
+  void setDefaults(void);
   void initMethod(const Request &Req);
   void initHeadGet(const Request &Req);
 
-	Conditions _conditions;
+  Conditions _conditions;
 
   HttpHeaders _headers;
 
