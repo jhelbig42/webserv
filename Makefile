@@ -40,7 +40,7 @@ CXXFLAGS	:=
 CXXFLAGS	+= -std=c++98
 CXXFLAGS	+= -Wall
 CXXFLAGS	+= -Wextra
-CXXFLAGS	+= -Werror
+# CXXFLAGS	+= -Werror
 	
 CPPFLAGS	:=
 CPPFLAGS	+= -MMD

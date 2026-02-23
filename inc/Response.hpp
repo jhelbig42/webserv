@@ -48,6 +48,7 @@ private:
   void setDefaults(void);
   void initMethod(const Request &Req);
   void initHeadGet(const Request &Req);
+  void initDelete(const Request &Req);
 
   Conditions _conditions;
 

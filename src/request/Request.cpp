@@ -55,6 +55,8 @@ void Request::parseMethod(std::string token)
 		this->_method = Post;
 	else if (token == "DELETE")
 		this->_method = Delete;
+	else if (token == "HEAD")
+		this->_method = Head;
 	else
 		throw std::runtime_error("invalid Method");
 	logging::log(logging::Debug, "parse status_line: got method successfully");

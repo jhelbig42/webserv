@@ -7,6 +7,7 @@
 #include "StatusCodes.hpp"
 #include <cerrno>
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <fcntl.h>
 #include <sstream>
@@ -62,11 +63,22 @@ void Response::initMethod(const Request &Req) {
     initHeadGet(Req);
     return;
   case Delete:
+    initDelete(Req);
+    return;
   case Post:
   case Generic:
     initSendFile(CODE_501, FILE_501);
     return;
   }
+}
+
+void Response::initDelete(const Request &Req) {
+  errno = 0;
+  if (std::remove(Req.getResource().c_str()) != 0) {
+    initError(errno);
+    return;
+  }
+  initSendFile(CODE_202, NULL);
 }
 
 void Response::initHeadGet(const Request &Req) {

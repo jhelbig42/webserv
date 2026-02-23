@@ -6,7 +6,7 @@
 
 #define CHUNK_SIZE 1024
 
-#define METHOD "GET"
+#define METHOD "HEAD"
 #define PATH "/home/alneuman/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
