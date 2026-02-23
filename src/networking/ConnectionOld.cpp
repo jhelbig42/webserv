@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Connection.cpp                                     :+:      :+:    :+:   */
+/*   ConnectionOld.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 15:29:31 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 12:16:51 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/23 14:14:19 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logging.hpp"
-#include "Connection.hpp"
+#include "ConnectionOld.hpp"
 #include "Response.hpp"
 #include "Request.hpp"
 #include "Networking.hpp"

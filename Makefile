@@ -16,7 +16,7 @@ SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
 			   Networking_init_server.cpp\
 			   Networking_run.cpp\
-			   Connection.cpp
+			   ConnectionOld.cpp
 vpath %.cpp $(SRC_DIR)/response
 SRC			+= Response.cpp
 SRC			+= ResponseProcess.cpp
