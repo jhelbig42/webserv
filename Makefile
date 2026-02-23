@@ -16,7 +16,7 @@ SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
 			   Networking_init_server.cpp\
 			   Networking_run.cpp\
-			   Connection.cpp
+			   ConnectionOld.cpp
 vpath %.cpp $(SRC_DIR)/response
 SRC			+= Response.cpp
 SRC			+= ResponseProcess.cpp
@@ -26,6 +26,9 @@ vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
 vpath %.cpp $(SRC_DIR)/http_headers
 SRC			+= HttpHeaders.cpp
+SRC			+= HttpHeadersOutput.cpp
+vpath %.cpp $(SRC_DIR)/connection
+SRC			+= Connection.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -105,13 +108,15 @@ ifeq ($(DEBUG), 1)
 endif
 
 ifeq ($(ASAN), 1)
-	LDFLAGS += -fsanitize=address -g
-	CPPFLAGS += -fsanitize=address -g
+	LDFLAGS += -fsanitize=address
+	CPPFLAGS += -fsanitize=address
+	CPPFLAGS += -g3
 endif
 
 ifeq ($(UBSAN), 1)
-	LDFLAGS += -fsanitize=undefined -g
-	CPPFLAGS += -fsanitize=undefined -g
+	LDFLAGS += -fsanitize=undefined
+	CPPFLAGS += -fsanitize=undefined
+	CPPFLAGS += -g3
 endif
 
 # rules

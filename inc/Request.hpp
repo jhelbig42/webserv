@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Conditions.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -10,6 +11,7 @@
 
 typedef enum {
   Generic,
+	Head,
 	Get,
 	Post,
 	Delete
@@ -30,6 +32,10 @@ class Request {
 		void parseResource(std::string token);
 		void parseHttp(std::string token);
 
+		bool isFullyParsed(void) const;
+		Conditions getConditions(void) const;
+		bool process(const int Socket, const size_t Bytes);
+
 		bool isValid() const;
 		size_t getMajorV() const;
 		size_t getMinorV() const;
@@ -42,6 +48,8 @@ class Request {
 		size_t _majorVersion;
 		size_t _minorVersion;
 		bool _valid;
+		Conditions _conditions;
+		bool _fullyParsed;
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

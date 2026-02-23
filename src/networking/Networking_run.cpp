@@ -40,7 +40,7 @@ void networking::poll_loop(const int sock) {
   fds.push_back(listener);
 
   while (1) {
-    int res = poll(fds.data(), fds.size(), -1); // -1 means poll indefinitely
+    int res = poll(fds.data(), (nfds_t)fds.size(), -1); // without restriction to fds.size this cast is unsafe
     if (res == -1) {
     	std::ostringstream msg;
     	msg << "poll: " << std::strerror(errno);

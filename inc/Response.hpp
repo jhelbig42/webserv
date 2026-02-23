@@ -13,6 +13,8 @@ public:
   // Response& operator=(const Response&);
   // ~Response();
 
+  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
+
   explicit Response(const Request &Req);
   void init(const Request &Req);
 
@@ -32,17 +34,22 @@ public:
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
   /// \return true if response got fully processed otherwise false
-  bool process(const int Socket, const size_t Bytes);
+  bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
+
+  Conditions getConditions(void) const;
 
 private:
-  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
-
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
-  bool statbufPopulate(const int Code, const char *File, struct stat &statbuf);
-  bool setFdIn(const char *File);
+  bool statbufPopulate(const int Code, const char *File, struct stat &Statbuf);
+  bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
+  void setDefaults(void);
+  void initMethod(const Request &Req);
+  void initHeadGet(const Request &Req);
+
+  Conditions _conditions;
 
   HttpHeaders _headers;
 

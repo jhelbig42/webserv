@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
-#include <errno.h>
 #include <stdexcept>
 #include <string>
 #include <sys/types.h>
@@ -37,6 +36,14 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
+// Response::process(const int Socket, const int SocketForward, const size_t
+// Bytes) {
+//   if (conditions & SockRead)
+//     //call something
+//   if (conditions & SockRead)
+//     //call something
+// }
+
 /// \brief writes the content of an std::string object to a socket
 ///
 /// side effects:
@@ -49,7 +56,9 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Response::process(const int Socket, const size_t Bytes) {
+bool Response::process(const int Socket, int &ForwardSocket,
+                       const size_t Bytes) {
+  (void)ForwardSocket;
   if (_ptype == SendFile)
     return sendFile(Socket, Bytes);
   throw std::runtime_error("Unknown process type");
@@ -93,10 +102,8 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     // spill just 0 next iteration and no exception will be thrown
     const ssize_t rc = Buf.fill(FileFd, Bytes);
     if ((size_t)rc < Bytes && Buf.getFree() > 0) {
-      if (close(FileFd) < 0) {
+      if (close(FileFd) < 0)
         logging::log2(logging::Error, "close: ", strerror(errno));
-        errno = 0;
-      }
       FileFd = -1;
     }
   }
