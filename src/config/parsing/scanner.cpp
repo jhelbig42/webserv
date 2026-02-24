@@ -26,7 +26,6 @@ class Token {
 public:
   Token();
   Token(const std::string &Str, std::string::iterator &It);
-  static Token getNext(std::string::iterator &It);
   TokenType getType(void);
   std::string getLexeme(void);
 
@@ -35,6 +34,7 @@ private:
   TokenType _type;
   std::string _lexeme;
 };
+
 Token::Token() {}
 
 TokenType Token::getType(void) {
@@ -47,15 +47,20 @@ std::string Token::getLexeme(void) {
 
 class Scanner {
 public:
-  Scanner(std::string &source);
-  std::list<Token> _tokens;
-
-  std::string &_source;
+  explicit Scanner(std::string &source);
+  ~Scanner();
+  std::list<Token *> _tokens;
 private:
+  std::string &_source;
 };
 
+Scanner::~Scanner() {
+  for (std::list<Token *>::iterator It = _tokens.begin(); It != _tokens.end(); ++It)
+    delete *It;
+}
+
 std::ostream &operator<<(std::ostream &Os, Token &Tkn);
-std::ostream &operator<<(std::ostream &Os, TokenType &Type);
+std::ostream &operator<<(std::ostream &Os, TokenType Type);
 std::ostream &operator<<(std::ostream &Os, Scanner &Scan);
 bool isEofChar(const char Ch);
 bool isSemicolonChar(const char Ch);
@@ -66,11 +71,14 @@ bool isNameChar(const char Ch);
 
 
 std::ostream &operator<<(std::ostream &Os, Token &Tkn) {
-  Os << Tkn.getType() << ":\t" << Tkn.getLexeme() << '\n';
+  Os << Tkn.getType() << ":\t";
+  if (Tkn.getType() == Name)
+    Os << '\t';
+  Os << Tkn.getLexeme() << '\n';
   return Os;
 }
 
-std::ostream &operator<<(std::ostream &Os, TokenType &Type) {
+std::ostream &operator<<(std::ostream &Os, TokenType Type) {
   switch (Type) {
   case Eof:
     Os << "Eof";
@@ -79,10 +87,10 @@ std::ostream &operator<<(std::ostream &Os, TokenType &Type) {
     Os << "Semicolon";
     break;
   case BracesLeft:
-    Os << "Braces_left";
+    Os << "BracesLeft";
     break;
   case BracesRight:
-    Os << "Braces_right";
+    Os << "BracesRight";
     break;
   case Whitespace:
     Os << "Whitespace";
@@ -96,33 +104,37 @@ std::ostream &operator<<(std::ostream &Os, TokenType &Type) {
 
 Scanner::Scanner(std::string &Source)
   : _source(Source) {
-  for (std::string::iterator It = _source.begin(); It != _source.end(); ++It) {
-    _tokens.push_back(Token(Source, It));
+  for (std::string::iterator It = _source.begin(); It != _source.end();) {
+    Token *tkn = new Token(Source, It);
+    _tokens.push_back(tkn);
   }
 }
 
 std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
-  for (std::list<Token>::iterator It = Scan._tokens.begin(); It != Scan._tokens.end(); ++It) {
-    Os << *It;
-  }
+  for (std::list<Token *>::iterator It = Scan._tokens.begin(); It != Scan._tokens.end(); ++It)
+    Os << **It;
   return Os;
 }
 
 Token::Token(const std::string &Str, std::string::iterator &It) {
-  Token newToken;
-  for (int type = (int)Eof; type != (int)Name; ++type) {
+  for (int type = (int)Eof; type <= (int)Name; ++type) {
     if (isType((TokenType)type, Str, It)) {
-      newToken._type = (TokenType)type;
+      _type = (TokenType)type;
       break;
     }
   }
-  if (newToken._type == Eof)
+  if (_type == Eof)
     return;
-  if (newToken._type == Name) {
+  if (_type == Name) {
     const std::string::iterator start = It;
     while (It != Str.end() && isNameChar(*It))
       ++It;
-    newToken._lexeme = Str.substr(start - Str.begin(), It - Str.end());
+    _lexeme = Str.substr(start - Str.begin(), It - start);
+    return;
+  }
+  else if (_type == Whitespace) {
+    while (It != Str.end() && isWhitespaceChar(*It))
+      ++It;
     return;
   }
   ++It;
@@ -168,4 +180,5 @@ bool Token::isType(const TokenType Type, const std::string &Str, std::string::it
 int main(int argc, char **argv) {
   std::string s(argv[1], argv[1] + strlen(argv[1]));
   Scanner scan(s);
+  std::cout << scan;
 }
