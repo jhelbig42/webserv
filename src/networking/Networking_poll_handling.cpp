@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:21:01 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:59:24 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
                                std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLIN: fd ", fd);
   if (fd == listen_sock) { // listening socket got new connection
-    clientAddr candidate;
+    ClientAddr candidate;
     if (acceptConnection(listen_sock, &candidate) != -1) {
       addConnectionToMap(candidate, c_map);
       const pollfd newFd = {candidate.clientSock, POLLIN, 0};

@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:04:11 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:34:49 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <stdio.h> // for puts
 #include <string.h> // for memcpy, memset
 #include <sys/socket.h> // for socklen_t, recv
+#include <sys/types.h> // for ssize_t
 
 #define BYTES_PER_CHUNK 256
 

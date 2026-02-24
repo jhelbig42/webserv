@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:25:04 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:33:48 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 
 // TODO These functions could be made static:
 // process(), acceptConnection(), addConnectionToMap()
-// But then they would lose sight of networking::clientAddr struct
+// But then they would lose sight of networking::ClientAddr struct
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
@@ -37,8 +37,8 @@ void networking::process(const int listen_sock,
                          std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds);
 int networking::acceptConnection(const int listen_sock,
-                                  clientAddr *candidate);
-void networking::addConnectionToMap(const struct clientAddr &candidate,
+                                  ClientAddr *candidate);
+void networking::addConnectionToMap(const struct ClientAddr &candidate,
                                        std::map<int, Connection> &cMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
@@ -133,7 +133,7 @@ void networking::process(const int listen_sock,
 // RETURNS: fd for new socket
 
 int networking::acceptConnection(const int listen_sock,
-                                  clientAddr *candidate) {
+                                  ClientAddr *candidate) {
 
   candidate->clientSock = accept(
       listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
@@ -149,7 +149,7 @@ int networking::acceptConnection(const int listen_sock,
   return (0);
 }
 
-void networking::addConnectionToMap(const struct clientAddr &candidate,
+void networking::addConnectionToMap(const struct ClientAddr &candidate,
                                        std::map<int, Connection> &cMap) {
 
   Connection newConnection =

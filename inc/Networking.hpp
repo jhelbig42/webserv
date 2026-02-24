@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:13:40 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:33:18 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 
 namespace networking {
 
-struct clientAddr {
+struct ClientAddr {
 
   struct sockaddr_storage addr;
   int clientSock;
@@ -46,8 +46,8 @@ void setToListen(const int sock);
 void pollLoop(const int sock);
 void process(const int listen_sock, std::map<int, Connection> &c_map,
              std::vector<pollfd> &fds);
-int acceptConnection(const int listen_sock, struct clientAddr *candidate);
-void addConnectionToMap(const struct clientAddr &candidate,
+int acceptConnection(const int listen_sock, struct ClientAddr *candidate);
+void addConnectionToMap(const struct ClientAddr &candidate,
                            std::map<int, Connection> &c_map);
 
 void handlePollnval(int fd, std::map<int, Connection> &c_map);
