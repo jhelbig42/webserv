@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 13:28:49 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:18:29 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <cstddef> // for NULL
 #include <cstring> // for strerror
 #include <netdb.h>
+#include <ostream>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h> // for close
@@ -80,9 +81,8 @@ int networking::getServerSocket(struct addrinfo *server_info) {
   if (p == NULL) {
     freeaddrinfo(server_info);
     throw std::runtime_error("server failed to find a socket");
-  } else {
-    logging::log(logging::Debug, "sever found socket. bind: success");
   }
+  logging::log(logging::Debug, "sever found socket. bind: success");
   return (sock);
 }
 
@@ -100,7 +100,7 @@ int networking::getServerSocket(struct addrinfo *server_info) {
 
 static int clearSocket(const int sock) {
   int yes = 1;
-  int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+  const int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
   if (ret == -1) {
     std::ostringstream msg;
     msg << "setsockopt: " << std::strerror(errno);

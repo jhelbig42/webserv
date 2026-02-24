@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 13:49:45 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:25:04 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,15 @@
 #include <map>
 #include <ostream>
 #include <poll.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <utility>
 #include <vector>
 
 // TODO These functions could be made static:
 // process(), acceptConnection(), addConnectionToMap()
-// But then they would lose sight of networking::client_addr struct
+// But then they would lose sight of networking::clientAddr struct
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
@@ -33,8 +37,8 @@ void networking::process(const int listen_sock,
                          std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds);
 int networking::acceptConnection(const int listen_sock,
-                                  client_addr *candidate);
-void networking::addConnectionToMap(const struct client_addr &candidate,
+                                  clientAddr *candidate);
+void networking::addConnectionToMap(const struct clientAddr &candidate,
                                        std::map<int, Connection> &cMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
@@ -92,7 +96,7 @@ void networking::process(const int listen_sock,
                          std::vector<pollfd> &fds) {
 
   logging::log(logging::Debug, "Process()");
-  std::vector<pollfd> new_fd_batch;
+  std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (it->revents & POLLNVAL) {
       handlePollnval(it->fd, cMap);
@@ -107,7 +111,7 @@ void networking::process(const int listen_sock,
       exit(1);
     }
     if (it->revents & POLLIN) { // data to read | hang-up
-      handlePollin(it->fd, cMap, listen_sock, new_fd_batch);
+      handlePollin(it->fd, cMap, listen_sock, newFdBatch);
     }
     // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
@@ -118,7 +122,7 @@ void networking::process(const int listen_sock,
       it++;
     }
   }
-  fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
+  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
 }
 
 // acceptConnections() is a a wrapper for accept(), which extracts
@@ -129,7 +133,7 @@ void networking::process(const int listen_sock,
 // RETURNS: fd for new socket
 
 int networking::acceptConnection(const int listen_sock,
-                                  client_addr *candidate) {
+                                  clientAddr *candidate) {
 
   candidate->clientSock = accept(
       listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
@@ -145,7 +149,7 @@ int networking::acceptConnection(const int listen_sock,
   return (0);
 }
 
-void networking::addConnectionToMap(const struct client_addr &candidate,
+void networking::addConnectionToMap(const struct clientAddr &candidate,
                                        std::map<int, Connection> &cMap) {
 
   Connection newConnection =

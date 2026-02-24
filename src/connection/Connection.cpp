@@ -6,22 +6,19 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 12:24:31 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:04:11 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Conditions.hpp"
 #include "Connection.hpp"
 #include "Logging.hpp"
-#include "Networking.hpp" // needed for sockaddr_storage
-// sockaddr_storage could possibly be defined here
-// or somewhere else
 #include "NetworkingDefines.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include <cerrno> // for errno
-#include <cstring> // for strerror
 #include <cstddef>
+#include <cstring> // for strerror
 #include <sstream> // for ostreamstring
 #include <stddef.h>
 #include <stdio.h> // for puts

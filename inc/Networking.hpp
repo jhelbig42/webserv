@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 18:47:08 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 14:13:40 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,15 @@
 #include "Logging.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains
-#include <cerrno>  // for errno
-#include <cstdlib> // for exit
-#include <cstring> // for memset
-#include <iostream>
 #include <map>
 #include <netdb.h>
 #include <poll.h>
-#include <sstream>
-#include <stdexcept> // for runtime_error
-#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h> // for close
 
 namespace networking {
 
-struct client_addr {
+struct clientAddr {
 
   struct sockaddr_storage addr;
   int clientSock;
@@ -54,8 +46,8 @@ void setToListen(const int sock);
 void pollLoop(const int sock);
 void process(const int listen_sock, std::map<int, Connection> &c_map,
              std::vector<pollfd> &fds);
-int acceptConnection(const int listen_sock, struct client_addr *candidate);
-void addConnectionToMap(const struct client_addr &candidate,
+int acceptConnection(const int listen_sock, struct clientAddr *candidate);
+void addConnectionToMap(const struct clientAddr &candidate,
                            std::map<int, Connection> &c_map);
 
 void handlePollnval(int fd, std::map<int, Connection> &c_map);

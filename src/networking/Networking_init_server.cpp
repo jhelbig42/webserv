@@ -1,13 +1,23 @@
-// TODO: add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking_init_server.cpp                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/24 14:06:35 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/24 14:11:56 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "Logging.hpp"
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
 #include <cstddef> // for NULL
+#include <netdb.h>
 #include <ostream>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netdb.h>
 #include <string>
 #include <string.h>
 
