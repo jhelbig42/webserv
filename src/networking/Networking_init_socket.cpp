@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:18:29 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 15:31:58 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,9 +139,11 @@ static int bindToIP(const int sock, const struct addrinfo *p) {
 // hardcode TCP here. What's cleaner?
 
 static int createSocket(const struct addrinfo *p) {
-
+/*
   const int sock = socket(p->ai_family, p->ai_socktype,
                     p->ai_protocol); // could set ai_protocol manually to TCP?
+*/  
+  const int sock = socket(p->ai_family, SOCK_STREAM | SOCK_NONBLOCK, 0); // could set ai_protocol manually to TCP?
   if (sock == -1) {
     std::ostringstream msg;
     msg << "socket: " << std::strerror(errno)
