@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:33:48 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 17:03:37 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <fcntl.h> // TODO delete before submission, only for debugging
 
 // TODO These functions could be made static:
 // process(), acceptConnection(), addConnectionToMap()
@@ -146,7 +147,22 @@ int networking::acceptConnection(const int listen_sock,
     return (-1);
   }
   logging::log2(logging::Debug, "Connection accepted on socket ", candidate->clientSock);
+  printFcntlFlags(candidate->clientSock);
   return (0);
+}
+
+// printFcntlFlags() is a temporary debug function that makes use
+// of forbidden function fcntl(). This function is used to check
+// if a particular fd is blocking, and print the results.
+
+void networking::printFcntlFlags(const int Sock){
+	const int flags = fcntl(Sock, F_GETFL);
+	if (flags & O_NONBLOCK){
+		logging::log2(logging::Debug, Sock, " is NON-BLOCKING");
+	}
+	else {
+		logging::log2(logging::Debug, Sock, " is BLOCKING");
+	}
 }
 
 void networking::addConnectionToMap(const struct ClientAddr &candidate,
@@ -156,3 +172,4 @@ void networking::addConnectionToMap(const struct ClientAddr &candidate,
       Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
   cMap.insert(std::make_pair(candidate.clientSock, newConnection));
 }
+
