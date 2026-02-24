@@ -24,10 +24,10 @@ class Request {
 		// request& operator=(const request&);
 		// ~request();
     	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
-		explicit Request(const char *input);
-		void init(const char *input);
+		explicit Request(std::string input);
+		void init(std::string input);
     	
-		void parseStatusLine(const char *, const size_t);
+		void parseStatusLine(std::string input, const size_t);
 		void parseMethod(std::string token);
 		void parseResource(std::string token);
 		void parseHttp(std::string token);

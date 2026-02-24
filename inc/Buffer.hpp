@@ -112,7 +112,7 @@ public:
   void deleteFront(const size_t Bytes);
 
 private:
-  char _buffer[BUFFER_SIZE];
+  char	_buffer[BUFFER_SIZE];
   size_t _start;
   size_t _end;
 };

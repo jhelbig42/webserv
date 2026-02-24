@@ -57,5 +57,6 @@ private:
   Request _req;
   Response _res;
   
-  char _readBuf[MAX_REQUEST];
+  Buffer	_buf;
+  char		_readBuf[MAX_REQUEST];
 };

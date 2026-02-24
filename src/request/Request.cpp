@@ -21,11 +21,11 @@
 Request::Request() : _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {}  
 
-void Request::init(const char *input) {
+void Request::init(std::string input) {
 	this->parseStatusLine(input, 100);
 }
 
-Request::Request(const char *input)
+Request::Request(std::string input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {
 	this->parseStatusLine(input, 100);
@@ -103,9 +103,9 @@ void Request::parseHttp(std::string token)
  * 
  * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
  */
-void Request::parseStatusLine(const char *buffer, const size_t bytes)
+void Request::parseStatusLine(std::string input, const size_t bytes)
 {
-	std::vector<std::string> status = split(buffer, " ");
+	std::vector<std::string> status = split(input, " ");
 	if (status.size() != 3)
 	{
 		this->_valid =false;

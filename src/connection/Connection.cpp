@@ -66,7 +66,8 @@ void Connection::scheduleForDemolition(void) {
 void Connection::readData(void) {
 
   logging::log(logging::Debug, "read_data()");
-  const ssize_t bytesRead = recv(_sock, &_readBuf, MAX_REQUEST, 0);
+  const ssize_t bytesRead = _buf.fill(_sock, MAX_REQUEST);
+  //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
   if (bytesRead == MAX_REQUEST) {
     logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
@@ -88,7 +89,9 @@ void Connection::readData(void) {
   _readBuf[bytesRead - 1] = '\0';
   //	puts(_read_buf);
   //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
-  _req.init(_readBuf);
+  std::string s(_buf.begin(), _buf.end());
+  _req.init(s); 
+  //_req.init(_readBuf);
   _res.init(_req);
   int dummy = -1;
   while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
