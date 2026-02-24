@@ -6,17 +6,27 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 18:58:28 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 13:40:53 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Connection.hpp"
+#include "Logging.hpp"
 #include "Networking.hpp"
-#include "NetworkingDefines.hpp"
+// #include "NetworkingDefines.hpp" // can be removed?
+#include <map>
+#include <ostream>
+#include <poll.h>
+#include <stdexcept>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 
 void handlePollnval(int fd, std::map<int, Connection> &c_map);
 void handlePollerr(int fd, std::map<int, Connection> &c_map);
 void handlPollin(int fd, std::map<int, Connection> &c_map,
-                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
 
 
 void networking::handlePollnval(int fd, std::map<int, Connection> &c_map) {
@@ -50,20 +60,20 @@ void networking::handlePollerr(int fd, std::map<int, Connection> &c_map) {
 
 void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
                                const int &listen_sock,
-                               std::vector<pollfd> &new_fd_batch) {
+                               std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLIN: fd ", fd);
   if (fd == listen_sock) { // listening socket got new connection
     client_addr candidate;
     if (acceptConnection(listen_sock, &candidate) != -1) {
       addConnectionToMap(candidate, c_map);
-      pollfd new_fd = {candidate.clientSock, POLLIN, 0};
-      new_fd_batch.push_back(new_fd);
+      pollfd newFd = {candidate.clientSock, POLLIN, 0};
+      newFdBatch.push_back(newFd);
     }
   }
   else {
-    std::map<int, Connection>::iterator c_it = c_map.find(fd);
-    if (c_it != c_map.end()) {
-      (c_it->second).readData();
+    std::map<int, Connection>::iterator itC = c_map.find(fd);
+    if (itC != c_map.end()) {
+      (itC->second).readData();
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");

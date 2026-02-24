@@ -6,12 +6,21 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 18:50:52 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 13:49:45 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Connection.hpp"
+#include "Logging.hpp"
 #include "Networking.hpp"
-#include "NetworkingDefines.hpp"
+// #include "NetworkingDefines.hpp" // Can be removed?
+#include <cerrno>  // for errno
+#include <cstring> // for strerror
+#include <exception>
+#include <map>
+#include <ostream>
+#include <poll.h>
+#include <vector>
 
 // TODO These functions could be made static:
 // process(), acceptConnection(), addConnectionToMap()
@@ -21,17 +30,17 @@
 
 void networking::pollLoop(const int sock);
 void networking::process(const int listen_sock,
-                         std::map<int, Connection> &c_map,
+                         std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds);
 int networking::acceptConnection(const int listen_sock,
                                   client_addr *candidate);
 void networking::addConnectionToMap(const struct client_addr &candidate,
-                                       std::map<int, Connection> &c_map);
+                                       std::map<int, Connection> &cMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
 //
-// • Declares c_map, a map of clients (key = fd, value = Connection object)
+// • Declares cMap, a map of clients (key = fd, value = Connection object)
 // • Declares fds, a vector of pollfd structs
 //  - Pollfd structs are library-defined and required by poll()
 //  - Placing pollfds in a vector is useful for constant re-sizing,
@@ -44,14 +53,14 @@ void networking::addConnectionToMap(const struct client_addr &candidate,
 
 void networking::pollLoop(const int sock) {
 
-  std::map<int, Connection> c_map;
+  std::map<int, Connection> cMap;
   std::vector<pollfd> fds;
 
-  pollfd listener = {sock, POLLIN, 0};
+  const pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
 
   while (1) {
-    int res = poll(fds.data(), (nfds_t)fds.size(),
+    const int res = poll(fds.data(), (nfds_t)fds.size(),
                    -1); // without restriction to fds.size this cast is unsafe
     if (res == -1) {
       std::ostringstream msg;
@@ -62,7 +71,7 @@ void networking::pollLoop(const int sock) {
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-    process(sock, c_map, fds);
+    process(sock, cMap, fds);
   }
 }
 
@@ -79,18 +88,18 @@ void networking::pollLoop(const int sock) {
 // TODO Handle additional flags
 
 void networking::process(const int listen_sock,
-                         std::map<int, Connection> &c_map,
+                         std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
   logging::log(logging::Debug, "Process()");
   std::vector<pollfd> new_fd_batch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (it->revents & POLLNVAL) {
-      handlePollnval(it->fd, c_map);
+      handlePollnval(it->fd, cMap);
       exit(1);
     }
     if (it->revents & POLLERR) {
-      handlePollerr(it->fd, c_map);
+      handlePollerr(it->fd, cMap);
       exit(1);
     }
     if (it->revents & POLLHUP) {
@@ -98,12 +107,12 @@ void networking::process(const int listen_sock,
       exit(1);
     }
     if (it->revents & POLLIN) { // data to read | hang-up
-      handlePollin(it->fd, c_map, listen_sock, new_fd_batch);
+      handlePollin(it->fd, cMap, listen_sock, new_fd_batch);
     }
     // CHECK IF CONNECTION SHOULD BE DELETED
-    if (it->fd != listen_sock && c_map.at(it->fd)._delete == true) {
+    if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
 	  close(it->fd);
-      c_map.erase(it->fd);
+      cMap.erase(it->fd);
       it = fds.erase(it);
     } else {
       it++;
@@ -137,9 +146,9 @@ int networking::acceptConnection(const int listen_sock,
 }
 
 void networking::addConnectionToMap(const struct client_addr &candidate,
-                                       std::map<int, Connection> &c_map) {
+                                       std::map<int, Connection> &cMap) {
 
-  Connection new_connection =
+  Connection newConnection =
       Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
-  c_map.insert(std::make_pair(candidate.clientSock, new_connection));
+  cMap.insert(std::make_pair(candidate.clientSock, newConnection));
 }

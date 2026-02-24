@@ -6,21 +6,27 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 19:04:05 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 12:24:31 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Connection.hpp"
 #include "Conditions.hpp"
+#include "Connection.hpp"
 #include "Logging.hpp"
-//#include "Networking.hpp"
+#include "Networking.hpp" // needed for sockaddr_storage
+// sockaddr_storage could possibly be defined here
+// or somewhere else
+#include "NetworkingDefines.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include <stdio.h> // for puts
-#include <stddef.h>
-#include <string.h> // for memcpy
-#include <cstring> // for strerror
 #include <cerrno> // for errno
+#include <cstring> // for strerror
+#include <cstddef>
+#include <sstream> // for ostreamstring
+#include <stddef.h>
+#include <stdio.h> // for puts
+#include <string.h> // for memcpy, memset
+#include <sys/socket.h> // for socklen_t, recv
 
 #define BYTES_PER_CHUNK 256
 
@@ -62,26 +68,26 @@ void Connection::scheduleForDemolition(void) {
 void Connection::readData(void) {
 
   logging::log(logging::Debug, "read_data()");
-  ssize_t bytes_read = recv(_sock, &_readBuf, MAX_REQUEST, 0);
+  const ssize_t bytesRead = recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
-  if (bytes_read == MAX_REQUEST) {
+  if (bytesRead == MAX_REQUEST) {
     logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
     // May happen frequently, will be handled in chunks
     // Logging for debug purposes as we build.
   }
-  if (bytes_read == 0) {
+  if (bytesRead == 0) {
     logging::log(logging::Warning, "read_data(): bytes_read == 0");
     _delete = true; // important to coordinate with Julia / parsing
     logging::log(logging::Warning, "client appears to have hung up.");
     return;
   }
-  if (bytes_read < 0) {
+  if (bytesRead < 0) {
     std::ostringstream msg;
     msg << "recv: " << std::strerror(errno);
     logging::log(logging::Warning, msg.str());
     return;
   }
-  _readBuf[bytes_read - 1] = '\0';
+  _readBuf[bytesRead - 1] = '\0';
   //	puts(_read_buf);
   //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
   _req.init(_readBuf);

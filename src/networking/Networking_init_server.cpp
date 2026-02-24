@@ -1,12 +1,20 @@
 // TODO: add 42 header
 
+#include "Logging.hpp"
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
+#include <cstddef> // for NULL
+#include <ostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <string>
+#include <string.h>
 
 struct addrinfo *networking::getServerInfo(void);
 static struct addrinfo createHints(void);
 static std::string addrinfoToStr(const struct addrinfo *info,
-                                   const std::string msg);
+                                   const std::string &msg);
 
 // getServerInfo() creates an addrinfo struct (standard, from <sys/socket.h>)
 // with information about the server's own address & our chosen I/O settings.
@@ -21,17 +29,16 @@ static std::string addrinfoToStr(const struct addrinfo *info,
 
 struct addrinfo *networking::getServerInfo(void) {
 
-  struct addrinfo hints = createHints();
+  const struct addrinfo hints = createHints();
   struct addrinfo *info;
 
-  int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
+  const int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
   if (ret != 0) {
-    std::string msg(gai_strerror(ret));
+    const std::string msg(gai_strerror(ret));
     throw std::runtime_error("getaddrinfo: " + msg);
-  } else {
-    logging::log(logging::Debug, "addrinfo server_info created");
-    logging::log(logging::Debug, addrinfoToStr(info, "server_info:"));
   }
+  logging::log(logging::Debug, "addrinfo server_info created");
+  logging::log(logging::Debug, addrinfoToStr(info, "server_info:"));
   return (info);
 }
 
@@ -70,7 +77,7 @@ static struct addrinfo createHints(void) {
 // RETURNS: a string with all info to be printed
 
 static std::string addrinfoToStr(const struct addrinfo *info,
-                                   const std::string msg) {
+                                   const std::string &msg) {
   std::ostringstream oss;
   oss << "\n\t" << msg << "\n"
       << "\tai_flags = " << info->ai_flags << "\n"

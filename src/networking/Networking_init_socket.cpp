@@ -6,12 +6,20 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 19:00:32 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/24 13:28:49 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Logging.hpp"
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
+#include <cerrno>  // for errno
+#include <cstddef> // for NULL
+#include <cstring> // for strerror
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h> // for close
 
 static int clearSocket(const int sock);
 static int bindToIP(const int sock, const struct addrinfo *p);
@@ -112,7 +120,7 @@ static int clearSocket(const int sock) {
 
 static int bindToIP(const int sock, const struct addrinfo *p) {
 
-  int ret = bind(sock, p->ai_addr, p->ai_addrlen);
+  const int ret = bind(sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
     close(sock);
     std::string msg(gai_strerror(ret));
@@ -132,7 +140,7 @@ static int bindToIP(const int sock, const struct addrinfo *p) {
 
 static int createSocket(const struct addrinfo *p) {
 
-  int sock = socket(p->ai_family, p->ai_socktype,
+  const int sock = socket(p->ai_family, p->ai_socktype,
                     p->ai_protocol); // could set ai_protocol manually to TCP?
   if (sock == -1) {
     std::ostringstream msg;

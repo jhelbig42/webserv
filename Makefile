@@ -164,7 +164,6 @@ $(SA_REPORTS_STAMP): $(SA_CCMDS)
 	mkdir -p $(SA_REPORTS)
 	-CodeChecker analyze \
 		--ctu \
-		--verbose debug \
 		--analyzers $(SA_ANALYZER) \
 		--analyzer-config $(SA_ANALYZER_CONFIG) \
 		--enable sensitive \
