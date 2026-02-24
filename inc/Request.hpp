@@ -1,13 +1,14 @@
 #pragma once
 
+#include "Buffer.hpp"
 #include "Conditions.hpp"
+#include "Logging.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
 #include <iostream>
 #include <stdlib.h>
 #include <sstream>
-#include "Logging.hpp"
 
 typedef enum {
   Generic,
@@ -27,6 +28,8 @@ class Request {
 		explicit Request(std::string input);
 		void init(std::string input);
     	
+		void readFromSocket(int Fd);
+		bool ClientHungUp;
 		void parseStatusLine(std::string input, const size_t);
 		void parseMethod(std::string token);
 		void parseResource(std::string token);
@@ -36,20 +39,22 @@ class Request {
 		Conditions getConditions(void) const;
 		bool process(const int Socket, const size_t Bytes);
 
-		bool isValid() const;
-		size_t getMajorV() const;
-		size_t getMinorV() const;
+		bool		isValid() const;
+		size_t		getMajorV() const;
+		size_t		getMinorV() const;
 		const std::string &getResource() const;
-		HttpMethod getMethod() const;
+		HttpMethod 	getMethod() const;
 
 	private:
-		HttpMethod _method;
+		HttpMethod	_method;
 		std::string _resource;
-		size_t _majorVersion;
-		size_t _minorVersion;
-		bool _valid;
-		Conditions _conditions;
-		bool _fullyParsed;
+		size_t		_majorVersion;
+		size_t		_minorVersion;
+		bool		_valid;
+		Conditions	_conditions;
+		bool		_fullyParsed;
+
+		Buffer		_buf;
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

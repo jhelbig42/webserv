@@ -13,7 +13,7 @@
 #include "Connection.hpp"
 #include "Logging.hpp"
 #include "Networking.hpp"
-// #include "NetworkingDefines.hpp" // can be removed?
+#include "NetworkingDefines.hpp" // can be removed?
 #include <map>
 #include <ostream>
 #include <poll.h>
@@ -73,7 +73,8 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
   else {
     const std::map<int, Connection>::iterator itC = c_map.find(fd);
     if (itC != c_map.end()) {
-      (itC->second).readData();
+
+      (itC->second).serve(BYTES_PER_JUNK);
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");

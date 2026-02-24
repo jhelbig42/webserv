@@ -26,8 +26,6 @@
 #include <sys/socket.h> // for socklen_t, recv
 #include <sys/types.h> // for ssize_t
 
-#define BYTES_PER_CHUNK 256
-
 // Construct & Destruct
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
@@ -63,52 +61,35 @@ void Connection::scheduleForDemolition(void) {
 
 // Send & Receive
 
-void Connection::readData(void) {
-
-  logging::log(logging::Debug, "read_data()");
-  const ssize_t bytesRead = _buf.fill(_sock, MAX_REQUEST);
-  //recv(_sock, &_readBuf, MAX_REQUEST, 0);
-
-  if (bytesRead == MAX_REQUEST) {
-    logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
-    // May happen frequently, will be handled in chunks
-    // Logging for debug purposes as we build.
-  }
-  if (bytesRead == 0) {
-    logging::log(logging::Warning, "read_data(): bytes_read == 0");
-    _delete = true; // important to coordinate with Julia / parsing
-    logging::log(logging::Warning, "client appears to have hung up.");
-    return;
-  }
-  if (bytesRead < 0) {
-    std::ostringstream msg;
-    msg << "recv: " << std::strerror(errno);
-    logging::log(logging::Warning, msg.str());
-    return;
-  }
-  _readBuf[bytesRead - 1] = '\0';
-  //	puts(_read_buf);
-  //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
-  std::string s(_buf.begin(), _buf.end());
-  _req.init(s); 
-  //_req.init(_readBuf);
-  _res.init(_req);
-  int dummy = -1;
-  while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
-    ;
-  logging::log(logging::Debug, "read_buf = ");
-  logging::log(logging::Debug, _readBuf);
-}
+//void Connection::processData(void) {
+//	_req.readFromSocket(_sock);
+//	
+//	if (_req.ClientHungUp){
+//		scheduleForDemolition();
+//		return ;
+//	};
+	 
+//	//parsing from buffer into Request
+//	//when fully parsed init response 
+//	if(_req.isFullyParsed())
+//	{
+//		_res.init(_req);
+//		int dummy = -1;
+//		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
+//  			 ;
+//	}
+//}//
 
 bool Connection::serve(const size_t Bytes) {
-  if (!_req.isFullyParsed()) {
+  //handle Request until fully parsed
+	if (!_req.isFullyParsed()) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock, Bytes);
 		if (_req.isFullyParsed())
 			_res.init(_req);
     return false;
   }
-	
+  //switch to Response	
   if (_conditionsFulfilled & _res.getConditions())
     return _res.process(_sock, _sockForward, Bytes);
   return false;

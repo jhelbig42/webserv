@@ -1,6 +1,8 @@
 #include "Request.hpp"
 #include "Logging.hpp"
 
+#define MAX_REQUEST 1024
+
 // Source - https://stackoverflow.com/a/14266139
 // Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-11, License - CC BY-SA 4.0
@@ -18,7 +20,13 @@
  * \return fills the Request attributes. On error _valid attribute will remain false
  */
 
-Request::Request() : _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
+Request::Request() : 
+	_method(Generic),
+	_resource(""),
+	_majorVersion(0), 
+	_minorVersion(0), 
+	_valid(false),
+	ClientHungUp(false)
 {}  
 
 void Request::init(std::string input) {
@@ -94,6 +102,8 @@ void Request::parseHttp(std::string token)
 
 	logging::log(logging::Debug, "parse status_line: parse http version successfully");
 }
+
+
 /**
  * \brief Parses the status line to construct a Request instance. 
  * On any invalid syntax within the status line Request remains invalid. 
@@ -126,6 +136,35 @@ void Request::parseStatusLine(std::string input, const size_t bytes)
 	(void)bytes;
 }
 
+void Request::readFromSocket(int Fd){
+	logging::log(logging::Debug, "read_data()");
+  const ssize_t bytesRead = _buf.fill(Fd, MAX_REQUEST);
+  //recv(_sock, &_readBuf, MAX_REQUEST, 0);
+
+  if (bytesRead == MAX_REQUEST) {
+    logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
+    // May happen frequently, will be handled in chunks
+    // Logging for debug purposes as we build.
+  }
+  if (bytesRead == 0) {
+    logging::log(logging::Warning, "read_data(): bytes_read == 0");
+	ClientHungUp = true; //into conditions
+    //_delete = true; // important to coordinate with Julia / parsing
+    logging::log(logging::Warning, "client appears to have hung up.");
+    return;
+  }
+  if (bytesRead < 0) {
+    std::ostringstream msg;
+    logging::log(logging::Warning, "buf.fill() not successful");
+    return;
+  }
+  //	puts(_read_buf);
+  //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
+  std::string s(_buf.begin(), _buf.end());
+  std::cout << s << std::endl;
+
+}
+
 bool Request::isValid() const {
 	return _valid;
 }
@@ -155,5 +194,12 @@ Conditions Request::getConditions(void) const {
 }
 
 bool Request::process(const int Socket, const size_t Bytes) {
+	//read
+	readFromSocket(Socket);
+	//check buffer for crlf crlf
+	//parse_status line
+	//parse headers
+	// if end of header found: fully parsed = true;
+	//return for next read or res handling
 	return false;
 }

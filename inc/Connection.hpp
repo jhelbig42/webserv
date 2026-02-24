@@ -35,13 +35,15 @@ public:
   void scheduleForDemolition(void);
 
   // send & receive
-  void readData(void);
+  //void readData(void);
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
 
+  Request _req;
+  Response _res;
+
 private:
   Connection(); // should not be possible
-
 
   // serve reads from
   Conditions _conditionsFulfilled;
@@ -53,9 +55,6 @@ private:
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;
-
-  Request _req;
-  Response _res;
   
   Buffer	_buf;
   char		_readBuf[MAX_REQUEST];

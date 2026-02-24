@@ -8,7 +8,7 @@
 #define CHUNK_SIZE 1024
 
 #define METHOD "HEAD"
-#define PATH "/home/alneuman/projects/webserv/hello.txt"
+#define PATH "/home/jhelbig/Desktop/webserv/Makefile"
 #define VERSION "HTTP/1.0"
 
 #ifdef OFFLINE
