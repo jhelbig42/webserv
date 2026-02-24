@@ -1,13 +1,32 @@
-// TODO: add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking_init_server.cpp                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/24 14:06:35 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/24 14:11:56 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "Logging.hpp"
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp"
+#include <cstddef> // for NULL
+#include <netdb.h>
+#include <ostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <string>
+#include <string.h>
 
-struct addrinfo *networking::get_server_info(void);
-static struct addrinfo create_hints(void);
-static std::string addrinfo_to_str(const struct addrinfo *info, const std::string msg);
+struct addrinfo *networking::getServerInfo(void);
+static struct addrinfo createHints(void);
+static std::string addrinfoToStr(const struct addrinfo *info,
+                                   const std::string &msg);
 
-// get_server_info() creates an addrinfo struct (standard, from <sys/socket.h>)
+// getServerInfo() creates an addrinfo struct (standard, from <sys/socket.h>)
 // with information about the server's own address & our chosen I/O settings.
 // We need this struct to find a usable socket for listening.
 //
@@ -18,23 +37,22 @@ static std::string addrinfo_to_str(const struct addrinfo *info, const std::strin
 // Allocation is not our choice, but the result of system call getaddrinfo().
 // The addrinfo MUST later be freed by system call freeaddrinfo()... easy.
 
-struct addrinfo *networking::get_server_info(void) {
+struct addrinfo *networking::getServerInfo(void) {
 
-  struct addrinfo hints = create_hints();
+  const struct addrinfo hints = createHints();
   struct addrinfo *info;
 
-  int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
+  const int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
   if (ret != 0) {
-    std::string msg(gai_strerror(ret));
+    const std::string msg(gai_strerror(ret));
     throw std::runtime_error("getaddrinfo: " + msg);
-  } else {
-    logging::log(logging::Debug, "addrinfo server_info created");
-    logging::log(logging::Debug, addrinfo_to_str(info, "server_info:"));
   }
+  logging::log(logging::Debug, "addrinfo server_info created");
+  logging::log(logging::Debug, addrinfoToStr(info, "server_info:"));
   return (info);
 }
 
-// create_hints() is a helper function for get_server_info,
+// createHints() is a helper function for getServerInfo,
 // which creates a "hints" addrinfo struct. "hints" contains the address
 // info and I/O settings that we want to specify ourselves, when
 // building our server's addrinfo.
@@ -44,7 +62,7 @@ struct addrinfo *networking::get_server_info(void) {
 //
 // RETURNS: struct addrinfo with specified fields
 
-static struct addrinfo create_hints(void) {
+static struct addrinfo createHints(void) {
 
   struct addrinfo hints;
   memset(&hints, 0, sizeof hints); // init struct to empty;
@@ -60,7 +78,7 @@ static struct addrinfo create_hints(void) {
 //
 // NOTE: This function should not be used with uninitialized addrinfo structs,
 // in which the values might be garbage. Currently, it is only used by
-// get_server_info(), which assures initialization.
+// getServerInfo(), which assures initialization.
 //
 // Currently static due to one-time use. In the future, may be useful for
 // logging client addrinfo, in which case it would need to be added back
@@ -68,7 +86,8 @@ static struct addrinfo create_hints(void) {
 //
 // RETURNS: a string with all info to be printed
 
-static std::string addrinfo_to_str(const struct addrinfo *info, const std::string msg) {
+static std::string addrinfoToStr(const struct addrinfo *info,
+                                   const std::string &msg) {
   std::ostringstream oss;
   oss << "\n\t" << msg << "\n"
       << "\tai_flags = " << info->ai_flags << "\n"
@@ -78,4 +97,3 @@ static std::string addrinfo_to_str(const struct addrinfo *info, const std::strin
       << "\tai_addrlen = " << info->ai_addrlen << "\n";
   return (oss.str());
 }
-

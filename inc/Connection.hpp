@@ -1,6 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Connection.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/23 17:00:20 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/23 17:43:28 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include "Conditions.hpp"
+#include "NetworkingDefines.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include <netdb.h>
@@ -8,20 +21,27 @@
 
 class Connection {
 public:
-  Connection(const int sock, const sockaddr_storage &addr,
-             const socklen_t addr_size);
+  
+  bool _delete; // placement in public is temporary
+  
+  Connection(const int Sock, const sockaddr_storage &Addr,
+             const socklen_t addrSize);
   ~Connection();
 
   // getters
-  int get_sock(void) const;
+  int getSock(void) const;
 
+  // setters
+  void scheduleForDemolition(void);
+
+  // send & receive
+  void readData(void);
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
 
 private:
   Connection(); // should not be possible
 
-  bool _delete;
 
   // serve reads from
   Conditions _conditionsFulfilled;
@@ -32,8 +52,10 @@ private:
   // networking
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
-  socklen_t _addr_size;
+  socklen_t _addrSize;
 
   Request _req;
   Response _res;
+  
+  char _readBuf[MAX_REQUEST];
 };

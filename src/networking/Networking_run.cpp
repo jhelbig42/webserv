@@ -1,26 +1,50 @@
-// TODO add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Networking_run.cpp                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
+/*   Updated: 2026/02/24 14:33:48 by hallison         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "Connection.hpp"
+#include "Logging.hpp"
 #include "Networking.hpp"
-#include "NetworkingDefines.hpp"
+// #include "NetworkingDefines.hpp" // Can be removed?
+#include <cerrno>  // for errno
+#include <cstring> // for strerror
+#include <exception>
+#include <map>
+#include <ostream>
+#include <poll.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <utility>
+#include <vector>
 
 // TODO These functions could be made static:
-// process(), accept_connection(), add_connection_to_map()
-// But then they would lose sight of networking::client_addr struct
+// process(), acceptConnection(), addConnectionToMap()
+// But then they would lose sight of networking::ClientAddr struct
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
-void networking::poll_loop(const int sock);
+void networking::pollLoop(const int sock);
 void networking::process(const int listen_sock,
-		std::map<int, Connection> &c_map,
-		std::vector<pollfd> &fds);
-int networking::accept_connection(const int listen_sock, client_addr *candidate);
-void networking::add_connection_to_map(const struct client_addr &candidate,
-                                       std::map<int, Connection> &c_map);
+                         std::map<int, Connection> &cMap,
+                         std::vector<pollfd> &fds);
+int networking::acceptConnection(const int listen_sock,
+                                  ClientAddr *candidate);
+void networking::addConnectionToMap(const struct ClientAddr &candidate,
+                                       std::map<int, Connection> &cMap);
 
-// poll_loop() introduces the while(1) networking loop that will run
+// pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
 //
-// • Declares c_map, a map of clients (key = fd, value = Connection object)
+// • Declares cMap, a map of clients (key = fd, value = Connection object)
 // • Declares fds, a vector of pollfd structs
 //  - Pollfd structs are library-defined and required by poll()
 //  - Placing pollfds in a vector is useful for constant re-sizing,
@@ -31,105 +55,89 @@ void networking::add_connection_to_map(const struct client_addr &candidate,
 // 	- continuously checks and marks which pollfds are ready for I/O
 // 	- processes the ones that are marked
 
-void networking::poll_loop(const int sock) {
+void networking::pollLoop(const int sock) {
 
-  std::map<int, Connection> c_map;
+  std::map<int, Connection> cMap;
   std::vector<pollfd> fds;
 
-  pollfd listener = {sock, POLLIN, 0};
+  const pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
 
   while (1) {
-    int res = poll(fds.data(), (nfds_t)fds.size(), -1); // without restriction to fds.size this cast is unsafe
+    const int res = poll(fds.data(), (nfds_t)fds.size(),
+                   -1); // without restriction to fds.size this cast is unsafe
     if (res == -1) {
-    	std::ostringstream msg;
-    	msg << "poll: " << std::strerror(errno);
+      std::ostringstream msg;
+      msg << "poll: " << std::strerror(errno);
       logging::log(logging::Error, msg.str());
-      
+
       // TODO How to best handle poll() failure?
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-    process(sock, c_map, fds);
+    process(sock, cMap, fds);
   }
 }
 
 // process() iterates through the vector of fds and handles the flags
 // that were set by poll() in fd[i]->events & fd[i]->revents.
 //
-// If the listening socket got a new connection, we attempt to accept the connection.
-// If accept is successful, the connection is added to the map of connections
-// and its fd is added to a stash. This stash will be appended to the fds vector
-// after all current fds have been handled. 
+// If one of the handling functions sets the Connection's _delete field
+// to true, due to client hang-up or error, the fd is closed, 
+// and both the Connection & the fd are deleted.
 //
-// TODO More robust and granular error-handling, see additional flags in man pages
-// Currently, the server logs Error and continues normally.
-// We may want to downgrade some errors to warnings.
-// We may want to drop connections with certain errors / flags? TBD.
+// If a new connection is discovered, a new Connection and fd
+// are added.
+//
+// TODO Handle additional flags
 
-void networking::process(const int listen_sock, std::map<int, Connection> &c_map,
+void networking::process(const int listen_sock,
+                         std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
-  std::vector<pollfd> new_fd_batch;
-  std::vector<int> delete_list;
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
-
-	if (it->revents & POLLNVAL || it->revents & POLLERR) { // error
-    	std::ostringstream msg;
-    	msg << "process: " << "poll() resulted in unexpected results for fd " << it->fd
-		<< " : POLLNVAL or POLLERR";
-      logging::log(logging::Error, msg.str());
+  logging::log(logging::Debug, "Process()");
+  std::vector<pollfd> newFdBatch;
+  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
+    if (it->revents & POLLNVAL) {
+      handlePollnval(it->fd, cMap);
+      exit(1);
     }
-
-    if (it->revents & (POLLIN | POLLHUP)) { // data to read | hang-up
-      
-	  std::cout << "POLLIN | POLLHUP : fd : " << it->fd << "\n";
-	  if (it->fd == listen_sock) { // listening socket got new connection
-	    std::cout << "is listener\n";
-        client_addr candidate;
-        if (accept_connection(listen_sock, &candidate) != -1) {
-          add_connection_to_map(candidate, c_map);
-          pollfd new_fd = {candidate.client_sock, POLLIN, 0};
-          new_fd_batch.push_back(new_fd);
-        }
-      }
-	
-	else {
-
-	    std::cout << "is client\n";
-        std::map<int, Connection>::iterator c_it = c_map.find(it->fd);
-        if (c_it != c_map.end()) {
-          (c_it->second).read_data();
-		} else {
-          logging::log(logging::Error, "process: Connection not found in map "
-                                       "container (This should never happen)");
-	  				// could be removed after thorough testing
-        }
-      }
+    if (it->revents & POLLERR) {
+      handlePollerr(it->fd, cMap);
+      exit(1);
+    }
+    if (it->revents & POLLHUP) {
+      logging::log2(logging::Debug, "Hangup from fd ", it->fd);
+      exit(1);
+    }
+    if (it->revents & POLLIN) { // data to read | hang-up
+      handlePollin(it->fd, cMap, listen_sock, newFdBatch);
+    }
+    // CHECK IF CONNECTION SHOULD BE DELETED
+    if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
+	  close(it->fd);
+      cMap.erase(it->fd);
+      it = fds.erase(it);
+    } else {
+      it++;
     }
   }
-  /*
-  for (std::vector<int>::iterator it = delete_list.begin();
-  	it != delete_list.end(); it++) {
-  	fds.erase(it);
-  }
-  */
-  fds.insert(fds.end(), new_fd_batch.begin(), new_fd_batch.end());
+  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
 }
 
-
-// accept_connections() is a a wrapper for accept(), which extracts
+// acceptConnections() is a a wrapper for accept(), which extracts
 // the first connection request on the queue of pending connections
-// for the listening socket. Creates new socket for the 
+// for the listening socket. Creates new socket for the
 // incoming connection.
 //
 // RETURNS: fd for new socket
 
-int networking::accept_connection(const int listen_sock, client_addr *candidate) {
+int networking::acceptConnection(const int listen_sock,
+                                  ClientAddr *candidate) {
 
-  candidate->client_sock = accept(
-      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addr_size);
-  if (candidate->client_sock == -1) {
+  candidate->clientSock = accept(
+      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
+  if (candidate->clientSock == -1) {
     std::ostringstream msg;
     msg << "accept: " << std::strerror(errno)
         << " (can continue trying to accept connections)";
@@ -137,15 +145,14 @@ int networking::accept_connection(const int listen_sock, client_addr *candidate)
                  msg.str()); // may downgrade log level at some point
     return (-1);
   }
-  std::cout << "\nConnection accepted on socket " << candidate->client_sock
-            << "\n\n"; // TODO move to debug
+  logging::log2(logging::Debug, "Connection accepted on socket ", candidate->clientSock);
   return (0);
 }
 
-void networking::add_connection_to_map(const struct client_addr &candidate,
-                                       std::map<int, Connection> &c_map) {
+void networking::addConnectionToMap(const struct ClientAddr &candidate,
+                                       std::map<int, Connection> &cMap) {
 
-  Connection new_connection =
-      Connection(candidate.client_sock, candidate.addr, candidate.addr_size);
-  c_map.insert(std::make_pair(candidate.client_sock, new_connection));
+  Connection newConnection =
+      Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
+  cMap.insert(std::make_pair(candidate.clientSock, newConnection));
 }
