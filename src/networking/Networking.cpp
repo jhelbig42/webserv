@@ -13,6 +13,7 @@
 #include "Networking.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains
+#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 

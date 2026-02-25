@@ -15,11 +15,12 @@
 #include "Networking.hpp"
 // #include "NetworkingDefines.hpp" // Can be removed?
 #include <cerrno>  // for errno
+#include <cstdlib> // exit()
 #include <cstring> // for strerror
-#include <exception>
 #include <map>
 #include <ostream>
 #include <poll.h>
+#include <sstream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -152,7 +153,7 @@ int networking::acceptConnection(const int listen_sock,
 void networking::addConnectionToMap(const struct ClientAddr &candidate,
                                        std::map<int, Connection> &cMap) {
 
-  Connection newConnection =
+  const Connection newConnection =
       Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
   cMap.insert(std::make_pair(candidate.clientSock, newConnection));
 }

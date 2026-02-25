@@ -15,12 +15,11 @@
 #include "Networking.hpp"
 // #include "NetworkingDefines.hpp" // can be removed?
 #include <map>
-#include <ostream>
 #include <poll.h>
+#include <sstream>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <vector>
 
 void handlePollnval(int fd, std::map<int, Connection> &c_map);

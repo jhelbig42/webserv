@@ -16,10 +16,11 @@
 #include <cstddef> // for NULL
 #include <netdb.h>
 #include <ostream>
-#include <sys/types.h>
+#include <sstream>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <string>
-#include <string.h>
+#include <cstring>
 
 struct addrinfo *networking::getServerInfo(void);
 static struct addrinfo createHints(void);
