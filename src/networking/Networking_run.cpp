@@ -157,6 +157,7 @@ int networking::acceptConnection(const int listen_sock,
 
 void networking::printFcntlFlags(const int Sock){
 	const int flags = fcntl(Sock, F_GETFL);
+	logging::log3(logging::Debug, Sock, " fcntl flags = ", flags);
 	if (flags & O_NONBLOCK){
 		logging::log2(logging::Debug, Sock, " is NON-BLOCKING");
 	}

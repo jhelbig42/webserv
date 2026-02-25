@@ -147,6 +147,7 @@ static int createSocket(const struct addrinfo *p) {
         << " (will continue trying sockets)";
     logging::log(logging::Info, msg.str());
   }
+  networking::printFcntlFlags(sock);
   return (sock);
 }
 
