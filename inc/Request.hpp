@@ -52,9 +52,10 @@ class Request {
 		size_t		_minorVersion;
 		bool		_valid;
 		Conditions	_conditions;
+		bool		_statusLineParsed;
 		bool		_fullyParsed;
-
 		Buffer		_buf;
+		
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

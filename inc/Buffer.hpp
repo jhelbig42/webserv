@@ -53,6 +53,8 @@ public:
   Buffer &operator=(const Buffer &other);
   ~Buffer(void);
 
+  char	_buffer[BUFFER_SIZE];
+
   typedef char *iterator;
   typedef const char *const_iterator;
 
@@ -112,7 +114,7 @@ public:
   void deleteFront(const size_t Bytes);
 
 private:
-  char	_buffer[BUFFER_SIZE];
+  
   size_t _start;
   size_t _end;
 };

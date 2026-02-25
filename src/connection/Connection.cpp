@@ -60,9 +60,10 @@ void Connection::scheduleForDemolition(void) {
 }
 
 // Send & Receive
-
+//processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
-	_req.readFromSocket(_sock);
+	if(!_req.isFullyParsed())
+		_req.process(_sock, BYTES_PER_CHUNK);
 	
 	if (_req.ClientHungUp){
 		scheduleForDemolition();
@@ -77,7 +78,7 @@ void Connection::processData(void) {
 		int dummy = -1;
 		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
   			 ;	}
-}//
+}
 
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed

@@ -7,10 +7,11 @@
 
 #define CHUNK_SIZE 1024
 
-#define METHOD "HEAD"
-#define PATH "/home/jhelbig/Desktop/webserv/Makefile"
+#define METHOD "GET"
+#define PATH "/home/julia/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
+// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
 #ifdef OFFLINE
 
 int main(void) {

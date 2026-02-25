@@ -1,5 +1,6 @@
 #include "Request.hpp"
 #include "Logging.hpp"
+#include "NetworkingDefines.hpp"
 
 #define MAX_REQUEST 1024
 
@@ -20,13 +21,13 @@
  * \return fills the Request attributes. On error _valid attribute will remain false
  */
 
-Request::Request() : 
+Request::Request() :
+	ClientHungUp(false),
 	_method(Generic),
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_valid(false),
-	ClientHungUp(false)
+	_valid(false)	
 {}  
 
 void Request::init(std::string input) {
@@ -115,6 +116,7 @@ void Request::parseHttp(std::string token)
  */
 void Request::parseStatusLine(std::string input, const size_t bytes)
 {
+	logging::log(logging::Debug, "parseStatusLine()");
 	std::vector<std::string> status = split(input, " ");
 	if (status.size() != 3)
 	{
@@ -137,7 +139,7 @@ void Request::parseStatusLine(std::string input, const size_t bytes)
 }
 
 void Request::readFromSocket(int Fd){
-	logging::log(logging::Debug, "read_data()");
+	logging::log(logging::Debug, "readFromSocket() starts");
   const ssize_t bytesRead = _buf.fill(Fd, MAX_REQUEST);
   //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
@@ -158,6 +160,7 @@ void Request::readFromSocket(int Fd){
     logging::log(logging::Warning, "buf.fill() not successful");
     return;
   }
+  logging::log(logging::Debug, "readFromSocket() done");
 }
 
 bool Request::isValid() const {
@@ -190,13 +193,28 @@ Conditions Request::getConditions(void) const {
 
 bool Request::process(const int Socket, const size_t Bytes) {
 	//read
+	logging::log(logging::Debug, "Request::process()");
 	readFromSocket(Socket);
-	//parseStatusLine(_buf.)
 	//check buffer for crlf crlf
 	//parse_status line
+	std::string s(_buf.begin(), _buf.end()); // to comply with parse_line implementattion
+												// string needs to cut of crlf or nl in tests
+	size_t pos = s.find("\r\n");
+	if (pos != std::string::npos) // if end of line is found
+	{
+		std::string line = s.substr(0, pos);
+		parseStatusLine(line, BYTES_PER_CHUNK);
+		logging::log(logging::Debug, "status Line parsed");
+		_buf.deleteFront(pos + 2);
+		_fullyParsed = true;
+	}
+	else
+		logging::log(logging::Debug, "end of line not found");
+	//parseStatusLine(s, BYTES_PER_CHUNK);
+	
 	//parse headers
 	// if end of header found: fully parsed = true;
 	//return for next read or res handling
-	_fullyParsed = true;
+	//_fullyParsed = true;
 	return false;
 }
