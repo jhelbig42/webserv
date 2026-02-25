@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 17:03:37 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:42:36 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,9 @@ void networking::process(const int listen_sock,
     if (it->revents & POLLIN) { // data to read | hang-up
       handlePollin(it->fd, cMap, listen_sock, newFdBatch);
     }
+    if (it->revents & POLLOUT) { // data to read | hang-up
+	  handlePollout(it->fd, cMap, listen_sock, newFdBatch);
+	}
     // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
 	  close(it->fd);
