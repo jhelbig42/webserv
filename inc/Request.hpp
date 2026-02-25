@@ -35,19 +35,21 @@ class Request {
 		explicit Request(std::string input);
 		void init(std::string input);
     	
+		bool process(const int Socket);
 		void readFromSocket(int Fd);
 		bool ClientHungUp;
+		
 		bool parseStatusLineFromBuffer();
-		void parseStatusLine(std::string input);
+		void parseStatusLine(std::string StatusLine);
+		void parseMethod(std::string Token);
+		void parseResource(std::string Token);
+		void parseHttp(std::string Token);
+
+
 		bool parseHeadersFromBuffer();
 		void parseHeader(std::string headerLine);
-		void parseMethod(std::string token);
-		void parseResource(std::string token);
-		void parseHttp(std::string token);
-
-		bool isFullyParsed(void) const;
+		
 		Conditions getConditions(void) const;
-		bool process(const int Socket);
 
 		ParseState	getState() const;
 		bool		isValid() const;
@@ -55,16 +57,17 @@ class Request {
 		size_t		getMinorV() const;
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
+		bool		isFullyParsed() const;
 
 	private:
 		HttpMethod	_method;
 		std::string _resource;
 		size_t		_majorVersion;
 		size_t		_minorVersion;
-		bool		_valid;
+		bool		_valid; // can this go into state as well?
 		Conditions	_conditions;
 		//bool		_statusLineParsed;
-		bool		_fullyParsed;
+		bool		_fullyParsed; //likely obsolete as caught by _state --> TO DO delete
 		Buffer		_buf;
 		ParseState	_state;
 		

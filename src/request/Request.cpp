@@ -3,7 +3,6 @@
 #include "NetworkingDefines.hpp"
 
 #define MAX_REQUEST 1024
-
 // Source - https://stackoverflow.com/a/14266139
 // Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-11, License - CC BY-SA 4.0
@@ -39,127 +38,69 @@ Request::Request(std::string input)
 {
 	this->parseStatusLine(input);
 }  
+bool Request::process(int Socket)
+{
+    readFromSocket(Socket);  // fills _buf
+	while (true)
+    {
+        if (_state == STATUS_LINE)
+        {
+			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
+            if (!parseStatusLineFromBuffer())
+                return false;
+        }
+        else if (_state == HEADERS)
+        {
+			logging::log(logging::Debug, "Request::process() state is HEADERS");
+            if (!parseHeadersFromBuffer())
+                return false;
+        }
+        else if (_state == COMPLETE)
+		{
+			logging::log(logging::Debug, "Request::process() state is COMPLETE");
+    		return true;
+		}
+    }
+}
 
-std::vector<std::string> split(const std::string& s, const std::string& delimiter) 
+std::vector<std::string> split(const std::string& S, const std::string& Delimiter) 
 {
     std::vector<std::string> tokens;
     std::string token;
 	size_t last = 0;
 	size_t next = 0;
-    while ((next = s.find(delimiter, last)) != std::string::npos) {
-        token = s.substr(last, next - last);
+    while ((next = S.find(Delimiter, last)) != std::string::npos) {
+        token = S.substr(last, next - last);
         tokens.push_back(token);
-		last = next + delimiter.length();
+		last = next + Delimiter.length();
     }
-    tokens.push_back(s.substr(last)); 
+    tokens.push_back(S.substr(last)); 
 	logging::log(logging::Debug, "parse status_line: split Successfull");
     return tokens;
 }
 
-void Request::parseMethod(std::string token)
-{
-	if (token == "GET")
-		this->_method = Get;
-	else if (token == "POST")
-		this->_method = Post;
-	else if (token == "DELETE")
-		this->_method = Delete;
-	else if (token == "HEAD")
-		this->_method = Head;
-	else
-		throw std::runtime_error("invalid Method");
-	logging::log(logging::Debug, "parse status_line: got method successfully");
-}
-
-void Request::parseResource(std::string token)
-{
-	if (token[0] != '/')
-		throw std::runtime_error("requestURI not given as absolute path");
-	this->_resource = token;
-	logging::log(logging::Debug, "parse status_line: parse resource successfully");
-}
-/**
- * \brief Parses the HTTP-version and sets this Version as Request attributes.
- * parseHttp uses stringstream into size_t as this gives the option to catch
- * invalid inputs like 1.1a(by setting the failbit) which is more diffiult with atoi(which would just return 0 on error, where further checks are necessary)
- * \return nothing but fills the Request attributes _majorVersion and _minorVersion. On error exceptions are thrown, that will be caught in parseStatusLine()
- */
-void Request::parseHttp(std::string token)
-{
-	if (token.substr(0, 5) != "HTTP/")
-		throw std::runtime_error("invalid HTTP version");
-	size_t tback = token.size();
-	size_t pos = token.find(".");
-	if (pos == std::string::npos || pos <= 5 || pos == tback - 1 ) //no . or no other char before .
-		throw std::runtime_error("no HTTP version given");
-	
-	std::stringstream smajor(token.substr(5, pos - 5));
-	if (!(smajor >> this->_majorVersion) || !smajor.eof())
-    	throw std::runtime_error("no HTTP version given");
-
-	std::stringstream sminor(token.substr(pos + 1));
-	if (!(sminor >> this->_minorVersion) || !sminor.eof())
-    	throw std::runtime_error("no HTTP version given");
-
-	logging::log(logging::Debug, "parse status_line: parse http version successfully");
-}
-
-
-/**
- * \brief Parses the status line to construct a Request instance. 
- * On any invalid syntax within the status line Request remains invalid. 
- * So before generating a Response, it shall be checked if the Request is valid at all. 
- * 
- * \returns nothing. On success Request instance will be initialized with _valid set to true. On error _valid will remain false.
- * 
- * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
- */
-void Request::parseStatusLine(std::string input)
-{
-	logging::log(logging::Debug, "parseStatusLine()");
-	std::vector<std::string> status = split(input, " ");
-	if (status.size() != 3)
-	{
-		this->_valid =false;
-		return ;
-	}
-	try
-	{
-		parseMethod(status[0]);
-		parseResource(status[1]);
-		parseHttp(status[2]);
-		this->_valid = true;
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-		return ;
-	}
-}
-
 void Request::readFromSocket(int Fd){
 	logging::log(logging::Debug, "readFromSocket() starts");
-  const ssize_t bytesRead = _buf.fill(Fd, MAX_REQUEST);
+	const ssize_t bytesRead = _buf.fill(Fd, MAX_REQUEST);
   //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
-  if (bytesRead == MAX_REQUEST) {
-    logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
+	if (bytesRead == MAX_REQUEST) {
+    	logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
     // May happen frequently, will be handled in chunks
     // Logging for debug purposes as we build.
-  }
-  if (bytesRead == 0) {
-    logging::log(logging::Warning, "read_data(): bytes_read == 0");
-	ClientHungUp = true; //into conditions
-    //_delete = true; // important to coordinate with Julia / parsing
-    logging::log(logging::Warning, "client appears to have hung up.");
-    return;
-  }
-  if (bytesRead < 0) {
-    std::ostringstream msg;
-    logging::log(logging::Warning, "buf.fill() not successful");
-    return;
-  }
-  logging::log(logging::Debug, "readFromSocket() done");
+  	}
+  	if (bytesRead == 0) {
+    	logging::log(logging::Warning, "read_data(): bytes_read == 0");
+		ClientHungUp = true; //into conditions?
+    	logging::log(logging::Warning, "client appears to have hung up.");
+    	return;
+  	}
+  	if (bytesRead < 0) {
+    	std::ostringstream msg;
+    	logging::log(logging::Warning, "buf.fill() not successful");
+    	return;
+ 	}
+  	logging::log(logging::Debug, "readFromSocket() done");
 }
 
 bool Request::isValid() const {
@@ -192,76 +133,4 @@ Conditions Request::getConditions(void) const {
 
 ParseState Request::getState() const{
 	return _state;
-}
-
-bool Request::parseHeadersFromBuffer()
-{
-    if (_buf.getUsed() == 0)
-        return false;
-
-    std::string s(_buf.begin(), _buf.end());
-    size_t pos = s.find("\r\n");
-
-    if (pos == std::string::npos)
-        return false;  // header line not complete
-
-    // Empty line => end of headers
-    if (pos == 0)
-    {
-        _buf.deleteFront(2);  // remove "\r\n"
-        _state = COMPLETE;
-        return true;
-    }
-
-    std::string headerLine = s.substr(0, pos);
-
-    //parseHeader(headerLine);
-
-    _buf.deleteFront(pos + 2);
-
-    return true;
-}
-
-void Request::parseHeader(std::string headerLine){
-
-}
-
-bool Request::parseStatusLineFromBuffer()
-{
-    if (_buf.getUsed() == 0)
-        return false;
-    std::string s(_buf.begin(), _buf.end());
-    size_t pos = s.find("\r\n");
-    if (pos == std::string::npos)
-        return false;  // line not complete yet
-    std::string line = s.substr(0, pos);
-    parseStatusLine(line);
-    _buf.deleteFront(pos + 2);  // remove line + CRLF
-    _state = HEADERS;
-    return true;
-}
-
-bool Request::process(int socket)
-{
-    readFromSocket(socket);  // fills _buf
-	while (true)
-    {
-        if (_state == STATUS_LINE)
-        {
-			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
-            if (!parseStatusLineFromBuffer())
-                return false;
-        }
-        else if (_state == HEADERS)
-        {
-			logging::log(logging::Debug, "Request::process() state is HEADERS");
-            if (!parseHeadersFromBuffer())
-                return false;
-        }
-        else if (_state == COMPLETE)
-		{
-			logging::log(logging::Debug, "Request::process() state is COMPLETE");
-    		return true;
-		}
-    }
 }

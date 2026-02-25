@@ -62,22 +62,28 @@ void Connection::scheduleForDemolition(void) {
 // Send & Receive
 //processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
-	if(!_req.ClientHungUp && !_req.isFullyParsed())
+	if(_req.getState() != COMPLETE)
 		_req.process(_sock);
 	
 	if (_req.ClientHungUp){
-		scheduleForDemolition();
+		scheduleForDemolition(); // this does not result in deletion
+							// of Connection yet --> Hilary?
 		return ;
 	};
 		 
 	//parsing from buffer into Request
 	//when fully parsed init response 
-	if(_req.isFullyParsed())
+	if(_req.getState() == COMPLETE)
 	{
 		_res.init(_req);
 		int dummy = -1;
 		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
   			 ;	}
+	if (_req.ClientHungUp){
+		scheduleForDemolition(); // this does not result in deletion
+							// of Connection yet --> Hilary?
+		return ;
+	};
 }
 
 bool Connection::serve(const size_t Bytes) {
