@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 13:45:07 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 15:47:28 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,17 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
   else {
     const std::map<int, Connection>::iterator itC = c_map.find(fd);
     if (itC != c_map.end()) {
-      (itC->second).readData();
-    } else {
+	   
+	  // simple dummy
+	  (itC->second).readData();
+      
+	  // eventual implementation
+	  /*
+	  (itC->second).addToConditions(SockRead);
+	  (itC->second).serve(MAX_REQUEST);
+      */
+
+	} else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
       // could be removed after thorough testing
@@ -86,23 +95,18 @@ void networking::handlePollout(int fd, std::map<int, Connection> &c_map,
                                const int &listen_sock,
                                std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLOUT: fd ", fd);
-/*
-if (fd == listen_sock) { // listening socket got new connection
-    ClientAddr candidate;
-    if (acceptConnection(listen_sock, &candidate) != -1) {
-      addConnectionToMap(candidate, c_map);
-      const pollfd newFd = {candidate.clientSock, POLLIN, 0};
-      newFdBatch.push_back(newFd);
-    }
-  }
-  else {
-    const std::map<int, Connection>::iterator itC = c_map.find(fd);
+  const std::map<int, Connection>::iterator itC = c_map.find(fd);
     if (itC != c_map.end()) {
-      (itC->second).readData();
-    } else {
+
+	  send(fd, "We got your request", 1024, MSG_DONTWAIT);
+	  // eventual implementation
+	  /*
+      (itC->second).addToConditions(SockWrite); 
+	  (itC->second).serve(MAX_REQUEST);
+	  */
+	} else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
       // could be removed after thorough testing
     }
-*/
 }

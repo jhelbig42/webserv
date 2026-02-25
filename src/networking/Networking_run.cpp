@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 13:42:36 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 15:51:00 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ void networking::pollLoop(const int sock) {
   while (1) {
     const int res = poll(fds.data(), (nfds_t)fds.size(),
                    -1); // without restriction to fds.size this cast is unsafe
-    if (res == -1) {
+    logging::log(logging::Debug, "poll()");
+	if (res == -1) {
       std::ostringstream msg;
       msg << "poll: " << std::strerror(errno);
       logging::log(logging::Error, msg.str());
