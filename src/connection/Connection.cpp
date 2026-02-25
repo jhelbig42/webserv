@@ -56,29 +56,28 @@ Conditions Connection::getConditions(void) const {
 // Setters
 
 void Connection::scheduleForDemolition(void) {
-  _delete = false;
+  _delete = true;
 }
 
 // Send & Receive
 
-//void Connection::processData(void) {
-//	_req.readFromSocket(_sock);
-//	
-//	if (_req.ClientHungUp){
-//		scheduleForDemolition();
-//		return ;
-//	};
+void Connection::processData(void) {
+	_req.readFromSocket(_sock);
+	
+	if (_req.ClientHungUp){
+		scheduleForDemolition();
+		return ;
+	};
 	 
-//	//parsing from buffer into Request
-//	//when fully parsed init response 
-//	if(_req.isFullyParsed())
-//	{
-//		_res.init(_req);
-//		int dummy = -1;
-//		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
-//  			 ;
-//	}
-//}//
+	//parsing from buffer into Request
+	//when fully parsed init response 
+	if(_req.isFullyParsed())
+	{
+		_res.init(_req);
+		int dummy = -1;
+		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
+  			 ;	}
+}//
 
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed

@@ -158,11 +158,6 @@ void Request::readFromSocket(int Fd){
     logging::log(logging::Warning, "buf.fill() not successful");
     return;
   }
-  //	puts(_read_buf);
-  //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
-  std::string s(_buf.begin(), _buf.end());
-  std::cout << s << std::endl;
-
 }
 
 bool Request::isValid() const {
@@ -196,10 +191,12 @@ Conditions Request::getConditions(void) const {
 bool Request::process(const int Socket, const size_t Bytes) {
 	//read
 	readFromSocket(Socket);
+	//parseStatusLine(_buf.)
 	//check buffer for crlf crlf
 	//parse_status line
 	//parse headers
 	// if end of header found: fully parsed = true;
 	//return for next read or res handling
+	_fullyParsed = true;
 	return false;
 }

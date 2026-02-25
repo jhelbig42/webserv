@@ -38,7 +38,7 @@ public:
   //void readData(void);
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
-
+  void processData(void);
   Request _req;
   Response _res;
 
