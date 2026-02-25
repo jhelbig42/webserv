@@ -27,7 +27,7 @@ Scanner::~Scanner() {
 }
 
 std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
-  Os << "Line: " << Tkn.getLine() << ": ";
+  Os << "Line " << Tkn.getLine() << ": ";
   Os << Tkn.getType().identifier;
   Os << ":\t";
   if (Tkn.getType().type == TokenType::Name)
@@ -45,9 +45,16 @@ std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
 // }
 
 std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
+  size_t line = 0;
   for (std::list<Token *>::iterator It = Scan._tokens.begin();
-       It != Scan._tokens.end(); ++It)
+       It != Scan._tokens.end(); ++It) {
+    if ((**It).getLine() > line)
+    {
+      line = (**It).getLine();
+      Os << "\n########### Line " << line << " ###########\n";
+    }
     Os << **It;
+  }
   return Os;
 }
 
