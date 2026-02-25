@@ -10,6 +10,7 @@ struct TokenType {
     BracesLeft,
     BracesRight,
     Whitespace,
+    Number,
     Name
   } Type;
   Type type;

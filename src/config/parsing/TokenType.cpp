@@ -7,6 +7,7 @@ bool isSemicolon(const char Ch);
 bool isBracesLeft(const char Ch);
 bool isBracesRight(const char Ch);
 bool isWhitespace(const char Ch);
+bool isNumber(const char Ch);
 bool isName(const char Ch);
 
 std::string::const_iterator advanceEof(const std::string &Str,
@@ -20,6 +21,8 @@ advanceBracesRight(const std::string &Str,
                    const std::string::const_iterator It);
 std::string::const_iterator
 advanceWhitespace(const std::string &Str, const std::string::const_iterator It);
+std::string::const_iterator
+advanceNumber(const std::string &Str, const std::string::const_iterator It);
 std::string::const_iterator advanceName(const std::string &Str,
                                         const std::string::const_iterator It);
 
@@ -30,6 +33,7 @@ static const TokenType globalTokenTypes[] = {
     {TokenType::BracesRight, "BracesRight", &isBracesRight,
      &advanceBracesRight},
     {TokenType::Whitespace, "Whitespace", &isWhitespace, &advanceWhitespace},
+    {TokenType::Number, "Number", &isNumber, &advanceNumber},
     {TokenType::Name, "Name", &isName, &advanceName}};
 
 static const size_t globalTokenTypesSize =
@@ -53,6 +57,11 @@ bool isBracesRight(const char Ch) {
 
 bool isWhitespace(const char Ch) {
   return isspace(Ch);
+}
+
+bool isNumber(const char Ch) {
+  static const char nameChar[] = "0123456789";
+  return strchr(nameChar, Ch);
 }
 
 bool isName(const char Ch) {
@@ -91,6 +100,14 @@ advanceWhitespace(const std::string &Str,
                   const std::string::const_iterator It) {
   std::string::const_iterator ItDup = It;
   while (ItDup != Str.end() && isWhitespace(*ItDup))
+    ++ItDup;
+  return ItDup;
+}
+
+std::string::const_iterator advanceNumber(const std::string &Str,
+                                        const std::string::const_iterator It) {
+  std::string::const_iterator ItDup = It;
+  while (ItDup != Str.end() && isNumber(*ItDup))
     ++ItDup;
   return ItDup;
 }

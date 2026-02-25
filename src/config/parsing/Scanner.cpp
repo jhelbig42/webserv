@@ -30,19 +30,12 @@ std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
   Os << "Line " << Tkn.getLine() << ": ";
   Os << Tkn.getType().identifier;
   Os << ":\t";
-  if (Tkn.getType().type == TokenType::Name)
+  if (Tkn.getType().type == TokenType::Name
+    || Tkn.getType().type == TokenType::Number)
     Os << '\t';
   Os << Tkn.getLexeme() << '\n';
   return Os;
 }
-
-// Scanner::Scanner(const std::string &Source) : _source(Source) {
-//   std::string::const_iterator It = _source.begin();
-//   while (It != _source.end()) {
-//     Token *tkn = new Token(Source, It);
-//     _tokens.push_back(tkn);
-//   }
-// }
 
 std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
   size_t line = 0;
@@ -73,11 +66,10 @@ Scanner::Scanner(const char *File) {
   std::string line;
   size_t lineNumber = 0;
   while (true) {
-    ++lineNumber;
     std::getline(inf, line);
     if (!inf.good())
       break;
-    scanLine(lineNumber, line);
+    scanLine(++lineNumber, line);
   }
   if (inf.fail() && !inf.eof())
     throw std::runtime_error("Scanner: file I/O error");
