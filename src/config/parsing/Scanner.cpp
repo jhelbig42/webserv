@@ -51,7 +51,8 @@ std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
   return Os;
 }
 
-Token::Token(const size_t Line, const std::string &Str, std::string::const_iterator &It)
+Token::Token(const size_t Line, const std::string &Str,
+             std::string::const_iterator &It)
     : _line(Line), _type(TokenType::getTokenType(Str, It)) {
   const std::string::const_iterator start = It;
   It = _type.advanceIt(Str, It);

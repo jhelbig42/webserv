@@ -17,14 +17,15 @@ struct TokenType {
   bool (*isType)(const char);
   std::string::const_iterator (*advanceIt)(const std::string &,
                                            const std::string::const_iterator);
-  static const TokenType &
-  getTokenType(const std::string &Str, const std::string::const_iterator It);
+  static const TokenType &getTokenType(const std::string &Str,
+                                       const std::string::const_iterator It);
   static const TokenType &getTokenType2(const Type Type);
 };
 
 class Token {
 public:
-  Token(const size_t Line, const std::string &Str, std::string::const_iterator &It);
+  Token(const size_t Line, const std::string &Str,
+        std::string::const_iterator &It);
   Token(const size_t Line, const TokenType::Type Type);
   const TokenType &getType(void) const;
   const std::string &getLexeme(void) const;
