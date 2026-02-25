@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 16:26:43 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:26:50 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void networking::setToListen(const int sock);
 
 void networking::setToListen(const int sock) {
 
-  if (listen(sock, BACKLOG == -1)) {
+  if (listen(sock, BACKLOG) == -1) {
     std::ostringstream msg;
     msg << "listen: " << std::strerror(errno);
     throw std::runtime_error(msg.str());

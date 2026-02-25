@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 15:51:00 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:50:53 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,9 +113,10 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
     if (it->revents & POLLIN) { // data to read | hang-up
       handlePollin(it->fd, cMap, listen_sock, newFdBatch);
     }
-    if (it->revents & POLLOUT) { // data to read | hang-up
+    if (it->revents & POLLOUT) {
       handlePollout(it->fd, cMap, listen_sock, newFdBatch);
     }
+	// serve within this loop or separate loop
     // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
       close(it->fd);
@@ -125,6 +126,7 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
       it++;
     }
   }
+  // double check that conditions are being reset
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
 }
 

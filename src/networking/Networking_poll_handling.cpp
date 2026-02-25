@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 16:19:36 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:46:41 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
       // eventual implementation
       /*
       (itC->second).addToConditions(SockRead);
-      (itC->second).serve(MAX_REQUEST);
+      (itC->second).serve(MAX_REQUEST); // add to end of process loop instead
         */
 
     } else {
