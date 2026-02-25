@@ -6,6 +6,8 @@ bool isEof(const char Ch);
 bool isSemicolon(const char Ch);
 bool isBracesLeft(const char Ch);
 bool isBracesRight(const char Ch);
+bool isDot(const char Ch);
+bool isAsterisk(const char Ch);
 bool isWhitespace(const char Ch);
 bool isNumber(const char Ch);
 bool isName(const char Ch);
@@ -19,10 +21,14 @@ advanceBracesLeft(const std::string &Str, const std::string::const_iterator It);
 std::string::const_iterator
 advanceBracesRight(const std::string &Str,
                    const std::string::const_iterator It);
+std::string::const_iterator advanceDot(const std::string &Str,
+                                       const std::string::const_iterator It);
+std::string::const_iterator
+advanceAsterisk(const std::string &Str, const std::string::const_iterator It);
 std::string::const_iterator
 advanceWhitespace(const std::string &Str, const std::string::const_iterator It);
-std::string::const_iterator
-advanceNumber(const std::string &Str, const std::string::const_iterator It);
+std::string::const_iterator advanceNumber(const std::string &Str,
+                                          const std::string::const_iterator It);
 std::string::const_iterator advanceName(const std::string &Str,
                                         const std::string::const_iterator It);
 
@@ -32,6 +38,8 @@ static const TokenType globalTokenTypes[] = {
     {TokenType::BracesLeft, "BracesLeft", &isBracesLeft, &advanceBracesLeft},
     {TokenType::BracesRight, "BracesRight", &isBracesRight,
      &advanceBracesRight},
+    {TokenType::Dot, "Dot", &isDot, &advanceDot},
+    {TokenType::Asterisk, "Asterisk", &isAsterisk, &advanceAsterisk},
     {TokenType::Whitespace, "Whitespace", &isWhitespace, &advanceWhitespace},
     {TokenType::Number, "Number", &isNumber, &advanceNumber},
     {TokenType::Name, "Name", &isName, &advanceName}};
@@ -53,6 +61,14 @@ bool isBracesLeft(const char Ch) {
 
 bool isBracesRight(const char Ch) {
   return Ch == '}';
+}
+
+bool isDot(const char Ch) {
+  return Ch == '.';
+}
+
+bool isAsterisk(const char Ch) {
+  return Ch == '*';
 }
 
 bool isWhitespace(const char Ch) {
@@ -95,6 +111,18 @@ advanceBracesRight(const std::string &Str,
   return It + 1;
 }
 
+std::string::const_iterator advanceDot(const std::string &Str,
+                                       const std::string::const_iterator It) {
+  (void)Str;
+  return It + 1;
+}
+
+std::string::const_iterator
+advanceAsterisk(const std::string &Str, const std::string::const_iterator It) {
+  (void)Str;
+  return It + 1;
+}
+
 std::string::const_iterator
 advanceWhitespace(const std::string &Str,
                   const std::string::const_iterator It) {
@@ -104,8 +132,8 @@ advanceWhitespace(const std::string &Str,
   return ItDup;
 }
 
-std::string::const_iterator advanceNumber(const std::string &Str,
-                                        const std::string::const_iterator It) {
+std::string::const_iterator
+advanceNumber(const std::string &Str, const std::string::const_iterator It) {
   std::string::const_iterator ItDup = It;
   while (ItDup != Str.end() && isNumber(*ItDup))
     ++ItDup;

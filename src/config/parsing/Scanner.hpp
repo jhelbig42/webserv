@@ -9,6 +9,8 @@ struct TokenType {
     Semicolon,
     BracesLeft,
     BracesRight,
+    Dot,
+    Asterisk,
     Whitespace,
     Number,
     Name
