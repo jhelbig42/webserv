@@ -94,3 +94,12 @@ const TokenType &TokenType::getTokenType(const std::string &Str, const std::stri
   }
   throw std::runtime_error("unrecognized token");
 }
+
+const TokenType &TokenType::getTokenType2(const TokenType::Type Type) {
+  for (size_t i = 0; i != globalTokenTypesSize; ++i) {
+    if (globalTokenTypes[i].type == Type) {
+      return globalTokenTypes[i];
+    }
+  }
+  throw std::runtime_error("unrecognized token");
+}

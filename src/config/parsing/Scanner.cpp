@@ -2,9 +2,11 @@
 
 #include <cctype>
 #include <cstring>
-#include <string>
+#include <fstream>
 #include <iostream>
 #include <list>
+#include <stdexcept>
+#include <string>
 
 const TokenType &Token::getType(void) const {
   return _type;
@@ -14,6 +16,10 @@ const std::string &Token::getLexeme(void) const {
   return _lexeme;
 }
 
+size_t Token::getLine(void) const {
+  return _line;
+}
+
 Scanner::~Scanner() {
   for (std::list<Token *>::iterator It = _tokens.begin(); It != _tokens.end();
        ++It)
@@ -21,6 +27,7 @@ Scanner::~Scanner() {
 }
 
 std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
+  Os << "Line: " << Tkn.getLine() << ": ";
   Os << Tkn.getType().identifier;
   Os << ":\t";
   if (Tkn.getType().type == TokenType::Name)
@@ -29,13 +36,13 @@ std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
   return Os;
 }
 
-Scanner::Scanner(const std::string &Source) : _source(Source) {
-  std::string::const_iterator It = _source.begin();
-  while (It != _source.end()) {
-    Token *tkn = new Token(Source, It);
-    _tokens.push_back(tkn);
-  }
-}
+// Scanner::Scanner(const std::string &Source) : _source(Source) {
+//   std::string::const_iterator It = _source.begin();
+//   while (It != _source.end()) {
+//     Token *tkn = new Token(Source, It);
+//     _tokens.push_back(tkn);
+//   }
+// }
 
 std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
   for (std::list<Token *>::iterator It = Scan._tokens.begin();
@@ -44,15 +51,49 @@ std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
   return Os;
 }
 
-Token::Token(const std::string &Str, std::string::const_iterator &It)
-    : _type(TokenType::getTokenType(Str, It)) {
+Token::Token(const size_t Line, const std::string &Str, std::string::const_iterator &It)
+    : _line(Line), _type(TokenType::getTokenType(Str, It)) {
   const std::string::const_iterator start = It;
   It = _type.advanceIt(Str, It);
   _lexeme = Str.substr(start - Str.begin(), It - start);
 }
 
+Scanner::Scanner(const char *File) {
+  std::ifstream inf(File);
+  if (!inf.is_open())
+    throw std::runtime_error("Scanner: can not open file");
+  std::string line;
+  size_t lineNumber = 0;
+  while (true) {
+    ++lineNumber;
+    std::getline(inf, line);
+    if (!inf.good())
+      break;
+    scanLine(lineNumber, line);
+  }
+  if (inf.fail() && !inf.eof())
+    throw std::runtime_error("Scanner: file I/O error");
+  addEof(lineNumber);
+}
+
+Token::Token(const size_t Line, const TokenType::Type Type)
+    : _line(Line), _type(TokenType::getTokenType2(Type)), _lexeme("") {
+}
+
+void Scanner::addEof(const size_t Line) {
+  Token *tkn = new Token(Line, TokenType::Eof);
+  _tokens.push_back(tkn);
+}
+
+void Scanner::scanLine(const size_t Number, const std::string &Str) {
+  std::string::const_iterator It = Str.begin();
+  while (It != Str.end()) {
+    Token *tkn = new Token(Number, Str, It);
+    _tokens.push_back(tkn);
+  }
+}
+
 int main(int argc, char **argv) {
-  std::string s(argv[1], argv[1] + strlen(argv[1]));
-  Scanner scan(s);
+  Scanner scan(argv[1]);
   std::cout << scan;
 }
