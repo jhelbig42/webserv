@@ -6,12 +6,12 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:34:49 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 15:49:29 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Conditions.hpp"
 #include "Connection.hpp"
+#include "Conditions.hpp"
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
 #include "Request.hpp"
@@ -21,10 +21,10 @@
 #include <cstring> // for strerror
 #include <sstream> // for ostreamstring
 #include <stddef.h>
-#include <stdio.h> // for puts
-#include <string.h> // for memcpy, memset
+#include <stdio.h>      // for puts
+#include <string.h>     // for memcpy, memset
 #include <sys/socket.h> // for socklen_t, recv
-#include <sys/types.h> // for ssize_t
+#include <sys/types.h>  // for ssize_t
 
 #define BYTES_PER_CHUNK 256
 
@@ -51,8 +51,8 @@ int Connection::getSock(void) const {
 
 Conditions Connection::getConditions(void) const {
   if (_req.isFullyParsed())
-		return _res.getConditions();
-	return _req.getConditions();
+    return _res.getConditions();
+  return _req.getConditions();
 }
 
 // Setters
@@ -86,28 +86,35 @@ void Connection::readData(void) {
     return;
   }
   _readBuf[bytesRead - 1] = '\0';
-  //	puts(_read_buf);
-  //_req.init("GET /home/hallison/webserv/.gitignore HTTP/1.0");
+  logging::log2(logging::Debug, "read_buf = ", _readBuf);
+
+  /*
   _req.init(_readBuf);
   _res.init(_req);
   int dummy = -1;
   while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
     ;
-  logging::log(logging::Debug, "read_buf = ");
-  logging::log(logging::Debug, _readBuf);
+  */
 }
 
 bool Connection::serve(const size_t Bytes) {
   if (!_req.isFullyParsed()) {
-		if (_conditionsFulfilled & _req.getConditions())
-			_req.process(_sock, Bytes);
-		if (_req.isFullyParsed())
-			_res.init(_req);
+    if (_conditionsFulfilled & _req.getConditions())
+      _req.process(_sock, Bytes);
+    if (_req.isFullyParsed())
+      _res.init(_req);
     return false;
   }
-	
+
   if (_conditionsFulfilled & _res.getConditions())
     return _res.process(_sock, _sockForward, Bytes);
   return false;
 }
 
+void Connection::addToConditions(Conditions Condition) {
+  _conditionsFulfilled = _conditionsFulfilled | Condition;
+}
+
+void Connection::resetConditions(void) {
+  _conditionsFulfilled = 0;
+}

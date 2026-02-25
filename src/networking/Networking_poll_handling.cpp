@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:59:24 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:46:41 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,7 @@
 void handlePollnval(int fd, std::map<int, Connection> &c_map);
 void handlePollerr(int fd, std::map<int, Connection> &c_map);
 void handlPollin(int fd, std::map<int, Connection> &c_map,
-                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
-
+                 const int &listen_sock, std::vector<pollfd> &newFdBatch);
 
 void networking::handlePollnval(int fd, std::map<int, Connection> &c_map) {
   logging::log2(logging::Error,
@@ -59,8 +58,8 @@ void networking::handlePollerr(int fd, std::map<int, Connection> &c_map) {
 }
 
 void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
-                               const int &listen_sock,
-                               std::vector<pollfd> &newFdBatch) {
+                              const int &listen_sock,
+                              std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLIN: fd ", fd);
   if (fd == listen_sock) { // listening socket got new connection
     ClientAddr candidate;
@@ -69,15 +68,43 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
       const pollfd newFd = {candidate.clientSock, POLLIN, 0};
       newFdBatch.push_back(newFd);
     }
-  }
-  else {
+  } else {
     const std::map<int, Connection>::iterator itC = c_map.find(fd);
     if (itC != c_map.end()) {
+
+      // simple dummy
       (itC->second).readData();
+
+      // eventual implementation
+      /*
+      (itC->second).addToConditions(SockRead);
+      (itC->second).serve(MAX_REQUEST); // add to end of process loop instead
+        */
+
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
       // could be removed after thorough testing
     }
+  }
+}
+
+void networking::handlePollout(int fd, std::map<int, Connection> &c_map,
+                               const int &listen_sock,
+                               std::vector<pollfd> &newFdBatch) {
+  logging::log2(logging::Debug, "POLLOUT: fd ", fd);
+  const std::map<int, Connection>::iterator itC = c_map.find(fd);
+  if (itC != c_map.end()) {
+
+    send(fd, "We got your request", 1024, MSG_DONTWAIT);
+    // eventual implementation
+    /*
+      (itC->second).addToConditions(SockWrite);
+      (itC->second).serve(MAX_REQUEST);
+    */
+  } else {
+    logging::log(logging::Error, "process: Connection not found in map "
+                                 "container (This should never happen)");
+    // could be removed after thorough testing
   }
 }

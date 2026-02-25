@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:06:40 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:18:29 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:26:50 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void networking::setToListen(const int sock);
 
 void networking::setToListen(const int sock) {
 
-  if (listen(sock, BACKLOG == -1)) {
+  if (listen(sock, BACKLOG) == -1) {
     std::ostringstream msg;
     msg << "listen: " << std::strerror(errno);
     throw std::runtime_error(msg.str());
@@ -139,15 +139,15 @@ static int bindToIP(const int sock, const struct addrinfo *p) {
 // hardcode TCP here. What's cleaner?
 
 static int createSocket(const struct addrinfo *p) {
-
-  const int sock = socket(p->ai_family, p->ai_socktype,
-                    p->ai_protocol); // could set ai_protocol manually to TCP?
+  const int sock = socket(p->ai_family, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  // 0 = TCP
   if (sock == -1) {
     std::ostringstream msg;
     msg << "socket: " << std::strerror(errno)
         << " (will continue trying sockets)";
     logging::log(logging::Info, msg.str());
   }
+  networking::printFcntlFlags(sock);
   return (sock);
 }
 

@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:33:48 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 17:50:53 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,12 @@
 #include <cerrno>  // for errno
 #include <cstring> // for strerror
 #include <exception>
+#include <fcntl.h> // TODO delete before submission, only for debugging
 #include <map>
 #include <ostream>
 #include <poll.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <utility>
 #include <vector>
@@ -33,13 +34,11 @@
 // Decide on most elegant arrangement.
 
 void networking::pollLoop(const int sock);
-void networking::process(const int listen_sock,
-                         std::map<int, Connection> &cMap,
+void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds);
-int networking::acceptConnection(const int listen_sock,
-                                  ClientAddr *candidate);
+int networking::acceptConnection(const int listen_sock, ClientAddr *candidate);
 void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                       std::map<int, Connection> &cMap);
+                                    std::map<int, Connection> &cMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
@@ -64,8 +63,10 @@ void networking::pollLoop(const int sock) {
   fds.push_back(listener);
 
   while (1) {
-    const int res = poll(fds.data(), (nfds_t)fds.size(),
-                   -1); // without restriction to fds.size this cast is unsafe
+    const int res =
+        poll(fds.data(), (nfds_t)fds.size(),
+             -1); // without restriction to fds.size this cast is unsafe
+    logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
       msg << "poll: " << std::strerror(errno);
@@ -83,7 +84,7 @@ void networking::pollLoop(const int sock) {
 // that were set by poll() in fd[i]->events & fd[i]->revents.
 //
 // If one of the handling functions sets the Connection's _delete field
-// to true, due to client hang-up or error, the fd is closed, 
+// to true, due to client hang-up or error, the fd is closed,
 // and both the Connection & the fd are deleted.
 //
 // If a new connection is discovered, a new Connection and fd
@@ -91,8 +92,7 @@ void networking::pollLoop(const int sock) {
 //
 // TODO Handle additional flags
 
-void networking::process(const int listen_sock,
-                         std::map<int, Connection> &cMap,
+void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
   logging::log(logging::Debug, "Process()");
@@ -113,15 +113,20 @@ void networking::process(const int listen_sock,
     if (it->revents & POLLIN) { // data to read | hang-up
       handlePollin(it->fd, cMap, listen_sock, newFdBatch);
     }
+    if (it->revents & POLLOUT) {
+      handlePollout(it->fd, cMap, listen_sock, newFdBatch);
+    }
+	// serve within this loop or separate loop
     // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
-	  close(it->fd);
+      close(it->fd);
       cMap.erase(it->fd);
       it = fds.erase(it);
     } else {
       it++;
     }
   }
+  // double check that conditions are being reset
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
 }
 
@@ -132,8 +137,7 @@ void networking::process(const int listen_sock,
 //
 // RETURNS: fd for new socket
 
-int networking::acceptConnection(const int listen_sock,
-                                  ClientAddr *candidate) {
+int networking::acceptConnection(const int listen_sock, ClientAddr *candidate) {
 
   candidate->clientSock = accept(
       listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
@@ -145,12 +149,28 @@ int networking::acceptConnection(const int listen_sock,
                  msg.str()); // may downgrade log level at some point
     return (-1);
   }
-  logging::log2(logging::Debug, "Connection accepted on socket ", candidate->clientSock);
+  logging::log2(logging::Debug, "Connection accepted on socket ",
+                candidate->clientSock);
+  printFcntlFlags(candidate->clientSock);
   return (0);
 }
 
+// printFcntlFlags() is a temporary debug function that makes use
+// of forbidden function fcntl(). This function is used to check
+// if a particular fd is blocking, and print the results.
+
+void networking::printFcntlFlags(const int Sock) {
+  const int flags = fcntl(Sock, F_GETFL);
+  logging::log3(logging::Debug, Sock, " fcntl flags = ", flags);
+  if (flags & O_NONBLOCK) {
+    logging::log2(logging::Debug, Sock, " is NON-BLOCKING");
+  } else {
+    logging::log2(logging::Debug, Sock, " is BLOCKING");
+  }
+}
+
 void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                       std::map<int, Connection> &cMap) {
+                                    std::map<int, Connection> &cMap) {
 
   Connection newConnection =
       Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
