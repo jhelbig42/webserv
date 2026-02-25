@@ -1,0 +1,30 @@
+server      -> "server" *ws "{" *ws entries *ws "}"
+entries     -> entry *(+ws entry)
+
+entry       -> listen | root | allowed | redirects
+
+listen      -> listen-name +ws listen-val ";"
+listen-name -> "listen"
+listen-val  -> (ip | "*") ":" (port | "*")
+ip          -> ipv4 | ipv6
+ipv4        -> uint8 "." uint8 "." uint8 "." uint8 
+ipv6        -> DUMMY
+port        -> uint16
+
+root        -> root-name +ws root-val ";"
+root-name   -> "root"
+root-val    -> abspath
+
+allowed     -> allowed-name +ws allowed-val ";"
+allowed-name  -> "allowed"
+allowed-val -> "*" | method *(+ws method)
+method  -> "POST" | "GET" | "PUT" | "DELETE" | "HEAD"
+
+# amount
+*listen
+root
+*allowed
+*redirects
+*request_body_max
+
+
