@@ -31,13 +31,13 @@ Request::Request() :
 {}  
 
 void Request::init(std::string input) {
-	this->parseStatusLine(input, 100);
+	this->parseStatusLine(input);
 }
 
 Request::Request(std::string input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {
-	this->parseStatusLine(input, 100);
+	this->parseStatusLine(input);
 }  
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter) 
@@ -114,7 +114,7 @@ void Request::parseHttp(std::string token)
  * 
  * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
  */
-void Request::parseStatusLine(std::string input, const size_t bytes)
+void Request::parseStatusLine(std::string input)
 {
 	logging::log(logging::Debug, "parseStatusLine()");
 	std::vector<std::string> status = split(input, " ");
@@ -135,7 +135,6 @@ void Request::parseStatusLine(std::string input, const size_t bytes)
 		std::cerr << e.what() << std::endl;
 		return ;
 	}
-	(void)bytes;
 }
 
 void Request::readFromSocket(int Fd){
@@ -191,30 +190,78 @@ Conditions Request::getConditions(void) const {
 	return _conditions;
 }
 
-bool Request::process(const int Socket, const size_t Bytes) {
-	//read
-	logging::log(logging::Debug, "Request::process()");
-	readFromSocket(Socket);
-	//check buffer for crlf crlf
-	//parse_status line
-	std::string s(_buf.begin(), _buf.end()); // to comply with parse_line implementattion
-												// string needs to cut of crlf or nl in tests
-	size_t pos = s.find("\r\n");
-	if (pos != std::string::npos) // if end of line is found
-	{
-		std::string line = s.substr(0, pos);
-		parseStatusLine(line, BYTES_PER_CHUNK);
-		logging::log(logging::Debug, "status Line parsed");
-		_buf.deleteFront(pos + 2);
-		_fullyParsed = true;
-	}
-	else
-		logging::log(logging::Debug, "end of line not found");
-	//parseStatusLine(s, BYTES_PER_CHUNK);
-	
-	//parse headers
-	// if end of header found: fully parsed = true;
-	//return for next read or res handling
-	//_fullyParsed = true;
-	return false;
+ParseState Request::getState() const{
+	return _state;
+}
+
+bool Request::parseHeadersFromBuffer()
+{
+    if (_buf.getUsed() == 0)
+        return false;
+
+    std::string s(_buf.begin(), _buf.end());
+    size_t pos = s.find("\r\n");
+
+    if (pos == std::string::npos)
+        return false;  // header line not complete
+
+    // Empty line => end of headers
+    if (pos == 0)
+    {
+        _buf.deleteFront(2);  // remove "\r\n"
+        _state = COMPLETE;
+        return true;
+    }
+
+    std::string headerLine = s.substr(0, pos);
+
+    //parseHeader(headerLine);
+
+    _buf.deleteFront(pos + 2);
+
+    return true;
+}
+
+void Request::parseHeader(std::string headerLine){
+
+}
+
+bool Request::parseStatusLineFromBuffer()
+{
+    if (_buf.getUsed() == 0)
+        return false;
+    std::string s(_buf.begin(), _buf.end());
+    size_t pos = s.find("\r\n");
+    if (pos == std::string::npos)
+        return false;  // line not complete yet
+    std::string line = s.substr(0, pos);
+    parseStatusLine(line);
+    _buf.deleteFront(pos + 2);  // remove line + CRLF
+    _state = HEADERS;
+    return true;
+}
+
+bool Request::process(int socket)
+{
+    readFromSocket(socket);  // fills _buf
+	while (true)
+    {
+        if (_state == STATUS_LINE)
+        {
+			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
+            if (!parseStatusLineFromBuffer())
+                return false;
+        }
+        else if (_state == HEADERS)
+        {
+			logging::log(logging::Debug, "Request::process() state is HEADERS");
+            if (!parseHeadersFromBuffer())
+                return false;
+        }
+        else if (_state == COMPLETE)
+		{
+			logging::log(logging::Debug, "Request::process() state is COMPLETE");
+    		return true;
+		}
+    }
 }

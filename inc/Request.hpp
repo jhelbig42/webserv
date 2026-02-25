@@ -18,6 +18,13 @@ typedef enum {
 	Delete
 } HttpMethod;
 
+typedef enum  {
+    STATUS_LINE,
+    HEADERS,
+    COMPLETE
+} ParseState;
+
+
 class Request {
 	public:
 		Request();
@@ -30,15 +37,19 @@ class Request {
     	
 		void readFromSocket(int Fd);
 		bool ClientHungUp;
-		void parseStatusLine(std::string input, const size_t);
+		bool parseStatusLineFromBuffer();
+		void parseStatusLine(std::string input);
+		bool parseHeadersFromBuffer();
+		void parseHeader(std::string headerLine);
 		void parseMethod(std::string token);
 		void parseResource(std::string token);
 		void parseHttp(std::string token);
 
 		bool isFullyParsed(void) const;
 		Conditions getConditions(void) const;
-		bool process(const int Socket, const size_t Bytes);
+		bool process(const int Socket);
 
+		ParseState	getState() const;
 		bool		isValid() const;
 		size_t		getMajorV() const;
 		size_t		getMinorV() const;
@@ -52,9 +63,10 @@ class Request {
 		size_t		_minorVersion;
 		bool		_valid;
 		Conditions	_conditions;
-		bool		_statusLineParsed;
+		//bool		_statusLineParsed;
 		bool		_fullyParsed;
 		Buffer		_buf;
+		ParseState	_state;
 		
 };
 
