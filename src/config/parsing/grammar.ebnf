@@ -1,0 +1,72 @@
+config				= { sep } expression { { sep } expression } { sep }
+
+sep		      		= newline | ws
+newline     		= "\n"
+ws					= wschar { wschar }
+wschar         		= " " | "\t"
+
+expression  		= general | server
+
+general     		= backlog
+            		= max_req_body_size
+
+server      		= "server" { sep } "{" { sep } entries { sep } "}"
+
+entries     		= entry { { sep } entry }
+
+entry       		= ( listen | root | allowed | redirect | index | directory_listing | max_req_body_size | backlog ) { sep } ";"
+
+listen      		= "listen" ws { ws } listen_val
+listen_val  		= (ip | "*") ":" (port | "*")
+ip          		= ipv4 | ipv6
+ipv4        		= uint8 "." uint8 "." uint8 "." uint8 
+uint8				= ? n such that: 0 <= n && n <= 255 ?
+ipv6        		= DUMMY
+port        		= uint16
+uint16				= ? n such that: 0 <= n && n <= 65535 ?
+
+root        		= "root" ws { ws } root_val
+root_val    		= abspath
+abspath     		= "/" *(+pathchar "/")
+
+allowed     		= "allowed" ws { ws } allowed_val
+allowed_val 		= "*" | methods
+methods				= method { ws { ws } method }
+method      		= "POST" | "GET" | "PUT" | "DELETE" | "HEAD"
+
+index       		= "index" ws { ws } name { ws { ws } name }
+
+directory_listing	= "directory-listing" ws { ws } boolean
+boolean				= "true" | "false"
+
+max_req_body_size	= "max-req-body-size" ws { ws } off_t
+off_t				= ? n such that: _1 <= n && n <= OFF_T_MAX ?
+
+backlog				= "backlog" ws { ws } int_non_negative
+int_non_negative
+					= ? n such that: 0 <= n && n <= INT_MAX ?
+
+redirect			= "redirect" ws { ws } redirect_scope { sep } "{" { sep } redirect_rules { sep } "}"
+
+(* continue here *)
+
+redirect_scope		= abs_path
+
+content_typ			= FROM_HTTP
+
+redirect_rules		= redirect_rule { { sep } redirect_rule }
+
+
+redirect_rule		= ( redirect | execute_rule | path_rule | resource_rule | code_rule ) { sep } ";"
+
+execute_rule		= content_type ws { ws } executor
+
+path_rule			= abs_path
+
+resource_rule		= resource
+
+code_rule			= status_code ws { ws } resource
+
+status_code			= FROM_HTTP
+
+resource			= abs_path name
