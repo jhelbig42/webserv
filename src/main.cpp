@@ -1,9 +1,12 @@
+#include "Scanner.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Networking.hpp"
 #include <unistd.h>
+#include <iostream>
 
 //#define OFFLINE
+#define PARSING
 
 #define CHUNK_SIZE 1024
 
@@ -19,6 +22,13 @@ int main(void) {
   int dummy = -1;
   while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
     ;
+}
+
+#elif defined PARSING
+
+int main(int argc, char **argv) {
+  const Scanner scan(argv[1]);
+  std::cout << scan;
 }
 
 #else

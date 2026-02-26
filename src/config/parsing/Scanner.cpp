@@ -1,7 +1,8 @@
 #include "Scanner.hpp"
 
-#include <cctype>
-#include <cstring>
+#include "Token.hpp"
+#include "TokenType.hpp"
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -21,22 +22,9 @@ size_t Token::getLine(void) const {
 }
 
 Scanner::~Scanner() {
-  for (std::list<Token *>::iterator It = _tokens.begin(); It != _tokens.end();
-       ++It)
-    delete *It;
-}
-
-std::ostream &operator<<(std::ostream &Os, Scanner &Scan) {
-  size_t line = 0;
-  for (std::list<Token *>::iterator It = Scan._tokens.begin();
-       It != Scan._tokens.end(); ++It) {
-    if ((**It).getLine() > line) {
-      line = (**It).getLine();
-      Os << "\n########### Line " << line << " ###########\n";
-    }
-    Os << **It;
-  }
-  return Os;
+  for (std::list<Token *>::iterator it = _tokens.begin(); it != _tokens.end();
+       ++it)
+    delete *it;
 }
 
 Scanner::Scanner(const char *File) {
@@ -58,21 +46,29 @@ Scanner::Scanner(const char *File) {
 }
 
 void Scanner::addEof(const size_t Line) {
-  Token *tkn = new Token(Line, TokenType::Eof);
+  Token *const tkn = new Token(Line, TokenType::Eof);
   _tokens.push_back(tkn);
 }
 
 void Scanner::scanLine(const size_t Number, const std::string &Str) {
-  std::string::const_iterator It = Str.begin();
-  std::string::const_iterator ItTmp;
-  while (It != Str.end()) {
-    Token *tkn = new Token(Number, Str, It, ItTmp);
+  std::string::const_iterator it = Str.begin();
+  std::string::const_iterator itTmp;
+  while (it != Str.end()) {
+    Token *tkn = new Token(Number, Str, it, itTmp);
     _tokens.push_back(tkn);
-    It = ItTmp;
+    it = itTmp;
   }
 }
 
-int main(int argc, char **argv) {
-  Scanner scan(argv[1]);
-  std::cout << scan;
+std::ostream &operator<<(std::ostream &Os, const Scanner &Scan) {
+  size_t line = 0;
+  for (std::list<Token *>::const_iterator it = Scan._tokens.begin();
+       it != Scan._tokens.end(); ++it) {
+    if ((**it).getLine() > line) {
+      line = (**it).getLine();
+      Os << "\n########### Line " << line << " ###########\n";
+    }
+    Os << **it;
+  }
+  return Os;
 }

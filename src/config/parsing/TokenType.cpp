@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <stdexcept>
+#include <string>
 
 static bool isSingleChar(const char Ch, std::string::const_iterator &It);
 static bool isCharset(const char *Charset, const std::string &Str,
@@ -24,10 +25,10 @@ static const size_t globalTokenTypesSize =
 bool TokenType::isType(const Type Type, const std::string &Str,
                        std::string::const_iterator It) {
   size_t i = 0;
-  std::string::const_iterator Dummy;
+  std::string::const_iterator dummy;
   while (i != globalTokenTypesSize) {
     if (globalTokenTypes[i].type == Type)
-      return globalTokenTypes[i].matchType(Str, It, Dummy);
+      return globalTokenTypes[i].matchType(Str, It, dummy);
     ++i;
   }
   throw std::runtime_error("requested unlisted token type");
@@ -59,6 +60,7 @@ bool TokenType::matchType(const std::string &Str,
   case CategoryEof:
     return false;
   }
+  return false;
 }
 
 static bool isSingleChar(const char Ch, std::string::const_iterator &It) {

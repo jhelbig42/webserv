@@ -1,5 +1,6 @@
-#include "Token.hpp"
 #include "TokenType.hpp"
+#include "Token.hpp"
+#include <cstddef>
 #include <ostream>
 #include <string>
 

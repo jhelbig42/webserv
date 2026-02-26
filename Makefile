@@ -11,6 +11,10 @@ vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
+vpath %.cpp $(SRC_DIR)/config/parsing
+SRC			+= Scanner.cpp
+SRC			+= Token.cpp
+SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
