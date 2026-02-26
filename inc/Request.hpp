@@ -3,6 +3,7 @@
 #include "Buffer.hpp"
 #include "Conditions.hpp"
 #include "Logging.hpp"
+#include "HttpHeaders.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -39,8 +40,8 @@ class Request {
 		void readFromSocket(int Fd);
 		bool ClientHungUp;
 		
-		bool parseStatusLineFromBuffer();
-		void parseStatusLine(std::string StatusLine);
+		bool parseRequestLineFromBuffer();
+		void parseRequestLine(std::string StatusLine);
 		void parseMethod(std::string Token);
 		void parseResource(std::string Token);
 		void parseHttp(std::string Token);
@@ -66,10 +67,10 @@ class Request {
 		size_t		_minorVersion;
 		bool		_valid; // can this go into state as well?
 		Conditions	_conditions;
-		//bool		_statusLineParsed;
 		bool		_fullyParsed; //likely obsolete as caught by _state --> TO DO delete
 		Buffer		_buf;
 		ParseState	_state;
+		HttpHeaders	_headers;
 		
 };
 

@@ -12,6 +12,7 @@
 #define VERSION "HTTP/1.0"
 
 // GET /home/julia/projects/webserv/hello.txt HTTP/1.0
+// Content_Length: 100
 #ifdef OFFLINE
 
 int main(void) {

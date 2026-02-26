@@ -30,13 +30,13 @@ Request::Request() :
 {}  
 
 void Request::init(std::string input) {
-	this->parseStatusLine(input);
+	this->parseRequestLine(input);
 }
 
 Request::Request(std::string input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {
-	this->parseStatusLine(input);
+	this->parseRequestLine(input);
 }  
 bool Request::process(int Socket)
 {
@@ -46,7 +46,7 @@ bool Request::process(int Socket)
         if (_state == STATUS_LINE)
         {
 			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
-            if (!parseStatusLineFromBuffer())
+            if (!parseRequestLineFromBuffer())
                 return false;
         }
         else if (_state == HEADERS)

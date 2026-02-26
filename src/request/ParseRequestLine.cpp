@@ -42,11 +42,11 @@ void Request::parseHttp(std::string Token)
 		throw std::runtime_error("no HTTP version given");
 	
 	std::stringstream smajor(Token.substr(5, pos - 5));
-	if (!(smajor >> this->_majorVersion) || !smajor.eof())
+	if (!(smajor >> _majorVersion) || !smajor.eof())
     	throw std::runtime_error("no HTTP version given");
 
 	std::stringstream sminor(Token.substr(pos + 1));
-	if (!(sminor >> this->_minorVersion) || !sminor.eof())
+	if (!(sminor >> _minorVersion) || !sminor.eof())
     	throw std::runtime_error("no HTTP version given");
 
 	logging::log(logging::Debug, "parse status_line: parse http version successfully");
@@ -62,7 +62,7 @@ void Request::parseHttp(std::string Token)
  * 
  * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
  */
-void Request::parseStatusLine(std::string StatusLine)
+void Request::parseRequestLine(std::string StatusLine)
 {
 	logging::log(logging::Debug, "parseStatusLine()");
 	std::vector<std::string> status = split(StatusLine, " ");
@@ -87,7 +87,7 @@ void Request::parseStatusLine(std::string StatusLine)
 	}
 }
 
-bool Request::parseStatusLineFromBuffer()
+bool Request::parseRequestLineFromBuffer()
 {
     if (_buf.getUsed() == 0)
         return false;
@@ -96,7 +96,7 @@ bool Request::parseStatusLineFromBuffer()
     if (pos == std::string::npos)
         return false;  // line not complete yet - read more
     std::string line = s.substr(0, pos);
-    parseStatusLine(line);
+    parseRequestLine(line);
     _buf.deleteFront(pos + 2);  // remove line + CRLF
     if (!_valid)
         return false; 

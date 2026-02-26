@@ -48,7 +48,7 @@ int Connection::getSock(void) const {
 }
 
 Conditions Connection::getConditions(void) const {
-  if (_req.isFullyParsed())
+  if (_req.getState() == COMPLETE)
 		return _res.getConditions();
 	return _req.getConditions();
 }
@@ -88,10 +88,10 @@ void Connection::processData(void) {
 
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed
-	if (!_req.isFullyParsed()) {
+	if (_req.getState() == COMPLETE) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock);
-		if (_req.isFullyParsed())
+		if (_req.getState() == COMPLETE)
 			_res.init(_req);
     return false;
   }
