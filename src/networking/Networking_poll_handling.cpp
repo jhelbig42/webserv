@@ -65,7 +65,8 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
     ClientAddr candidate;
     if (acceptConnection(listen_sock, &candidate) != -1) {
       addConnectionToMap(candidate, c_map);
-      const pollfd newFd = {candidate.clientSock, POLLIN, 0};
+      const short events = POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL;
+      const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
   } else {
@@ -96,7 +97,8 @@ void networking::handlePollout(int fd, std::map<int, Connection> &c_map,
   const std::map<int, Connection>::iterator itC = c_map.find(fd);
   if (itC != c_map.end()) {
 
-    send(fd, "We got your request", 1024, MSG_DONTWAIT);
+    logging::log2(logging::Debug, "Ready to send to ", fd);
+    //send(fd, "We got your request", 1024, MSG_DONTWAIT);
     // eventual implementation
     /*
       (itC->second).addToConditions(SockWrite);
