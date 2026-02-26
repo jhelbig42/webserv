@@ -3,6 +3,7 @@
 #include "CompileTimeConstants.hpp"
 #include <cstddef>
 #include <sys/types.h>
+#include <string>
 
 /// \class Buffer
 /// \brief This is a simple character buffer that can be filled from
@@ -53,8 +54,6 @@ public:
   Buffer &operator=(const Buffer &other);
   ~Buffer(void);
 
-  char	_buffer[BUFFER_SIZE];
-
   typedef char *iterator;
   typedef const char *const_iterator;
 
@@ -73,6 +72,7 @@ public:
 
   const static size_t size = BUFFER_SIZE;
 
+  std::string getStringFromBuffer(void) const;
   /// \brief get currently occupied storage in Buffer
   size_t getOccupied(void) const;
 
@@ -114,7 +114,7 @@ public:
   void deleteFront(const size_t Bytes);
 
 private:
-  
+  char	_buffer[BUFFER_SIZE];
   size_t _start;
   size_t _end;
 };

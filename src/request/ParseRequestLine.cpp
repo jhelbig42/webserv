@@ -91,7 +91,7 @@ bool Request::parseRequestLineFromBuffer()
 {
     if (_buf.getUsed() == 0)
         return false;
-    std::string s(_buf.begin(), _buf.end());
+    std::string s = _buf.getStringFromBuffer();
     size_t pos = s.find("\r\n");
     if (pos == std::string::npos)
         return false;  // line not complete yet - read more
