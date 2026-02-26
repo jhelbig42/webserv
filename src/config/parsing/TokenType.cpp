@@ -1,62 +1,99 @@
-#include "Scanner.hpp"
+#include "TokenType.hpp"
+
 #include <cstring>
 #include <stdexcept>
 
+static bool isSingleChar(const char Ch, std::string::const_iterator &It);
+static bool isCharset(const char *Charset, const std::string &Str,
+                      std::string::const_iterator &It);
+static bool isKeyword(const std::string &Keyword, const std::string &Str,
+                      std::string::const_iterator &It);
+
 static const TokenType globalTokenTypes[] = {
-    {"Semicolon", NULL, NULL, TokenType::Semicolon, TokenType::SingleChar, ';'},
-    {"BracesLeft", NULL, NULL, TokenType::BracesLeft, TokenType::SingleChar, '{'},
-    {"BracesRight", NULL, NULL, TokenType::BracesRight, TokenType::SingleChar, '}'},
+    {"Semicolon", "", NULL, TokenType::Semicolon, TokenType::SingleChar, ';'},
+    {"BracesLeft", "", NULL, TokenType::BracesLeft, TokenType::SingleChar, '{'},
+    {"BracesRight", "", NULL, TokenType::BracesRight, TokenType::SingleChar,
+     '}'},
     {"Server", "server", NULL, TokenType::Server, TokenType::Keyword, 0},
-    {"Whitespace", NULL, " \t", TokenType::Whitespace, TokenType::Charset, 0},
-    {"Eof", NULL, NULL, TokenType::Eof, TokenType::Eof, 0}}
+    {"Whitespace", "", " \t", TokenType::Whitespace, TokenType::Charset, 0},
+    {"Eof", "", NULL, TokenType::Eof, TokenType::CategoryEof, 0}};
 
 static const size_t globalTokenTypesSize =
     sizeof(globalTokenTypes) / sizeof(*globalTokenTypes);
 
-static bool isSingleChar(const char Ch, std::string::const_iterator &It);
-static bool isCharset(const char *Charset, const std::string &Str, std::string::const_iterator &It);
-static bool isKeyword(const std::string &Keyword, const std::string &Str, std::string::const_iterator &It);
-
-static bool isType(Type Type, const std::string &Str, std::string::const_iterator &It) {
+bool TokenType::isType(const Type Type, const std::string &Str,
+                       std::string::const_iterator It) {
   size_t i = 0;
+  std::string::const_iterator Dummy;
   while (i != globalTokenTypesSize) {
-    if (globalTokenTypes[i].type)
-      break;
+    if (globalTokenTypes[i].type == Type)
+      return globalTokenTypes[i].matchType(Str, It, Dummy);
     ++i;
   }
-  switch (globalTokenTypes[i].category) {
-    case SingleChar:
-      return isSingleChar(globalTokenTypes[i].singleChar, It);
-    case Charset:
-      return isCharset(globalTokenTypes[i].Charset, Str, It);
-    case Keyword:
-      return isKeyword(globalTokenTypes[i].Keyword, Str, It);
-    case Eof:
-      return false
+  throw std::runtime_error("requested unlisted token type");
+}
+
+const TokenType &TokenType::getTokenType(const std::string &Str,
+                                         const std::string::const_iterator It,
+                                         std::string::const_iterator &ItNew) {
+  size_t i = 0;
+  while (i != globalTokenTypesSize) {
+    if (globalTokenTypes[i].matchType(Str, It, ItNew))
+      return globalTokenTypes[i];
+    ++i;
+  }
+  throw std::runtime_error("unrecognized token");
+}
+
+bool TokenType::matchType(const std::string &Str,
+                          const std::string::const_iterator It,
+                          std::string::const_iterator &ItNew) const {
+  ItNew = It;
+  switch (category) {
+  case SingleChar:
+    return isSingleChar(singleChar, ItNew);
+  case Charset:
+    return isCharset(charset, Str, ItNew);
+  case Keyword:
+    return isKeyword(keyword, Str, ItNew);
+  case CategoryEof:
+    return false;
   }
 }
 
-bool isSingleChar(const char Ch, std::string::const_iterator &It) {
+static bool isSingleChar(const char Ch, std::string::const_iterator &It) {
   if (*It != Ch)
     return false;
   ++It;
   return true;
 }
 
-bool isCharset(const char *Charset, const std::string &Str, std::string::const_iterator &It) {
-  if (!strchr(*It, Charset))
+static bool isCharset(const char *Charset, const std::string &Str,
+                      std::string::const_iterator &It) {
+  if (!strchr(Charset, *It))
     return false;
   ++It;
-  while (It != Str.end() && strchr(*It, Charset))
+  while (It != Str.end() && strchr(Charset, *It))
     ++It;
   return true;
 }
 
-bool isKeyword(const std::string &Keyword, const std::string &Str, std::string::const_iterator &It) {
+static bool isKeyword(const std::string &Keyword, const std::string &Str,
+                      std::string::const_iterator &It) {
   if (Keyword.length() > Str.end() - It)
     return false;
   if (Str.compare(It - Str.begin(), Keyword.length(), Keyword))
     return false;
   It += Keyword.length();
   return true;
+}
+
+const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
+  size_t i = 0;
+  while (i != globalTokenTypesSize) {
+    if (globalTokenTypes[i].type == Id)
+      return globalTokenTypes[i];
+    ++i;
+  }
+  throw std::runtime_error("unrecognized token");
 }
