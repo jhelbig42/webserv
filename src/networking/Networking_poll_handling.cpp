@@ -28,6 +28,29 @@ void networking::handlePollerr(int fd, std::map<int, Connection> &c_map);
 void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
                  const int &listen_sock, std::vector<pollfd> &newFdBatch);
 
+void networking::handleTerminalCondition(const short revents, int fd, std::map<int, Connection> &c_map) {
+    if (revents & POLLNVAL) {
+      handlePollnval(fd, c_map);
+      exit(1);
+    }
+    if (revents & POLLERR) {
+      handlePollerr(fd, c_map);
+      exit(1);
+    }
+    if (revents & POLLRDHUP) {
+      handlePollrdhup(fd, c_map);
+    }
+    if (revents & POLLHUP) {
+      logging::log2(logging::Debug, "Hangup from fd ", fd);
+      exit(1);
+    }
+    if (revents & POLLPRI) {
+      logging::log2(logging::Debug, "POLLPRI from fd ", fd);
+      exit(1);
+    }
+}
+
+
 void networking::handlePollnval(int fd, std::map<int, Connection> &c_map) {
   logging::log2(logging::Error,
                 "networking::process(): POLLNAL.\n\tpoll() tried to read "

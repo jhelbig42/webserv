@@ -98,24 +98,8 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
   logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
-    if (it->revents & POLLNVAL) {
-      handlePollnval(it->fd, cMap);
-      exit(1);
-    }
-    if (it->revents & POLLERR) {
-      handlePollerr(it->fd, cMap);
-      exit(1);
-    }
-    if (it->revents & POLLHUP) {
-      logging::log2(logging::Debug, "Hangup from fd ", it->fd);
-      exit(1);
-    }
-    if (it->revents & POLLPRI) {
-      logging::log2(logging::Debug, "POLLPRI from fd ", it->fd);
-      exit(1);
-    }
-    if (it->revents & POLLRDHUP) {
-      handlePollrdhup(it->fd, cMap);
+    if ((it->revents & POLLNVAL) | (it->revents & POLLERR) | (it->revents & POLLHUP) | (it->revents & POLLPRI) | (it->revents & POLLRDHUP)) {
+      handleTerminalCondition(it->revents, it->fd, cMap);
     }
     if (it->revents & POLLIN) { // data to read | hang-up
       handlePollin(it->fd, cMap, listen_sock, newFdBatch);

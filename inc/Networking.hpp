@@ -57,6 +57,7 @@ void handlePollin(int fd, std::map<int, Connection> &c_map,
 void handlePollout(int fd, std::map<int, Connection> &c_map,
                    const int &listen_sock, std::vector<pollfd> &new_fd_batch);
 void handlePollrdhup(int fd, std::map<int, Connection> &c_map);
+void handleTerminalCondition(const short revents, int fd, std::map<int, Connection> &c_map);
 
 // temporary Debug
 // TODO delete or comment out before submission:
