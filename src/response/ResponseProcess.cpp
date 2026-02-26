@@ -7,6 +7,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -80,7 +81,7 @@ static bool stringToSocket(const int Socket, std::string &Str,
   if (Str.empty())
     return true;
   const size_t amount = std::min(Bytes, Str.size());
-  const ssize_t rc = write(Socket, Str.c_str(), amount);
+  const ssize_t rc = send(Socket, Str.c_str(), amount, MSG_DONTWAIT);
   if (rc < 0) {
     logging::log3(logging::Error, __func__, ": ", strerror(errno));
     return false;
@@ -100,7 +101,7 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     // edgecase = FileFd empties by exactly filling up Buf. Then empty FileFd
     // would be passed one more time; theory: does not matter as FileFd will
     // spill just 0 next iteration and no exception will be thrown
-    const ssize_t rc = Buf.fill(FileFd, Bytes);
+    const ssize_t rc = Buf.fileToBuf(FileFd, Bytes);
     if ((size_t)rc < Bytes && Buf.getFree() > 0) {
       if (close(FileFd) < 0)
         logging::log2(logging::Error, "close: ", strerror(errno));
@@ -110,7 +111,7 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
   const size_t used = Buf.getUsed();
   if (used == 0) // nothing read from FileFd and no residue from last time
     return true;
-  const ssize_t rc = Buf.empty(Socket, Bytes);
+  const ssize_t rc = Buf.bufToSocket(Socket, Bytes);
   if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used))
     return true;
   return false;

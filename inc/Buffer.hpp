@@ -88,14 +88,30 @@ public:
   /// \returns -1 if buffer is full
   /// \returns amount of bytes filled into buffer otherwise
   /// throws exception on error
-  ssize_t fill(const int Fd, const size_t Bytes);
+  ssize_t fileToBuf(const int Fd, const size_t Bytes);
 
   /// \brief reads Bytes bytes from Buffer and sends them to Fd
   ///
   /// \returns -1 if buffer is empty
   /// \returns amount of bytes emptied into Fd otherwise
   /// throws exception on error
-  ssize_t empty(const int Fd, const size_t Bytes);
+  ssize_t bufToFile(const int Fd, const size_t Bytes);
+
+  /// \brief reads up to Bytes bytes from Socket into buffer in non-blocking
+  /// mode
+  ///
+  /// \returns -1 if buffer is full
+  /// \returns amount of bytes filled into buffer otherwise
+  /// throws exception on error
+  ssize_t socketToBuf(const int Socket, const size_t Bytes);
+
+  /// \brief reads Bytes bytes from Buffer and sends them to Socket in
+  /// non-blocking mode
+  ///
+  /// \returns -1 if buffer is empty
+  /// \returns amount of bytes emptied into Fd otherwise
+  /// throws exception on error
+  ssize_t bufToSocket(const int Socket, const size_t Bytes);
 
   /// \brief moves meaningful data to the front of the buffer.
   void format(void);
@@ -112,7 +128,7 @@ public:
   void deleteFront(const size_t Bytes);
 
 private:
-  char _buffer[BUFFER_SIZE];
   size_t _start;
   size_t _end;
+  char _buffer[BUFFER_SIZE];
 };
