@@ -92,7 +92,7 @@ void networking::pollLoop(const int sock) {
 //
 // TODO Handle additional flags
 
-void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
+void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
   logging::log(logging::Debug, "Networking::Process()\n");
@@ -100,27 +100,24 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if ((it->revents & POLLNVAL) | (it->revents & POLLERR) | (it->revents & POLLHUP) | (it->revents & POLLPRI) | (it->revents & POLLRDHUP)) {
       handleTerminalCondition(it->revents, it->fd, cMap);
-    }
-    if (it->revents & POLLIN) { // data to read | hang-up
-      handlePollin(it->fd, cMap, listen_sock, newFdBatch);
-    }
-    if (it->revents & POLLOUT) {
-      handlePollout(it->fd, cMap, listen_sock, newFdBatch);
-    }
-    if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
-      close(it->fd);
-      cMap.erase(it->fd);
-      it = fds.erase(it);
     } else {
-      if (it->fd != listen_sock) {
-        //cMap.at(it->fd).serve(MAX_REQUEST);
-        cMap.at(it->fd).processData();
-        cMap.at(it->fd).resetConditions();
-      }
-      it++;
+        handleServableCondition(ListenSock, it->revents, it->fd, cMap, newFdBatch);
     }
+    if (it->fd != ListenSock && cMap.at(it->fd)._delete == true) {
+        close(it->fd);
+        cMap.erase(it->fd);
+        it = fds.erase(it);
+      } else {
+        if (it->fd != ListenSock) {
+          cMap.at(it->fd).serve(MAX_REQUEST);
+          //cMap.at(it->fd).processData();
+          cMap.at(it->fd).resetConditions();
+        }
+        it++;
+      }
   }
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
+   newFdBatch.clear();
 }
 
 // acceptConnections() is a a wrapper for accept(), which extracts

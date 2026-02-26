@@ -58,6 +58,7 @@ void handlePollout(int Fd, std::map<int, Connection> &CMap,
                    const int &listen_sock, std::vector<pollfd> &newFdBatch);
 void handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
 void handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
+void handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
 
 // temporary Debug
 // TODO delete or comment out before submission:

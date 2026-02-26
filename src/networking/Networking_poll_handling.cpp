@@ -27,6 +27,8 @@ void networking::handlePollnval(int fd, std::map<int, Connection> &c_map);
 void networking::handlePollerr(int fd, std::map<int, Connection> &c_map);
 void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
                  const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
+void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
 
 void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap) {
     if (Revents & POLLNVAL) {
@@ -48,6 +50,15 @@ void networking::handleTerminalCondition(const short Revents, const int Fd, std:
       logging::log2(logging::Debug, "POLLPRI from fd ", Fd);
       exit(1);
     }
+}
+
+void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch) {
+      if (Revents & POLLIN) { // data to read | hang-up
+        handlePollin(Fd, CMap, ListenSock, newFdBatch);
+      }
+      if (Revents & POLLOUT) {
+        handlePollout(Fd, CMap, ListenSock, newFdBatch);
+      }
 }
 
 

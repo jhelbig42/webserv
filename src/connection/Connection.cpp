@@ -141,7 +141,7 @@ bool Connection::serve(const size_t Bytes) {
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed
 	logging::log2(logging::Debug, "_state = ", _req.getState());
-	if (_req.getState() == COMPLETE) {
+	if (_req.getState() != COMPLETE) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock);
 		if (_req.getState() == COMPLETE)
