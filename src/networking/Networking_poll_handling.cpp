@@ -13,7 +13,7 @@
 #include "Connection.hpp"
 #include "Logging.hpp"
 #include "Networking.hpp"
-// #include "NetworkingDefines.hpp" // can be removed?
+#include "NetworkingDefines.hpp" // can be removed?
 #include <map>
 #include <ostream>
 #include <poll.h>

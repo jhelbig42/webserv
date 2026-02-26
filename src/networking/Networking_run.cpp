@@ -95,7 +95,7 @@ void networking::pollLoop(const int sock) {
 void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
-  logging::log(logging::Debug, "Process()");
+  logging::log(logging::Debug, "Networking::Process()");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (it->revents & POLLNVAL) {

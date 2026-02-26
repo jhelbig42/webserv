@@ -7,10 +7,12 @@
 
 #define CHUNK_SIZE 1024
 
-#define METHOD "HEAD"
-#define PATH "/home/alneuman/projects/webserv/hello.txt"
+#define METHOD "GET"
+#define PATH "/home/julia/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
+// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
+// Content_Length: 100
 #ifdef OFFLINE
 
 int main(void) {
