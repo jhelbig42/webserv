@@ -3,27 +3,6 @@
 #include <list>
 #include <string>
 
-struct TokenType {
-  typedef enum {
-    Eof,
-    Semicolon,
-    BracesLeft,
-    BracesRight,
-    Dot,
-    Asterisk,
-    Whitespace,
-    Number,
-    Name
-  } Type;
-  Type type;
-  std::string identifier;
-  bool (*isType)(const char);
-  std::string::const_iterator (*advanceIt)(const std::string &,
-                                           const std::string::const_iterator);
-  static const TokenType &getTokenType(const std::string &Str,
-                                       const std::string::const_iterator It);
-  static const TokenType &getTokenType2(const Type Type);
-};
 
 class Token {
 public:
