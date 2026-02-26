@@ -95,7 +95,7 @@ void networking::pollLoop(const int sock) {
 void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
                          std::vector<pollfd> &fds) {
 
-  logging::log(logging::Debug, "Networking::Process()");
+  logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (it->revents & POLLNVAL) {
@@ -110,23 +110,32 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
       logging::log2(logging::Debug, "Hangup from fd ", it->fd);
       exit(1);
     }
+    if (it->revents & POLLPRI) {
+      logging::log2(logging::Debug, "POLLPRI from fd ", it->fd);
+      exit(1);
+    }
+    if (it->revents & POLLRDHUP) {
+      handlePollrdhup(it->fd, cMap);
+    }
     if (it->revents & POLLIN) { // data to read | hang-up
       handlePollin(it->fd, cMap, listen_sock, newFdBatch);
     }
     if (it->revents & POLLOUT) {
       handlePollout(it->fd, cMap, listen_sock, newFdBatch);
     }
-	// serve within this loop or separate loop
-    // CHECK IF CONNECTION SHOULD BE DELETED
     if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
       close(it->fd);
       cMap.erase(it->fd);
       it = fds.erase(it);
     } else {
+      if (it->fd != listen_sock) {
+        //cMap.at(it->fd).serve(MAX_REQUEST);
+        cMap.at(it->fd).processData();
+        cMap.at(it->fd).resetConditions();
+      }
       it++;
     }
   }
-  // double check that conditions are being reset
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
 }
 

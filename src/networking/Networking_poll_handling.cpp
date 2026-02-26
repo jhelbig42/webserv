@@ -23,15 +23,29 @@
 #include <unistd.h>
 #include <vector>
 
-void handlePollnval(int fd, std::map<int, Connection> &c_map);
-void handlePollerr(int fd, std::map<int, Connection> &c_map);
-void handlPollin(int fd, std::map<int, Connection> &c_map,
+void networking::handlePollnval(int fd, std::map<int, Connection> &c_map);
+void networking::handlePollerr(int fd, std::map<int, Connection> &c_map);
+void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
                  const int &listen_sock, std::vector<pollfd> &newFdBatch);
 
 void networking::handlePollnval(int fd, std::map<int, Connection> &c_map) {
   logging::log2(logging::Error,
                 "networking::process(): POLLNAL.\n\tpoll() tried to read "
                 "invalid fd. fd = ",
+                fd);
+  try {
+    c_map.at(fd).scheduleForDemolition();
+  } catch (const std::out_of_range &e) {
+    logging::log(logging::Error,
+                 "Connection could not be marked for deletion because there is "
+                 "no Connection with this fd.");
+  }
+}
+
+void networking::handlePollrdhup(int fd, std::map<int, Connection> &c_map) {
+  logging::log2(logging::Debug,
+                "networking::process(): POLLRDHUP.\n\t client hung up."
+                " fd = ",
                 fd);
   try {
     c_map.at(fd).scheduleForDemolition();
@@ -65,7 +79,7 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
     ClientAddr candidate;
     if (acceptConnection(listen_sock, &candidate) != -1) {
       addConnectionToMap(candidate, c_map);
-      const short events = POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL;
+      const short events = POLLIN | POLLERR | POLLHUP | POLLNVAL | POLLPRI | POLLRDHUP;
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
@@ -74,13 +88,9 @@ void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
     if (itC != c_map.end()) {
 
       // simple dummy
-      (itC->second).readData();
+    //  (itC->second).readData();
 
-      // eventual implementation
-      /*
       (itC->second).addToConditions(SockRead);
-      (itC->second).serve(MAX_REQUEST); // add to end of process loop instead
-        */
 
     } else {
       logging::log(logging::Error, "process: Connection not found in map "

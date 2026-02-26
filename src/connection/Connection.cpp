@@ -61,6 +61,7 @@ void Connection::scheduleForDemolition(void) {
 
 // Send & Receive
 
+/*
 void Connection::readData(void) {
 
   logging::log(logging::Debug, "read_data()");
@@ -86,24 +87,14 @@ void Connection::readData(void) {
   _readBuf[bytesRead - 1] = '\0';
   logging::log2(logging::Debug, "read_buf = ", _readBuf);
 
-  /*
-  _req.init(_readBuf);
-  _res.init(_req);
-  int dummy = -1;
-  while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
-    ;
-  */
-}
+  //_req.init(_readBuf);
+  //_res.init(_req);
+  //int dummy = -1;
+  //while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
+  //  ;
+}*/
 
-bool Connection::serve(const size_t Bytes) {
-  if (!_req.isFullyParsed()) {
-    if (_conditionsFulfilled & _req.getConditions())
-      _req.process(_sock, Bytes);
-    if (_req.isFullyParsed())
-      _res.init(_req);
-    return false;
-  }
-
+// Send & Receive
 //processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
 	if(_req.getState() != COMPLETE)
@@ -130,8 +121,26 @@ void Connection::processData(void) {
 	};
 }
 
+/*
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed
+	if (_req.getState() == COMPLETE) {
+		if (_conditionsFulfilled & _req.getConditions())
+			_req.process(_sock);
+		if (_req.getState() == COMPLETE)
+			_res.init(_req);
+    return false;
+  }
+  //switch to Response	
+  if (_conditionsFulfilled & _res.getConditions())
+    return _res.process(_sock, _sockForward, Bytes);
+  return false;
+}
+*/
+
+bool Connection::serve(const size_t Bytes) {
+  //handle Request until fully parsed
+	logging::log2(logging::Debug, "_state = ", _req.getState());
 	if (_req.getState() == COMPLETE) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock);
