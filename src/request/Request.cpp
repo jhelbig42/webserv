@@ -81,7 +81,7 @@ std::vector<std::string> split(const std::string& S, const std::string& Delimite
 
 void Request::readFromSocket(int Fd){
 	logging::log(logging::Debug, "readFromSocket() starts");
-	const ssize_t bytesRead = _buf.fill(Fd, MAX_REQUEST);
+	const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
   //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
 	if (bytesRead == MAX_REQUEST) {

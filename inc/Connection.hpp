@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:00:20 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/23 17:43:28 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 15:48:57 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ public:
 
   // setters
   void scheduleForDemolition(void);
+  void addToConditions(Conditions Condition);
+  void resetConditions(void);
 
   // send & receive
   //void readData(void);
@@ -46,7 +48,7 @@ private:
   Connection(); // should not be possible
 
   // serve reads from
-  Conditions _conditionsFulfilled;
+  int _conditionsFulfilled;
 
   int _sock; // client socket fd
   int _sockForward;

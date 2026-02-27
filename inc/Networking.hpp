@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:33:18 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:44:19 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,18 @@ int acceptConnection(const int listen_sock, struct ClientAddr *candidate);
 void addConnectionToMap(const struct ClientAddr &candidate,
                            std::map<int, Connection> &c_map);
 
-void handlePollnval(int fd, std::map<int, Connection> &c_map);
-void handlePollerr(int fd, std::map<int, Connection> &c_map);
-void handlePollin(int fd, std::map<int, Connection> &c_map,
-                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+void handlePollnval(int Fd, std::map<int, Connection> &CMap);
+void handlePollerr(int Fd, std::map<int, Connection> &CMap);
+void handlePollin(int Fd, std::map<int, Connection> &CMap,
+                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void handlePollout(int Fd, std::map<int, Connection> &CMap,
+                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
+void handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
+void handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
+
+// temporary Debug
+// TODO delete or comment out before submission:
+void printFcntlFlags(const int Sock);
+
 } // namespace networking
