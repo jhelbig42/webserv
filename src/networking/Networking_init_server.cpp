@@ -23,8 +23,8 @@
 
 struct addrinfo *networking::getServerInfo(void);
 static struct addrinfo createHints(void);
-static std::string addrinfoToStr(const struct addrinfo *info,
-                                 const std::string &msg);
+static std::string addrinfoToStr(const struct addrinfo *Info,
+                                 const std::string &Msg);
 
 // getServerInfo() creates an addrinfo struct (standard, from <sys/socket.h>)
 // with information about the server's own address & our chosen I/O settings.
@@ -86,14 +86,14 @@ static struct addrinfo createHints(void) {
 //
 // RETURNS: a string with all info to be printed
 
-static std::string addrinfoToStr(const struct addrinfo *info,
-                                 const std::string &msg) {
+static std::string addrinfoToStr(const struct addrinfo *Info,
+                                 const std::string &Msg) {
   std::ostringstream oss;
-  oss << "\n\t" << msg << "\n"
-      << "\tai_flags = " << info->ai_flags << "\n"
-      << "\tai_family = " << info->ai_family << "\n"
-      << "\tai_socktype = " << info->ai_socktype << "\n"
-      << "\tai_protocol = " << info->ai_protocol << "\n"
-      << "\tai_addrlen = " << info->ai_addrlen << "\n";
+  oss << "\n\t" << Msg << "\n"
+      << "\tai_flags = " << Info->ai_flags << "\n"
+      << "\tai_family = " << Info->ai_family << "\n"
+      << "\tai_socktype = " << Info->ai_socktype << "\n"
+      << "\tai_protocol = " << Info->ai_protocol << "\n"
+      << "\tai_addrlen = " << Info->ai_addrlen << "\n";
   return (oss.str());
 }

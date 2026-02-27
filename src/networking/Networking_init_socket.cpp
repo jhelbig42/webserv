@@ -22,11 +22,11 @@
 #include <sys/types.h>
 #include <unistd.h> // for close
 
-static int clearSocket(const int sock);
-static int bindToIP(const int sock, const struct addrinfo *p);
-static int createSocket(const struct addrinfo *p);
-int networking::getServerSocket(struct addrinfo *server_info);
-void networking::setToListen(const int sock);
+static int clearSocket(const int Sock);
+static int bindToIP(const int Sock, const struct addrinfo *P);
+static int createSocket(const struct addrinfo *P);
+int networking::getServerSocket(struct addrinfo *Server_info);
+void networking::setToListen(const int Sock);
 
 // setToListen() is a wrapper for listen(), which marks the
 // server's socket as a "possive socket". This means it will
@@ -35,9 +35,9 @@ void networking::setToListen(const int sock);
 // The second arguments of listen() is backlog, the maximum
 // length to which the queue of pending connections may grow.
 
-void networking::setToListen(const int sock) {
+void networking::setToListen(const int Sock) {
 
-  if (listen(sock, BACKLOG) == -1) {
+  if (listen(Sock, BACKLOG) == -1) {
     std::ostringstream msg;
     msg << "listen: " << std::strerror(errno);
     throw std::runtime_error(msg.str());
@@ -63,11 +63,11 @@ void networking::setToListen(const int sock) {
 //
 // RETURNS: file descriptor for server's listening socket
 
-int networking::getServerSocket(struct addrinfo *server_info) {
+int networking::getServerSocket(struct addrinfo *ServerInfo) {
 
   int sock;
   const struct addrinfo *p;
-  for (p = server_info; p != NULL; p = p->ai_next) {
+  for (p = ServerInfo; p != NULL; p = p->ai_next) {
     sock = createSocket(p);
     if (sock == -1) {
       continue;
@@ -79,7 +79,7 @@ int networking::getServerSocket(struct addrinfo *server_info) {
     break;
   }
   if (p == NULL) {
-    freeaddrinfo(server_info);
+    freeaddrinfo(ServerInfo);
     throw std::runtime_error("server failed to find a socket");
   }
   logging::log(logging::Debug, "sever found socket. bind: success");
@@ -98,9 +98,9 @@ int networking::getServerSocket(struct addrinfo *server_info) {
 //
 // RETURN: the result of setsockopt(): 0 on success, -1 on failure
 
-static int clearSocket(const int sock) {
+static int clearSocket(const int Sock) {
   int yes = 1;
-  const int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+  const int ret = setsockopt(Sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
   if (ret == -1) {
     std::ostringstream msg;
     msg << "setsockopt: " << std::strerror(errno);
@@ -118,11 +118,11 @@ static int clearSocket(const int sock) {
 //
 // RETURN: the result of bind(): 0 on success, -1 on failure
 
-static int bindToIP(const int sock, const struct addrinfo *p) {
+static int bindToIP(const int Sock, const struct addrinfo *p) {
 
-  const int ret = bind(sock, p->ai_addr, p->ai_addrlen);
+  const int ret = bind(Sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
-    close(sock);
+    close(Sock);
     std::string msg(gai_strerror(ret));
     logging::log(logging::Info,
                  "bind: " + msg + " will continue trying sockets");
@@ -138,8 +138,8 @@ static int bindToIP(const int sock, const struct addrinfo *p) {
 // (see Networking_server_init.cpp). If we wanted to, we could also
 // hardcode TCP here. What's cleaner?
 
-static int createSocket(const struct addrinfo *p) {
-  const int sock = socket(p->ai_family, SOCK_STREAM | SOCK_NONBLOCK, 0);
+static int createSocket(const struct addrinfo *P) {
+  const int sock = socket(P->ai_family, SOCK_STREAM | SOCK_NONBLOCK, 0);
   // 0 = TCP
   if (sock == -1) {
     std::ostringstream msg;
@@ -150,5 +150,3 @@ static int createSocket(const struct addrinfo *p) {
   networking::printFcntlFlags(sock);
   return (sock);
 }
-
-//////////////////////////////////////////////////////////////////////////////

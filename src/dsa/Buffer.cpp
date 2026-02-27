@@ -51,6 +51,11 @@ Buffer::const_iterator Buffer::end() const {
   return _buffer + _end;
 }
 
+std::string Buffer::getStringFromBuffer(void) const{
+  std::string s(this->begin(), this->end());
+  return (s);
+}
+
 size_t Buffer::getUsed(void) const {
   return _end - _start;
 }

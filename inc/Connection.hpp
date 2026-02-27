@@ -21,15 +21,14 @@
 
 class Connection {
 public:
-  
-  bool _delete; // placement in public is temporary
-  
+   
   Connection(const int Sock, const sockaddr_storage &Addr,
              const socklen_t addrSize);
   ~Connection();
 
   // getters
   int getSock(void) const;
+  bool getDeleteStatus(void) const;
 
   // setters
   void scheduleForDemolition(void);
@@ -37,13 +36,15 @@ public:
   void resetConditions(void);
 
   // send & receive
-  void readData(void);
+  //void readData(void);
   bool serve(const size_t Bytes);
   Conditions getConditions() const;
+  void processData(void);
+  Request _req;
+  Response _res;
 
 private:
   Connection(); // should not be possible
-
 
   // serve reads from
   int _conditionsFulfilled;
@@ -52,12 +53,11 @@ private:
   int _sockForward;
 
   // networking
+  bool _delete; // set by scheduleForDemolition
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;
-
-  Request _req;
-  Response _res;
   
-  char _readBuf[MAX_REQUEST];
+  Buffer	_buf;
+  char		_readBuf[MAX_REQUEST];
 };

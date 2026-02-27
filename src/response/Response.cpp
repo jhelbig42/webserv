@@ -41,7 +41,7 @@ Conditions Response::getConditions(void) const {
 void Response::init(const Request &Req) {
   setDefaults();
 
-  logging::log2(logging::Debug, __func__, " called");
+  logging::log3(logging::Debug, "Response: ", __func__, " called");
   if (!Req.isValid()) {
     initSendFile(CODE_400, FILE_400);
     return;
