@@ -62,7 +62,6 @@ void networking::pollLoop(const int sock) {
   const pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
 
-  //  int i = 0;
   while (1) {
     const int res =
         poll(fds.data(), (nfds_t)fds.size(),
@@ -78,7 +77,6 @@ void networking::pollLoop(const int sock) {
       // Could also log Warning and continue.
     }
     process(sock, cMap, fds);
-    //	i++;
   }
 }
 

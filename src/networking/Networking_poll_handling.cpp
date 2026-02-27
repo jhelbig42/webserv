@@ -86,8 +86,8 @@ void networking::handleServableCondition(const int ListenSock,
   }
 }
 
-// handlePollnval() handles POLLNVAL, which indicates an invalid request:
-// fd not open.
+// handlePollnval() handles POLLNVAL:
+// 		invalid request: fd not open.
 
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Error,
@@ -103,6 +103,15 @@ void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   }
 }
 
+// handlePollrdhup() handles POLLRDHUP:
+// 		Stream  socket peer closed connection, or shut down writing half 
+//		of  connection.   The  _GNU_SOURCE  feature test macro must be defined
+//		(before  including  any header files) in order to obtain this definition.
+//
+// TODO : inclusion of _GNU_SOURCE gave compiler error due to already defined?
+// We clearly don't need it becuase POLLRDHUP is recognized, but perhaps there
+// should be some kind of ifndef? May be machine specific?
+
 void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Debug,
                 "networking::process(): POLLRDHUP.\n\t client hung up."
@@ -116,6 +125,10 @@ void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap) {
                  "no Connection with this fd.");
   }
 }
+
+// handlePollerr() handles POLLERR:
+// 		Error  condition. This bit is also set for a file descriptor
+//		referring  to  the  write  end of a pipe when the read end has been closed.
 
 void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
   const std::ostringstream msg;
@@ -131,6 +144,9 @@ void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
                  "no Connection with this fd.");
   }
 }
+
+// handlePollin() handles POLLIN:
+// 		There is data to read.
 
 void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
                               const int &listen_sock,
@@ -148,12 +164,7 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
   } else {
     const std::map<int, Connection>::iterator itC = CMap.find(Fd);
     if (itC != CMap.end()) {
-
-      // simple dummy
-      //  (itC->second).readData();
-
       (itC->second).addToConditions(SockRead);
-
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
@@ -161,6 +172,9 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     }
   }
 }
+
+// handlePollout() handles POLLOUT:
+// 		Writing is now possible.
 
 void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
