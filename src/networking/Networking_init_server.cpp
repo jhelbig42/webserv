@@ -16,8 +16,8 @@
 #include <cstddef> // for NULL
 #include <netdb.h>
 #include <ostream>
-#include <string>
 #include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 

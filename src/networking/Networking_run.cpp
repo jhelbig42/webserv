@@ -62,7 +62,7 @@ void networking::pollLoop(const int sock) {
   const pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
 
-//  int i = 0;
+  //  int i = 0;
   while (1) {
     const int res =
         poll(fds.data(), (nfds_t)fds.size(),
@@ -78,7 +78,7 @@ void networking::pollLoop(const int sock) {
       // Could also log Warning and continue.
     }
     process(sock, cMap, fds);
-  //	i++;
+    //	i++;
   }
 }
 
@@ -100,26 +100,29 @@ void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
   logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
-    if ((it->revents & POLLNVAL) | (it->revents & POLLERR) | (it->revents & POLLHUP) | (it->revents & POLLPRI) | (it->revents & POLLRDHUP)) {
+    if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |
+        (it->revents & POLLHUP) | (it->revents & POLLPRI) |
+        (it->revents & POLLRDHUP)) {
       handleTerminalCondition(it->revents, it->fd, cMap);
     } else {
-        handleServableCondition(ListenSock, it->revents, it->fd, cMap, newFdBatch);
+      handleServableCondition(ListenSock, it->revents, it->fd, cMap,
+                              newFdBatch);
     }
     if (it->fd != ListenSock && cMap.at(it->fd).getDeleteStatus() == true) {
-        close(it->fd);
-        cMap.erase(it->fd);
-        it = fds.erase(it);
-      } else {
-        if (it->fd != ListenSock) {
-          //cMap.at(it->fd).serve(MAX_REQUEST);
-          cMap.at(it->fd).processData();
-          cMap.at(it->fd).resetConditions();
-        }
-        it++;
+      close(it->fd);
+      cMap.erase(it->fd);
+      it = fds.erase(it);
+    } else {
+      if (it->fd != ListenSock) {
+        // cMap.at(it->fd).serve(MAX_REQUEST);
+        cMap.at(it->fd).processData();
+        cMap.at(it->fd).resetConditions();
       }
+      it++;
+    }
   }
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
-   newFdBatch.clear();
+  newFdBatch.clear();
 }
 
 // acceptConnections() is a a wrapper for accept(), which extracts

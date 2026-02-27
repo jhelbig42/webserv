@@ -26,43 +26,51 @@
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap);
 void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap);
 void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
-                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+                              const int &listen_sock,
+                              std::vector<pollfd> &newFdBatch);
 void networking::handlePollout(int Fd, std::map<int, Connection> &CMap);
 void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
-void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
-void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
+void networking::handleTerminalCondition(const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap);
+void networking::handleServableCondition(const int ListenSock,
+                                         const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap,
+                                         std::vector<pollfd> &newFdBatch);
 
-void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap) {
-    if (Revents & POLLNVAL) {
-      handlePollnval(Fd, CMap);
-      exit(1);
-    }
-    if (Revents & POLLERR) {
-      handlePollerr(Fd, CMap);
-      exit(1);
-    }
-    if (Revents & POLLRDHUP) {
-      handlePollrdhup(Fd, CMap);
-    }
-    if (Revents & POLLHUP) {
-      logging::log2(logging::Debug, "Hangup from fd ", Fd);
-      exit(1);
-    }
-    if (Revents & POLLPRI) {
-      logging::log2(logging::Debug, "POLLPRI from fd ", Fd);
-      exit(1);
-    }
+void networking::handleTerminalCondition(const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap) {
+  if (Revents & POLLNVAL) {
+    handlePollnval(Fd, CMap);
+    exit(1);
+  }
+  if (Revents & POLLERR) {
+    handlePollerr(Fd, CMap);
+    exit(1);
+  }
+  if (Revents & POLLRDHUP) {
+    handlePollrdhup(Fd, CMap);
+  }
+  if (Revents & POLLHUP) {
+    logging::log2(logging::Debug, "Hangup from fd ", Fd);
+    exit(1);
+  }
+  if (Revents & POLLPRI) {
+    logging::log2(logging::Debug, "POLLPRI from fd ", Fd);
+    exit(1);
+  }
 }
 
-void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch) {
-      if (Revents & POLLIN) { // data to read | hang-up
-        handlePollin(Fd, CMap, ListenSock, newFdBatch);
-      }
-      if (Revents & POLLOUT) {
-        handlePollout(Fd, CMap);
-      }
+void networking::handleServableCondition(const int ListenSock,
+                                         const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap,
+                                         std::vector<pollfd> &newFdBatch) {
+  if (Revents & POLLIN) { // data to read | hang-up
+    handlePollin(Fd, CMap, ListenSock, newFdBatch);
+  }
+  if (Revents & POLLOUT) {
+    handlePollout(Fd, CMap);
+  }
 }
-
 
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Error,
@@ -115,7 +123,8 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     ClientAddr candidate;
     if (acceptConnection(listen_sock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
-      const short events = POLLIN | POLLERR | POLLHUP | POLLNVAL | POLLPRI | POLLRDHUP;
+      const short events =
+          POLLIN | POLLERR | POLLHUP | POLLNVAL | POLLPRI | POLLRDHUP;
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
@@ -124,7 +133,7 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     if (itC != CMap.end()) {
 
       // simple dummy
-    //  (itC->second).readData();
+      //  (itC->second).readData();
 
       (itC->second).addToConditions(SockRead);
 
@@ -142,8 +151,8 @@ void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
   if (itC != CMap.end()) {
 
     logging::log2(logging::Debug, "Ready to send to ", Fd);
-    //send(Fd, "We got your request", 1024, MSG_DONTWAIT);
-    // eventual implementation
+    // send(Fd, "We got your request", 1024, MSG_DONTWAIT);
+    //  eventual implementation
     /*
       (itC->second).addToConditions(SockWrite);
       (itC->second).serve(MAX_REQUEST);
