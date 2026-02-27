@@ -28,7 +28,7 @@ public:
 
   // getters
   int getSock(void) const;
-  bool readyToDelete(void) const;
+  bool getDeleteStatus(void) const;
 
   // setters
   void scheduleForDemolition(void);

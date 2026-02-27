@@ -57,7 +57,7 @@ void networking::handleServableCondition(const int ListenSock, const short Reven
         handlePollin(Fd, CMap, ListenSock, newFdBatch);
       }
       if (Revents & POLLOUT) {
-        handlePollout(Fd, CMap, ListenSock, newFdBatch);
+        handlePollout(Fd, CMap);
       }
 }
 
@@ -134,9 +134,7 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
   }
 }
 
-void networking::handlePollout(int Fd, std::map<int, Connection> &CMap,
-                               const int &listen_sock,
-                               std::vector<pollfd> &newFdBatch) {
+void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = CMap.find(Fd);
   if (itC != CMap.end()) {

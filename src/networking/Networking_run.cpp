@@ -105,7 +105,7 @@ void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
     } else {
         handleServableCondition(ListenSock, it->revents, it->fd, cMap, newFdBatch);
     }
-    if (it->fd != ListenSock && cMap.at(it->fd).readyToDelete() == true) {
+    if (it->fd != ListenSock && cMap.at(it->fd).getDeleteStatus() == true) {
         close(it->fd);
         cMap.erase(it->fd);
         it = fds.erase(it);

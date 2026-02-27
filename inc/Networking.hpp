@@ -54,8 +54,7 @@ void handlePollnval(int Fd, std::map<int, Connection> &CMap);
 void handlePollerr(int Fd, std::map<int, Connection> &CMap);
 void handlePollin(int Fd, std::map<int, Connection> &CMap,
                    const int &listen_sock, std::vector<pollfd> &newFdBatch);
-void handlePollout(int Fd, std::map<int, Connection> &CMap,
-                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void handlePollout(int Fd, std::map<int, Connection> &CMap);
 void handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
 void handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
 void handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);

@@ -47,7 +47,7 @@ int Connection::getSock(void) const {
   return (_sock);
 }
 
-bool Connection::readyToDelete(void) const {
+bool Connection::getDeleteStatus(void) const {
 	return (_delete);
 }
 
