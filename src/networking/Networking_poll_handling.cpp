@@ -23,10 +23,12 @@
 #include <unistd.h>
 #include <vector>
 
-void networking::handlePollnval(int fd, std::map<int, Connection> &c_map);
-void networking::handlePollerr(int fd, std::map<int, Connection> &c_map);
-void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
-                 const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
+                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void networking::handlePollout(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
 void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
 void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
 
