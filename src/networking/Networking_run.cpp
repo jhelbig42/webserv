@@ -33,12 +33,12 @@
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
-void networking::pollLoop(const int sock);
-void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
-                         std::vector<pollfd> &fds);
-int networking::acceptConnection(const int listen_sock, ClientAddr *candidate);
-void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                    std::map<int, Connection> &cMap);
+void networking::pollLoop(const int Sock);
+void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
+                         std::vector<pollfd> &Fds);
+int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate);
+void networking::addConnectionToMap(const struct ClientAddr &Candidate,
+                                    std::map<int, Connection> &CMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:

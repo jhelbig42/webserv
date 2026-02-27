@@ -149,12 +149,12 @@ void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
 // 		There is data to read.
 
 void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
-                              const int &listen_sock,
+                              const int &ListenSock,
                               std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (Fd == listen_sock) { // listening socket got new connection
+  if (Fd == ListenSock) { // listening socket got new connection
     ClientAddr candidate;
-    if (acceptConnection(listen_sock, &candidate) != -1) {
+    if (acceptConnection(ListenSock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
       const short events =
           POLLIN | POLLOUT | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
