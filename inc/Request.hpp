@@ -35,6 +35,7 @@ class Request {
     	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
 		explicit Request(std::string input);
 		void init(std::string input);
+		void reset( void );
     	
 		bool process(const int Socket);
 		void readFromSocket(int Fd);
@@ -45,7 +46,6 @@ class Request {
 		void parseMethod(std::string Token);
 		void parseResource(std::string Token);
 		void parseHttp(std::string Token);
-
 
 		bool parseHeadersFromBuffer();
 		void parseHeader(std::string headerLine);
@@ -65,13 +65,12 @@ class Request {
 		std::string _resource;
 		size_t		_majorVersion;
 		size_t		_minorVersion;
-		bool		_valid; // can this go into state as well?
 		Conditions	_conditions;
 		bool		_fullyParsed; //likely obsolete as caught by _state --> TO DO delete
 		Buffer		_buf;
 		ParseState	_state;
-		HttpHeaders	_headers;
-		
+		HttpHeaders	_headers;	
+		bool		_valid; // can this go into state as well?	
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

@@ -26,12 +26,24 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
+	_state(STATUS_LINE),
 	_valid(false)	
 {}  
 
 void Request::init(std::string input) {
 	this->parseRequestLine(input);
 }
+
+void Request::reset() {
+	ClientHungUp = false;
+	_method = Generic;
+	_resource = "";
+	_majorVersion = 0; 
+	_minorVersion = 0;
+	_valid = false;
+	_state = STATUS_LINE;
+}
+
 
 Request::Request(std::string input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)

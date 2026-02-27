@@ -101,8 +101,7 @@ void Connection::processData(void) {
 		_req.process(_sock);
 	
 	if (_req.ClientHungUp){
-		scheduleForDemolition(); // this does not result in deletion
-							// of Connection yet --> Hilary?
+		scheduleForDemolition();
 		return ;
 	};
 		 
@@ -111,13 +110,14 @@ void Connection::processData(void) {
 	if(_req.getState() == COMPLETE)
 	{
 		_res.init(_req);
+		_req.reset();
 		int dummy = -1;
 		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
   			 ;	}
-	if (_req.ClientHungUp){
-		scheduleForDemolition(); // this does not result in deletion
-							// of Connection yet --> Hilary?
-		return ;
+		
+		if (_req.ClientHungUp){
+			scheduleForDemolition();
+			return ;
 	};
 }
 
