@@ -13,7 +13,8 @@ public:
 
   typedef enum {
     ContentLength = (1u << 0),
-    ContentType = (1u << 1)
+    ContentType = (1u << 1),
+	Date = (1u << 2)
   } HeaderType;
 
   typedef enum {
@@ -40,6 +41,7 @@ public:
 
   void setContentType(const char *extension);
   MediaType getContentType(void) const;
+
 
 private:
   int _headersSet;
