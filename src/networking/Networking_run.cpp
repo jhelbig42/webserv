@@ -54,12 +54,12 @@ void networking::addConnectionToMap(const struct ClientAddr &candidate,
 // 	- continuously checks and marks which pollfds are ready for I/O
 // 	- processes the ones that are marked
 
-void networking::pollLoop(const int sock) {
+void networking::pollLoop(const int Sock) {
 
   std::map<int, Connection> cMap;
   std::vector<pollfd> fds;
 
-  const pollfd listener = {sock, POLLIN, 0};
+  const pollfd listener = {Sock, POLLIN, 0};
   fds.push_back(listener);
 
   while (1) {
@@ -76,7 +76,7 @@ void networking::pollLoop(const int sock) {
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-    process(sock, cMap, fds);
+    process(Sock, cMap, fds);
   }
 }
 
@@ -92,34 +92,34 @@ void networking::pollLoop(const int sock) {
 //
 // TODO Handle additional flags
 
-void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
-                         std::vector<pollfd> &fds) {
+void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
+                         std::vector<pollfd> &Fds) {
 
   logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
+  for (std::vector<pollfd>::iterator it = Fds.begin(); it != Fds.end();) {
     if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |
         (it->revents & POLLHUP) | (it->revents & POLLPRI) |
         (it->revents & POLLRDHUP)) {
-      handleTerminalCondition(it->revents, it->fd, cMap);
+      handleTerminalCondition(it->revents, it->fd, CMap);
     } else {
-      handleServableCondition(ListenSock, it->revents, it->fd, cMap,
+      handleServableCondition(ListenSock, it->revents, it->fd, CMap,
                               newFdBatch);
     }
-    if (it->fd != ListenSock && cMap.at(it->fd).getDeleteStatus() == true) {
+    if (it->fd != ListenSock && CMap.at(it->fd).getDeleteStatus() == true) {
       close(it->fd);
-      cMap.erase(it->fd);
-      it = fds.erase(it);
+      CMap.erase(it->fd);
+      it = Fds.erase(it);
     } else {
       if (it->fd != ListenSock) {
         // cMap.at(it->fd).serve(MAX_REQUEST);
-        cMap.at(it->fd).processData();
-        cMap.at(it->fd).resetConditions();
+        CMap.at(it->fd).processData();
+        CMap.at(it->fd).resetConditions();
       }
       it++;
     }
   }
-  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
+  Fds.insert(Fds.end(), newFdBatch.begin(), newFdBatch.end());
   newFdBatch.clear();
 }
 
@@ -130,11 +130,11 @@ void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
 //
 // RETURNS: fd for new socket
 
-int networking::acceptConnection(const int listen_sock, ClientAddr *candidate) {
+int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate) {
 
-  candidate->clientSock = accept(
-      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
-  if (candidate->clientSock == -1) {
+  Candidate->clientSock = accept(
+      ListenSock, (struct sockaddr *)&Candidate->addr, &Candidate->addrSize);
+  if (Candidate->clientSock == -1) {
     std::ostringstream msg;
     msg << "accept: " << std::strerror(errno)
         << " (can continue trying to accept connections)";
@@ -143,8 +143,8 @@ int networking::acceptConnection(const int listen_sock, ClientAddr *candidate) {
     return (-1);
   }
   logging::log2(logging::Debug, "Connection accepted on socket ",
-                candidate->clientSock);
-  printFcntlFlags(candidate->clientSock);
+                Candidate->clientSock);
+  printFcntlFlags(Candidate->clientSock);
   return (0);
 }
 
@@ -162,10 +162,10 @@ void networking::printFcntlFlags(const int Sock) {
   }
 }
 
-void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                    std::map<int, Connection> &cMap) {
+void networking::addConnectionToMap(const struct ClientAddr &Candidate,
+                                    std::map<int, Connection> &CMap) {
 
   Connection newConnection =
-      Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
-  cMap.insert(std::make_pair(candidate.clientSock, newConnection));
+      Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize);
+  CMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }
