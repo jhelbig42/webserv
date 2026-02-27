@@ -150,5 +150,3 @@ static int createSocket(const struct addrinfo *p) {
   networking::printFcntlFlags(sock);
   return (sock);
 }
-
-//////////////////////////////////////////////////////////////////////////////

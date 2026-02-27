@@ -64,41 +64,6 @@ void Connection::scheduleForDemolition(void) {
 }
 
 // Send & Receive
-
-/*
-void Connection::readData(void) {
-
-  logging::log(logging::Debug, "read_data()");
-  const ssize_t bytesRead = recv(_sock, &_readBuf, MAX_REQUEST, 0);
-
-  if (bytesRead == MAX_REQUEST) {
-    logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
-    // May happen frequently, will be handled in chunks
-    // Logging for debug purposes as we build.
-  }
-  if (bytesRead == 0) {
-    logging::log(logging::Warning, "read_data(): bytes_read == 0");
-    _delete = true; // important to coordinate with Julia / parsing
-    logging::log(logging::Warning, "client appears to have hung up.");
-    return;
-  }
-  if (bytesRead < 0) {
-    std::ostringstream msg;
-    msg << "recv: " << std::strerror(errno);
-    logging::log(logging::Warning, msg.str());
-    return;
-  }
-  _readBuf[bytesRead - 1] = '\0';
-  logging::log2(logging::Debug, "read_buf = ", _readBuf);
-
-  //_req.init(_readBuf);
-  //_res.init(_req);
-  //int dummy = -1;
-  //while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
-  //  ;
-}*/
-
-// Send & Receive
 //processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
 	if(_req.getState() != COMPLETE)
@@ -139,6 +104,8 @@ bool Connection::serve(const size_t Bytes) {
     return _res.process(_sock, _sockForward, Bytes);
   return false;
 }
+
+// Conditions
 
 void Connection::addToConditions(Conditions Condition) {
   _conditionsFulfilled = _conditionsFulfilled | Condition;

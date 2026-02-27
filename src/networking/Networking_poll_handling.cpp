@@ -23,6 +23,10 @@
 #include <unistd.h>
 #include <vector>
 
+// These functions handle the results of poll(), which are indicated
+// by flags contained within the "revents" field of a given connection's
+// pollfd struct.
+
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap);
 void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap);
 void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
@@ -36,6 +40,13 @@ void networking::handleServableCondition(const int ListenSock,
                                          const short Revents, const int Fd,
                                          std::map<int, Connection> &CMap,
                                          std::vector<pollfd> &newFdBatch);
+
+
+// handleTerminalCondition() handles flags which indicate a hangup or
+// error. This path is in the logic is separated so we can skip checks
+// for POLLIN and POLLOUT. Terminal conditions are handled with additional
+// helper functions, which log specific errors / debug messages and mark
+// the connection for deletion.
 
 void networking::handleTerminalCondition(const short Revents, const int Fd,
                                          std::map<int, Connection> &CMap) {
@@ -60,6 +71,9 @@ void networking::handleTerminalCondition(const short Revents, const int Fd,
   }
 }
 
+// handleServableCondition() handles POLLIN & POLLOUT
+// through the use of additional helper functions
+
 void networking::handleServableCondition(const int ListenSock,
                                          const short Revents, const int Fd,
                                          std::map<int, Connection> &CMap,
@@ -71,6 +85,9 @@ void networking::handleServableCondition(const int ListenSock,
     handlePollout(Fd, CMap);
   }
 }
+
+// handlePollnval() handles POLLNVAL, which indicates an invalid request:
+// fd not open.
 
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Error,
