@@ -30,7 +30,7 @@
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size)
-    : _delete(false), _sock(Sock), _addrSize(sizeof _addr) {
+    : _sock(Sock), _delete(false), _addrSize(sizeof _addr) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -45,6 +45,10 @@ Connection::~Connection(void) {
 
 int Connection::getSock(void) const {
   return (_sock);
+}
+
+bool Connection::readyToDelete(void) const {
+	return (_delete);
 }
 
 Conditions Connection::getConditions(void) const {
