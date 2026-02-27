@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 15:49:29 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/27 12:32:38 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,27 +121,9 @@ void Connection::processData(void) {
 	};
 }
 
-/*
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed
 	if (_req.getState() == COMPLETE) {
-		if (_conditionsFulfilled & _req.getConditions())
-			_req.process(_sock);
-		if (_req.getState() == COMPLETE)
-			_res.init(_req);
-    return false;
-  }
-  //switch to Response	
-  if (_conditionsFulfilled & _res.getConditions())
-    return _res.process(_sock, _sockForward, Bytes);
-  return false;
-}
-*/
-
-bool Connection::serve(const size_t Bytes) {
-  //handle Request until fully parsed
-	logging::log2(logging::Debug, "_state = ", _req.getState());
-	if (_req.getState() != COMPLETE) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock);
 		if (_req.getState() == COMPLETE)

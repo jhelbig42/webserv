@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 17:50:53 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/27 12:22:18 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ void networking::pollLoop(const int sock) {
   const pollfd listener = {sock, POLLIN, 0};
   fds.push_back(listener);
 
+//  int i = 0;
   while (1) {
     const int res =
         poll(fds.data(), (nfds_t)fds.size(),
@@ -77,6 +78,7 @@ void networking::pollLoop(const int sock) {
       // Could also log Warning and continue.
     }
     process(sock, cMap, fds);
+  //	i++;
   }
 }
 
@@ -109,8 +111,8 @@ void networking::process(const int ListenSock, std::map<int, Connection> &cMap,
         it = fds.erase(it);
       } else {
         if (it->fd != ListenSock) {
-          cMap.at(it->fd).serve(MAX_REQUEST);
-          //cMap.at(it->fd).processData();
+          //cMap.at(it->fd).serve(MAX_REQUEST);
+          cMap.at(it->fd).processData();
           cMap.at(it->fd).resetConditions();
         }
         it++;
