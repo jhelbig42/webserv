@@ -83,6 +83,8 @@ void Request::parseRequestLine(std::string StatusLine)
 	catch (std::exception &e)
 	{
 		std::cerr << e.what() << std::endl;
+		_valid = false;
+        _state = COMPLETE;
 		return ;
 	}
 }
