@@ -13,8 +13,7 @@ public:
 
   typedef enum {
     ContentLength = (1u << 0),
-    ContentType = (1u << 1),
-	Date = (1u << 2)
+    ContentType = (1u << 1)
   } HeaderType;
 
   typedef enum {

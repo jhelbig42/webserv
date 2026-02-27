@@ -1,7 +1,6 @@
 #include "Response.hpp"
 
 #include "Conditions.hpp"
-#include "Date.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
@@ -126,7 +125,6 @@ static void setMetadata(std::string &Metadata, const int Code,
   std::ostringstream oss;
   oss << "HTTP/1.0 " << Code << ' ' << getReasonPhrase(Code) << "\r\n";
   oss << Hdrs << "\r\n";
-  oss << "Date: " << getDate() << "\r\n";
   Metadata = oss.str();
 }
 
