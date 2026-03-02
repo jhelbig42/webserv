@@ -4,6 +4,7 @@
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -52,7 +53,7 @@ Buffer::const_iterator Buffer::end() const {
 }
 
 std::string Buffer::getStringFromBuffer(void) const{
-  std::string s(this->begin(), this->end());
+  std::string const s(this->begin(), this->end());
   return (s);
 }
 

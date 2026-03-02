@@ -1,6 +1,8 @@
-#include "Request.hpp"
+#include "Conditions.hpp"
 #include "Logging.hpp"
-#include "NetworkingDefines.hpp"
+#include "Request.hpp"
+#include <string>
+#include <vector>
 
 #define MAX_REQUEST 1024
 // Source - https://stackoverflow.com/a/14266139
@@ -30,7 +32,7 @@ Request::Request() :
 	_valid(false)	
 {}  
 
-void Request::init(std::string input) {
+void Request::init(const std::string &input) {
 	this->parseRequestLine(input);
 }
 
@@ -45,7 +47,7 @@ void Request::reset() {
 }
 
 
-Request::Request(std::string input)
+Request::Request(std::string &input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
 {
 	this->parseRequestLine(input);
@@ -108,7 +110,6 @@ void Request::readFromSocket(int Fd){
     	return;
   	}
   	if (bytesRead < 0) {
-    	std::ostringstream msg;
     	logging::log(logging::Warning, "buf.fill() not successful");
     	return;
  	}

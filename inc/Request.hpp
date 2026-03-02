@@ -4,12 +4,12 @@
 #include "Conditions.hpp"
 #include "Logging.hpp"
 #include "HttpHeaders.hpp"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <iostream>
-#include <stdlib.h>
-#include <sstream>
 
 typedef enum {
   Generic,
@@ -33,22 +33,22 @@ class Request {
 		// request& operator=(const request&);
 		// ~request();
     	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
-		explicit Request(std::string input);
-		void init(std::string input);
+		explicit Request(std::string &input);
+		void init(const std::string &input);
 		void reset( void );
     	
 		bool process(const int Socket);
 		void readFromSocket(int Fd);
-		bool ClientHungUp;
+		bool ClientHungUp; // will go into state
 		
 		bool parseRequestLineFromBuffer();
-		void parseRequestLine(std::string StatusLine);
-		void parseMethod(std::string Token);
-		void parseResource(std::string Token);
-		void parseHttp(std::string Token);
+		void parseRequestLine(const std::string &RequestLine);
+		void parseMethod(const std::string &Token);
+		void parseResource(const std::string &Token);
+		void parseHttp(const std::string &Token);
 
 		bool parseHeadersFromBuffer();
-		void parseHeader(std::string headerLine);
+		void parseHeader(const std::string &headerLine);
 		
 		Conditions getConditions(void) const;
 
