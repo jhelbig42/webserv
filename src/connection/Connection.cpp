@@ -66,7 +66,7 @@ void Connection::scheduleForDemolition(void) {
 // Send & Receive
 //processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
-	if(_req.getState() != COMPLETE)
+	if(_req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	
 	if (_req.ClientHungUp){
@@ -76,7 +76,7 @@ void Connection::processData(void) {
 		 
 	//parsing from buffer into Request
 	//when fully parsed init response 
-	if(_req.getState() == COMPLETE)
+	if(_req.getState() == COMPLETE || _req.getState() == INVALID)
 	{
 		_res.init(_req);
 		_req.reset();

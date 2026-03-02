@@ -42,7 +42,7 @@ void Response::init(const Request &Req) {
   setDefaults();
 
   logging::log3(logging::Debug, "Response: ", __func__, " called");
-  if (!Req.isValid()) {
+  if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
   }

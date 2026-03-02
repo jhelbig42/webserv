@@ -73,8 +73,7 @@ void Request::parseRequestLine(const std::string &RequestLine)
 	if (status.size() != 3)
 	{
         logging::log(logging::Debug, "Request is invalid after split of StatusLine");
-		_valid = false;
-        _state = COMPLETE;
+        _state = INVALID;
 		return ;
 	}
 	try
@@ -82,13 +81,13 @@ void Request::parseRequestLine(const std::string &RequestLine)
 		parseMethod(status[0]);
 		parseResource(status[1]);
 		parseHttp(status[2]);
-		_valid = true;
+		_state = COMPLETE;
+		return;
 	}
 	catch (std::exception &e)
 	{
 		std::cerr << e.what() << '\n';
-		_valid = false;
-        _state = COMPLETE;
+        _state = INVALID;
 		return ;
 	}
 }
@@ -104,7 +103,7 @@ bool Request::parseRequestLineFromBuffer()
     const std::string line = s.substr(0, pos);
     parseRequestLine(line);
     _buf.deleteFront(pos + 2);  // remove line + CRLF
-    if (!_valid)
+    if (_state == INVALID)
         return false; 
     _state = HEADERS;
     return true;

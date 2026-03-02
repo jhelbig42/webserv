@@ -5,22 +5,7 @@
 #include <vector>
 
 #define MAX_REQUEST 1024
-// Source - https://stackoverflow.com/a/14266139
-// Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-02-11, License - CC BY-SA 4.0
 
-// Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
-//   : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
-
-/**
- * \brief Request Constructor called on given input.
- * This should be used if the status line. Later: called on first buffer.
- * Calls parse() that parses the statusline.
- * Does not need the amount of sent bytes yet, but will likely do so,
- * when the headers are sent and need to be parsed later on.
- * 
- * \return fills the Request attributes. On error _valid attribute will remain false
- */
 
 Request::Request() :
 	ClientHungUp(false),
@@ -28,8 +13,7 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_state(STATUS_LINE),
-	_valid(false)	
+	_state(STATUS_LINE)
 {}  
 
 void Request::init(const std::string &input) {
@@ -42,13 +26,12 @@ void Request::reset() {
 	_resource = "";
 	_majorVersion = 0; 
 	_minorVersion = 0;
-	_valid = false;
 	_state = STATUS_LINE;
 }
 
 
 Request::Request(std::string &input)
-	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
+	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0)
 {
 	this->parseRequestLine(input);
 }  
@@ -57,6 +40,8 @@ bool Request::process(int Socket)
     readFromSocket(Socket);  // fills _buf
 	while (true)
     {
+		if (ClientHungUp)
+			return (false);
         if (_state == STATUS_LINE)
         {
 			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
@@ -116,9 +101,6 @@ void Request::readFromSocket(int Fd){
   	logging::log(logging::Debug, "readFromSocket() done");
 }
 
-bool Request::isValid() const {
-	return _valid;
-}
 
 size_t Request::getMajorV() const {
 	return _majorVersion;

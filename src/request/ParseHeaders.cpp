@@ -37,7 +37,7 @@ void Request::parseHeader(const std::string &HeaderLine)
 	std::vector<std::string> token = split(HeaderLine, ": ");
 	if (token.size() != 2) 
 	{
-		_valid = false; // request is made invalid on every headerline that is syntactically incorrect
+		_state = INVALID; // request is made invalid on every headerline that is syntactically incorrect
 		return ;
 	}
     if (token[0] == "Content-Length")
@@ -47,7 +47,7 @@ void Request::parseHeader(const std::string &HeaderLine)
         if (!(slength >> length) || !slength.eof())
         {
             logging::log(logging::Warning, "transform content length into long failed");
-            _valid = false;
+            _state = INVALID;
             return;
         }
         _headers.setContentLength(length);   
