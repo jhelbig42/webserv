@@ -10,6 +10,8 @@ static bool isCharset(const char *Charset, const std::string &Str,
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It);
 
+// highest priority classification should always come first
+// i.e. usually TokenTypes of category TokenType::Charset
 static const TokenType globalTokenTypes[] = {
     {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name, TokenType::Charset, 0},
     {"Number", "", "0123456789", TokenType::Number, TokenType::Charset, 0},
@@ -76,15 +78,6 @@ static bool isCharset(const char *Charset, const std::string &Str,
                       std::string::const_iterator &It) {
   if (!strchr(Charset, *It))
     return false;
-  // size_t i = 0;
-  // std::string::const_iterator itDup = It;
-  // while (i != globalTokenTypesSize) {
-  //   if (globalTokenTypes[i].category == TokenType::Keyword &&
-  //     globalTokenTypes[i].matchType(Str, It, itDup)) {
-  //     return false;
-  //   }
-  //   ++i;
-  // }
   while (It != Str.end() && strchr(Charset, *It))
     ++It;
   return true;
