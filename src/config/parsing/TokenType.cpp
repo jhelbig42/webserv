@@ -11,13 +11,14 @@ static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It);
 
 static const TokenType globalTokenTypes[] = {
+    {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name, TokenType::Charset, 0},
+    {"Number", "", "0123456789", TokenType::Number, TokenType::Charset, 0},
     {"Semicolon", "", NULL, TokenType::Semicolon, TokenType::SingleChar, ';'},
     {"BracesLeft", "", NULL, TokenType::BracesLeft, TokenType::SingleChar, '{'},
     {"BracesRight", "", NULL, TokenType::BracesRight, TokenType::SingleChar,
      '}'},
     {"Server", "server", NULL, TokenType::Server, TokenType::Keyword, 0},
     {"Whitespace", "", " \t", TokenType::Whitespace, TokenType::Charset, 0},
-    {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name, TokenType::Charset, 0},
     {"Eof", "", NULL, TokenType::Eof, TokenType::CategoryEof, 0}};
 
 static const size_t globalTokenTypesSize =
@@ -75,15 +76,15 @@ static bool isCharset(const char *Charset, const std::string &Str,
                       std::string::const_iterator &It) {
   if (!strchr(Charset, *It))
     return false;
-  size_t i = 0;
-  std::string::const_iterator itDup = It;
-  while (i != globalTokenTypesSize) {
-    if (globalTokenTypes[i].category == TokenType::Keyword &&
-      globalTokenTypes[i].matchType(Str, It, itDup)) {
-      return false;
-    }
-    ++i;
-  }
+  // size_t i = 0;
+  // std::string::const_iterator itDup = It;
+  // while (i != globalTokenTypesSize) {
+  //   if (globalTokenTypes[i].category == TokenType::Keyword &&
+  //     globalTokenTypes[i].matchType(Str, It, itDup)) {
+  //     return false;
+  //   }
+  //   ++i;
+  // }
   while (It != Str.end() && strchr(Charset, *It))
     ++It;
   return true;
