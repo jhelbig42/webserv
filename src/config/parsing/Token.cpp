@@ -18,10 +18,7 @@ Token::Token(const size_t Line, const TokenType::Type Type)
 std::ostream &operator<<(std::ostream &Os, const Token &Tkn) {
   Os << "Line " << Tkn.getLine() << ": ";
   Os << Tkn.getType().identifier;
-  Os << ":\t";
-  if (Tkn.getType().type == TokenType::Name ||
-      Tkn.getType().type == TokenType::Number)
-    Os << '\t';
+  Os << ": ";
   Os << Tkn.getLexeme() << '\n';
   return Os;
 }

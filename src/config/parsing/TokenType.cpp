@@ -17,6 +17,7 @@ static const TokenType globalTokenTypes[] = {
      '}'},
     {"Server", "server", NULL, TokenType::Server, TokenType::Keyword, 0},
     {"Whitespace", "", " \t", TokenType::Whitespace, TokenType::Charset, 0},
+    {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name, TokenType::Charset, 0},
     {"Eof", "", NULL, TokenType::Eof, TokenType::CategoryEof, 0}};
 
 static const size_t globalTokenTypesSize =
@@ -74,7 +75,15 @@ static bool isCharset(const char *Charset, const std::string &Str,
                       std::string::const_iterator &It) {
   if (!strchr(Charset, *It))
     return false;
-  ++It;
+  size_t i = 0;
+  std::string::const_iterator itDup = It;
+  while (i != globalTokenTypesSize) {
+    if (globalTokenTypes[i].category == TokenType::Keyword &&
+      globalTokenTypes[i].matchType(Str, It, itDup)) {
+      return false;
+    }
+    ++i;
+  }
   while (It != Str.end() && strchr(Charset, *It))
     ++It;
   return true;
