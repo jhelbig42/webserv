@@ -21,15 +21,14 @@
 
 class Connection {
 public:
-  
-  bool _delete; // placement in public is temporary
-  
+   
   Connection(const int Sock, const sockaddr_storage &Addr,
              const socklen_t addrSize);
   ~Connection();
 
   // getters
   int getSock(void) const;
+  bool getDeleteStatus(void) const;
 
   // setters
   void scheduleForDemolition(void);
@@ -54,6 +53,7 @@ private:
   int _sockForward;
 
   // networking
+  bool _delete; // set by scheduleForDemolition
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;

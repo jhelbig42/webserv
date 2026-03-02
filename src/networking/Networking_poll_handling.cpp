@@ -23,44 +23,71 @@
 #include <unistd.h>
 #include <vector>
 
-void networking::handlePollnval(int fd, std::map<int, Connection> &c_map);
-void networking::handlePollerr(int fd, std::map<int, Connection> &c_map);
-void networking::handlePollin(int fd, std::map<int, Connection> &c_map,
-                 const int &listen_sock, std::vector<pollfd> &newFdBatch);
-void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
-void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
+// These functions handle the results of poll(), which are indicated
+// by flags contained within the "revents" field of a given connection's
+// pollfd struct.
 
-void networking::handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap) {
-    if (Revents & POLLNVAL) {
-      handlePollnval(Fd, CMap);
-      exit(1);
-    }
-    if (Revents & POLLERR) {
-      handlePollerr(Fd, CMap);
-      exit(1);
-    }
-    if (Revents & POLLRDHUP) {
-      handlePollrdhup(Fd, CMap);
-    }
-    if (Revents & POLLHUP) {
-      logging::log2(logging::Debug, "Hangup from fd ", Fd);
-      exit(1);
-    }
-    if (Revents & POLLPRI) {
-      logging::log2(logging::Debug, "POLLPRI from fd ", Fd);
-      exit(1);
-    }
+void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
+                              const int &listen_sock,
+                              std::vector<pollfd> &newFdBatch);
+void networking::handlePollout(int Fd, std::map<int, Connection> &CMap);
+void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
+void networking::handleTerminalCondition(const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap);
+void networking::handleServableCondition(const int ListenSock,
+                                         const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap,
+                                         std::vector<pollfd> &newFdBatch);
+
+
+// handleTerminalCondition() handles flags which indicate a hangup or
+// error. This path is in the logic is separated so we can skip checks
+// for POLLIN and POLLOUT. Terminal conditions are handled with additional
+// helper functions, which log specific errors / debug messages and mark
+// the connection for deletion.
+
+void networking::handleTerminalCondition(const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap) {
+  if (Revents & POLLNVAL) {
+    handlePollnval(Fd, CMap);
+    exit(1);
+  }
+  if (Revents & POLLERR) {
+    handlePollerr(Fd, CMap);
+    exit(1);
+  }
+  if (Revents & POLLRDHUP) {
+    handlePollrdhup(Fd, CMap);
+  }
+  if (Revents & POLLHUP) {
+    logging::log2(logging::Debug, "Hangup from fd ", Fd);
+    exit(1);
+  }
+  if (Revents & POLLPRI) {
+    logging::log2(logging::Debug, "POLLPRI from fd ", Fd);
+    exit(1);
+  }
 }
 
-void networking::handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch) {
-      if (Revents & POLLIN) { // data to read | hang-up
-        handlePollin(Fd, CMap, ListenSock, newFdBatch);
-      }
-      if (Revents & POLLOUT) {
-        handlePollout(Fd, CMap, ListenSock, newFdBatch);
-      }
+// handleServableCondition() handles POLLIN & POLLOUT
+// through the use of additional helper functions
+
+void networking::handleServableCondition(const int ListenSock,
+                                         const short Revents, const int Fd,
+                                         std::map<int, Connection> &CMap,
+                                         std::vector<pollfd> &newFdBatch) {
+  if (Revents & POLLIN) { // data to read | hang-up
+    handlePollin(Fd, CMap, ListenSock, newFdBatch);
+  }
+  if (Revents & POLLOUT) {
+    handlePollout(Fd, CMap);
+  }
 }
 
+// handlePollnval() handles POLLNVAL:
+// 		invalid request: fd not open.
 
 void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Error,
@@ -76,6 +103,15 @@ void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
   }
 }
 
+// handlePollrdhup() handles POLLRDHUP:
+// 		Stream  socket peer closed connection, or shut down writing half 
+//		of  connection.   The  _GNU_SOURCE  feature test macro must be defined
+//		(before  including  any header files) in order to obtain this definition.
+//
+// TODO : inclusion of _GNU_SOURCE gave compiler error due to already defined?
+// We clearly don't need it becuase POLLRDHUP is recognized, but perhaps there
+// should be some kind of ifndef? May be machine specific?
+
 void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Debug,
                 "networking::process(): POLLRDHUP.\n\t client hung up."
@@ -89,6 +125,10 @@ void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap) {
                  "no Connection with this fd.");
   }
 }
+
+// handlePollerr() handles POLLERR:
+// 		Error  condition. This bit is also set for a file descriptor
+//		referring  to  the  write  end of a pipe when the read end has been closed.
 
 void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
   const std::ostringstream msg;
@@ -105,27 +145,26 @@ void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
   }
 }
 
+// handlePollin() handles POLLIN:
+// 		There is data to read.
+
 void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
-                              const int &listen_sock,
+                              const int &ListenSock,
                               std::vector<pollfd> &newFdBatch) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (Fd == listen_sock) { // listening socket got new connection
+  if (Fd == ListenSock) { // listening socket got new connection
     ClientAddr candidate;
-    if (acceptConnection(listen_sock, &candidate) != -1) {
+    if (acceptConnection(ListenSock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
-      const short events = POLLIN | POLLERR | POLLHUP | POLLNVAL | POLLPRI | POLLRDHUP;
+      const short events =
+          POLLIN | POLLOUT | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
   } else {
     const std::map<int, Connection>::iterator itC = CMap.find(Fd);
     if (itC != CMap.end()) {
-
-      // simple dummy
-    //  (itC->second).readData();
-
       (itC->second).addToConditions(SockRead);
-
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
@@ -134,20 +173,15 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
   }
 }
 
-void networking::handlePollout(int Fd, std::map<int, Connection> &CMap,
-                               const int &listen_sock,
-                               std::vector<pollfd> &newFdBatch) {
+// handlePollout() handles POLLOUT:
+// 		Writing is now possible.
+
+void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
   logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = CMap.find(Fd);
   if (itC != CMap.end()) {
-
     logging::log2(logging::Debug, "Ready to send to ", Fd);
-    //send(Fd, "We got your request", 1024, MSG_DONTWAIT);
-    // eventual implementation
-    /*
-      (itC->second).addToConditions(SockWrite);
-      (itC->second).serve(MAX_REQUEST);
-    */
+    (itC->second).addToConditions(SockWrite);
   } else {
     logging::log(logging::Error, "process: Connection not found in map "
                                  "container (This should never happen)");
