@@ -39,6 +39,7 @@ Scanner::Scanner(const char *File) {
     if (!inf.good())
       break;
     scanLine(++lineNumber, line);
+    addNewline(lineNumber);
   }
   if (inf.fail() && !inf.eof())
     throw std::runtime_error("Scanner: file I/O error");
@@ -47,6 +48,11 @@ Scanner::Scanner(const char *File) {
 
 void Scanner::addEof(const size_t Line) {
   Token *const tkn = new Token(Line, TokenType::Eof);
+  _tokens.push_back(tkn);
+}
+
+void Scanner::addNewline(const size_t Line) {
+  Token *const tkn = new Token(Line, TokenType::Newline);
   _tokens.push_back(tkn);
 }
 

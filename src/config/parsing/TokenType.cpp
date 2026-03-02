@@ -21,7 +21,8 @@ static const TokenType globalTokenTypes[] = {
      '}'},
     {"Server", "server", NULL, TokenType::Server, TokenType::Keyword, 0},
     {"Whitespace", "", " \t", TokenType::Whitespace, TokenType::Charset, 0},
-    {"Eof", "", NULL, TokenType::Eof, TokenType::CategoryEof, 0}};
+    {"Eof", "", NULL, TokenType::Eof, TokenType::Special, 0},
+    {"Newline", "", NULL, TokenType::Newline, TokenType::Special, 0}};
 
 static const size_t globalTokenTypesSize =
     sizeof(globalTokenTypes) / sizeof(*globalTokenTypes);
@@ -61,7 +62,7 @@ bool TokenType::matchType(const std::string &Str,
     return isCharset(charset, Str, ItNew);
   case Keyword:
     return isKeyword(keyword, Str, ItNew);
-  case CategoryEof:
+  case Special:
     return false;
   }
   return false;

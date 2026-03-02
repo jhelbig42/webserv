@@ -5,6 +5,7 @@
 struct TokenType {
   typedef enum {
     Eof,
+    Newline,
     Semicolon,
     BracesLeft,
     BracesRight,
@@ -16,7 +17,7 @@ struct TokenType {
     Name
   } Type;
 
-  typedef enum { CategoryEof, SingleChar, Charset, Keyword } Category;
+  typedef enum { Special, SingleChar, Charset, Keyword } Category;
 
   const std::string identifier;
   const std::string keyword;
