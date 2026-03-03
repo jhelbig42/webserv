@@ -10,6 +10,8 @@ public:
   ~Scanner(void);
   const std::list<Token> &getTokens(void) const;
 
+  std::list<Token>::const_iterator firstToken(void) const;
+
 private:
   std::list<Token> _tokens;
   void addEof(const size_t Line);

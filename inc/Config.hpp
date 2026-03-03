@@ -8,11 +8,17 @@ namespace config {
 logging::LogLevel logLevel(void);
 bool logColored(void);
 
-/// \brief reads configuration from a file into memory
-///
-/// not implemented yet!!
-///
-/// \param file the configuration file to read from
-void fromFile(const std::string &File);
-
 } // namespace config
+
+class Config {
+public:
+  Config(const char *File);
+  const Website &getWebsites(void) const;
+
+private:
+  Website expression(void);
+  Website server(void);
+  Scanner _scan;
+  std::list<const Website> _websites;
+  std::list<Token>::const_iterator _it;
+};

@@ -20,6 +20,21 @@ bool config::logColored(void) {
   return globalLogColored;
 }
 
-void config::fromFile(const std::string &File) {
-  (void)File;
+Config::Config(const char *File)
+  : _scan(File) {
+  _it = firstToken();
+  while (true)
+    _websites.push_back(server());
+}
+
+Website Config::server(void) {
+  if (match
+}
+
+bool Config::sep(void) {
+  return newline() || wschar();
+}
+
+bool Config::wschar(void) {
+  return 
 }

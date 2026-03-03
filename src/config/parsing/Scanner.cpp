@@ -75,3 +75,7 @@ std::ostream &operator<<(std::ostream &Os, const Scanner &Scan) {
 const std::list<Token> &Scanner::getTokens(void) const {
   return _tokens;
 }
+
+std::list<Token>::const_iterator firstToken(void) const {
+  return _tokens.begin();
+}
