@@ -15,12 +15,11 @@
 #include "Networking.hpp"
 #include "NetworkingDefines.hpp" // can be removed?
 #include <map>
-#include <ostream>
 #include <poll.h>
+#include <sstream>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <vector>
 
 // These functions handle the results of poll(), which are indicated

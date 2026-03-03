@@ -18,8 +18,10 @@
 #include <cstring> // for strerror
 #include <netdb.h>
 #include <ostream>
+#include <sstream>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h> // for close
 #include <unistd.h> // for close
 
 static int clearSocket(const int Sock);
@@ -122,8 +124,13 @@ static int bindToIP(const int Sock, const struct addrinfo *p) {
 
   const int ret = bind(Sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
+<<<<<<< config-scanner-experiment
+    close(sock);
+    const std::string msg(gai_strerror(ret));
+=======
     close(Sock);
     std::string msg(gai_strerror(ret));
+>>>>>>> main
     logging::log(logging::Info,
                  "bind: " + msg + " will continue trying sockets");
   }

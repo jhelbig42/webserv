@@ -11,6 +11,10 @@ vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
+vpath %.cpp $(SRC_DIR)/config/parsing
+SRC			+= Scanner.cpp
+SRC			+= Token.cpp
+SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
 			   Networking_init_socket.cpp\
@@ -43,7 +47,7 @@ CXXFLAGS	:=
 CXXFLAGS	+= -std=c++98
 CXXFLAGS	+= -Wall
 CXXFLAGS	+= -Wextra
-# CXXFLAGS	+= -Werror
+CXXFLAGS	+= -Werror
 	
 CPPFLAGS	:=
 CPPFLAGS	+= -MMD
@@ -107,7 +111,9 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
+	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -g3
+	CPPFLAGS += -fstandalone-debug
 endif
 
 ifeq ($(ASAN), 1)
