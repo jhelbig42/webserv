@@ -8,7 +8,6 @@
 
 
 Request::Request() :
-	ClientHungUp(false),
 	_method(Generic),
 	_resource(""),
 	_majorVersion(0), 
@@ -21,7 +20,6 @@ void Request::init(const std::string &input) {
 }
 
 void Request::reset() {
-	ClientHungUp = false;
 	_method = Generic;
 	_resource = "";
 	_majorVersion = 0; 
@@ -40,7 +38,7 @@ bool Request::process(int Socket)
     readFromSocket(Socket);  // fills _buf
 	while (true)
     {
-		if (ClientHungUp)
+		if (_state == CLIENTHUNGUP)
 			return (false);
         if (_state == STATUS_LINE)
         {
@@ -74,14 +72,13 @@ std::vector<std::string> split(const std::string& S, const std::string& Delimite
 		last = next + Delimiter.length();
     }
     tokens.push_back(S.substr(last)); 
-	logging::log(logging::Debug, "parse status_line: split Successfull");
+	logging::log(logging::Debug, "split Successfull");
     return tokens;
 }
 
 void Request::readFromSocket(int Fd){
 	logging::log(logging::Debug, "readFromSocket() starts");
 	const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
-  //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
 	if (bytesRead == MAX_REQUEST) {
     	logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
@@ -90,7 +87,7 @@ void Request::readFromSocket(int Fd){
   	}
   	if (bytesRead == 0) {
     	logging::log(logging::Warning, "read_data(): bytes_read == 0");
-		ClientHungUp = true; //into conditions?
+		_state = CLIENTHUNGUP;
     	logging::log(logging::Warning, "client appears to have hung up.");
     	return;
   	}
@@ -116,10 +113,6 @@ const std::string &Request::getResource() const {
 
 HttpMethod Request::getMethod() const {
 	return _method;
-}
-
-bool Request::isFullyParsed(void) const {
-	return _fullyParsed;
 }
 
 Conditions Request::getConditions(void) const {

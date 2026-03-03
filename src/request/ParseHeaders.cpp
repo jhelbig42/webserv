@@ -23,8 +23,9 @@ bool Request::parseHeadersFromBuffer()
     const std::string headerLine = s.substr(0, pos);
 
     parseHeader(headerLine);
-
-    _buf.deleteFront(pos + 2);
+	_buf.deleteFront(pos + 2);
+	if (_state == INVALID)
+		return false;
     return true;
 }
 // RFC: 

@@ -23,7 +23,8 @@ typedef enum  {
     STATUS_LINE,
     HEADERS,
     COMPLETE,
-	INVALID
+	INVALID,
+	CLIENTHUNGUP
 } ParseState;
 
 
@@ -44,11 +45,10 @@ class Request {
 /// \brief Resets to default values to be ready for new Request
 /// Just neccessarry if Connection is kept alive
 		void reset( void );
-    	
+
+///    	
 		bool process(const int Socket);
-		void readFromSocket(int Fd); // this function s
-		
-		bool ClientHungUp; // will go into state
+		void readFromSocket(int Fd);
 		
 		bool parseRequestLineFromBuffer();
 		void parseRequestLine(const std::string &RequestLine);
@@ -62,12 +62,10 @@ class Request {
 		Conditions getConditions(void) const;
 
 		ParseState	getState() const;
-		//bool		isValid() const;
 		size_t		getMajorV() const;
 		size_t		getMinorV() const;
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
-		bool		isFullyParsed() const;
 
 	private:
 		HttpMethod	_method;
@@ -75,11 +73,9 @@ class Request {
 		size_t		_majorVersion;
 		size_t		_minorVersion;
 		Conditions	_conditions;
-		bool		_fullyParsed; //likely obsolete as caught by _state --> TO DO delete
 		Buffer		_buf;
 		ParseState	_state;
 		HttpHeaders	_headers;	
-		//bool		_valid; // can this go into state as well?	
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

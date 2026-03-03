@@ -69,7 +69,7 @@ void Connection::processData(void) {
 	if(_req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	
-	if (_req.ClientHungUp){
+	if (_req.getState() == CLIENTHUNGUP){
 		scheduleForDemolition();
 		return ;
 	};
@@ -84,7 +84,7 @@ void Connection::processData(void) {
 		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
   			 ;	}
 		
-		if (_req.ClientHungUp){
+		if (_req.getState() == CLIENTHUNGUP){
 			scheduleForDemolition();
 			return ;
 	};
