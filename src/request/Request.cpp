@@ -12,8 +12,8 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_state(STATUS_LINE),
-	_conditions (SockRead)
+	_conditions (SockRead),
+	_state(STATUS_LINE)
 {}  
 
 void Request::init(const std::string &input) {

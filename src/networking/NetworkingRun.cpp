@@ -15,6 +15,7 @@
 #include "Networking.hpp"
 // #include "NetworkingDefines.hpp" // Can be removed?
 #include <cerrno>  // for errno
+#include <cstdlib> // exit()
 #include <cstring> // for strerror
 #include <exception>
 #include <fcntl.h> // TODO delete before submission, only for debugging
@@ -165,7 +166,7 @@ void networking::printFcntlFlags(const int Sock) {
 void networking::addConnectionToMap(const struct ClientAddr &Candidate,
                                     std::map<int, Connection> &CMap) {
 
-  Connection newConnection =
+  const Connection newConnection =
       Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize);
   CMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

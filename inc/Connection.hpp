@@ -15,7 +15,7 @@
 #include "Conditions.hpp"
 #include "NetworkingDefines.hpp"
 #include "Request.hpp"
-#include "Response.hpp"
+#include "Reaction.hpp"
 #include <netdb.h>
 #include <sys/socket.h>
 
@@ -41,7 +41,7 @@ public:
   Conditions getConditions() const;
   void processData(void);
   Request _req;
-  Response _res;
+  Reaction _res;
 
 private:
   Connection(); // should not be possible

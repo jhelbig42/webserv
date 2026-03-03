@@ -1,4 +1,4 @@
-#include "Response.hpp"
+#include "Reaction.hpp"
 
 #include "Buffer.hpp"
 #include "Logging.hpp"
@@ -37,7 +37,7 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
-// Response::process(const int Socket, const int SocketForward, const size_t
+// Reaction::process(const int Socket, const int SocketForward, const size_t
 // Bytes) {
 //   if (conditions & SockRead)
 //     //call something
@@ -57,7 +57,7 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Response::process(const int Socket, int &ForwardSocket,
+bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes) {
   (void)ForwardSocket;
   if (_ptype == SendFile)
@@ -65,7 +65,7 @@ bool Response::process(const int Socket, int &ForwardSocket,
   throw std::runtime_error("Unknown process type");
 }
 
-bool Response::sendFile(const int Socket, const size_t Bytes) {
+bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (!_metadataSent) {
     _metadataSent = stringToSocket(Socket, _metadata, Bytes);
     return false;

@@ -11,15 +11,19 @@ vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= Config.cpp
+vpath %.cpp $(SRC_DIR)/config/parsing
+SRC			+= Scanner.cpp
+SRC			+= Token.cpp
+SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
-			   Networking_init_socket.cpp\
-			   Networking_init_server.cpp\
-			   Networking_run.cpp\
-			   Networking_poll_handling.cpp
-vpath %.cpp $(SRC_DIR)/response
-SRC			+= Response.cpp
-SRC			+= ResponseProcess.cpp
+			   NetworkingInitSocket.cpp\
+			   NetworkingInitServer.cpp\
+			   NetworkingRun.cpp\
+			   NetworkingPollHandling.cpp
+vpath %.cpp $(SRC_DIR)/reaction
+SRC			+= Reaction.cpp
+SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 SRC			+= ParseHeaders.cpp
@@ -43,7 +47,7 @@ CXXFLAGS	:=
 CXXFLAGS	+= -std=c++98
 CXXFLAGS	+= -Wall
 CXXFLAGS	+= -Wextra
-# CXXFLAGS	+= -Werror
+CXXFLAGS	+= -Werror
 	
 CPPFLAGS	:=
 CPPFLAGS	+= -MMD
@@ -107,7 +111,9 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
+	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -g3
+	CPPFLAGS += -fstandalone-debug
 endif
 
 ifeq ($(ASAN), 1)

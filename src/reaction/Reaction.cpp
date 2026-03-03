@@ -1,4 +1,4 @@
-#include "Response.hpp"
+#include "Reaction.hpp"
 
 #include "Conditions.hpp"
 #include "HttpHeaders.hpp"
@@ -20,7 +20,7 @@ static bool hasDefaultFile(const int Code);
 static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs);
 
-void Response::setDefaults(void) {
+void Reaction::setDefaults(void) {
   _ptype = None;
   _metadataSent = false;
   _fdIn = -1;
@@ -29,19 +29,19 @@ void Response::setDefaults(void) {
   _conditions = Unconditional;
 }
 
-Response::Response()
+Reaction::Reaction()
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
   _headers.unsetAll();
 }
 
-Conditions Response::getConditions(void) const {
+Conditions Reaction::getConditions(void) const {
   return _conditions;
 }
 
-void Response::init(const Request &Req) {
+void Reaction::init(const Request &Req) {
   setDefaults();
 
-  logging::log3(logging::Debug, "Response: ", __func__, " called");
+  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
@@ -56,7 +56,7 @@ void Response::init(const Request &Req) {
   initMethod(Req);
 }
 
-void Response::initMethod(const Request &Req) {
+void Reaction::initMethod(const Request &Req) {
   switch (Req.getMethod()) {
   case Head:
   case Get:
@@ -72,7 +72,7 @@ void Response::initMethod(const Request &Req) {
   }
 }
 
-void Response::initDelete(const Request &Req) {
+void Reaction::initDelete(const Request &Req) {
   errno = 0;
   if (std::remove(Req.getResource().c_str()) != 0) {
     initError(errno);
@@ -81,7 +81,7 @@ void Response::initDelete(const Request &Req) {
   initSendFile(CODE_202, NULL);
 }
 
-void Response::initHeadGet(const Request &Req) {
+void Reaction::initHeadGet(const Request &Req) {
   initSendFile(CODE_200, Req.getResource().c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;
@@ -91,7 +91,7 @@ void Response::initHeadGet(const Request &Req) {
   _fdIn = -1;
 }
 
-Response::Response(const Request &Req)
+Reaction::Reaction(const Request &Req)
     : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
   init(Req);
 }
@@ -100,7 +100,7 @@ Response::Response(const Request &Req)
 // Check if recursion is safe and
 // potentially disable clang-tidy for this part.
 // think about splitting up
-void Response::initSendFile(const int Code, const char *File) {
+void Reaction::initSendFile(const int Code, const char *File) {
   struct stat statbuf;
   if (!statbufPopulate(Code, File, statbuf))
     return;
@@ -128,7 +128,7 @@ static void setMetadata(std::string &Metadata, const int Code,
   Metadata = oss.str();
 }
 
-bool Response::statbufPopulate(const int Code, const char *File,
+bool Reaction::statbufPopulate(const int Code, const char *File,
                                struct stat &StatBuf) {
   if (File == NULL)
     return true;
@@ -144,7 +144,7 @@ bool Response::statbufPopulate(const int Code, const char *File,
   return initError(errno);
 }
 
-bool Response::setFdIn(const int Code, const char *File) {
+bool Reaction::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
   errno = 0;
@@ -164,7 +164,7 @@ static bool hasDefaultFile(const int Code) {
   return Code != CODE_200;
 }
 
-bool Response::initError(const int Errno) {
+bool Reaction::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
     initSendFile(CODE_403, FILE_403);

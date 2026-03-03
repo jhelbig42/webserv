@@ -6,20 +6,20 @@
 #include <string>
 #include <sys/types.h>
 
-class Response {
+class Reaction {
 public:
-  Response();
-  // Response(const Response&);
-  // Response& operator=(const Response&);
-  // ~Response();
+  Reaction();
+  // Reaction(const Reaction&);
+  // Reaction& operator=(const Reaction&);
+  // ~Reaction();
 
   typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
 
-  explicit Response(const Request &Req);
+  explicit Reaction(const Request &Req);
   void init(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
-  /// \brief continues processing a response object
+  /// \brief continues processing a Reaction object
   ///
   /// Although Bytes gives a hint on how many Bytes should be processed,
   /// this is not a guarantee.
@@ -30,10 +30,10 @@ public:
   /// When any read() or write() call happens,
   /// usually no more than Bytes bytes will be processed by such call.
   ///
-  /// \param Socket socket associated with response
+  /// \param Socket socket associated with Reaction
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
-  /// \return true if response got fully processed otherwise false
+  /// \return true if Reaction got fully processed otherwise false
   bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
 
   Conditions getConditions(void) const;

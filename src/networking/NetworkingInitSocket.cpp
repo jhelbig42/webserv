@@ -18,8 +18,10 @@
 #include <cstring> // for strerror
 #include <netdb.h>
 #include <ostream>
+#include <sstream>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h> // for close
 #include <unistd.h> // for close
 
 static int clearSocket(const int Sock);
