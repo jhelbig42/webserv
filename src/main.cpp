@@ -1,6 +1,6 @@
 #include "Scanner.hpp"
 #include "Request.hpp"
-#include "Response.hpp"
+#include "Reaction.hpp"
 #include "Networking.hpp"
 #include <unistd.h>
 #include <iostream>
@@ -23,7 +23,7 @@
 
 int main(void) {
   const Request req(METHOD " " PATH " " VERSION);
-  Response res(req);
+  Reaction res(req);
   int dummy = -1;
   while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
     ;

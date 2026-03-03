@@ -21,9 +21,9 @@ SRC			+= Networking.cpp\
 			   Networking_init_server.cpp\
 			   Networking_run.cpp\
 			   Networking_poll_handling.cpp
-vpath %.cpp $(SRC_DIR)/response
-SRC			+= Response.cpp
-SRC			+= ResponseProcess.cpp
+vpath %.cpp $(SRC_DIR)/reaction
+SRC			+= Reaction.cpp
+SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 SRC			+= ParseHeaders.cpp

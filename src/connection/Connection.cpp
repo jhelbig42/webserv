@@ -15,7 +15,7 @@
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
 #include "Request.hpp"
-#include "Response.hpp"
+#include "Reaction.hpp"
 #include <cerrno> // for errno
 #include <cstddef>
 #include <cstring> // for strerror
@@ -75,8 +75,8 @@ void Connection::processData(void) {
 		return ;
 	};
 	//parsing from buffer into Request
-	//when fully parsed init response
-	//Response will set its conditions 
+	//when fully parsed init Reaction
+	//Reaction will set its conditions 
 	if(_conditionsFulfilled == SockWrite &&
 		(_req.getState() == COMPLETE || _req.getState() == INVALID))
 	{
@@ -101,7 +101,7 @@ bool Connection::serve(const size_t Bytes) {
 			_res.init(_req);
     return false;
   }
-  //switch to Response	
+  //switch to Reaction	
   if (_conditionsFulfilled & _res.getConditions())
     return _res.process(_sock, _sockForward, Bytes);
   return false;
