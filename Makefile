@@ -17,10 +17,10 @@ SRC			+= Token.cpp
 SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/networking
 SRC			+= Networking.cpp\
-			   Networking_init_socket.cpp\
-			   Networking_init_server.cpp\
-			   Networking_run.cpp\
-			   Networking_poll_handling.cpp
+			   NetworkingInitSocket.cpp\
+			   NetworkingInitServer.cpp\
+			   NetworkingRun.cpp\
+			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
 SRC			+= Reaction.cpp
 SRC			+= ReactionProcess.cpp
