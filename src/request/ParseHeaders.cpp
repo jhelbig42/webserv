@@ -1,6 +1,8 @@
 #include "Request.hpp"
 #include "Logging.hpp"
-#include "NetworkingDefines.hpp"
+#include <string>
+#include <sys/types.h>
+#include <vector>
 
 #define MAX_REQUEST 1024
 
@@ -8,8 +10,8 @@ bool Request::parseHeadersFromBuffer()
 {
     if (_buf.getUsed() == 0)
         return false;
-    std::string s = _buf.getStringFromBuffer();
-    size_t pos = s.find("\r\n");
+    const std::string s = _buf.getStringFromBuffer();
+    const size_t pos = s.find("\r\n");
     if (pos == std::string::npos)
         return false;  // header line not complete
     if (pos == 0)// buffer was "\r\n\r\n"
@@ -18,24 +20,25 @@ bool Request::parseHeadersFromBuffer()
         _state = COMPLETE;
         return true;
     }
-    std::string headerLine = s.substr(0, pos);
-
-    //parseHeader(headerLine);
-
-    _buf.deleteFront(pos + 2);
+    const std::string headerLine = s.substr(0, pos);
+    parseHeader(headerLine);
+	_buf.deleteFront(pos + 2);
+	if (_state == INVALID)
+		return false;
     return true;
 }
+
 // RFC: 
 // Each header field consists
  //  of a name followed immediately by a colon (":"), a single space (SP)
  //  character, and the field value.
-void Request::parseHeader(std::string HeaderLine)
+void Request::parseHeader(const std::string &HeaderLine)
 {
 	logging::log(logging::Debug, "parseHeaderLine()");
 	std::vector<std::string> token = split(HeaderLine, ": ");
 	if (token.size() != 2) 
 	{
-		_valid = false; // request is made invalid on every headerline that is syntactically incorrect
+		_state = INVALID; // request is made invalid on every headerline that is syntactically incorrect
 		return ;
 	}
     if (token[0] == "Content-Length")
@@ -45,7 +48,7 @@ void Request::parseHeader(std::string HeaderLine)
         if (!(slength >> length) || !slength.eof())
         {
             logging::log(logging::Warning, "transform content length into long failed");
-            _valid = false;
+            _state = INVALID;
             return;
         }
         _headers.setContentLength(length);   

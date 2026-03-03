@@ -2,8 +2,8 @@
 
 #include "CompileTimeConstants.hpp"
 #include <cstddef>
-#include <sys/types.h>
 #include <string>
+#include <sys/types.h>
 
 /// \class Buffer
 /// \brief This is a simple character buffer that can be filled from

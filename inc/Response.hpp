@@ -42,7 +42,7 @@ private:
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
-  bool statbufPopulate(const int Code, const char *File, struct stat &Statbuf);
+  bool statbufPopulate(const int Code, const char *File, struct stat &StatBuf);
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
   void setDefaults(void);

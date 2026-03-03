@@ -1,7 +1,9 @@
+#include "Logging.hpp"
+#include "Networking.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include "Networking.hpp"
-#include <unistd.h>
+#include <stdexcept>
+
 
 //#define OFFLINE
 
@@ -12,6 +14,9 @@
 #define VERSION "HTTP/1.0"
 
 // GET /home/julia/projects/webserv/hello.txt HTTP/1.0
+// GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
+//home/jhelbig/Desktop/webserv
+
 // Content_Length: 100
 #ifdef OFFLINE
 
