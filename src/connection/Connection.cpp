@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/27 12:32:38 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/03 13:46:25 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,7 @@ void Connection::processData(void) {
 	//parsing from buffer into Request
 	//when fully parsed init Reaction
 	//Reaction will set its conditions 
-	if(_conditionsFulfilled == SockWrite &&
-		(_req.getState() == COMPLETE || _req.getState() == INVALID))
+	if(	(_req.getState() == COMPLETE || _req.getState() == INVALID))
 	{
 		_res.init(_req);
 		_req.reset();
