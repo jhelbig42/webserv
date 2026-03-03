@@ -77,7 +77,8 @@ void Connection::processData(void) {
 	//parsing from buffer into Request
 	//when fully parsed init response
 	//Response will set its conditions 
-	if(_req.getState() == COMPLETE || _req.getState() == INVALID)
+	if(_conditionsFulfilled == SockWrite &&
+		(_req.getState() == COMPLETE || _req.getState() == INVALID))
 	{
 		_res.init(_req);
 		_req.reset();
