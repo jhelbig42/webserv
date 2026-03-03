@@ -39,23 +39,25 @@ void start(void);
 struct addrinfo *getServerInfo(void);
 
 // Networking_init_socket.cpp
-int getServerSocket(struct addrinfo *server_info);
-void setToListen(const int sock);
+int getServerSocket(struct addrinfo *Server_info);
+void setToListen(const int Sock);
 
 // Networking_run.cpp
-void pollLoop(const int sock);
-void process(const int listen_sock, std::map<int, Connection> &c_map,
-             std::vector<pollfd> &fds);
-int acceptConnection(const int listen_sock, struct ClientAddr *candidate);
-void addConnectionToMap(const struct ClientAddr &candidate,
-                           std::map<int, Connection> &c_map);
+void pollLoop(const int Sock);
+void process(const int ListenSock, std::map<int, Connection> &CMap,
+             std::vector<pollfd> &Fds);
+int acceptConnection(const int ListenSock, struct ClientAddr *Candidate);
+void addConnectionToMap(const struct ClientAddr &Candidate,
+                           std::map<int, Connection> &CMap);
 
-void handlePollnval(int fd, std::map<int, Connection> &c_map);
-void handlePollerr(int fd, std::map<int, Connection> &c_map);
-void handlePollin(int fd, std::map<int, Connection> &c_map,
-                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
-void handlePollout(int fd, std::map<int, Connection> &c_map,
-                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+void handlePollnval(int Fd, std::map<int, Connection> &CMap);
+void handlePollerr(int Fd, std::map<int, Connection> &CMap);
+void handlePollin(int Fd, std::map<int, Connection> &CMap,
+                   const int &listen_sock, std::vector<pollfd> &newFdBatch);
+void handlePollout(int Fd, std::map<int, Connection> &CMap);
+void handlePollrdhup(int Fd, std::map<int, Connection> &CMap);
+void handleTerminalCondition(const short Revents, const int Fd, std::map<int, Connection> &CMap);
+void handleServableCondition(const int ListenSock, const short Revents, const int Fd, std::map<int, Connection> &CMap, std::vector<pollfd> &newFdBatch);
 
 // temporary Debug
 // TODO delete or comment out before submission:

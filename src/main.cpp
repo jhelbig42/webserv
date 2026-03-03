@@ -1,19 +1,33 @@
+<<<<<<< config-scanner-experiment
 #include "Scanner.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Networking.hpp"
 #include <unistd.h>
 #include <iostream>
+=======
+#include "Logging.hpp"
+#include "Networking.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
+#include <stdexcept>
+
+>>>>>>> main
 
 //#define OFFLINE
 #define PARSING
 
 #define CHUNK_SIZE 1024
 
-#define METHOD "HEAD"
-#define PATH "/home/alneuman/projects/webserv/hello.txt"
+#define METHOD "GET"
+#define PATH "/home/julia/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
+// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
+// GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
+//home/jhelbig/Desktop/webserv
+
+// Content_Length: 100
 #ifdef OFFLINE
 
 int main(void) {

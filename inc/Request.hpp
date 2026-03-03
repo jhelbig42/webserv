@@ -1,13 +1,15 @@
 #pragma once
 
+#include "Buffer.hpp"
 #include "Conditions.hpp"
+#include "Logging.hpp"
+#include "HttpHeaders.hpp"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <iostream>
-#include <stdlib.h>
-#include <sstream>
-#include "Logging.hpp"
 
 typedef enum {
   Generic,
@@ -17,39 +19,65 @@ typedef enum {
 	Delete
 } HttpMethod;
 
+typedef enum  {
+    STATUS_LINE,
+    HEADERS,
+    COMPLETE,
+	INVALID,
+	CLIENTHUNGUP
+} ParseState;
+
+
 class Request {
 	public:
+
+
+/// called on initialisation of Connection.
 		Request();
 		// request(const request&);
 		// request& operator=(const request&);
 		// ~request();
     	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
-		explicit Request(const char *input);
-		void init(const char *input);
-    	
-		void parseStatusLine(const char *, const size_t);
-		void parseMethod(std::string token);
-		void parseResource(std::string token);
-		void parseHttp(std::string token);
+		
+		explicit Request(std::string &input); //just used in test main
+		void init(const std::string &input); // to be removed
 
-		bool isFullyParsed(void) const;
+/// \brief Resets to default values to be ready for new Request
+/// Just neccessarry if Connection is kept alive
+		void reset( void );
+
+/// \brief process() handles reading from socket into Request and parsing until the Request is complete
+/// A Request is considered complete, when the StatusLine and Headers are read.
+/// This is the case when "\r\n\r\n" is found.
+		void process(const int Socket);
+		void readFromSocket(int Fd);
+		
+		bool parseRequestLineFromBuffer();
+		void parseRequestLine(const std::string &RequestLine);
+		void parseMethod(const std::string &Token);
+		void parseResource(const std::string &Token);
+		void parseHttp(const std::string &Token);
+
+		bool parseHeadersFromBuffer();
+		void parseHeader(const std::string &headerLine);
+		
 		Conditions getConditions(void) const;
-		bool process(const int Socket, const size_t Bytes);
 
-		bool isValid() const;
-		size_t getMajorV() const;
-		size_t getMinorV() const;
+		ParseState	getState() const;
+		size_t		getMajorV() const;
+		size_t		getMinorV() const;
 		const std::string &getResource() const;
-		HttpMethod getMethod() const;
+		HttpMethod 	getMethod() const;
 
 	private:
-		HttpMethod _method;
+		HttpMethod	_method;
 		std::string _resource;
-		size_t _majorVersion;
-		size_t _minorVersion;
-		bool _valid;
-		Conditions _conditions;
-		bool _fullyParsed;
+		size_t		_majorVersion;
+		size_t		_minorVersion;
+		Conditions	_conditions;
+		Buffer		_buf;
+		ParseState	_state;
+		HttpHeaders	_headers;	
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

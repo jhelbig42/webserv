@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 17:50:53 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/27 12:22:18 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,12 @@
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
-void networking::pollLoop(const int sock);
-void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
-                         std::vector<pollfd> &fds);
-int networking::acceptConnection(const int listen_sock, ClientAddr *candidate);
-void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                    std::map<int, Connection> &cMap);
+void networking::pollLoop(const int Sock);
+void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
+                         std::vector<pollfd> &Fds);
+int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate);
+void networking::addConnectionToMap(const struct ClientAddr &Candidate,
+                                    std::map<int, Connection> &CMap);
 
 // pollLoop() introduces the while(1) networking loop that will run
 // for the duration of the webserver. This function:
@@ -55,12 +55,12 @@ void networking::addConnectionToMap(const struct ClientAddr &candidate,
 // 	- continuously checks and marks which pollfds are ready for I/O
 // 	- processes the ones that are marked
 
-void networking::pollLoop(const int sock) {
+void networking::pollLoop(const int Sock) {
 
   std::map<int, Connection> cMap;
   std::vector<pollfd> fds;
 
-  const pollfd listener = {sock, POLLIN, 0};
+  const pollfd listener = {Sock, POLLIN, 0};
   fds.push_back(listener);
 
   while (1) {
@@ -77,7 +77,7 @@ void networking::pollLoop(const int sock) {
       // Currently, logging error and exiting
       // Could also log Warning and continue.
     }
-    process(sock, cMap, fds);
+    process(Sock, cMap, fds);
   }
 }
 
@@ -93,42 +93,35 @@ void networking::pollLoop(const int sock) {
 //
 // TODO Handle additional flags
 
-void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
-                         std::vector<pollfd> &fds) {
+void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
+                         std::vector<pollfd> &Fds) {
 
-  logging::log(logging::Debug, "Process()");
+  logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
-    if (it->revents & POLLNVAL) {
-      handlePollnval(it->fd, cMap);
-      exit(1);
-    }
-    if (it->revents & POLLERR) {
-      handlePollerr(it->fd, cMap);
-      exit(1);
-    }
-    if (it->revents & POLLHUP) {
-      logging::log2(logging::Debug, "Hangup from fd ", it->fd);
-      exit(1);
-    }
-    if (it->revents & POLLIN) { // data to read | hang-up
-      handlePollin(it->fd, cMap, listen_sock, newFdBatch);
-    }
-    if (it->revents & POLLOUT) {
-      handlePollout(it->fd, cMap, listen_sock, newFdBatch);
-    }
-	// serve within this loop or separate loop
-    // CHECK IF CONNECTION SHOULD BE DELETED
-    if (it->fd != listen_sock && cMap.at(it->fd)._delete == true) {
-      close(it->fd);
-      cMap.erase(it->fd);
-      it = fds.erase(it);
+  for (std::vector<pollfd>::iterator it = Fds.begin(); it != Fds.end();) {
+    if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |
+        (it->revents & POLLHUP) | (it->revents & POLLPRI) |
+        (it->revents & POLLRDHUP)) {
+      handleTerminalCondition(it->revents, it->fd, CMap);
     } else {
+      handleServableCondition(ListenSock, it->revents, it->fd, CMap,
+                              newFdBatch);
+    }
+    if (it->fd != ListenSock && CMap.at(it->fd).getDeleteStatus() == true) {
+      close(it->fd);
+      CMap.erase(it->fd);
+      it = Fds.erase(it);
+    } else {
+      if (it->fd != ListenSock) {
+        // cMap.at(it->fd).serve(MAX_REQUEST);
+        CMap.at(it->fd).processData();
+        CMap.at(it->fd).resetConditions();
+	    }
       it++;
     }
   }
-  // double check that conditions are being reset
-  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
+  Fds.insert(Fds.end(), newFdBatch.begin(), newFdBatch.end());
+  newFdBatch.clear();
 }
 
 // acceptConnections() is a a wrapper for accept(), which extracts
@@ -138,11 +131,11 @@ void networking::process(const int listen_sock, std::map<int, Connection> &cMap,
 //
 // RETURNS: fd for new socket
 
-int networking::acceptConnection(const int listen_sock, ClientAddr *candidate) {
+int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate) {
 
-  candidate->clientSock = accept(
-      listen_sock, (struct sockaddr *)&candidate->addr, &candidate->addrSize);
-  if (candidate->clientSock == -1) {
+  Candidate->clientSock = accept(
+      ListenSock, (struct sockaddr *)&Candidate->addr, &Candidate->addrSize);
+  if (Candidate->clientSock == -1) {
     std::ostringstream msg;
     msg << "accept: " << std::strerror(errno)
         << " (can continue trying to accept connections)";
@@ -151,8 +144,8 @@ int networking::acceptConnection(const int listen_sock, ClientAddr *candidate) {
     return (-1);
   }
   logging::log2(logging::Debug, "Connection accepted on socket ",
-                candidate->clientSock);
-  printFcntlFlags(candidate->clientSock);
+                Candidate->clientSock);
+  printFcntlFlags(Candidate->clientSock);
   return (0);
 }
 
@@ -170,8 +163,8 @@ void networking::printFcntlFlags(const int Sock) {
   }
 }
 
-void networking::addConnectionToMap(const struct ClientAddr &candidate,
-                                    std::map<int, Connection> &cMap) {
+void networking::addConnectionToMap(const struct ClientAddr &Candidate,
+                                    std::map<int, Connection> &CMap) {
 
   const Connection newConnection =
       Connection(candidate.clientSock, candidate.addr, candidate.addrSize);

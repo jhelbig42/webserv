@@ -41,8 +41,8 @@ Conditions Response::getConditions(void) const {
 void Response::init(const Request &Req) {
   setDefaults();
 
-  logging::log2(logging::Debug, __func__, " called");
-  if (!Req.isValid()) {
+  logging::log3(logging::Debug, "Response: ", __func__, " called");
+  if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
   }
@@ -129,11 +129,11 @@ static void setMetadata(std::string &Metadata, const int Code,
 }
 
 bool Response::statbufPopulate(const int Code, const char *File,
-                               struct stat &Statbuf) {
+                               struct stat &StatBuf) {
   if (File == NULL)
     return true;
   errno = 0;
-  if (stat(File, &Statbuf) == 0)
+  if (stat(File, &StatBuf) == 0)
     return true;
   if (hasDefaultFile(Code)) {
     logging::log3(logging::Warning, "Code ", Code,

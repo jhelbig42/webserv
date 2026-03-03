@@ -26,9 +26,12 @@ SRC			+= Response.cpp
 SRC			+= ResponseProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
+SRC			+= ParseHeaders.cpp
+SRC			+= ParseRequestLine.cpp
 vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
 vpath %.cpp $(SRC_DIR)/http_headers
+SRC			+= Date.cpp
 SRC			+= HttpHeaders.cpp
 SRC			+= HttpHeadersOutput.cpp
 vpath %.cpp $(SRC_DIR)/connection
