@@ -167,6 +167,6 @@ void networking::addConnectionToMap(const struct ClientAddr &Candidate,
                                     std::map<int, Connection> &CMap) {
 
   const Connection newConnection =
-      Connection(candidate.clientSock, candidate.addr, candidate.addrSize);
-  cMap.insert(std::make_pair(candidate.clientSock, newConnection));
+      Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize);
+  CMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

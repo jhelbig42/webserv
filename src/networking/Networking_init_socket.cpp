@@ -124,13 +124,8 @@ static int bindToIP(const int Sock, const struct addrinfo *p) {
 
   const int ret = bind(Sock, p->ai_addr, p->ai_addrlen);
   if (ret != 0) {
-<<<<<<< config-scanner-experiment
-    close(sock);
-    const std::string msg(gai_strerror(ret));
-=======
     close(Sock);
     std::string msg(gai_strerror(ret));
->>>>>>> main
     logging::log(logging::Info,
                  "bind: " + msg + " will continue trying sockets");
   }

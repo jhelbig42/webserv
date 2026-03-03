@@ -1,18 +1,9 @@
-<<<<<<< config-scanner-experiment
 #include "Scanner.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Networking.hpp"
 #include <unistd.h>
 #include <iostream>
-=======
-#include "Logging.hpp"
-#include "Networking.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
-#include <stdexcept>
-
->>>>>>> main
 
 //#define OFFLINE
 #define PARSING
