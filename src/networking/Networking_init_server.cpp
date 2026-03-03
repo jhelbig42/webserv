@@ -16,16 +16,15 @@
 #include <cstddef> // for NULL
 #include <netdb.h>
 #include <ostream>
-#include <sstream>
+#include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <string>
-#include <cstring>
 
 struct addrinfo *networking::getServerInfo(void);
 static struct addrinfo createHints(void);
 static std::string addrinfoToStr(const struct addrinfo *info,
-                                   const std::string &msg);
+                                 const std::string &msg);
 
 // getServerInfo() creates an addrinfo struct (standard, from <sys/socket.h>)
 // with information about the server's own address & our chosen I/O settings.
@@ -88,7 +87,7 @@ static struct addrinfo createHints(void) {
 // RETURNS: a string with all info to be printed
 
 static std::string addrinfoToStr(const struct addrinfo *info,
-                                   const std::string &msg) {
+                                 const std::string &msg) {
   std::ostringstream oss;
   oss << "\n\t" << msg << "\n"
       << "\tai_flags = " << info->ai_flags << "\n"

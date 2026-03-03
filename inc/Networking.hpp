@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/24 14:33:18 by hallison         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:44:19 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,11 @@ void handlePollnval(int fd, std::map<int, Connection> &c_map);
 void handlePollerr(int fd, std::map<int, Connection> &c_map);
 void handlePollin(int fd, std::map<int, Connection> &c_map,
                    const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+void handlePollout(int fd, std::map<int, Connection> &c_map,
+                   const int &listen_sock, std::vector<pollfd> &new_fd_batch);
+
+// temporary Debug
+// TODO delete or comment out before submission:
+void printFcntlFlags(const int Sock);
+
 } // namespace networking
