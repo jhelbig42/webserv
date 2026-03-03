@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <string>
 #include <sys/types.h>
 
 static const struct {

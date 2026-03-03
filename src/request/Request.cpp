@@ -1,64 +1,69 @@
-#include "Request.hpp"
+#include "Conditions.hpp"
 #include "Logging.hpp"
-#include "NetworkingDefines.hpp"
+#include "Request.hpp"
+#include <string>
+#include <vector>
 
 #define MAX_REQUEST 1024
-// Source - https://stackoverflow.com/a/14266139
-// Posted by Vincenzo Pii, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-02-11, License - CC BY-SA 4.0
 
-// Request::Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid)
-//   : _method(Method), _resource(Resource), _majorVersion(MajorV), _minorVersion(MinorV), _valid(Valid) {}
-
-/**
- * \brief Request Constructor called on given input.
- * This should be used if the status line. Later: called on first buffer.
- * Calls parse() that parses the statusline.
- * Does not need the amount of sent bytes yet, but will likely do so,
- * when the headers are sent and need to be parsed later on.
- * 
- * \return fills the Request attributes. On error _valid attribute will remain false
- */
 
 Request::Request() :
-	ClientHungUp(false),
 	_method(Generic),
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_valid(false)	
+	_state(STATUS_LINE),
+	_conditions (SockRead)
 {}  
 
-void Request::init(std::string input) {
+void Request::init(const std::string &input) {
 	this->parseRequestLine(input);
 }
 
-Request::Request(std::string input)
-	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0), _valid(false)
+void Request::reset() {
+	_method = Generic;
+	_resource = "";
+	_majorVersion = 0; 
+	_minorVersion = 0;
+	_state = STATUS_LINE;
+	_conditions = SockRead;
+}
+
+
+Request::Request(std::string &input)
+	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0)
 {
 	this->parseRequestLine(input);
 }  
-bool Request::process(int Socket)
+
+void Request::process(int Socket)
 {
     readFromSocket(Socket);  // fills _buf
 	while (true)
     {
+		if (_state == CLIENTHUNGUP)
+			return ;
         if (_state == STATUS_LINE)
         {
 			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
             if (!parseRequestLineFromBuffer())
-                return false;
+                return ;
         }
         else if (_state == HEADERS)
         {
 			logging::log(logging::Debug, "Request::process() state is HEADERS");
             if (!parseHeadersFromBuffer())
-                return false;
+                return ;
         }
         else if (_state == COMPLETE)
 		{
 			logging::log(logging::Debug, "Request::process() state is COMPLETE");
-    		return true;
+    		return ;
+		}
+		else if (_state == INVALID)
+		{
+			logging::log(logging::Debug, "Request::process() state is INVALID");
+    		return ;
 		}
     }
 }
@@ -75,14 +80,13 @@ std::vector<std::string> split(const std::string& S, const std::string& Delimite
 		last = next + Delimiter.length();
     }
     tokens.push_back(S.substr(last)); 
-	logging::log(logging::Debug, "parse status_line: split Successfull");
+	logging::log(logging::Debug, "split Successfull");
     return tokens;
 }
 
 void Request::readFromSocket(int Fd){
 	logging::log(logging::Debug, "readFromSocket() starts");
 	const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
-  //recv(_sock, &_readBuf, MAX_REQUEST, 0);
 
 	if (bytesRead == MAX_REQUEST) {
     	logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
@@ -91,21 +95,17 @@ void Request::readFromSocket(int Fd){
   	}
   	if (bytesRead == 0) {
     	logging::log(logging::Warning, "read_data(): bytes_read == 0");
-		ClientHungUp = true; //into conditions?
+		_state = CLIENTHUNGUP;
     	logging::log(logging::Warning, "client appears to have hung up.");
     	return;
   	}
   	if (bytesRead < 0) {
-    	std::ostringstream msg;
     	logging::log(logging::Warning, "buf.fill() not successful");
     	return;
  	}
   	logging::log(logging::Debug, "readFromSocket() done");
 }
 
-bool Request::isValid() const {
-	return _valid;
-}
 
 size_t Request::getMajorV() const {
 	return _majorVersion;
@@ -121,10 +121,6 @@ const std::string &Request::getResource() const {
 
 HttpMethod Request::getMethod() const {
 	return _method;
-}
-
-bool Request::isFullyParsed(void) const {
-	return _fullyParsed;
 }
 
 Conditions Request::getConditions(void) const {

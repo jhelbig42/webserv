@@ -4,12 +4,12 @@
 #include "Conditions.hpp"
 #include "Logging.hpp"
 #include "HttpHeaders.hpp"
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include <stdexcept>
-#include <iostream>
-#include <stdlib.h>
-#include <sstream>
 
 typedef enum {
   Generic,
@@ -22,56 +22,62 @@ typedef enum {
 typedef enum  {
     STATUS_LINE,
     HEADERS,
-    COMPLETE
+    COMPLETE,
+	INVALID,
+	CLIENTHUNGUP
 } ParseState;
 
 
 class Request {
 	public:
+
+
+/// called on initialisation of Connection.
 		Request();
 		// request(const request&);
 		// request& operator=(const request&);
 		// ~request();
     	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
-		explicit Request(std::string input);
-		void init(std::string input);
-    	
-		bool process(const int Socket);
+		
+		explicit Request(std::string &input); //just used in test main
+		void init(const std::string &input); // to be removed
+
+/// \brief Resets to default values to be ready for new Request
+/// Just neccessarry if Connection is kept alive
+		void reset( void );
+
+/// \brief process() handles reading from socket into Request and parsing until the Request is complete
+/// A Request is considered complete, when the StatusLine and Headers are read.
+/// This is the case when "\r\n\r\n" is found.
+		void process(const int Socket);
 		void readFromSocket(int Fd);
-		bool ClientHungUp;
 		
 		bool parseRequestLineFromBuffer();
-		void parseRequestLine(std::string StatusLine);
-		void parseMethod(std::string Token);
-		void parseResource(std::string Token);
-		void parseHttp(std::string Token);
-
+		void parseRequestLine(const std::string &RequestLine);
+		void parseMethod(const std::string &Token);
+		void parseResource(const std::string &Token);
+		void parseHttp(const std::string &Token);
 
 		bool parseHeadersFromBuffer();
-		void parseHeader(std::string headerLine);
+		void parseHeader(const std::string &headerLine);
 		
 		Conditions getConditions(void) const;
 
 		ParseState	getState() const;
-		bool		isValid() const;
 		size_t		getMajorV() const;
 		size_t		getMinorV() const;
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
-		bool		isFullyParsed() const;
 
 	private:
 		HttpMethod	_method;
 		std::string _resource;
 		size_t		_majorVersion;
 		size_t		_minorVersion;
-		bool		_valid; // can this go into state as well?
 		Conditions	_conditions;
-		bool		_fullyParsed; //likely obsolete as caught by _state --> TO DO delete
 		Buffer		_buf;
 		ParseState	_state;
-		HttpHeaders	_headers;
-		
+		HttpHeaders	_headers;	
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

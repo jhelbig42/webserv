@@ -66,33 +66,34 @@ void Connection::scheduleForDemolition(void) {
 // Send & Receive
 //processData is a smaller type of serve() until conditions are fully implemented
 void Connection::processData(void) {
-	if(_req.getState() != COMPLETE)
+	if( (_conditionsFulfilled & _req.getConditions()) 
+		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	
-	if (_req.ClientHungUp){
-		scheduleForDemolition(); // this does not result in deletion
-							// of Connection yet --> Hilary?
+	if (_req.getState() == CLIENTHUNGUP){
+		scheduleForDemolition();
 		return ;
 	};
-		 
 	//parsing from buffer into Request
-	//when fully parsed init response 
-	if(_req.getState() == COMPLETE)
+	//when fully parsed init response
+	//Response will set its conditions 
+	if(_req.getState() == COMPLETE || _req.getState() == INVALID)
 	{
 		_res.init(_req);
+		_req.reset();
 		int dummy = -1;
 		while (!_res.process(_sock, dummy, BYTES_PER_CHUNK))
   			 ;	}
-	if (_req.ClientHungUp){
-		scheduleForDemolition(); // this does not result in deletion
-							// of Connection yet --> Hilary?
-		return ;
+		
+		if (_req.getState() == CLIENTHUNGUP){
+			scheduleForDemolition();
+			return ;
 	};
 }
 
 bool Connection::serve(const size_t Bytes) {
   //handle Request until fully parsed
-	if (_req.getState() == COMPLETE) {
+	if (_req.getState() != COMPLETE) {
 		if (_conditionsFulfilled & _req.getConditions())
 			_req.process(_sock);
 		if (_req.getState() == COMPLETE)
