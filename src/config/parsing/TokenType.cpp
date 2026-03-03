@@ -89,7 +89,8 @@ static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It) {
   if (Keyword.length() > static_cast<std::string::size_type>(Str.end() - It))
     return false;
-  if (Str.compare(static_cast<std::string::size_type>(It - Str.begin()), Keyword.length(), Keyword))
+  if (Str.compare(static_cast<std::string::size_type>(It - Str.begin()),
+                  Keyword.length(), Keyword))
     return false;
   It += static_cast<std::string::difference_type>(Keyword.length());
   return true;

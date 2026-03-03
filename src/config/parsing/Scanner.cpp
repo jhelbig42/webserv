@@ -22,8 +22,8 @@ size_t Token::getLine(void) const {
 }
 
 Scanner::~Scanner() {
-  for (std::list<const Token *>::iterator it = _tokens.begin(); it != _tokens.end();
-       ++it)
+  for (std::list<const Token *>::iterator it = _tokens.begin();
+       it != _tokens.end(); ++it)
     delete *it;
 }
 
