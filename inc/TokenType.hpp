@@ -19,12 +19,6 @@ struct TokenType {
 
   typedef enum { Special, SingleChar, Charset, Keyword } Category;
 
-  const std::string identifier;
-  const std::string keyword;
-  const char *charset;
-  const Type type;
-  const Category category;
-  const char singleChar;
 
   bool matchType(const std::string &Str, const std::string::const_iterator It,
                  std::string::const_iterator &ItNew) const;
@@ -37,4 +31,11 @@ struct TokenType {
 
   static bool isType(const Type Type, const std::string &Str,
                      std::string::const_iterator It);
+
+  const std::string identifier;
+  const std::string keyword;
+  const char *charset;
+  const Type type;
+  const Category category;
+  const char singleChar;
 };

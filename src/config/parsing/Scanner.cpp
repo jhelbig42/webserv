@@ -22,7 +22,7 @@ size_t Token::getLine(void) const {
 }
 
 Scanner::~Scanner() {
-  for (std::list<Token *>::iterator it = _tokens.begin(); it != _tokens.end();
+  for (std::list<const Token *>::iterator it = _tokens.begin(); it != _tokens.end();
        ++it)
     delete *it;
 }
@@ -47,12 +47,12 @@ Scanner::Scanner(const char *File) {
 }
 
 void Scanner::addEof(const size_t Line) {
-  Token *const tkn = new Token(Line, TokenType::Eof);
+  const Token *const tkn = new Token(Line, TokenType::Eof);
   _tokens.push_back(tkn);
 }
 
 void Scanner::addNewline(const size_t Line) {
-  Token *const tkn = new Token(Line, TokenType::Newline);
+  const Token *const tkn = new Token(Line, TokenType::Newline);
   _tokens.push_back(tkn);
 }
 
@@ -60,7 +60,7 @@ void Scanner::scanLine(const size_t Number, const std::string &Str) {
   std::string::const_iterator it = Str.begin();
   std::string::const_iterator itTmp;
   while (it != Str.end()) {
-    Token *tkn = new Token(Number, Str, it, itTmp);
+    const Token *const tkn = new Token(Number, Str, it, itTmp);
     _tokens.push_back(tkn);
     it = itTmp;
   }
@@ -68,8 +68,8 @@ void Scanner::scanLine(const size_t Number, const std::string &Str) {
 
 std::ostream &operator<<(std::ostream &Os, const Scanner &Scan) {
   size_t line = 0;
-  for (std::list<Token *>::const_iterator it = Scan._tokens.begin();
-       it != Scan._tokens.end(); ++it) {
+  for (std::list<const Token *>::const_iterator it = Scan.getTokens().begin();
+       it != Scan.getTokens().end(); ++it) {
     if ((**it).getLine() > line) {
       line = (**it).getLine();
       Os << "\n########### Line " << line << " ###########\n";
@@ -77,4 +77,8 @@ std::ostream &operator<<(std::ostream &Os, const Scanner &Scan) {
     Os << **it;
   }
   return Os;
+}
+
+const std::list<const Token *> &Scanner::getTokens(void) const {
+  return _tokens;
 }

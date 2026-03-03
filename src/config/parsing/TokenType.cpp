@@ -13,7 +13,8 @@ static bool isKeyword(const std::string &Keyword, const std::string &Str,
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
 static const TokenType globalTokenTypes[] = {
-    {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name, TokenType::Charset, 0},
+    {"Name", "", "abcdefghijklmnopqrstuvwxyz", TokenType::Name,
+     TokenType::Charset, 0},
     {"Number", "", "0123456789", TokenType::Number, TokenType::Charset, 0},
     {"Semicolon", "", NULL, TokenType::Semicolon, TokenType::SingleChar, ';'},
     {"BracesLeft", "", NULL, TokenType::BracesLeft, TokenType::SingleChar, '{'},

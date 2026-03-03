@@ -1,14 +1,14 @@
-config				= { sep } expression { { sep } expression } { sep }
+config				  = { sep } expression { { sep } expression } { sep }
 
 sep		      		= newline | ws
 newline     		= "\n"
-ws					= wschar { wschar }
-wschar         		= " " | "\t"
+ws					    = wschar { wschar }
+wschar         	= " " | "\t"
 
 expression  		= general | server
 
-general     		= backlog
-            		= max_req_body_size
+general     		= backlog ";"
+            		= max_req_body_size ";"
 
 server      		= "server" { sep } "{" { sep } entries { sep } "}"
 
@@ -20,10 +20,10 @@ listen      		= "listen" ws { ws } listen_val
 listen_val  		= (ip | "*") ":" (port | "*")
 ip          		= ipv4 | ipv6
 ipv4        		= uint8 "." uint8 "." uint8 "." uint8 
-uint8				= ? n such that: 0 <= n && n <= 255 ?
+uint8				    = ? n such that: 0 <= n && n <= 255 ?
 ipv6        		= DUMMY
 port        		= uint16
-uint16				= ? n such that: 0 <= n && n <= 65535 ?
+uint16				  = ? n such that: 0 <= n && n <= 65535 ?
 
 root        		= "root" ws { ws } root_val
 root_val    		= abspath
@@ -31,20 +31,20 @@ abspath     		= "/" *(+pathchar "/")
 
 allowed     		= "allowed" ws { ws } allowed_val
 allowed_val 		= "*" | methods
-methods				= method { ws { ws } method }
+methods				  = method { ws { ws } method }
 method      		= "POST" | "GET" | "PUT" | "DELETE" | "HEAD"
 
 index       		= "index" ws { ws } name { ws { ws } name }
 
 directory_listing	= "directory-listing" ws { ws } boolean
-boolean				= "true" | "false"
+boolean				  = "true" | "false"
 
 max_req_body_size	= "max-req-body-size" ws { ws } off_t
-off_t				= ? n such that: _1 <= n && n <= OFF_T_MAX ?
+off_t				    = ? n such that: _1 <= n && n <= OFF_T_MAX ?
 
-backlog				= "backlog" ws { ws } int_non_negative
+backlog				  = "backlog" ws { ws } int_non_negative
 int_non_negative
-					= ? n such that: 0 <= n && n <= INT_MAX ?
+					      = ? n such that: 0 <= n && n <= INT_MAX ?
 
 redirect			= "redirect" ws { ws } redirect_scope { sep } "{" { sep } redirect_rules { sep } "}"
 
