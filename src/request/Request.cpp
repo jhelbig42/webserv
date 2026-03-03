@@ -12,7 +12,8 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_state(STATUS_LINE)
+	_state(STATUS_LINE),
+	_conditions (SockRead)
 {}  
 
 void Request::init(const std::string &input) {
@@ -25,6 +26,7 @@ void Request::reset() {
 	_majorVersion = 0; 
 	_minorVersion = 0;
 	_state = STATUS_LINE;
+	_conditions = SockRead;
 }
 
 
@@ -33,29 +35,35 @@ Request::Request(std::string &input)
 {
 	this->parseRequestLine(input);
 }  
-bool Request::process(int Socket)
+
+void Request::process(int Socket)
 {
     readFromSocket(Socket);  // fills _buf
 	while (true)
     {
 		if (_state == CLIENTHUNGUP)
-			return (false);
+			return ;
         if (_state == STATUS_LINE)
         {
 			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
             if (!parseRequestLineFromBuffer())
-                return false;
+                return ;
         }
         else if (_state == HEADERS)
         {
 			logging::log(logging::Debug, "Request::process() state is HEADERS");
             if (!parseHeadersFromBuffer())
-                return false;
+                return ;
         }
         else if (_state == COMPLETE)
 		{
 			logging::log(logging::Debug, "Request::process() state is COMPLETE");
-    		return true;
+    		return ;
+		}
+		else if (_state == INVALID)
+		{
+			logging::log(logging::Debug, "Request::process() state is INVALID");
+    		return ;
 		}
     }
 }

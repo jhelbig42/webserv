@@ -46,8 +46,10 @@ class Request {
 /// Just neccessarry if Connection is kept alive
 		void reset( void );
 
-///    	
-		bool process(const int Socket);
+/// \brief process() handles reading from socket into Request and parsing until the Request is complete
+/// A Request is considered complete, when the StatusLine and Headers are read.
+/// This is the case when "\r\n\r\n" is found.
+		void process(const int Socket);
 		void readFromSocket(int Fd);
 		
 		bool parseRequestLineFromBuffer();

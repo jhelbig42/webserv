@@ -57,15 +57,13 @@ void Request::parseHttp(const std::string &Token)
 }
 
 
-/**
- * \brief Parses the status line to construct a Request instance. 
- * On any invalid syntax within the status line Request remains invalid. 
- * So before generating a Response, it shall be checked if the Request is valid at all. 
- * 
- * \returns nothing. On success Request instance will be initialized with _valid set to true. On error _valid will remain false.
- * 
- * \param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
- */
+///
+///\brief Parses the status line to construct a Request instance. 
+///On any invalid syntax within the status line Request is set to be INVALID. 
+///Otherwise, when a
+/// 
+///\param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
+///
 void Request::parseRequestLine(const std::string &RequestLine)
 {
 	logging::log(logging::Debug, "parseStatusLine()");
@@ -81,7 +79,7 @@ void Request::parseRequestLine(const std::string &RequestLine)
 		parseMethod(status[0]);
 		parseResource(status[1]);
 		parseHttp(status[2]);
-		_state = COMPLETE;
+		_state = HEADERS;
 		return;
 	}
 	catch (std::exception &e)

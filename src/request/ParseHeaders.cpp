@@ -21,13 +21,13 @@ bool Request::parseHeadersFromBuffer()
         return true;
     }
     const std::string headerLine = s.substr(0, pos);
-
     parseHeader(headerLine);
 	_buf.deleteFront(pos + 2);
 	if (_state == INVALID)
 		return false;
     return true;
 }
+
 // RFC: 
 // Each header field consists
  //  of a name followed immediately by a colon (":"), a single space (SP)
