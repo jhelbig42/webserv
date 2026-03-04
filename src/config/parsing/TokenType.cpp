@@ -9,6 +9,7 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It);
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It);
+static bool isReserved(const std::string &word);
 
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
@@ -79,9 +80,21 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It) {
   if (!strchr(Charset.c_str(), *It))
     return false;
+  const std::string::const_iterator itDup = It;
   while (It != Str.end() && strchr(Charset.c_str(), *It))
     ++It;
+  const std::string word(itDup, It);
+  if (isReserved(word))
+    return false;
   return true;
+}
+
+static bool isReserved(const std::string &word) {
+  for (size_t i = 0; i != globalTokenTypesSize; ++i) {
+    if (globalTokenTypes[i].category == TokenType::Keyword && word == globalTokenTypes[i].tokenStr)
+      return true;
+  }
+  return false;
 }
 
 static bool isKeyword(const std::string &Keyword, const std::string &Str,

@@ -4,6 +4,14 @@
 #include <ostream>
 #include <string>
 
+const TokenType &Token::getType(void) const {
+  return _type;
+}
+
+const std::string &Token::getLexeme(void) const {
+  return _lexeme;
+}
+
 Token::Token(const size_t Line, const std::string &Str,
              const std::string::const_iterator It,
              std::string::const_iterator &ItNew)

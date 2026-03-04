@@ -9,14 +9,6 @@
 #include <stdexcept>
 #include <string>
 
-const TokenType &Token::getType(void) const {
-  return _type;
-}
-
-const std::string &Token::getLexeme(void) const {
-  return _lexeme;
-}
-
 size_t Token::getLine(void) const {
   return _line;
 }

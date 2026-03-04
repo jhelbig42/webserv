@@ -66,14 +66,45 @@ bool Config::match(TokenType::Type Type) {
 }
 
 void Config::addEntry(Website &site) {
+  Listen interface;
   if (match(TokenType::Listen)) {
     if (!sep())
       throw std::runtime_error("unexpected token");
     skipSep();
-    addIp(site);
+    addIpv4(interface);
     if (!match(TokenType::Colon))
       throw std::runtime_error("unexpected token");
-    addPort(site);
+    addPort(interface);
+    site.addInterface(interface);
   }
   throw std::runtime_error("invalid entry");
+}
+
+void Config::addIpv4(Listen &interface) {
+  try {
+    interface.ip = matchGetLexeme(TokenType::Number);
+    interface.ip += matchGetLexeme(TokenType::Dot);
+    interface.ip += matchGetLexeme(TokenType::Number);
+    interface.ip += matchGetLexeme(TokenType::Dot);
+    interface.ip += matchGetLexeme(TokenType::Number);
+    interface.ip += matchGetLexeme(TokenType::Dot);
+    interface.ip += matchGetLexeme(TokenType::Number);
+  } catch (...) {
+    throw std::runtime_error("invalid ipv4");
+  }
+}
+
+const std::string &Config::matchGetLexeme(TokenType::Type Type) {
+  std::string::const_iterator itDup = _it;
+  if (!match(Type))
+    throw std::runtime_error("unexpected token");
+  return itDup->_lexeme;
+}
+
+void Config::addPort(Listen &interface) {
+  try {
+    interface.ip = matchGetLexeme(TokenType::Number);
+  } catch (...) {
+    throw std::runtime_error("invalid ipv4");
+  }
 }
