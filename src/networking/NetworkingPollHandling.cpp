@@ -176,10 +176,10 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
 // 		Writing is now possible.
 
 void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
-  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
+  //logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = CMap.find(Fd);
   if (itC != CMap.end()) {
-    logging::log2(logging::Debug, "Ready to send to ", Fd);
+    //logging::log2(logging::Debug, "Ready to send to ", Fd);
     (itC->second).addToConditions(SockWrite);
   } else {
     logging::log(logging::Error, "process: Connection not found in map "

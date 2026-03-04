@@ -67,7 +67,7 @@ void networking::pollLoop(const int Sock) {
     const int res =
         poll(fds.data(), (nfds_t)fds.size(),
              -1); // without restriction to fds.size this cast is unsafe
-    logging::log(logging::Debug, "poll()");
+    //logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
       msg << "poll: " << std::strerror(errno);
@@ -96,7 +96,7 @@ void networking::pollLoop(const int Sock) {
 void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
                          std::vector<pollfd> &Fds) {
 
-  logging::log(logging::Debug, "Networking::Process()\n");
+  //logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = Fds.begin(); it != Fds.end();) {
     if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |

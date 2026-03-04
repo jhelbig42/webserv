@@ -66,6 +66,8 @@ void Reaction::initMethod(const Request &Req) {
     initDelete(Req);
     return;
   case Post:
+	initPost(Req);
+	return;
   case Generic:
     initSendFile(CODE_501, FILE_501);
     return;

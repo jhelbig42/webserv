@@ -49,6 +49,7 @@ private:
   void initMethod(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(const Request &Req);
+  void initPost(const Request &Req);
 
   Conditions _conditions;
 
