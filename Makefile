@@ -89,8 +89,7 @@ DOXYGEN		:= doxygen
 DOXY_TIMESTAMP := $(DOXY_DIR)/.done
 
 # options
-DEV			:= 1
-ifeq ($(DEV), 1)
+ifneq ($(DEV), 0)
 	ASAN		:= 1
 	UBSAN		:= 1
 	DEBUG		:= 1
