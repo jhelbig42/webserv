@@ -32,9 +32,7 @@ struct TokenType {
                      std::string::const_iterator It);
 
   const std::string identifier;
-  const std::string keyword;
-  const char *charset;
+  const std::string tokenStr;
   const Type type;
   const Category category;
-  const char singleChar;
 };
