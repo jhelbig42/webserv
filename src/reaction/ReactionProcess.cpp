@@ -60,7 +60,7 @@ static bool stringToSocket(const int Socket, std::string &Str,
 bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes) {
   (void)ForwardSocket;
-  if (_ptype == SendFile)
+  if (_processType == SendFile)
     return sendFile(Socket, Bytes);
   throw std::runtime_error("Unknown process type");
 }

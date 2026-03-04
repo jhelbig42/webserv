@@ -8,6 +8,7 @@
 // think about body is coming in chunks
 // maybe Reaction also needs state
 void Reaction::initPost(const Request &Req){
+	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
 	//check if method is allowed -> config file
 		//initSendFile(CODE_501, FILE_501);
 	//check content-length header is present --> BadRequest
@@ -17,6 +18,8 @@ void Reaction::initPost(const Request &Req){
 		return;
 	}
 	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
+	_contLenReq = Req.getHeaders().getContentLength();
+
 	//copy buffer if still in buffer
 	//create requested file with write access
 	
