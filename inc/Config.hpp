@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Logging.hpp"
+#include "TokenType.hpp"
 #include <string>
 
 namespace config {
@@ -16,6 +17,7 @@ public:
   const Website &getWebsites(void) const;
 
 private:
+  bool match(TokenType::Type Type);
   Website expression(void);
   Website server(void);
   Scanner _scan;
