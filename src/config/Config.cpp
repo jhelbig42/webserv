@@ -25,7 +25,11 @@ Config::Config(const char *File) : _scan(File) {
   while (true) {
     while (sep())
       ;
-    _websites.push_back(server());
+    try {
+      _websites.push_back(server());
+    } catch (...) {
+      break;
+    }
   }
 }
 
@@ -77,7 +81,8 @@ void Config::addEntry(Website &site) {
     addPort(interface);
     site.addInterface(interface);
   }
-  throw std::runtime_error("invalid entry");
+  else
+    throw std::runtime_error("invalid entry");
 }
 
 void Config::addIpv4(Listen &interface) {
@@ -95,10 +100,10 @@ void Config::addIpv4(Listen &interface) {
 }
 
 const std::string &Config::matchGetLexeme(TokenType::Type Type) {
-  std::string::const_iterator itDup = _it;
+  std::list<Token>::const_iterator itDup = _it;
   if (!match(Type))
     throw std::runtime_error("unexpected token");
-  return itDup->_lexeme;
+  return itDup->getLexeme();
 }
 
 void Config::addPort(Listen &interface) {
@@ -112,10 +117,11 @@ void Config::addPort(Listen &interface) {
 std::ostream &operator<<(std::ostream &Os, const Config &Conf) {
   std::list<Website>::const_iterator it = Conf.getWebsites().begin();
   while (it != Conf.getWebsites().end()) {
-    Os << *it << '\n';
+    Os << *it++ << '\n';
   }
+  return Os;
 }
 
-const std::list<Website> &getWebsites(void) const {
+const std::list<Website> &Config::getWebsites(void) const {
   return _websites;
 }

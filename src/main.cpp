@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
     return 1;
   const Config conf(argv[1]);
   std::cout << conf;
+  // const Scanner scan(argv[1]);
+  // std::cout << scan;
   return 0;
 }
 

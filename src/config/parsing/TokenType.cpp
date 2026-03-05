@@ -18,6 +18,7 @@ static const TokenType globalTokenTypes[] = {
      TokenType::Charset},
     {"Number", "0123456789", TokenType::Number, TokenType::Charset},
     {"Semicolon", ";", TokenType::Semicolon, TokenType::SingleChar},
+    {"Dot", ".", TokenType::Dot, TokenType::SingleChar},
     {"BracesLeft", "{", TokenType::BracesLeft, TokenType::SingleChar},
     {"BracesRight", "}", TokenType::BracesRight, TokenType::SingleChar},
     {"Colon", ":", TokenType::Colon, TokenType::SingleChar},
