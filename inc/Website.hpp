@@ -5,6 +5,7 @@
 #include <ostream>
 
 struct Listen {
+  bool operator==(const Listen &other) const;
   std::string ip;
   std::string port;
 };
@@ -17,7 +18,7 @@ public:
   ~Website();
 
   Website(std::list<Token>::const_iterator It);
-  void addInterface(Listen &Interface);
+  void addInterface(Listen &If);
   const std::list<Listen> &getInterfaces(void) const;
 
 private:

@@ -1,4 +1,6 @@
 #include "Website.hpp"
+#include <algorithm>
+#include <list>
 
 Website::Website(void) {
 }
@@ -17,8 +19,13 @@ Website &Website::operator=(const Website &other) {
 Website::~Website(void) {
 }
 
-void Website::addInterface(Listen &Interface) {
-  _interfaces.push_back(Interface);
+void Website::addInterface(Listen &If) {
+  if (std::find(_interfaces.begin(), _interfaces.end(), If) == _interfaces.end())
+    _interfaces.push_back(If);
+}
+
+bool Listen::operator==(const Listen &other) const {
+  return ip == other.ip && port == other.port;
 }
 
 const std::list<Listen> &Website::getInterfaces(void) const {
