@@ -11,8 +11,10 @@ struct TokenType {
     BracesRight,
     Dot,
     Asterisk,
+    Colon,
     Server,
     Whitespace,
+    Listen,
     Number,
     Name
   } Type;

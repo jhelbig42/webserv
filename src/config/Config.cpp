@@ -21,7 +21,7 @@ bool config::logColored(void) {
 }
 
 Config::Config(const char *File) : _scan(File) {
-  _it = firstToken();
+  _it = _scan.firstToken();
   while (true) {
     while (sep())
       ;
@@ -49,7 +49,7 @@ Website Config::server(void) {
 }
 
 bool Config::sep(void) {
-  return match(TokenType::Newline || match(TokenType::Whitespace));
+  return match(TokenType::Newline) || match(TokenType::Whitespace);
 }
 
 void Config::skipSep(void) {
@@ -58,7 +58,7 @@ void Config::skipSep(void) {
 }
 
 bool Config::match(TokenType::Type Type) {
-  if (_it->_type.type == Type) {
+  if (_it->getType().type == Type) {
     ++_it;
     return true;
   }
@@ -107,4 +107,15 @@ void Config::addPort(Listen &interface) {
   } catch (...) {
     throw std::runtime_error("invalid ipv4");
   }
+}
+
+std::ostream &operator<<(std::ostream &Os, const Config &Conf) {
+  std::list<Website>::const_iterator it = Conf.getWebsites().begin();
+  while (it != Conf.getWebsites().end()) {
+    Os << *it << '\n';
+  }
+}
+
+const std::list<Website> &getWebsites(void) const {
+  return _websites;
 }

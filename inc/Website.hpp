@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Token.hpp"
+#include <list>
+#include <ostream>
 
 struct Listen {
   std::string ip;
@@ -15,8 +17,12 @@ public:
   ~Website();
 
   Website(std::list<Token>::const_iterator It);
-  void setIp(const std::string &Ip);
+  void addInterface(Listen &Interface);
+  const std::list<Listen> &getInterfaces(void) const;
 
 private:
   std::list<Listen> _interfaces; 
 };
+
+std::ostream &operator<<(std::ostream &Os, const Listen &If);
+std::ostream &operator<<(std::ostream &Os, const Website &site);

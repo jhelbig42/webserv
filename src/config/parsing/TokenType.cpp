@@ -20,7 +20,9 @@ static const TokenType globalTokenTypes[] = {
     {"Semicolon", ";", TokenType::Semicolon, TokenType::SingleChar},
     {"BracesLeft", "{", TokenType::BracesLeft, TokenType::SingleChar},
     {"BracesRight", "}", TokenType::BracesRight, TokenType::SingleChar},
+    {"Colon", ":", TokenType::Colon, TokenType::SingleChar},
     {"Server", "server", TokenType::Server, TokenType::Keyword},
+    {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
     {"Newline", "", TokenType::Newline, TokenType::Special}};

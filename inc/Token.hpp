@@ -19,7 +19,6 @@ public:
   const TokenType &getType(void) const;
   const std::string &getLexeme(void) const;
   size_t getLine(void) const;
-  // const Data &getData(void) const;
 
 private:
   const size_t _line;
