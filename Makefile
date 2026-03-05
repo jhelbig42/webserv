@@ -112,6 +112,7 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
 	CXXFLAGS += -fstandalone-debug
+	CPPFLAGS += -O0
 	CPPFLAGS += -g3
 	CPPFLAGS += -fstandalone-debug
 endif

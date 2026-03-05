@@ -6,7 +6,7 @@
 
 struct Listen {
   std::string ip;
-  unsigned int port;
+  std::string port;
 };
 
 class Website {

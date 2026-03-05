@@ -3,6 +3,7 @@
 #include "ConfigDefaults.hpp"
 #include "Logging.hpp"
 #include <string>
+#include <iostream>
 
 /// \var static logging::LogLevel globalLogLevel
 /// \brief defines the lowest log severity that is still printed
@@ -108,7 +109,7 @@ const std::string &Config::matchGetLexeme(TokenType::Type Type) {
 
 void Config::addPort(Listen &interface) {
   try {
-    interface.ip = matchGetLexeme(TokenType::Number);
+    interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
     throw std::runtime_error("invalid ipv4");
   }

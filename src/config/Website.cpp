@@ -3,12 +3,13 @@
 Website::Website(void) {
 }
 
-Website::Website(const Website &other) {
-  (void)other;
+Website::Website(const Website &other)
+  : _interfaces(other._interfaces) {
 }
 
 Website &Website::operator=(const Website &other) {
   if (this != &other) {
+    _interfaces = other._interfaces;
   }
   return *this;
 }
