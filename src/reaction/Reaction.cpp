@@ -53,10 +53,14 @@ void Reaction::init(const Request &Req) {
   }
 
   // TODO: make more generic
+  /*
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
     initSendFile(CODE_501, FILE_501);
     return;
   }
+  */ // commenting out because we need to allow 1.1 requests
+  // and can response with 1.0
+  //
   //check if method is allowed in comparison to config
 
   initMethod(Req);
