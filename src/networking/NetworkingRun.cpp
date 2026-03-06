@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/06 14:38:45 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:59:32 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,20 +113,9 @@ void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
       it = Fds.erase(it);
     } else {
       if (it->fd != ListenSock) {
-        // cMap.at(it->fd).serve(MAX_REQUEST);
         CMap.at(it->fd).processData();
-	
-		/*
-		// add POLLOUT to events
-		if (CMap.at(it->fd)._react.getConditions() & SockWrite){
-			it->events = it->events | POLLOUT;
-		}
-		else {
-			it->events = POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
-		}
-        */
 		CMap.at(it->fd).resetConditions();
-	    }
+	  }
       it++;
     }
   }

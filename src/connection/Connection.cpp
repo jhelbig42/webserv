@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/06 14:43:51 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:55:54 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ void Connection::processData(void) {
 		int dummy = -1;
 		
 		if (_react.process(_sock, dummy, BYTES_PER_CHUNK) == true){
+
+			logging::log(logging::Debug, "finished writing to client");
 			scheduleForDemolition();
 			// close after finishing writing greatly simplifies
 			// polling & is consistent with HTTP 1.0
