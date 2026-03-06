@@ -10,7 +10,8 @@ SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
-SRC			+= Config.cpp
+SRC			+= ConfigGlobals.cpp
+SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp

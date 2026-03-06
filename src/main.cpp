@@ -35,8 +35,11 @@ int main(void) {
 int main(int argc, char **argv) {
   if (argc != 2)
     return 1;
-  const Config conf(argv[1]);
-  std::cout << conf;
+  try {
+    const Config conf(argv[1]);
+    std::cout << conf;
+  } catch (...) {
+  }
   // const Scanner scan(argv[1]);
   // std::cout << scan;
   return 0;

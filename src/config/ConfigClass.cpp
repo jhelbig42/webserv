@@ -1,53 +1,40 @@
 #include "Config.hpp"
-
 #include "ConfigDefaults.hpp"
 #include "Logging.hpp"
 #include <string>
 #include <iostream>
 
-/// \var static logging::LogLevel globalLogLevel
-/// \brief defines the lowest log severity that is still printed
-static logging::LogLevel globalLogLevel = LOG_LEVEL;
-
-/// \var static bool globalLogColored
-/// \brief defines if log messages are colored
-static bool globalLogColored = LOG_COLORED;
-
-logging::LogLevel config::logLevel(void) {
-  return globalLogLevel;
-}
-
-bool config::logColored(void) {
-  return globalLogColored;
-}
-
-Config::Config(const char *File) : _scan(File) {
+// class Config
+Config::Config(const char *File) : _scan(File), _line(1) {
   _it = _scan.firstToken();
   while (true) {
     while (sep())
       ;
+    if (match(TokenType::Eof))
+      break;
     try {
       _websites.push_back(server());
-    } catch (...) {
-      break;
+    } catch (const std::exception &e) {
+      std::cerr << __func__ << ": " << e.what() << '\n';
+      throw std::exception();
     }
   }
 }
 
 Website Config::server(void) {
   if (!match(TokenType::Server))
-    throw std::runtime_error("unexpected token");
+    throwTokenError();
   while (sep())
     ;
   if (!match(TokenType::BracesLeft))
-    throw std::runtime_error("unexpected token");
+    throwTokenError();
   Website newWebsite;
   while (!match(TokenType::BracesRight)) {
     skipSep();
     addEntry(newWebsite);
     skipSep();
     if (!match(TokenType::Semicolon))
-      throw std::runtime_error("unexpected token");
+      throwTokenError();
     skipSep();
   }
   return newWebsite;
@@ -65,6 +52,8 @@ void Config::skipSep(void) {
 bool Config::match(TokenType::Type Type) {
   if (_it->getType().type == Type) {
     ++_it;
+    if (Type == TokenType::Newline)
+      ++_line;
     return true;
   }
   return false;
@@ -74,16 +63,22 @@ void Config::addEntry(Website &site) {
   Listen interface;
   if (match(TokenType::Listen)) {
     if (!sep())
-      throw std::runtime_error("unexpected token");
+      throwTokenError();
     skipSep();
     addIpv4(interface);
     if (!match(TokenType::Colon))
-      throw std::runtime_error("unexpected token");
+      throwTokenError();
     addPort(interface);
     site.addInterface(interface);
   }
   else
-    throw std::runtime_error("invalid entry");
+    throwTokenError();
+}
+
+void Config::throwTokenError(void) {
+  std::ostringstream oss;
+  oss << "Unexpected token in line " << _line << ": `" << _it->getLexeme() << '\'';
+  throw std::runtime_error(oss.str());
 }
 
 void Config::addIpv4(Listen &interface) {
@@ -96,14 +91,14 @@ void Config::addIpv4(Listen &interface) {
     interface.ip += matchGetLexeme(TokenType::Dot);
     interface.ip += matchGetLexeme(TokenType::Number);
   } catch (...) {
-    throw std::runtime_error("invalid ipv4");
+    throwTokenError();
   }
 }
 
 const std::string &Config::matchGetLexeme(TokenType::Type Type) {
   std::list<Token>::const_iterator itDup = _it;
   if (!match(Type))
-    throw std::runtime_error("unexpected token");
+    throwTokenError();
   return itDup->getLexeme();
 }
 
@@ -111,7 +106,7 @@ void Config::addPort(Listen &interface) {
   try {
     interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
-    throw std::runtime_error("invalid ipv4");
+    throwTokenError();
   }
 }
 

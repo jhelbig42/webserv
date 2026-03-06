@@ -13,22 +13,31 @@ bool logColored(void);
 
 } // namespace config
 
+/// \brief object which holds most of the HTTP configuration
 class Config {
 public:
   Config(const char *File);
   const std::list<Website> &getWebsites(void) const;
 
 private:
-  void addEntry(Website &site);
-  void addIpv4(Listen &interface);
-  const std::string &matchGetLexeme(TokenType::Type Type);
-  void addPort(Listen &interface);
   bool sep(void);
   void skipSep(void);
   bool match(TokenType::Type Type);
+  const std::string &matchGetLexeme(TokenType::Type Type);
+
   Website expression(void);
+
   Website server(void);
+
+  void addEntry(Website &site);
+
+  void addIpv4(Listen &interface);
+  void addPort(Listen &interface);
+
+  void throwTokenError(void);
+
   Scanner _scan;
+  unsigned int _line;
   std::list<Website> _websites;
   std::list<Token>::const_iterator _it;
 };
