@@ -156,7 +156,7 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     if (acceptConnection(ListenSock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
       const short events =
-          POLLIN | POLLOUT | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
+          POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP; // POLLOUT will be added when ready to send
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
