@@ -2,6 +2,7 @@
 
 #include "Token.hpp"
 #include <list>
+#include <stdexcept>
 #include <string>
 
 class Scanner {

@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 
+Config::UnexpectedTokenException::UnexpectedTokenException(const std::string &str)
+    : std::runtime_error(str) {
+}
+
 // class Config
 Config::Config(const char *File) : _scan(File), _line(1) {
   _it = _scan.firstToken();
@@ -14,9 +18,8 @@ Config::Config(const char *File) : _scan(File), _line(1) {
       break;
     try {
       _websites.push_back(server());
-    } catch (const std::exception &e) {
-      std::cerr << __func__ << ": " << e.what() << '\n';
-      throw std::exception();
+    } catch (const UnexpectedTokenException &e) {
+      throw;
     }
   }
 }
@@ -78,7 +81,7 @@ void Config::addEntry(Website &site) {
 void Config::throwTokenError(void) {
   std::ostringstream oss;
   oss << "Unexpected token in line " << _line << ": `" << _it->getLexeme() << '\'';
-  throw std::runtime_error(oss.str());
+  throw UnexpectedTokenException(oss.str());
 }
 
 void Config::addIpv4(Listen &interface) {

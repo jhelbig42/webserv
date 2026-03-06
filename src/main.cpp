@@ -38,7 +38,8 @@ int main(int argc, char **argv) {
   try {
     const Config conf(argv[1]);
     std::cout << conf;
-  } catch (...) {
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
   }
   // const Scanner scan(argv[1]);
   // std::cout << scan;

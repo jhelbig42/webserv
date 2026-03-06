@@ -3,6 +3,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <sstream>
 
 static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It);
 static bool isCharset(const std::string &Charset, const std::string &Str,
@@ -40,7 +41,7 @@ bool TokenType::isType(const Type Type, const std::string &Str,
       return globalTokenTypes[i].matchType(Str, It, dummy);
     ++i;
   }
-  throw std::runtime_error("requested unlisted token type");
+  return false;
 }
 
 const TokenType &TokenType::getTokenType(const std::string &Str,
@@ -52,7 +53,9 @@ const TokenType &TokenType::getTokenType(const std::string &Str,
       return globalTokenTypes[i];
     ++i;
   }
-  throw std::runtime_error("unrecognized token");
+  std::ostringstream oss;
+  oss << "Unrecognized token: " << *It << "...";
+  throw UnrecognizedTokenException(oss.str());
 }
 
 bool TokenType::matchType(const std::string &Str,
@@ -120,3 +123,8 @@ const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
   }
   throw std::runtime_error("unrecognized token");
 }
+
+TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &str)
+    : std::runtime_error(str) {
+}
+

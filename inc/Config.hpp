@@ -4,6 +4,7 @@
 #include "TokenType.hpp"
 #include "Website.hpp"
 #include "Scanner.hpp"
+#include <stdexcept>
 #include <string>
 
 namespace config {
@@ -18,6 +19,11 @@ class Config {
 public:
   Config(const char *File);
   const std::list<Website> &getWebsites(void) const;
+
+  class UnexpectedTokenException : public std::runtime_error {
+  public:
+    explicit UnexpectedTokenException(const std::string &);
+  };
 
 private:
   bool sep(void);
