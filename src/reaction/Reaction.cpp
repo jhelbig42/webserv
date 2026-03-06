@@ -21,7 +21,8 @@ static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs);
 
 void Reaction::setDefaults(void) {
-  _ptype = None;
+  _processType = NotInitialized;
+  //_postType = NotPost;
   _metadataSent = false;
   _fdIn = -1;
   _fdOut = -1;
@@ -30,12 +31,16 @@ void Reaction::setDefaults(void) {
 }
 
 Reaction::Reaction()
-    : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
   _headers.unsetAll();
 }
 
 Conditions Reaction::getConditions(void) const {
   return _conditions;
+}
+
+Reaction::ProcessType Reaction::getProcessType(void) const{
+  return _processType;
 }
 
 void Reaction::init(const Request &Req) {
@@ -52,11 +57,13 @@ void Reaction::init(const Request &Req) {
     initSendFile(CODE_501, FILE_501);
     return;
   }
+  //check if method is allowed in comparison to config
 
   initMethod(Req);
 }
 
 void Reaction::initMethod(const Request &Req) {
+  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   switch (Req.getMethod()) {
   case Head:
   case Get:
@@ -66,6 +73,8 @@ void Reaction::initMethod(const Request &Req) {
     initDelete(Req);
     return;
   case Post:
+	  initPost(Req);
+	  return;
   case Generic:
     initSendFile(CODE_501, FILE_501);
     return;
@@ -92,7 +101,9 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 Reaction::Reaction(const Request &Req)
-    : _ptype(None), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1),
+    _fdOut(-1) 
+{
   init(Req);
 }
 
@@ -116,7 +127,7 @@ void Reaction::initSendFile(const int Code, const char *File) {
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
   _fdOut = -1;
-  _ptype = SendFile;
+  _processType = SendFile;
   _conditions = SockWrite;
 }
 

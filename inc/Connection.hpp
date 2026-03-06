@@ -41,7 +41,7 @@ public:
   Conditions getConditions() const;
   void processData(void);
   Request _req;
-  Reaction _res;
+  Reaction _react;
 
 private:
   Connection(); // should not be possible

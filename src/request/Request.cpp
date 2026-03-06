@@ -14,7 +14,9 @@ Request::Request() :
 	_minorVersion(0), 
 	_conditions (SockRead),
 	_state(STATUS_LINE)
-{}  
+{
+	_headers.unsetAll();
+}  
 
 void Request::init(const std::string &input) {
 	this->parseRequestLine(input);
@@ -27,6 +29,7 @@ void Request::reset() {
 	_minorVersion = 0;
 	_state = STATUS_LINE;
 	_conditions = SockRead;
+	_headers.unsetAll();
 }
 
 
@@ -106,6 +109,13 @@ void Request::readFromSocket(int Fd){
   	logging::log(logging::Debug, "readFromSocket() done");
 }
 
+Buffer		Request::getBuffer() const{
+	return _buf;
+}
+
+HttpHeaders	Request::getHeaders() const{
+	return _headers;
+}
 
 size_t Request::getMajorV() const {
 	return _majorVersion;
@@ -130,3 +140,4 @@ Conditions Request::getConditions(void) const {
 ParseState Request::getState() const{
 	return _state;
 }
+
