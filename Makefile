@@ -22,6 +22,7 @@ SRC			+= Networking.cpp\
 			   NetworkingRun.cpp\
 			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
+SRC			+= Post.cpp
 SRC			+= Reaction.cpp
 SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
@@ -114,6 +115,8 @@ ifeq ($(DEBUG), 1)
 #	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -g3
 #	CPPFLAGS += -fstandalone-debug
+#   These flags do not compile on Debian VM
+
 endif
 
 ifeq ($(ASAN), 1)

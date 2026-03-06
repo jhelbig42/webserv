@@ -63,11 +63,13 @@ class Request {
 		
 		Conditions getConditions(void) const;
 
+		Buffer		getBuffer() const;
 		ParseState	getState() const;
 		size_t		getMajorV() const;
 		size_t		getMinorV() const;
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
+		HttpHeaders	getHeaders() const;
 
 	private:
 		HttpMethod	_method;
