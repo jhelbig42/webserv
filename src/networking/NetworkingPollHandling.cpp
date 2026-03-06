@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 15:55:29 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/06 10:56:28 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:40:46 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,8 +155,8 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     ClientAddr candidate;
     if (acceptConnection(ListenSock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
-      const short events =
-          POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP; // POLLOUT will be added when ready to send
+      const short events = POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
+//          POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP; // POLLOUT will be added when ready to send
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
@@ -176,10 +176,10 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
 // 		Writing is now possible.
 
 void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
-  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
+//  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = CMap.find(Fd);
   if (itC != CMap.end()) {
-    logging::log2(logging::Debug, "Ready to send to ", Fd);
+    //logging::log2(logging::Debug, "Ready to send to ", Fd);
     (itC->second).addToConditions(SockWrite);
   } else {
     logging::log(logging::Error, "process: Connection not found in map "

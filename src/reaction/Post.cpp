@@ -18,7 +18,7 @@ void Reaction::initPost(const Request &Req){
 		return;
 	}
 	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
-	_contLenReq = Req.getHeaders().getContentLength();
+	_contLenReq = (size_t) Req.getHeaders().getContentLength(); // temp edit for compilation - Hilary, 6. March
 
 	//copy buffer if still in buffer
 	//create requested file with write access

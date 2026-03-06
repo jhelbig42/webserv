@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Networking_run.cpp                                 :+:      :+:    :+:   */
+/*   NetworkingRun.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/27 12:22:18 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:38:45 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,17 @@ void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
       if (it->fd != ListenSock) {
         // cMap.at(it->fd).serve(MAX_REQUEST);
         CMap.at(it->fd).processData();
-        CMap.at(it->fd).resetConditions();
+	
+		/*
+		// add POLLOUT to events
+		if (CMap.at(it->fd)._react.getConditions() & SockWrite){
+			it->events = it->events | POLLOUT;
+		}
+		else {
+			it->events = POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
+		}
+        */
+		CMap.at(it->fd).resetConditions();
 	    }
       it++;
     }

@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/27 12:32:38 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:37:32 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,20 +76,27 @@ void Connection::processData(void) {
 	
 	// if Request is complete, reaction can get initialized - NO Socket Access Required
 	// need a not initialized state for Reaction here
+
 	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
 		&& _react.getProcessType() == Reaction::NotInitialized)
 	{
 		_react.init(_req);
 		_req.reset();
 	}
-
 	// if reaction does not need more aka is not POST or POST is done, then process
 	//this needs write access to the socket	
 	if (_conditionsFulfilled & _react.getConditions())
 	{
 		int dummy = -1;
-		while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
-  			 ;	}
+		
+		if (_react.process(_sock, dummy, BYTES_PER_CHUNK) == 0){
+			scheduleForDemolition();
+			// close after finishing writing greatly simplifies
+			// polling & is consistent with HTTP 1.0
+		}
+
+		//while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
+  		//	 ;	}
 	}
 }
 
