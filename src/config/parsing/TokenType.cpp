@@ -22,9 +22,11 @@ static const TokenType globalTokenTypes[] = {
     {"Dot", ".", TokenType::Dot, TokenType::SingleChar},
     {"BracesLeft", "{", TokenType::BracesLeft, TokenType::SingleChar},
     {"BracesRight", "}", TokenType::BracesRight, TokenType::SingleChar},
+    {"Slash", "/", TokenType::Slash, TokenType::SingleChar},
     {"Colon", ":", TokenType::Colon, TokenType::SingleChar},
     {"Server", "server", TokenType::Server, TokenType::Keyword},
     {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
+    {"Root", "root", TokenType::Root, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
     {"Newline", "", TokenType::Newline, TokenType::Special}};
@@ -54,7 +56,7 @@ const TokenType &TokenType::getTokenType(const std::string &Str,
     ++i;
   }
   std::ostringstream oss;
-  oss << "Unrecognized token: " << *It << "...";
+  oss << "Unrecognized token: `" << *It << '\'';
   throw UnrecognizedTokenException(oss.str());
 }
 

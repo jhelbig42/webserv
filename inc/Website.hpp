@@ -20,9 +20,12 @@ public:
   Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
   const std::list<Listen> &getInterfaces(void) const;
+  void setRoot(const std::string &Root);
+  std::string getRoot(void) const;
 
 private:
   std::list<Listen> _interfaces; 
+  std::string _root;
 };
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);

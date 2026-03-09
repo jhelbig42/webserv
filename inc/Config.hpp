@@ -29,6 +29,7 @@ private:
   bool sep(void);
   void skipSep(void);
   bool match(TokenType::Type Type);
+  bool noMatch(TokenType::Type Type);
   const std::string &matchGetLexeme(TokenType::Type Type);
 
   Website expression(void);
@@ -40,7 +41,12 @@ private:
   void addIpv4(Listen &interface);
   void addPort(Listen &interface);
 
+  std::string parseAbsPath(void);
+
   void throwTokenError(void);
+
+  const Token &peek(void) const;
+  void eat(void);
 
   Scanner _scan;
   unsigned int _line;
