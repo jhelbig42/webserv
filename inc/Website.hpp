@@ -22,8 +22,11 @@ public:
   const std::list<Listen> &getInterfaces(void) const;
   void setRoot(const std::string &Root);
   std::string getRoot(void) const;
+  bool getAutoindex(void) const;
+  void setAutoindex(const bool IsOn);
 
 private:
+  bool _autoindex;
   std::list<Listen> _interfaces; 
   std::string _root;
 };

@@ -53,3 +53,11 @@ std::ostream &operator<<(std::ostream &Os, const Website &site) {
   }
   return Os;
 }
+
+bool Website::getAutoindex(void) const {
+  return _autoindex;
+}
+
+void Website::setAutoindex(const bool IsOn) {
+  _autoindex = IsOn;
+}
