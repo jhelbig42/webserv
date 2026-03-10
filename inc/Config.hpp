@@ -45,6 +45,8 @@ private:
 
   void throwTokenError(void);
 
+  bool parseOnOff(void);
+
   const Token &peek(void) const;
   void eat(void);
 

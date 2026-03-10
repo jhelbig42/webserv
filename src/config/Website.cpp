@@ -6,13 +6,15 @@ Website::Website(void) {
 }
 
 Website::Website(const Website &other)
-  : _interfaces(other._interfaces), _root(other._root) {
+    : _interfaces(other._interfaces), _root(other._root),
+      _autoindex(other._autoindex) {
 }
 
 Website &Website::operator=(const Website &other) {
   if (this != &other) {
     _interfaces = other._interfaces;
     _root = other._root;
+    _autoindex = other._autoindex;
   }
   return *this;
 }
@@ -21,7 +23,8 @@ Website::~Website(void) {
 }
 
 void Website::addInterface(Listen &If) {
-  if (std::find(_interfaces.begin(), _interfaces.end(), If) == _interfaces.end())
+  if (std::find(_interfaces.begin(), _interfaces.end(), If) ==
+      _interfaces.end())
     _interfaces.push_back(If);
 }
 
@@ -51,6 +54,12 @@ std::ostream &operator<<(std::ostream &Os, const Website &site) {
   while (it != site.getInterfaces().end()) {
     Os << *it++ << '\n';
   }
+  Os << "autoindex: ";
+  if (site.getAutoindex())
+    Os << "on";
+  else
+    Os << "off";
+  Os << '\n';
   return Os;
 }
 

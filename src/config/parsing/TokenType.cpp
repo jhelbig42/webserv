@@ -26,7 +26,10 @@ static const TokenType globalTokenTypes[] = {
     {"Colon", ":", TokenType::Colon, TokenType::SingleChar},
     {"Server", "server", TokenType::Server, TokenType::Keyword},
     {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
+    {"On", "on", TokenType::On, TokenType::Keyword},
+    {"Off", "off", TokenType::Off, TokenType::Keyword},
     {"Root", "root", TokenType::Root, TokenType::Keyword},
+    {"Autoindex", "autoindex", TokenType::Autoindex, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
     {"Newline", "", TokenType::Newline, TokenType::Special}};

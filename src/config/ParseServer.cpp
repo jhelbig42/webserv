@@ -35,9 +35,23 @@ void Config::addEntry(Website &site) {
     skipSep();
     const std::string root = parseAbsPath();
     site.setRoot(root);
+  } else if (match(TokenType::Autoindex)) {
+    if (!sep())
+      throwTokenError();
+    skipSep();
+    site.setAutoindex(parseOnOff());
   }
   else
     throwTokenError();
+}
+
+bool Config::parseOnOff(void) {
+  if (match(TokenType::On))
+    return true;
+  if (match(TokenType::Off))
+    return false;
+  throwTokenError();
+  return false;
 }
 
 void Config::addIpv4(Listen &interface) {

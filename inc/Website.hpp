@@ -26,9 +26,10 @@ public:
   void setAutoindex(const bool IsOn);
 
 private:
-  bool _autoindex;
+
   std::list<Listen> _interfaces; 
   std::string _root;
+  bool _autoindex;
 };
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);
