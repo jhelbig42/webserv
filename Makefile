@@ -13,6 +13,8 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= ConfigGlobals.cpp
 SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
+SRC			+= Parse.cpp
+SRC			+= ParseServer.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
