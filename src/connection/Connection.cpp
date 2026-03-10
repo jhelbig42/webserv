@@ -10,12 +10,12 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Connection.hpp"
 #include "Conditions.hpp"
+#include "Connection.hpp"
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
-#include "Request.hpp"
 #include "Reaction.hpp"
+#include "Request.hpp"
 #include <cerrno> // for errno
 #include <cstddef>
 #include <cstring> // for strerror
@@ -48,13 +48,13 @@ int Connection::getSock(void) const {
 }
 
 bool Connection::getDeleteStatus(void) const {
-	return (_delete);
+  return (_delete);
 }
 
 Conditions Connection::getConditions(void) const {
   if (_req.getState() == COMPLETE)
-		return _react.getConditions();
-	return _req.getConditions();
+    return _react.getConditions();
+  return _req.getConditions();
 }
 
 // Setters
@@ -64,59 +64,59 @@ void Connection::scheduleForDemolition(void) {
 }
 
 // Send & Receive
-//processData is a smaller type of serve() until conditions are fully implemented
+// processData is a smaller type of serve() until conditions are fully
+// implemented
 void Connection::processData(void) {
-	if( (_conditionsFulfilled & _req.getConditions()) 
-		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
-		_req.process(_sock);
-	if (_req.getState() == CLIENTHUNGUP){
-		scheduleForDemolition();
-		return ;
-	};
-	//parsing from buffer into Request
-	//when fully parsed init Reaction
-	//Reaction will set its conditions 
-	if(_conditionsFulfilled == SockWrite &&
-		(_req.getState() == COMPLETE || _req.getState() == INVALID))
-	
-	// if Request is complete, reaction can get initialized - NO Socket Access Required
-	// need a not initialized state for Reaction here
+  if ((_conditionsFulfilled & _req.getConditions()) &&
+      _req.getState() != COMPLETE && _req.getState() != INVALID)
+    _req.process(_sock);
+  if (_req.getState() == CLIENTHUNGUP) {
+    scheduleForDemolition();
+    return;
+  };
+  // parsing from buffer into Request
+  // when fully parsed init Reaction
+  // Reaction will set its conditions
+  if (_conditionsFulfilled == SockWrite &&
+      (_req.getState() == COMPLETE || _req.getState() == INVALID))
 
-	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
-		&& _react.getProcessType() == Reaction::NotInitialized)
-	{
-		_react.init(_req);
-		_req.reset();
-	}
-	// if reaction does not need more aka is not POST or POST is done, then process
-	//this needs write access to the socket	
-	if (_conditionsFulfilled & _react.getConditions())
-	{
-		int dummy = -1;
-		
-		if (_react.process(_sock, dummy, BYTES_PER_CHUNK) == true){
+    // if Request is complete, reaction can get initialized - NO Socket Access
+    // Required need a not initialized state for Reaction here
 
-			logging::log(logging::Debug, "finished writing to client");
-			scheduleForDemolition();
-			// close after finishing writing greatly simplifies
-			// polling & is consistent with HTTP 1.0
-		}
+    if ((_req.getState() == COMPLETE || _req.getState() == INVALID) &&
+        _react.getProcessType() == Reaction::NotInitialized) {
+      _react.init(_req);
+      _req.reset();
+    }
+  // if reaction does not need more aka is not POST or POST is done, then
+  // process
+  // this needs write access to the socket
+  if (_conditionsFulfilled & _react.getConditions()) {
+    int dummy = -1;
 
-		//while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
-  		//	 ;	}
-	}
+    if (_react.process(_sock, dummy, BYTES_PER_CHUNK) == true) {
+
+      logging::log(logging::Debug, "finished writing to client");
+      scheduleForDemolition();
+      // close after finishing writing greatly simplifies
+      // polling & is consistent with HTTP 1.0
+    }
+
+    // while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
+    //	 ;	}
+  }
 }
 
 bool Connection::serve(const size_t Bytes) {
-  //handle Request until fully parsed
-	if (_req.getState() != COMPLETE) {
-		if (_conditionsFulfilled & _req.getConditions())
-			_req.process(_sock);
-		if (_req.getState() == COMPLETE)
-			_react.init(_req);
+  // handle Request until fully parsed
+  if (_req.getState() != COMPLETE) {
+    if (_conditionsFulfilled & _req.getConditions())
+      _req.process(_sock);
+    if (_req.getState() == COMPLETE)
+      _react.init(_req);
     return false;
   }
-  //switch to Reaction	
+  // switch to Reaction
   if (_conditionsFulfilled & _react.getConditions())
     return _react.process(_sock, _sockForward, Bytes);
   return false;

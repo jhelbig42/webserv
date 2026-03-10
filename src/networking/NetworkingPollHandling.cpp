@@ -40,7 +40,6 @@ void networking::handleServableCondition(const int ListenSock,
                                          std::map<int, Connection> &CMap,
                                          std::vector<pollfd> &newFdBatch);
 
-
 // handleTerminalCondition() handles flags which indicate a hangup or
 // error. This path is in the logic is separated so we can skip checks
 // for POLLIN and POLLOUT. Terminal conditions are handled with additional
@@ -103,7 +102,7 @@ void networking::handlePollnval(int Fd, std::map<int, Connection> &CMap) {
 }
 
 // handlePollrdhup() handles POLLRDHUP:
-// 		Stream  socket peer closed connection, or shut down writing half 
+// 		Stream  socket peer closed connection, or shut down writing half
 //		of  connection.   The  _GNU_SOURCE  feature test macro must be defined
 //		(before  including  any header files) in order to obtain this definition.
 //
@@ -127,7 +126,8 @@ void networking::handlePollrdhup(int Fd, std::map<int, Connection> &CMap) {
 
 // handlePollerr() handles POLLERR:
 // 		Error  condition. This bit is also set for a file descriptor
-//		referring  to  the  write  end of a pipe when the read end has been closed.
+//		referring  to  the  write  end of a pipe when the read end has been
+//closed.
 
 void networking::handlePollerr(int Fd, std::map<int, Connection> &CMap) {
   const std::ostringstream msg;
@@ -155,7 +155,8 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
     ClientAddr candidate;
     if (acceptConnection(ListenSock, &candidate) != -1) {
       addConnectionToMap(candidate, CMap);
-      const short events = POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
+      const short events =
+          POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
       const pollfd newFd = {candidate.clientSock, events, 0};
       newFdBatch.push_back(newFd);
     }
@@ -175,10 +176,10 @@ void networking::handlePollin(int Fd, std::map<int, Connection> &CMap,
 // 		Writing is now possible.
 
 void networking::handlePollout(int Fd, std::map<int, Connection> &CMap) {
-//  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
+  //  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = CMap.find(Fd);
   if (itC != CMap.end()) {
-    //logging::log2(logging::Debug, "Ready to send to ", Fd);
+    // logging::log2(logging::Debug, "Ready to send to ", Fd);
     (itC->second).addToConditions(SockWrite);
   } else {
     logging::log(logging::Error, "process: Connection not found in map "
