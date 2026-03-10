@@ -12,8 +12,8 @@ public:
   // Reaction(const Reaction&);
   // Reaction& operator=(const Reaction&);
   // ~Reaction();
-
-  typedef enum { None, SendFile, ReceiveFile, Cgi } ProcessType;
+  //typedef enum { NotPost, NotInitialized, Invalid, ContinueReading, DoneReading, ReadyToProcess } PostType;
+  typedef enum { NotInitialized, SendFile, ReceiveFile, Cgi } ProcessType;
 
   explicit Reaction(const Request &Req);
   void init(const Request &Req);
@@ -37,6 +37,7 @@ public:
   bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
 
   Conditions getConditions(void) const;
+  ProcessType getProcessType(void) const;
 
 private:
   // sending files + metadata
@@ -49,12 +50,16 @@ private:
   void initMethod(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(const Request &Req);
+  void initPost(const Request &Req);
 
   Conditions _conditions;
-
   HttpHeaders _headers;
+  ProcessType _processType;
+  //PostType    _postType;
 
-  ProcessType _ptype;
+  //for post
+
+  size_t  _contLenReq;
 
   // consider abstraction for metaData
   bool _metadataSent;

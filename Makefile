@@ -22,6 +22,7 @@ SRC			+= Networking.cpp\
 			   NetworkingRun.cpp\
 			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
+SRC			+= Post.cpp
 SRC			+= Reaction.cpp
 SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
@@ -89,8 +90,7 @@ DOXYGEN		:= doxygen
 DOXY_TIMESTAMP := $(DOXY_DIR)/.done
 
 # options
-DEV			:= 1
-ifeq ($(DEV), 1)
+ifneq ($(DEV), 0)
 	ASAN		:= 1
 	UBSAN		:= 1
 	DEBUG		:= 1
@@ -111,9 +111,11 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
-	CXXFLAGS += -fstandalone-debug
+#	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -g3
-	CPPFLAGS += -fstandalone-debug
+#	CPPFLAGS += -fstandalone-debug
+#   These flags do not compile on Debian VM
+
 endif
 
 ifeq ($(ASAN), 1)
