@@ -20,13 +20,22 @@ public:
   Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
   const std::list<Listen> &getInterfaces(void) const;
-  void setRoot(const std::string &Root);
+  void setRoot(const std::string &RootDir);
   std::string getRoot(void) const;
   bool getAutoindex(void) const;
   void setAutoindex(const bool IsOn);
+  bool isSetAutoindex(void) const;
+  bool isSetRoot(void) const;
+  bool isSetInterfaces(void) const;
 
 private:
+  typedef enum {
+    Interfaces = (1u << 0),
+    Root = (1u << 1),
+    Autoindex = (1u << 2)
+  } SetMembers;
 
+  int _setMembers;
   std::list<Listen> _interfaces; 
   std::string _root;
   bool _autoindex;
