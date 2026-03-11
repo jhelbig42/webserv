@@ -12,40 +12,59 @@ Website Config::server(void) {
     throwTokenError();
   Website newWebsite;
   while (!match(TokenType::BracesRight)) {
-    skipSep();
-    addEntry(newWebsite);
-    skipSep();
-    if (!match(TokenType::Semicolon))
-      throwTokenError();
-    skipSep();
+    parseEntry(newWebsite);
   }
   return newWebsite;
 }
 
-void Config::addEntry(Website &site) {
+void Config::parseEntry(Website &Website) {
+  skipSep();
+  addEntry(Website);
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
+  skipSep();
+}
+
+void Config::gap(void) {
+  if (!sep())
+    throwTokenError();
+  skipSep();
+}
+
+void Config::populateInterface(Listen &Interface) {
+  addIpv4(Interface);
+  if (!match(TokenType::Colon))
+    throwTokenError();
+  addPort(Interface);
+}
+
+void Config::parseListen(Website &site) {
+  gap();
+  Listen interface;
+  populateInterface(interface);
+  site.addInterface(interface);
+}
+
+void Config::parseRoot(Website &site) {
+  gap();
+  const std::string root = parseAbsPath();
+  site.setRoot(root);
+}
+
+void Config::parseAutoindex(Website &site) {
+  gap();
+  site.setAutoindex(parseOnOff());
+}
+
+void Config::addEntry(Website &Site) {
   if (match(TokenType::Listen)) {
-    if (!sep())
-      throwTokenError();
-    skipSep();
-    Listen interface;
-    addIpv4(interface);
-    if (!match(TokenType::Colon))
-      throwTokenError();
-    addPort(interface);
-    site.addInterface(interface);
+    parseListen(Site);
   } else if (match(TokenType::Root)) {
-    if (!sep())
-      throwTokenError();
-    skipSep();
-    const std::string root = parseAbsPath();
-    site.setRoot(root);
+    parseRoot(Site);
   } else if (match(TokenType::Autoindex)) {
-    if (!sep())
-      throwTokenError();
-    skipSep();
-    site.setAutoindex(parseOnOff());
-  }
-  else
+    parseAutoindex(Site);
+  } else
     throwTokenError();
 }
 
@@ -82,7 +101,7 @@ void Config::addPort(Listen &interface) {
 
 std::string Config::parseAbsPath(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
-  if (sep() || peek().getType().type == TokenType::Semicolon)
+  if (sep() || nextType() == TokenType::Semicolon)
     return path;
   while (true) {
     if (nextType() == TokenType::Slash)

@@ -37,11 +37,18 @@ private:
 
   Website server(void);
 
+  void gap(void);
+  void populateInterface(Listen &Interface);
+  void parseListen(Website &site);
+  void parseRoot(Website &site);
+  void parseAutoindex(Website &site);
+
   void addEntry(Website &site);
 
-  void addIpv4(Listen &interface);
-  void addPort(Listen &interface);
+  void addIpv4(Listen &Interface);
+  void addPort(Listen &Interface);
 
+  void parseEntry(Website &Website);
   std::string parseAbsPath(void);
 
   void throwTokenError(void);
