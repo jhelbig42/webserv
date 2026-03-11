@@ -20,9 +20,13 @@ public:
   explicit Config(const char *File);
   const std::list<Website> &getWebsites(void) const;
 
-  class UnexpectedTokenException : public std::runtime_error {
+  class UnexpectedTokenException : public std::exception {
   public:
-    explicit UnexpectedTokenException(const std::string &);
+    explicit UnexpectedTokenException(const std::list<Token>::const_iterator It);
+    ~UnexpectedTokenException(void) throw();
+    const char *what(void) const throw();
+  private:
+    std::string _report;
   };
 
 private:

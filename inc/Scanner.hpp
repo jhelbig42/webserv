@@ -14,10 +14,12 @@ public:
   std::list<Token>::const_iterator firstToken(void) const;
 
 private:
+  size_t _numLines;
+  size_t _numTokens;
   std::list<Token> _tokens;
-  void addEof(const size_t Line);
-  void addNewline(const size_t Line);
-  void scanLine(const size_t Number, const std::string &Str);
+  void addEof(void);
+  void addNewline(void);
+  void scanLine(const std::string &Str);
 };
 
 std::ostream &operator<<(std::ostream &Os, const Scanner &Scan);

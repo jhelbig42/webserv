@@ -9,44 +9,38 @@
 #include <stdexcept>
 #include <string>
 
-size_t Token::getLine(void) const {
-  return _line;
-}
-
 Scanner::~Scanner() { }
 
-Scanner::Scanner(const char *File) {
+Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
   std::ifstream inf(File);
   if (!inf.is_open())
     throw std::runtime_error("Scanner: can not open file");
   std::string line;
-  size_t lineNumber = 0;
-
   while (true) {
     std::getline(inf, line);
     if (!inf.good())
       break;
-    scanLine(++lineNumber, line);
-    addNewline(lineNumber);
+    scanLine(line);
+    addNewline();
   }
   if (inf.fail() && !inf.eof())
     throw std::runtime_error("Scanner: file I/O error");
-  addEof(lineNumber);
+  addEof();
 }
 
-void Scanner::addEof(const size_t Line) {
-  _tokens.push_back(Token(Line, TokenType::Eof));
+void Scanner::addEof(void) {
+  _tokens.push_back(Token(_numLines, ++_numTokens, TokenType::Eof));
 }
 
-void Scanner::addNewline(const size_t Line) {
-  _tokens.push_back(Token(Line, TokenType::Newline));
+void Scanner::addNewline(void) {
+  _tokens.push_back(Token(_numLines++, ++_numTokens, TokenType::Newline));
 }
 
-void Scanner::scanLine(const size_t Number, const std::string &Str) {
+void Scanner::scanLine(const std::string &Str) {
   std::string::const_iterator it = Str.begin();
   std::string::const_iterator itTmp;
   while (it != Str.end()) {
-    _tokens.push_back(Token(Number, Str, it, itTmp));
+    _tokens.push_back(Token(_numLines, ++_numTokens, Str, it, itTmp));
     it = itTmp;
   }
 }

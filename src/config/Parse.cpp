@@ -48,9 +48,7 @@ bool Config::noMatch(const TokenType::Type Type) {
 }
 
 void Config::throwTokenError(void) {
-  std::ostringstream oss;
-  oss << "Unexpected token in line " << _line << ": `" << _it->getLexeme() << '\'';
-  throw UnexpectedTokenException(oss.str());
+  throw UnexpectedTokenException(_it);
 }
 
 const std::string &Config::matchGetLexeme(TokenType::Type Type) {

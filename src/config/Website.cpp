@@ -7,7 +7,7 @@ static void printInterfaces(std::ostream &Os, const Website &Site);
 static void printRoot(std::ostream &Os, const Website &Site);
 static void printAutoindex(std::ostream &Os, const Website &Site);
 
-Website::Website(void): _setMembers(0) {
+Website::Website(void): _setMembers(0), _autoindex(false) {
 }
 
 Website::Website(const Website &other)
@@ -29,15 +29,15 @@ Website::~Website(void) {
 }
 
 void Website::addInterface(Listen &If) {
-  _setMembers |= Interfaces;
   if (std::find(_interfaces.begin(), _interfaces.end(), If) ==
       _interfaces.end())
     _interfaces.push_back(If);
+  _setMembers |= Interfaces;
 }
 
 void Website::setRoot(const std::string &RootDir) {
-  _setMembers |= Website::Root;
   _root = RootDir;
+  _setMembers |= Website::Root;
 }
 
 std::string Website::getRoot(void) const {
@@ -93,8 +93,8 @@ bool Website::getAutoindex(void) const {
 }
 
 void Website::setAutoindex(const bool IsOn) {
-  _setMembers |= Website::Autoindex;
   _autoindex = IsOn;
+  _setMembers |= Website::Autoindex;
 }
 
 bool Website::isSetAutoindex(void) const {
