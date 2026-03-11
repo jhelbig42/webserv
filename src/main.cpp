@@ -1,4 +1,5 @@
 #include "Scanner.hpp"
+#include "Server.hpp"
 #include "Request.hpp"
 #include "Reaction.hpp"
 #include "Networking.hpp"
@@ -48,12 +49,21 @@ int main(int argc, char **argv) {
 
 #else
 
-int main(void) {
+int main(int argc, char **argv) {
 
+  // argument check
+  if (argc != 2){
+  	std::cerr << "Usage: <config file>\n";
+	exit (1);
+  }
+  
   try {
-    networking::start();
-  } catch (const std::runtime_error &e) {
-    logging::log(logging::Error, e.what());
+    const Config conf(argv[1]);
+    Server server(conf);
+	server.pollLoop();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
+	exit (1);
   }
 }
 

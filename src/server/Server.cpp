@@ -17,25 +17,15 @@
 #include <utility>
 #include <vector>
 
-// TODO These functions could be made static:
-// process(), acceptConnection(), addConnectionToMap()
-// But then they would lose sight of networking::ClientAddr struct
-// and netoworking::read_data().
-// Decide on most elegant arrangement.
 
-/*
-void networking::pollLoop2(const int Sock); // old, to be deleted
-void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
-                         std::vector<pollfd> &Fds);
-int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate);
-void networking::addConnectionToMap(const struct ClientAddr &Candidate,
-                                    std::map<int, Connection> &CMap);
-*/
-
-// TODO update pollLoop() documentation for 2.0
+Server::Server(const Config &conf){
+	(void)conf;
+}
 
 void Server::pollLoop(void) {
 
+	logging::log(logging::Debug, "<pollLoop>");
+/*
   const pollfd listener = {Sock, POLLIN, 0};
   fds.push_back(listener);
 
@@ -55,6 +45,7 @@ void Server::pollLoop(void) {
     }
     process(Sock, cMap, fds);
   }
+  */
 }
 
 // process() iterates through the vector of fds and handles the flags

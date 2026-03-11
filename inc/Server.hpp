@@ -19,5 +19,6 @@ class Server {
 	std::vector<pollfd> fds;
 	std::map<int, Website*> listenMap;
 
+	Server(const Config &conf);
 	void pollLoop(void);
 };
