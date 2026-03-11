@@ -5,6 +5,26 @@
 #include <list>
 #include <string>
 
+// class Config
+Parser::Parser(Config &Conf, const char *File) : _config(Conf), _scan(File), _line(1) {
+}
+
+Parser::parse(Config &Conf) {
+  _it = _scan.firstToken();
+  while (true) {
+    skipSep();
+    if (match(TokenType::Eof))
+      break;
+    try {
+      Conf.addWebsite(server());
+    } catch (const UnexpectedTokenException &e) {
+      throw;
+    } catch (...) {
+      throw;
+    }
+  }
+}
+
 const Token &Config::peek(void) const {
   return *_it;
 }
