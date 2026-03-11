@@ -3,7 +3,6 @@
 #include "Token.hpp"
 #include "TokenType.hpp"
 #include <list>
-#include <sstream>
 #include <string>
 
 const Token &Config::peek(void) const {

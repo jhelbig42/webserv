@@ -15,6 +15,7 @@ SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
 SRC			+= Parse.cpp
 SRC			+= ParseServer.cpp
+SRC			+= UnexpectedToken.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
