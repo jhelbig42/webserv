@@ -43,7 +43,7 @@ void Request::parseHeader(const std::string &HeaderLine)
 	}
     if (token[0] == "Content-Length")
     {
-        off_t length;
+        size_t length;
         std::stringstream slength(token[1]);
         if (!(slength >> length) || !slength.eof())
         {

@@ -53,12 +53,12 @@ void HttpHeaders::unsetAll(void) {
   _headersSet = 0;
 }
 
-void HttpHeaders::setContentLength(const off_t Length) {
+void HttpHeaders::setContentLength(const size_t Length) {
   _headersSet |= ContentLength;
   _contentLength = Length;
 }
 
-off_t HttpHeaders::getContentLength(void) const {
+size_t HttpHeaders::getContentLength(void) const {
   return _contentLength;
 }
 

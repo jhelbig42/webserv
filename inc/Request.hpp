@@ -61,8 +61,7 @@ class Request {
 		bool parseHeadersFromBuffer();
 		void parseHeader(const std::string &headerLine);
 		
-		Conditions getConditions(void) const;
-
+	
 		Buffer		getBuffer() const;
 		ParseState	getState() const;
 		size_t		getMajorV() const;
@@ -76,7 +75,6 @@ class Request {
 		std::string _resource;
 		size_t		_majorVersion;
 		size_t		_minorVersion;
-		Conditions	_conditions;
 		Buffer		_buf;
 		ParseState	_state;
 		HttpHeaders	_headers;	

@@ -51,29 +51,21 @@ bool Connection::getDeleteStatus(void) const {
 	return (_delete);
 }
 
-Conditions Connection::getConditions(void) const {
-  if (_req.getState() == COMPLETE)
-		return _react.getConditions();
-	return _req.getConditions();
-}
-
 // Setters
 
 void Connection::scheduleForDemolition(void) {
   _delete = true;
 }
 
-// Send & Receive
-//processData is a smaller type of serve() until conditions are fully implemented
-void Connection::processData(void) {
-	if( (_conditionsFulfilled & _req.getConditions()) 
+void Connection::serve(void) {
+	//if request is not yet complete, read and parse until it is
+	if( (_conditionsFulfilled & SockRead) 
 		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	if (_req.getState() == CLIENTHUNGUP){
 		scheduleForDemolition();
 		return ;
 	};
-	
 	// if Request is complete, reaction can get initialized - NO Socket Access Required
 	// need a not initialized state for Reaction here
 	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
@@ -82,30 +74,10 @@ void Connection::processData(void) {
 		_react.init(_req);
 		_req.reset();
 	}
-
-	// if reaction does not need more aka is not POST or POST is done, then process
-	//this needs write access to the socket	
-	if (_conditionsFulfilled & _react.getConditions())
-	{
-		int dummy = -1;
-		while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
-  			 ;	}
-	}
-}
-
-bool Connection::serve(const size_t Bytes) {
-  //handle Request until fully parsed
-	if (_req.getState() != COMPLETE) {
-		if (_conditionsFulfilled & _req.getConditions())
-			_req.process(_sock);
-		if (_req.getState() == COMPLETE)
-			_react.init(_req);
-    return false;
-  }
-  //switch to Reaction	
-  if (_conditionsFulfilled & _react.getConditions())
-    return _react.process(_sock, _sockForward, Bytes);
-  return false;
+	// we have a initialized Reaction - act on it.
+	int dummy = -1;
+	if(_react.process(_sock, dummy, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+		scheduleForDemolition();
 }
 
 // Conditions

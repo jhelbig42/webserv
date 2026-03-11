@@ -38,8 +38,7 @@ public:
   // send & receive
   //void readData(void);
   bool serve(const size_t Bytes);
-  Conditions getConditions() const;
-  void processData(void);
+  void serve(void);
   Request _req;
   Reaction _react;
 
