@@ -12,15 +12,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-/*
-class ListenMap {
-
-	// struct addrinfo *serverInfo	
-	int socket;
-	Website *website;
-};
-*/
-
 class Server {
 
 	public:

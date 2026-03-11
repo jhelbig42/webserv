@@ -17,7 +17,7 @@ public:
   Website &operator=(const Website &);
   ~Website();
 
-  Website(std::list<Token>::const_iterator It);
+  explicit Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
   const std::list<Listen> &getInterfaces(void) const;
   void setRoot(const std::string &RootDir);
