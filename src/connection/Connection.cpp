@@ -14,17 +14,13 @@
 #include "Conditions.hpp"
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
-#include "Request.hpp"
 #include "Reaction.hpp"
+#include "Request.hpp"
 #include <cerrno> // for errno
-#include <cstddef>
 #include <cstring> // for strerror
-#include <sstream> // for ostreamstring
 #include <stddef.h>
-#include <stdio.h>      // for puts
 #include <string.h>     // for memcpy, memset
 #include <sys/socket.h> // for socklen_t, recv
-#include <sys/types.h>  // for ssize_t
 
 // Construct & Destruct
 

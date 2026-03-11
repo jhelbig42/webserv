@@ -2,8 +2,8 @@
 
 #include "Buffer.hpp"
 #include "Conditions.hpp"
-#include "Logging.hpp"
 #include "HttpHeaders.hpp"
+#include "Logging.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>

@@ -54,12 +54,10 @@ private:
 
   //for Post request
   bool receiveFile(const int Socket, const size_t Bytes);
+
   Conditions _conditions;
   HttpHeaders _headers;
   ProcessType _processType;
-
-
-  //for post
   size_t  _reqContLen;
   size_t  _receivedContLen;
 
@@ -69,7 +67,5 @@ private:
 
   int _fdIn;
   FILE *_fdOut;
-
-  // consider abstraction for buffer
   Buffer _buffer;
 };

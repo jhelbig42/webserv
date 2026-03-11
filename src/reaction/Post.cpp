@@ -4,9 +4,10 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
-
-#include <fstream>
-#include <iostream>
+#include <algorithm>
+#include <cstddef>
+#include <cstdio>
+#include <stdio.h>
 #include <string>
 
 #define DEFAULT_PATH "./post"
@@ -29,7 +30,7 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	std::string pathname = DEFAULT_PATH + Req.getResource();
+	const std::string pathname = DEFAULT_PATH + Req.getResource();
 	_fdOut = fopen(pathname.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
@@ -42,11 +43,11 @@ void Reaction::initPost(const Request &Req){
 bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
 	_buffer.socketToBuf(Socket, Bytes);
-	size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
 	if (toReceive > 0)
 	{
-		ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
+		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
 		if (copied == -1)
 			return (false);
 		_receivedContLen += static_cast<size_t>(copied);

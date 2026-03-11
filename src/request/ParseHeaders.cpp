@@ -1,6 +1,7 @@
 #include "Request.hpp"
 #include "Logging.hpp"
 #include <string>
+#include <sstream>
 #include <sys/types.h>
 #include <vector>
 
