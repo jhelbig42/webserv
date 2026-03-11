@@ -22,7 +22,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h> // for close
-#include <unistd.h> // for close
 
 static int clearSocket(const int Sock);
 static int bindToIP(const int Sock, const struct addrinfo *P);

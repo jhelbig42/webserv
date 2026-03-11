@@ -6,12 +6,12 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/27 12:32:38 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 15:41:52 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Connection.hpp"
 #include "Conditions.hpp"
+#include "Connection.hpp"
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
@@ -44,7 +44,13 @@ int Connection::getSock(void) const {
 }
 
 bool Connection::getDeleteStatus(void) const {
-	return (_delete);
+  return (_delete);
+}
+
+Conditions Connection::getConditions(void) const {
+  if (_req.getState() == COMPLETE)
+    return _react.getConditions();
+  return _req.getConditions();
 }
 
 // Setters

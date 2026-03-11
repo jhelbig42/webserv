@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 
 struct TokenType {
@@ -10,10 +11,17 @@ struct TokenType {
     BracesLeft,
     BracesRight,
     Dot,
+    Slash,
     Asterisk,
+    Colon,
     Server,
     Whitespace,
+    Autoindex,
+    On,
+    Off,
+    Listen,
     Number,
+    Root,
     Name
   } Type;
 
@@ -31,10 +39,13 @@ struct TokenType {
   static bool isType(const Type Type, const std::string &Str,
                      std::string::const_iterator It);
 
+  class UnrecognizedTokenException : public std::runtime_error {
+  public:
+    explicit UnrecognizedTokenException(const std::string &);
+  };
+
   const std::string identifier;
-  const std::string keyword;
-  const char *charset;
+  const std::string tokenStr;
   const Type type;
   const Category category;
-  const char singleChar;
 };

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Networking_run.cpp                                 :+:      :+:    :+:   */
+/*   NetworkingRun.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/27 12:22:18 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/06 14:59:32 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void networking::pollLoop(const int Sock) {
     const int res =
         poll(fds.data(), (nfds_t)fds.size(),
              -1); // without restriction to fds.size this cast is unsafe
-    //logging::log(logging::Debug, "poll()");
+    // logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
       msg << "poll: " << std::strerror(errno);
@@ -96,7 +96,7 @@ void networking::pollLoop(const int Sock) {
 void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
                          std::vector<pollfd> &Fds) {
 
-  //logging::log(logging::Debug, "Networking::Process()\n");
+  // logging::log(logging::Debug, "Networking::Process()\n");
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = Fds.begin(); it != Fds.end();) {
     if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |
@@ -116,7 +116,7 @@ void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
         // cMap.at(it->fd).serve(MAX_REQUEST);
         CMap.at(it->fd).serve();
         CMap.at(it->fd).resetConditions();
-	    }
+      }
       it++;
     }
   }

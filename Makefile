@@ -10,7 +10,12 @@ SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
-SRC			+= Config.cpp
+SRC			+= ConfigGlobals.cpp
+SRC			+= ConfigClass.cpp
+SRC			+= Website.cpp
+SRC			+= Parse.cpp
+SRC			+= ParseServer.cpp
+SRC			+= UnexpectedToken.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
@@ -90,8 +95,7 @@ DOXYGEN		:= doxygen
 DOXY_TIMESTAMP := $(DOXY_DIR)/.done
 
 # options
-DEV			:= 1
-ifeq ($(DEV), 1)
+ifneq ($(DEV), 0)
 	ASAN		:= 1
 	UBSAN		:= 1
 	DEBUG		:= 1
@@ -112,7 +116,11 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
+	CXXFLAGS += -fstandalone-debug
+	CPPFLAGS += -O0
 	CPPFLAGS += -g3
+	CPPFLAGS += -fstandalone-debug
+
 endif
 
 ifeq ($(ASAN), 1)
