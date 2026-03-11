@@ -18,8 +18,11 @@
 #include <vector>
 
 
-Server::Server(const Config &conf){
-	(void)conf;
+Server::Server(const Config &Conf){
+	const std::list<Website> websites = Conf.getWebsites();
+	for (std::list<Website>::const_iterator it = websites.begin(); it != websites.end(); it++){
+		std::cout << "Websiteeeee" << std::endl;
+	}
 }
 
 void Server::pollLoop(void) {

@@ -59,6 +59,8 @@ int main(int argc, char **argv) {
   
   try {
     const Config conf(argv[1]);
+
+	// first instantiate websites, check that they exist?
     Server server(conf);
 	server.pollLoop();
   } catch (const std::exception &e) {
