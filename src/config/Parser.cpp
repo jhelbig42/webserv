@@ -1,5 +1,6 @@
-#include "Config.hpp"
+#include "Parser.hpp"
 
+#include "Config.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
 #include <list>
@@ -9,14 +10,14 @@
 Parser::Parser(Config &Conf, const char *File) : _config(Conf), _scan(File), _line(1) {
 }
 
-Parser::parse(Config &Conf) {
+void Parser::parse(void) {
   _it = _scan.firstToken();
   while (true) {
     skipSep();
     if (match(TokenType::Eof))
       break;
     try {
-      Conf.addWebsite(server());
+      _config.addWebsite(server());
     } catch (const UnexpectedTokenException &e) {
       throw;
     } catch (...) {
@@ -25,28 +26,30 @@ Parser::parse(Config &Conf) {
   }
 }
 
-const Token &Config::peek(void) const {
+Parser::~Parser() { }
+
+const Token &Parser::peek(void) const {
   return *_it;
 }
 
-void Config::eat(void) {
+void Parser::eat(void) {
   ++_it;
 }
 
-bool Config::sep(void) {
+bool Parser::sep(void) {
   return match(TokenType::Newline) || match(TokenType::Whitespace);
 }
 
-void Config::skipSep(void) {
+void Parser::skipSep(void) {
   while (sep())
     ;
 }
 
-TokenType::Type Config::nextType(void) const {
+TokenType::Type Parser::nextType(void) const {
   return peek().getType().type;
 }
 
-bool Config::match(const TokenType::Type Type) {
+bool Parser::match(const TokenType::Type Type) {
   if (_it->getType().type == Type) {
     ++_it;
     if (Type == TokenType::Newline)
@@ -56,7 +59,7 @@ bool Config::match(const TokenType::Type Type) {
   return false;
 }
 
-bool Config::noMatch(const TokenType::Type Type) {
+bool Parser::noMatch(const TokenType::Type Type) {
   if (_it->getType().type != Type) {
     ++_it;
     if (Type == TokenType::Newline)
@@ -66,11 +69,11 @@ bool Config::noMatch(const TokenType::Type Type) {
   return false;
 }
 
-void Config::throwTokenError(void) {
+void Parser::throwTokenError(void) {
   throw UnexpectedTokenException(_it);
 }
 
-const std::string &Config::matchGetLexeme(TokenType::Type Type) {
+const std::string &Parser::matchGetLexeme(TokenType::Type Type) {
   const std::list<Token>::const_iterator itDup = _it;
   if (!match(Type))
     throwTokenError();

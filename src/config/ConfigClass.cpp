@@ -1,5 +1,6 @@
 #include "Config.hpp"
 
+#include "Parser.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
 #include <iostream>
@@ -11,7 +12,7 @@ Config::Config(const char *File) {
   parser.parse();
 }
 
-void addWebsite(const Website &Site) {
+void Config::addWebsite(const Website &Site) {
   _websites.push_back(Site);
 }
 

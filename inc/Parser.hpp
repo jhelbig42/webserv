@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Config.hpp"
+
 class Parser {
 public:
   Parser();
@@ -7,6 +9,7 @@ public:
   Parser &operator=(const Parser &);
   ~Parser();
 
+  Parser(Config &Conf, const char *File);
   void parse(void);
 
   class UnexpectedTokenException : public std::exception {
@@ -51,7 +54,7 @@ private:
   const Token &peek(void) const;
   void eat(void);
 
-  Config &_conf;
+  Config &_config;
   Scanner _scan;
   unsigned int _line;
 

@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "Parser.hpp"
 
 #include "Token.hpp"
 #include <cstddef>
@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-Config::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token>::const_iterator It) { 
+Parser::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token>::const_iterator It) { 
   std::list<Token>::const_iterator it = It;
   while (it->getNum() > 1 && it->getLine() == It->getLine())
     --it;
@@ -42,9 +42,8 @@ Config::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token
   _report = oss.str();
 }
 
-const char *Config::UnexpectedTokenException::what() const throw() {
+const char *Parser::UnexpectedTokenException::what() const throw() {
   return _report.c_str();
 }
 
-Config::UnexpectedTokenException::~UnexpectedTokenException(void) throw() { }
-
+Parser::UnexpectedTokenException::~UnexpectedTokenException(void) throw() { }
