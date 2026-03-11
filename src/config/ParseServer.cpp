@@ -1,10 +1,10 @@
-#include "Config.hpp"
+#include "Parser.hpp"
 
 #include "TokenType.hpp"
 #include "Website.hpp"
 #include <string>
 
-Website Config::server(void) {
+Website Parser::server(void) {
   if (!match(TokenType::Server))
     throwTokenError();
   skipSep();
@@ -17,7 +17,7 @@ Website Config::server(void) {
   return newWebsite;
 }
 
-void Config::parseEntry(Website &Website) {
+void Parser::parseEntry(Website &Website) {
   skipSep();
   addEntry(Website);
   skipSep();
@@ -26,38 +26,38 @@ void Config::parseEntry(Website &Website) {
   skipSep();
 }
 
-void Config::gap(void) {
+void Parser::gap(void) {
   if (!sep())
     throwTokenError();
   skipSep();
 }
 
-void Config::populateInterface(Listen &Interface) {
+void Parser::populateInterface(Listen &Interface) {
   addIpv4(Interface);
   if (!match(TokenType::Colon))
     throwTokenError();
   addPort(Interface);
 }
 
-void Config::parseListen(Website &site) {
+void Parser::parseListen(Website &site) {
   gap();
   Listen interface;
   populateInterface(interface);
   site.addInterface(interface);
 }
 
-void Config::parseRoot(Website &site) {
+void Parser::parseRoot(Website &site) {
   gap();
   const std::string root = parseAbsPath();
   site.setRoot(root);
 }
 
-void Config::parseAutoindex(Website &site) {
+void Parser::parseAutoindex(Website &site) {
   gap();
   site.setAutoindex(parseOnOff());
 }
 
-void Config::addEntry(Website &Site) {
+void Parser::addEntry(Website &Site) {
   if (match(TokenType::Listen)) {
     parseListen(Site);
   } else if (match(TokenType::Root)) {
@@ -68,7 +68,7 @@ void Config::addEntry(Website &Site) {
     throwTokenError();
 }
 
-bool Config::parseOnOff(void) {
+bool Parser::parseOnOff(void) {
   if (match(TokenType::On))
     return true;
   if (match(TokenType::Off))
@@ -77,7 +77,7 @@ bool Config::parseOnOff(void) {
   return false;
 }
 
-void Config::addIpv4(Listen &interface) {
+void Parser::addIpv4(Listen &interface) {
   try {
     interface.ip = matchGetLexeme(TokenType::Number);
     interface.ip += matchGetLexeme(TokenType::Dot);
@@ -91,7 +91,7 @@ void Config::addIpv4(Listen &interface) {
   }
 }
 
-void Config::addPort(Listen &interface) {
+void Parser::addPort(Listen &interface) {
   try {
     interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
@@ -99,7 +99,7 @@ void Config::addPort(Listen &interface) {
   }
 }
 
-std::string Config::parseAbsPath(void) {
+std::string Parser::parseAbsPath(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
   if (sep() || nextType() == TokenType::Semicolon)
     return path;
