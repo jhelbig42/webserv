@@ -40,7 +40,10 @@ void Reaction::initPost(const Request &Req){
 }
 
 bool Reaction::receiveFile(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	_buffer.socketToBuf(Socket, Bytes);
 	size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
 	if (toReceive > 0)
 	{
 		ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
@@ -48,11 +51,14 @@ bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 			return (false);
 		_receivedContLen += static_cast<size_t>(copied);
 		_buffer.deleteFront(static_cast<size_t>(copied));
-		_buffer.socketToBuf(Socket, Bytes);
-		return (false);
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 	}
+
+	if (!(_receivedContLen == _reqContLen))
+		return (false);
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
-	return true;
+	initSendFile(CODE_200, FILE_200);
+	return false;
 }

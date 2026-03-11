@@ -72,7 +72,7 @@ void Connection::serve(void) {
 		&& _react.getProcessType() == Reaction::NotInitialized)
 	{
 		_react.init(_req);
-		_req.reset();
+		//_req.reset();
 	}
 	// we have a initialized Reaction - act on it.
 	int dummy = -1;
