@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 18:01:57 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 13:44:19 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/11 15:30:08 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int getServerSocket(struct addrinfo *Server_info);
 void setToListen(const int Sock);
 
 // Networking_run.cpp
-void pollLoop(const int Sock);
+void pollLoop2(const int Sock);
 void process(const int ListenSock, std::map<int, Connection> &CMap,
              std::vector<pollfd> &Fds);
 int acceptConnection(const int ListenSock, struct ClientAddr *Candidate);

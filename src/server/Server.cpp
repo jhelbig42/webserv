@@ -1,18 +1,7 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   NetworkingRun.cpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/20 16:36:50 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/11 15:33:09 by hallison         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Connection.hpp"
 #include "Logging.hpp"
 #include "Networking.hpp"
+#include "Server.hpp"
 // #include "NetworkingDefines.hpp" // Can be removed?
 #include <cerrno>  // for errno
 #include <cstdlib> // exit()
@@ -34,31 +23,18 @@
 // and netoworking::read_data().
 // Decide on most elegant arrangement.
 
+/*
 void networking::pollLoop2(const int Sock); // old, to be deleted
 void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
                          std::vector<pollfd> &Fds);
 int networking::acceptConnection(const int ListenSock, ClientAddr *Candidate);
 void networking::addConnectionToMap(const struct ClientAddr &Candidate,
                                     std::map<int, Connection> &CMap);
+*/
 
-// pollLoop() introduces the while(1) networking loop that will run
-// for the duration of the webserver. This function:
-//
-// • Declares cMap, a map of clients (key = fd, value = Connection object)
-// • Declares fds, a vector of pollfd structs
-//  - Pollfd structs are library-defined and required by poll()
-//  - Placing pollfds in a vector is useful for constant re-sizing,
-//    as well as keeping constant track of the collection size.
-//    Can ALSO be used as a normal array, which poll() expects.
-// • Adds the server's listening socket as the first member of pollfd vector
-// • Enters the polling loop, which
-// 	- continuously checks and marks which pollfds are ready for I/O
-// 	- processes the ones that are marked
+// TODO update pollLoop() documentation for 2.0
 
-void networking::pollLoop2(const int Sock) {
-
-  std::map<int, Connection> cMap;
-  std::vector<pollfd> fds;
+void Server::pollLoop(void) {
 
   const pollfd listener = {Sock, POLLIN, 0};
   fds.push_back(listener);
@@ -93,6 +69,7 @@ void networking::pollLoop2(const int Sock) {
 //
 // TODO Handle additional flags
 
+/*
 void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
                          std::vector<pollfd> &Fds) {
 
@@ -169,3 +146,4 @@ void networking::addConnectionToMap(const struct ClientAddr &Candidate,
       Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize);
   CMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }
+*/

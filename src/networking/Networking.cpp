@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/10 17:52:19 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/11 14:42:56 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/11 15:28:34 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,17 @@ void generateDummyWebsite(std::string ip; Type type, unsigned int port) {
 
 void networking::start(void) {
 
+
+  Server server;
+
+  /*
   struct addrinfo *serverInfo = getServerInfo();
   int sock;
   sock = getServerSocket(serverInfo);
   freeaddrinfo(serverInfo);
   setToListen(sock);
-
+*/
   // signal handling goes here
 
-  pollLoop(sock);
+  server.pollLoop();
 }

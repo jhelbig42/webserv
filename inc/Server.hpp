@@ -12,17 +12,21 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+/*
 class ListenMap {
 
 	// struct addrinfo *serverInfo	
 	int socket;
 	Website *website;
 };
+*/
 
 class Server {
 
 	public:
 	std::map<int, Connection> cMap;
 	std::vector<pollfd> fds;
-	std::map<int, *Website> listenMap;
+	std::map<int, Website*> listenMap;
+
+	void pollLoop(void);
 };

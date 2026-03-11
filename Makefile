@@ -7,6 +7,8 @@ OBJ_DIR		:= obj
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
+vpath %.cpp $(SRC_DIR)/server
+SRC			+= Server.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
