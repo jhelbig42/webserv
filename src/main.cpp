@@ -2,6 +2,7 @@
 #include "Request.hpp"
 #include "Reaction.hpp"
 #include "Networking.hpp"
+#include "Config.hpp"
 #include <unistd.h>
 #include <iostream>
 
@@ -34,8 +35,14 @@ int main(void) {
 int main(int argc, char **argv) {
   if (argc != 2)
     return 1;
-  const Scanner scan(argv[1]);
-  std::cout << scan;
+  try {
+    const Config conf(argv[1]);
+    std::cout << conf;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
+  }
+  // const Scanner scan(argv[1]);
+  // std::cout << scan;
   return 0;
 }
 

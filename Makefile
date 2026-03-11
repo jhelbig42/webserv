@@ -10,7 +10,12 @@ SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
-SRC			+= Config.cpp
+SRC			+= ConfigGlobals.cpp
+SRC			+= ConfigClass.cpp
+SRC			+= Website.cpp
+SRC			+= Parse.cpp
+SRC			+= ParseServer.cpp
+SRC			+= UnexpectedToken.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
@@ -111,10 +116,10 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
-#	CXXFLAGS += -fstandalone-debug
+	CXXFLAGS += -fstandalone-debug
+	CPPFLAGS += -O0
 	CPPFLAGS += -g3
-#	CPPFLAGS += -fstandalone-debug
-#   These flags do not compile on Debian VM
+	CPPFLAGS += -fstandalone-debug
 
 endif
 
