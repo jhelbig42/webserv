@@ -59,6 +59,7 @@ bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
-	initSendFile(CODE_200, FILE_200);
+	_buffer.reset();
+	initSendFile(CODE_201, NULL);
 	return false;
 }
