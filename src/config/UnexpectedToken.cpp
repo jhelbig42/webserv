@@ -32,13 +32,13 @@ Config::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token
   std::string showStr = lineStr.substr(0, linePosition + 1);
   for (size_t i = 0; i != linePosition; ++i) {
     if (showStr[i] != '\t')
-      showStr[i] = '-';
+      showStr[i] = ' ';
   }
   showStr[linePosition] = '^';
   std::ostringstream oss;
   oss << "Unexpected token in line " << It->getLine() << ":\n";
   oss << lineStr << '\n';
-  oss << /*"\x1B[32m" << */showStr << "\033[0m";
+  oss << "\x1B[31m" << showStr << "\033[0m";
   _report = oss.str();
 }
 
