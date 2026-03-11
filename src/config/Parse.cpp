@@ -1,5 +1,11 @@
 #include "Config.hpp"
 
+#include "Token.hpp"
+#include "TokenType.hpp"
+#include <list>
+#include <sstream>
+#include <string>
+
 const Token &Config::peek(void) const {
   return *_it;
 }
@@ -44,7 +50,7 @@ void Config::throwTokenError(void) {
 }
 
 const std::string &Config::matchGetLexeme(TokenType::Type Type) {
-  std::list<Token>::const_iterator itDup = _it;
+  const std::list<Token>::const_iterator itDup = _it;
   if (!match(Type))
     throwTokenError();
   return itDup->getLexeme();

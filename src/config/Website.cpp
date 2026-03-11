@@ -1,6 +1,7 @@
 #include "Website.hpp"
 #include <algorithm>
 #include <list>
+#include <ostream>
 
 static void printInterfaces(std::ostream &Os, const Website &Site);
 static void printRoot(std::ostream &Os, const Website &Site);

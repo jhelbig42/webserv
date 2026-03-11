@@ -1,5 +1,9 @@
 #include "Config.hpp"
 
+#include "TokenType.hpp"
+#include "Website.hpp"
+#include <string>
+
 Website Config::server(void) {
   if (!match(TokenType::Server))
     throwTokenError();

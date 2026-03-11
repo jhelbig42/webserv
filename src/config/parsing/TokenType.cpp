@@ -1,9 +1,9 @@
 #include "TokenType.hpp"
 
 #include <cstring>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 
 static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It);
 static bool isCharset(const std::string &Charset, const std::string &Str,

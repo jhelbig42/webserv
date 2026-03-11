@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "ConfigDefaults.hpp"
+#include "Logging.hpp"
 
 /// \var static logging::LogLevel globalLogLevel
 /// \brief defines the lowest log severity that is still printed

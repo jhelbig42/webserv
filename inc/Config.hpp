@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Logging.hpp"
+#include "Scanner.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
-#include "Scanner.hpp"
 #include <stdexcept>
 #include <string>
 
@@ -17,7 +17,7 @@ bool logColored(void);
 /// \brief object which holds most of the HTTP configuration
 class Config {
 public:
-  Config(const char *File);
+  explicit Config(const char *File);
   const std::list<Website> &getWebsites(void) const;
 
   class UnexpectedTokenException : public std::runtime_error {
