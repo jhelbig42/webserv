@@ -23,7 +23,11 @@ void Config::skipSep(void) {
     ;
 }
 
-bool Config::match(TokenType::Type Type) {
+TokenType::Type Config::nextType(void) const {
+  return peek().getType().type;
+}
+
+bool Config::match(const TokenType::Type Type) {
   if (_it->getType().type == Type) {
     ++_it;
     if (Type == TokenType::Newline)
@@ -33,7 +37,7 @@ bool Config::match(TokenType::Type Type) {
   return false;
 }
 
-bool Config::noMatch(TokenType::Type Type) {
+bool Config::noMatch(const TokenType::Type Type) {
   if (_it->getType().type != Type) {
     ++_it;
     if (Type == TokenType::Newline)

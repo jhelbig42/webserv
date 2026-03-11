@@ -80,26 +80,24 @@ void Config::addPort(Listen &interface) {
   }
 }
 
-
 std::string Config::parseAbsPath(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
   if (sep() || peek().getType().type == TokenType::Semicolon)
     return path;
   while (true) {
-    if (peek().getType().type == TokenType::Slash)
+    if (nextType() == TokenType::Slash)
       throwTokenError();
-    while (peek().getType().type != TokenType::Newline
-           && peek().getType().type != TokenType::Whitespace
-           && peek().getType().type != TokenType::Semicolon
-           && peek().getType().type != TokenType::Slash) {
+    while (nextType() != TokenType::Newline &&
+           nextType() != TokenType::Whitespace &&
+           nextType() != TokenType::Semicolon &&
+           nextType() != TokenType::Slash) {
       path += peek().getLexeme();
       eat();
     }
     if (!match(TokenType::Slash))
       throwTokenError();
     path += "/";
-    if (sep() || peek().getType().type == TokenType::Semicolon)
+    if (sep() || nextType() == TokenType::Semicolon)
       return path;
   }
 }
-

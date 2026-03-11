@@ -28,8 +28,9 @@ public:
 private:
   bool sep(void);
   void skipSep(void);
-  bool match(TokenType::Type Type);
-  bool noMatch(TokenType::Type Type);
+  bool match(const TokenType::Type Type);
+  bool noMatch(const TokenType::Type Type);
+  TokenType::Type nextType(void) const;
   const std::string &matchGetLexeme(TokenType::Type Type);
 
   Website expression(void);
