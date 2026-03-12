@@ -50,22 +50,36 @@ void Server::initNetworking(const std::list<Website> &Websites) {
 
 Socket Server::initListeningSocket(const Listen &Interface,
                                    const Website &Web) {
-
+	
   struct addrinfo *serverInfo = getInfo(Interface);
-
   (void)serverInfo;
   freeaddrinfo(serverInfo);
   // set up socket
   Socket socket;
+  catch (const std::exception &e){
+  }
   return (socket);
+}
+
+uint16_t extractPort(std::string str){
+	
+	if (str.length() < 1 || str.length > 5)
+		return -1;
+	int port = stoi(str);
+	if 	(port < 0 || port > 65535){
+		const std::string msg(str, " is not a valid port number");
+		throw std::runtime_error(msg);
+	}
+	return (static_cast<uint16_t>(port)); 
 }
 
 struct addrinfo *Server::getInfo(const Listen &Interface) {
 
   struct addrinfo *info;
-  unsigned short port;
-
-  (void)port;
+  uint16_t port; 
+  try {
+  	extractPort(Interface.port);
+  }
   const int ret = getaddrinfo(NULL, PORT, &_hints, &info); // NULL = localhost
   if (ret != 0) {
     const std::string msg(gai_strerror(ret));
