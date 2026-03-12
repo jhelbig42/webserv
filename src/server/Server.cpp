@@ -17,34 +17,91 @@
 #include <utility>
 #include <vector>
 
-
-Socket Server::initListeningSocket(const Listen &Interface, const Website &Web){
-	
-	//struct addrinfo *serverInfo = getServerInfo(); // bring in from networking
-	Socket socket;
-	return(socket);
+Server::Server(const std::list<Website> &Websites) {
+  initNetworking(Websites);
+  // this could also be done after construction
 }
 
-void Server::initNetworking(const std::list <Website> &Websites){
-  
+void Server::initNetworking(const std::list<Website> &Websites) {
+
   // iterate through all websites from config file
   for (std::list<Website>::const_iterator itW = Websites.begin();
        itW != Websites.end(); itW++) {
-		const std::list<Listen> interfaces = itW->getInterfaces();
+    const std::list<Listen> interfaces = itW->getInterfaces();
 
-		// iterate through all interfaces of a given website
-    	for (std::list<Listen>::const_iterator itI = interfaces.begin();
-         itI != interfaces.end(); itI++){
-			const Socket sock = initListeningSocket(*itI, *itW);
-			sockets.push_back(sock);
-		}
+    // iterate through all interfaces of a given website
+    for (std::list<Listen>::const_iterator itI = interfaces.begin();
+         itI != interfaces.end(); itI++) {
+      const Socket sock = initListeningSocket(*itI, *itW);
+      sockets.push_back(sock);
+    }
   }
-
 }
 
-Server::Server(const std::list<Website> &Websites) {
-	initNetworking(Websites);
-	// this could also be done after construction
+Socket Server::initListeningSocket(const Listen &Interface,
+                                   const Website &Web) {
+
+  struct addrinfo *serverInfo = getInfo(Interface);
+
+  (void)serverInfo;
+  freeaddrinfo(serverInfo);
+  // set up socket
+  Socket socket;
+  return (socket);
+}
+
+struct addrinfo *Server::getInfo(const Listen &Interface) {
+
+  const struct addrinfo hints = createHints(); // TODO move this
+  // to do it once at the beginning / construction
+  struct addrinfo *info;
+  unsigned short port;
+
+  (void)port;
+  const int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
+  if (ret != 0) {
+    const std::string msg(gai_strerror(ret));
+    throw std::runtime_error("getaddrinfo: " + msg);
+  }
+  // logging::log(logging::Debug, "addrinfo server_info created");
+  // logging::log(logging::Debug, addrinfoToStr(info, "server_info:"));
+  return (info);
+}
+
+struct addrinfo Server::createHints(void) {
+
+  struct addrinfo hints;
+  memset(&hints, 0, sizeof hints); // init struct to empty;
+  hints.ai_family = AF_UNSPEC;     // allows either IPv4 or IPv6
+  hints.ai_socktype = SOCK_STREAM; // for TCP stream sockets
+  hints.ai_flags = AI_PASSIVE;     // autofill my IP
+  return (hints);
+}
+
+// get_addr_info_str() is only for logging purposes.
+// The function builds a string from the contents of an addrinfo struct
+// and an additional msg, which I've used to add a label for this struct.
+//
+// NOTE: This function should not be used with uninitialized addrinfo structs,
+// in which the values might be garbage. Currently, it is only used by
+// getServerInfo(), which assures initialization.
+//
+// Currently static due to one-time use. In the future, may be useful for
+// logging client addrinfo, in which case it would need to be added back
+// to the header, and could be moved to a different (debug / helper?) .cpp
+//
+// RETURNS: a string with all info to be printed
+
+std::string Server::addrinfoToStr(const struct addrinfo *Info,
+                                  const std::string &Msg) {
+  std::ostringstream oss;
+  oss << "\n\t" << Msg << "\n"
+      << "\tai_flags = " << Info->ai_flags << "\n"
+      << "\tai_family = " << Info->ai_family << "\n"
+      << "\tai_socktype = " << Info->ai_socktype << "\n"
+      << "\tai_protocol = " << Info->ai_protocol << "\n"
+      << "\tai_addrlen = " << Info->ai_addrlen << "\n";
+  return (oss.str());
 }
 
 void Server::pollLoop(void) {

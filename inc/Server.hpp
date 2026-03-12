@@ -25,7 +25,11 @@ class Server {
 	void pollLoop(void);
 
 	private:
+
+	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
-	void initWebsites(const Website &Web);
 	Socket initListeningSocket(const Listen &Interface, const Website &Web);
+	struct addrinfo *getInfo(const Listen &Interface);
+	struct addrinfo createHints(void);
+	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 };
