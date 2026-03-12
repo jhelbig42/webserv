@@ -1,7 +1,7 @@
+#include "Server.hpp"
 #include "Connection.hpp"
 #include "Logging.hpp"
 #include "Networking.hpp"
-#include "Server.hpp"
 // #include "NetworkingDefines.hpp" // Can be removed?
 #include <cerrno>  // for errno
 #include <cstdlib> // exit()
@@ -18,37 +18,51 @@
 #include <vector>
 
 
-Server::Server(const Config &Conf){
-	const std::list<Website> websites = Conf.getWebsites();
-	for (std::list<Website>::const_iterator it = websites.begin(); it != websites.end(); it++){
-		std::cout << "Websiteeeee" << std::endl;
-	}
+Socket initListeningSocket(const Listen &Interface, const Website &Web){
+	
+	//struct addrinfo *serverInfo = getServerInfo(); // bring in from networking
+	Socket socket;
+	return(socket);
+}
+
+Server::Server(const std::list<Website> &Websites) {
+  for (std::list<Website>::const_iterator itW = Websites.begin();
+       itW != Websites.end(); itW++) {
+    logging::log(logging::Debug, "Setting up website...");
+
+    const std::list<Listen> interfaces = itW->getInterfaces();
+    for (std::list<Listen>::const_iterator itI = interfaces.begin();
+         itI != interfaces.end(); itI++){
+			const Socket sock = initListeningSocket(*itI, *itW);
+			sockets.push_back(sock);
+		}
+  }
 }
 
 void Server::pollLoop(void) {
 
-	logging::log(logging::Debug, "<pollLoop>");
-/*
-  const pollfd listener = {Sock, POLLIN, 0};
-  fds.push_back(listener);
+  logging::log(logging::Debug, "<pollLoop>");
+  /*
+    const pollfd listener = {Sock, POLLIN, 0};
+    fds.push_back(listener);
 
-  while (1) {
-    const int res =
-        poll(fds.data(), (nfds_t)fds.size(),
-             -1); // without restriction to fds.size this cast is unsafe
-    // logging::log(logging::Debug, "poll()");
-    if (res == -1) {
-      std::ostringstream msg;
-      msg << "poll: " << std::strerror(errno);
-      logging::log(logging::Error, msg.str());
+    while (1) {
+      const int res =
+          poll(fds.data(), (nfds_t)fds.size(),
+               -1); // without restriction to fds.size this cast is unsafe
+      // logging::log(logging::Debug, "poll()");
+      if (res == -1) {
+        std::ostringstream msg;
+        msg << "poll: " << std::strerror(errno);
+        logging::log(logging::Error, msg.str());
 
-      // TODO How to best handle poll() failure?
-      // Currently, logging error and exiting
-      // Could also log Warning and continue.
+        // TODO How to best handle poll() failure?
+        // Currently, logging error and exiting
+        // Could also log Warning and continue.
+      }
+      process(Sock, cMap, fds);
     }
-    process(Sock, cMap, fds);
-  }
-  */
+    */
 }
 
 // process() iterates through the vector of fds and handles the flags

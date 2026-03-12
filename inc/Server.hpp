@@ -3,6 +3,7 @@
 #include "Config.hpp"
 #include "Connection.hpp"
 #include "Logging.hpp"
+#include "Socket.hpp"
 #include "Website.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains
@@ -15,10 +16,11 @@
 class Server {
 
 	public:
-	std::map<int, Connection> cMap;
-	std::vector<pollfd> fds;
-	std::map<int, Website*> listenMap;
+	//std::map<int, Connection> cMap;
+	//std::vector<pollfd> fds;
+	//std::map<int, Website*> listenMap;
 
-	Server(const Config &Conf);
+	std::vector<Socket> sockets;
+	Server(const std::list<Website>  &websites);
 	void pollLoop(void);
 };

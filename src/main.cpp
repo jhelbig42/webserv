@@ -59,9 +59,12 @@ int main(int argc, char **argv) {
   
   try {
     const Config conf(argv[1]);
-
-	// first instantiate websites, check that they exist?
-    Server server(conf);
+	const std::list<Website> websites = conf.getWebsites();
+	if (websites.empty()){
+		logging::log(logging::Info, "config file contains 0 websites");
+		exit(1);
+	}
+	Server server(websites);
 	server.pollLoop();
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
