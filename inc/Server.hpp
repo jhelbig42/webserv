@@ -25,6 +25,7 @@ class Server {
 	void pollLoop(void);
 
 	private:
-	void initWebsiteNetworking(const Website &Web);
+	void initNetworking(const std::list<Website> &Websites);
+	void initWebsites(const Website &Web);
 	Socket initListeningSocket(const Listen &Interface, const Website &Web);
 };

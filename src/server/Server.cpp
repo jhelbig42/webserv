@@ -25,24 +25,26 @@ Socket Server::initListeningSocket(const Listen &Interface, const Website &Web){
 	return(socket);
 }
 
-void Server::initWebsiteNetworking(const Website &Web){
-    
-	logging::log(logging::Debug, "initWebsiteNetworking()");
-    
-	const std::list<Listen> interfaces = Web.getInterfaces();
-    for (std::list<Listen>::const_iterator it = interfaces.begin();
-         it != interfaces.end(); it++){
-			const Socket sock = initListeningSocket(*it, Web);
+void Server::initNetworking(const std::list <Website> &Websites){
+  
+  // iterate through all websites from config file
+  for (std::list<Website>::const_iterator itW = Websites.begin();
+       itW != Websites.end(); itW++) {
+		const std::list<Listen> interfaces = itW->getInterfaces();
+
+		// iterate through all interfaces of a given website
+    	for (std::list<Listen>::const_iterator itI = interfaces.begin();
+         itI != interfaces.end(); itI++){
+			const Socket sock = initListeningSocket(*itI, *itW);
 			sockets.push_back(sock);
 		}
+  }
+
 }
 
 Server::Server(const std::list<Website> &Websites) {
-
-  for (std::list<Website>::const_iterator it = Websites.begin();
-       it != Websites.end(); it++) {
-		initWebsiteNetworking(*it);
-  }
+	initNetworking(Websites);
+	// this could also be done after construction
 }
 
 void Server::pollLoop(void) {
