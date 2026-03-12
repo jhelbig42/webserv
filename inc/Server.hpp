@@ -23,4 +23,8 @@ class Server {
 	std::vector<Socket> sockets;
 	Server(const std::list<Website>  &websites);
 	void pollLoop(void);
+
+	private:
+	void initWebsiteNetworking(const Website &Web);
+	Socket initListeningSocket(const Listen &Interface, const Website &Web);
 };

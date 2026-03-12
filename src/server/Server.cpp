@@ -18,24 +18,30 @@
 #include <vector>
 
 
-Socket initListeningSocket(const Listen &Interface, const Website &Web){
+Socket Server::initListeningSocket(const Listen &Interface, const Website &Web){
 	
 	//struct addrinfo *serverInfo = getServerInfo(); // bring in from networking
 	Socket socket;
 	return(socket);
 }
 
-Server::Server(const std::list<Website> &Websites) {
-  for (std::list<Website>::const_iterator itW = Websites.begin();
-       itW != Websites.end(); itW++) {
-    logging::log(logging::Debug, "Setting up website...");
-
-    const std::list<Listen> interfaces = itW->getInterfaces();
-    for (std::list<Listen>::const_iterator itI = interfaces.begin();
-         itI != interfaces.end(); itI++){
-			const Socket sock = initListeningSocket(*itI, *itW);
+void Server::initWebsiteNetworking(const Website &Web){
+    
+	logging::log(logging::Debug, "initWebsiteNetworking()");
+    
+	const std::list<Listen> interfaces = Web.getInterfaces();
+    for (std::list<Listen>::const_iterator it = interfaces.begin();
+         it != interfaces.end(); it++){
+			const Socket sock = initListeningSocket(*it, Web);
 			sockets.push_back(sock);
 		}
+}
+
+Server::Server(const std::list<Website> &Websites) {
+
+  for (std::list<Website>::const_iterator it = Websites.begin();
+       it != Websites.end(); it++) {
+		initWebsiteNetworking(*it);
   }
 }
 
