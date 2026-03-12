@@ -26,6 +26,8 @@ class Server {
 
 	private:
 
+	addrinfo _hints;
+
 	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
 	Socket initListeningSocket(const Listen &Interface, const Website &Web);

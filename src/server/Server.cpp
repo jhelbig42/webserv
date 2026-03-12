@@ -18,8 +18,13 @@
 #include <vector>
 
 Server::Server(const std::list<Website> &Websites) {
+  
+  memset(&_hints, 0, sizeof _hints); // init struct to empty;
+  _hints.ai_family = AF_UNSPEC;     // allows either IPv4 or IPv6
+  _hints.ai_socktype = SOCK_STREAM; // for TCP stream sockets
+  _hints.ai_flags = AI_PASSIVE;     // autofill my IP
+  
   initNetworking(Websites);
-  // this could also be done after construction
 }
 
 void Server::initNetworking(const std::list<Website> &Websites) {
@@ -57,13 +62,11 @@ Socket Server::initListeningSocket(const Listen &Interface,
 
 struct addrinfo *Server::getInfo(const Listen &Interface) {
 
-  const struct addrinfo hints = createHints(); // TODO move this
-  // to do it once at the beginning / construction
   struct addrinfo *info;
   unsigned short port;
 
   (void)port;
-  const int ret = getaddrinfo(NULL, PORT, &hints, &info); // NULL = localhost
+  const int ret = getaddrinfo(NULL, PORT, &_hints, &info); // NULL = localhost
   if (ret != 0) {
     const std::string msg(gai_strerror(ret));
     throw std::runtime_error("getaddrinfo: " + msg);
@@ -71,16 +74,6 @@ struct addrinfo *Server::getInfo(const Listen &Interface) {
   // logging::log(logging::Debug, "addrinfo server_info created");
   // logging::log(logging::Debug, addrinfoToStr(info, "server_info:"));
   return (info);
-}
-
-struct addrinfo Server::createHints(void) {
-
-  struct addrinfo hints;
-  memset(&hints, 0, sizeof hints); // init struct to empty;
-  hints.ai_family = AF_UNSPEC;     // allows either IPv4 or IPv6
-  hints.ai_socktype = SOCK_STREAM; // for TCP stream sockets
-  hints.ai_flags = AI_PASSIVE;     // autofill my IP
-  return (hints);
 }
 
 // get_addr_info_str() is only for logging purposes.
