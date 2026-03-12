@@ -32,8 +32,13 @@ void Server::initNetworking(const std::list<Website> &Websites) {
     // iterate through all interfaces of a given website
     for (std::list<Listen>::const_iterator itI = interfaces.begin();
          itI != interfaces.end(); itI++) {
-      const Socket sock = initListeningSocket(*itI, *itW);
-      sockets.push_back(sock);
+      try {
+	  	const Socket sock = initListeningSocket(*itI, *itW);
+      	sockets.push_back(sock);
+	  }
+	  catch (const std::exception &e) {
+	  	logging::log(logging::Error, e.what());
+	  }
     }
   }
 }
