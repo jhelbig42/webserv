@@ -22,16 +22,14 @@ static void setMetadata(std::string &Metadata, const int Code,
 
 void Reaction::setDefaults(void) {
   _processType = NotInitialized;
-  //_postType = NotPost;
   _metadataSent = false;
   _fdIn = -1;
-  _fdOut = -1;
   _headers.unsetAll();
   _conditions = Unconditional;
 }
 
 Reaction::Reaction()
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1) {
   _headers.unsetAll();
 }
 
@@ -41,6 +39,19 @@ Conditions Reaction::getConditions(void) const {
 
 Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
+}
+
+bool		Reaction::isCGI(const Request &Req){
+  if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh)
+  {
+    _processType = Cgi;
+    //init CGI
+      //fill Script information
+      //create env
+    //execute CGI
+    return true;
+  }
+  return false;
 }
 
 void Reaction::init(const Request &Req) {
@@ -63,10 +74,13 @@ void Reaction::init(const Request &Req) {
   //
   //check if method is allowed in comparison to config
 
-  initMethod(Req);
+  //check if Resource is a CGI script
+  //processType CGI
+  if(!isCGI(Req))
+    initMethodNonCGI(Req);
 }
 
-void Reaction::initMethod(const Request &Req) {
+void Reaction::initMethodNonCGI(const Request &Req) {
   logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   switch (Req.getMethod()) {
   case Head:
@@ -105,8 +119,7 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 Reaction::Reaction(const Request &Req)
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1),
-    _fdOut(-1) 
+    : _processType(NotInitialized),  _receivedContLen(0), _metadataSent(false), _fdIn(-1)
 {
   init(Req);
 }
@@ -124,13 +137,12 @@ void Reaction::initSendFile(const int Code, const char *File) {
     return;
 
   if (File != NULL) {
-    _headers.setContentLength(statbuf.st_size);
+    _headers.setContentLength(static_cast<size_t>(statbuf.st_size));
     _headers.setContentType(strrchr(File, '.'));
   }
 
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
-  _fdOut = -1;
   _processType = SendFile;
   _conditions = SockWrite;
 }

@@ -3,6 +3,7 @@
 #include "Buffer.hpp"
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
+#include "Script.hpp"
 #include <string>
 #include <sys/types.h>
 
@@ -34,7 +35,7 @@ public:
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
   /// \return true if Reaction got fully processed otherwise false
-  bool process(const int Socket, int &ForwardSocket, const size_t Bytes);
+  bool process(const int Socket, int &ForwardSocket, const size_t Bytes, const int Condition);
 
   Conditions getConditions(void) const;
   ProcessType getProcessType(void) const;
@@ -47,27 +48,29 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
   void setDefaults(void);
-  void initMethod(const Request &Req);
+  void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(const Request &Req);
   void initPost(const Request &Req);
 
-  Conditions _conditions;
+  //for Post request
+  bool receiveFile(const int Socket, const size_t Bytes);
+
+  bool		isCGI(const Request &Req);
+
+  Conditions  _conditions;
   HttpHeaders _headers;
   ProcessType _processType;
-  //PostType    _postType;
-
-  //for post
-
-  size_t  _contLenReq;
+  size_t      _reqContLen;
+  size_t      _receivedContLen;
 
   // consider abstraction for metaData
   bool _metadataSent;
   std::string _metadata;
 
   int _fdIn;
-  int _fdOut;
-
-  // consider abstraction for buffer
+  FILE *_fdOut;
   Buffer _buffer;
+
+  Script  _script; 
 };

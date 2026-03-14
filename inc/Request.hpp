@@ -2,8 +2,8 @@
 
 #include "Buffer.hpp"
 #include "Conditions.hpp"
-#include "Logging.hpp"
 #include "HttpHeaders.hpp"
+#include "Logging.hpp"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -61,8 +61,7 @@ class Request {
 		bool parseHeadersFromBuffer();
 		void parseHeader(const std::string &headerLine);
 		
-		Conditions getConditions(void) const;
-
+	
 		Buffer		getBuffer() const;
 		ParseState	getState() const;
 		size_t		getMajorV() const;
@@ -70,13 +69,13 @@ class Request {
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
 		HttpHeaders	getHeaders() const;
+		
 
 	private:
 		HttpMethod	_method;
 		std::string _resource;
 		size_t		_majorVersion;
 		size_t		_minorVersion;
-		Conditions	_conditions;
 		Buffer		_buf;
 		ParseState	_state;
 		HttpHeaders	_headers;	

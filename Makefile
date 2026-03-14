@@ -42,6 +42,8 @@ SRC			+= HttpHeaders.cpp
 SRC			+= HttpHeadersOutput.cpp
 vpath %.cpp $(SRC_DIR)/connection
 SRC			+= Connection.cpp
+vpath %.cpp $(SRC_DIR)/script
+SRC			+= Script.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
