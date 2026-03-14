@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-uint16_t extractPort(std::string str);
+void checkPort(std::string str);
 
 Server::Server(const std::list<Website> &Websites) {
   
@@ -40,29 +40,22 @@ void Server::initNetworking(const std::list<Website> &Websites) {
     // iterate through all interfaces of a given website
     for (std::list<Listen>::const_iterator itI = interfaces.begin();
          itI != interfaces.end(); itI++) {
-      try {
-	  	const Socket sock = initListeningSocket(*itI, *itW);
-      	sockets.push_back(sock);
+      const Socket sock = initListeningSocket(*itI, *itW);
+      sockets.push_back(sock);
 	  }
-	  catch (const std::exception &e) {
-	  	logging::log(logging::Error, e.what());
-	  }
-    }
   }
 }
 
 Socket Server::initListeningSocket(const Listen &Interface,
                                    const Website &Web) {
-	
-  uint16_t port = extractPort(Interface.port);
+  checkPort(Interface.port);
   struct addrinfo *serverInfo = getInfo(Interface);
   freeaddrinfo(serverInfo);
   Socket socket;
-  (void) port;
   return (socket);
 }
 
-uint16_t extractPort(std::string str){
+void checkPort(std::string str){
 	
 	if (str.length() < 1 || str.length()> 5){
 		const std::string msg(str + " is not a valid port number");
@@ -75,13 +68,13 @@ uint16_t extractPort(std::string str){
 		logging::log(logging::Error, msg);
 		exit(1);
 	}
-	return (static_cast<uint16_t>(port)); 
 }
 
 struct addrinfo *Server::getInfo(const Listen &Interface) {
 
   struct addrinfo *info;
-  const int ret = getaddrinfo(NULL, PORT, &_hints, &info); // NULL = localhost
+  logging::log2(logging::Debug, "getInfo() called with ip: ", Interface.ip);
+  const int ret = getaddrinfo(Interface.ip.c_str(), Interface.port.c_str(), &_hints, &info); // NULL = localhost
   if (ret != 0) {
     const std::string msg(gai_strerror(ret));
     throw std::runtime_error("getaddrinfo: " + msg);
