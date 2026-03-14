@@ -11,11 +11,14 @@
 #include <map>
 #include <ostream>
 #include <poll.h>
+#include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <utility>
 #include <vector>
+
+uint16_t extractPort(std::string str);
 
 Server::Server(const std::list<Website> &Websites) {
   
@@ -51,24 +54,26 @@ void Server::initNetworking(const std::list<Website> &Websites) {
 Socket Server::initListeningSocket(const Listen &Interface,
                                    const Website &Web) {
 	
+  uint16_t port = extractPort(Interface.port);
   struct addrinfo *serverInfo = getInfo(Interface);
-  (void)serverInfo;
   freeaddrinfo(serverInfo);
-  // set up socket
   Socket socket;
-  catch (const std::exception &e){
-  }
+  (void) port;
   return (socket);
 }
 
 uint16_t extractPort(std::string str){
 	
-	if (str.length() < 1 || str.length > 5)
-		return -1;
-	int port = stoi(str);
+	if (str.length() < 1 || str.length()> 5){
+		const std::string msg(str + " is not a valid port number");
+		logging::log(logging::Error, msg);
+		exit(1);
+  }
+	int port = std::atoi(str.c_str());
 	if 	(port < 0 || port > 65535){
-		const std::string msg(str, " is not a valid port number");
-		throw std::runtime_error(msg);
+		const std::string msg(str + " is not a valid port number");
+		logging::log(logging::Error, msg);
+		exit(1);
 	}
 	return (static_cast<uint16_t>(port)); 
 }
@@ -76,10 +81,6 @@ uint16_t extractPort(std::string str){
 struct addrinfo *Server::getInfo(const Listen &Interface) {
 
   struct addrinfo *info;
-  uint16_t port; 
-  try {
-  	extractPort(Interface.port);
-  }
   const int ret = getaddrinfo(NULL, PORT, &_hints, &info); // NULL = localhost
   if (ret != 0) {
     const std::string msg(gai_strerror(ret));
