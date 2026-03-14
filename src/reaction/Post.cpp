@@ -4,7 +4,13 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
+#include <algorithm>
+#include <cstddef>
+#include <cstdio>
+#include <stdio.h>
+#include <string>
 
+#define DEFAULT_PATH "./post"
 // think about body is coming in chunks
 // maybe Reaction also needs state
 void Reaction::initPost(const Request &Req){
@@ -18,14 +24,43 @@ void Reaction::initPost(const Request &Req){
 		return;
 	}
 	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
-	_contLenReq = (size_t) Req.getHeaders().getContentLength(); // temp edit for compilation - Hilary, 6. March
+	_reqContLen = Req.getHeaders().getContentLength();
 
 	//copy buffer if still in buffer
-	//create requested file with write access
-	
 	_buffer	= Req.getBuffer();
-	//write into it, what is in buffer
-	//check for content length
-	//read until done
-	//close file
+
+	//create requested file with write access
+	const std::string pathname = DEFAULT_PATH + Req.getResource();
+	_fdOut = fopen(pathname.c_str(), "w");
+	if (!_fdOut)
+		initSendFile(CODE_500, NULL);
+	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", pathname);
+	_processType = ReceiveFile;
+  	_conditions = SockRead;
+	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
+}
+
+bool Reaction::receiveFile(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	_buffer.socketToBuf(Socket, Bytes);
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
+	if (toReceive > 0)
+	{
+		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
+		if (copied == -1)
+			return (false);
+		_receivedContLen += static_cast<size_t>(copied);
+		_buffer.deleteFront(static_cast<size_t>(copied));
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
+	}
+
+	if (!(_receivedContLen == _reqContLen))
+		return (false);
+	// if we received enough data in comparison to given content length
+	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
+	fclose(_fdOut);
+	_buffer.reset();
+	initSendFile(CODE_201, NULL);
+	return false;
 }

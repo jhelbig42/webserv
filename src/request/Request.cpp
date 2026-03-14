@@ -1,4 +1,4 @@
-#include "Conditions.hpp"
+
 #include "Logging.hpp"
 #include "Request.hpp"
 #include <string>
@@ -12,7 +12,6 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_conditions (SockRead),
 	_state(STATUS_LINE)
 {
 	_headers.unsetAll();
@@ -28,7 +27,6 @@ void Request::reset() {
 	_majorVersion = 0; 
 	_minorVersion = 0;
 	_state = STATUS_LINE;
-	_conditions = SockRead;
 	_headers.unsetAll();
 }
 
@@ -131,10 +129,6 @@ const std::string &Request::getResource() const {
 
 HttpMethod Request::getMethod() const {
 	return _method;
-}
-
-Conditions Request::getConditions(void) const {
-	return _conditions;
 }
 
 ParseState Request::getState() const{

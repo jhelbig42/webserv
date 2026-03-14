@@ -1,6 +1,7 @@
 #include "Buffer.hpp"
 #include "CompileTimeConstants.hpp"
 #include <algorithm>
+#include <cstdio>
 #include <cstring>
 #include <errno.h>
 #include <stdexcept>
@@ -105,6 +106,26 @@ ssize_t Buffer::bufToFile(const int Fd, const size_t Bytes) {
   if (_start == _end)
     reset();
   return rc;
+}
+
+ssize_t Buffer::bufToFILE(FILE* file, const size_t Bytes) {
+  if (getUsed() == 0)
+    return -1;
+
+  const size_t amount = std::min(Bytes, getUsed());
+
+  errno = 0;
+  const size_t written = fwrite(_buffer + _start, 1, amount, file);
+
+  if (written < amount && ferror(file))
+    throw std::runtime_error(strerror(errno));
+
+  _start += written;
+
+  if (_start == _end)
+    reset();
+
+  return (static_cast<ssize_t>(written));
 }
 
 ssize_t Buffer::socketToBuf(const int Socket, const size_t Bytes) {

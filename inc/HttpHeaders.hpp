@@ -35,8 +35,8 @@ public:
   bool isSet(const HeaderType Hdr) const;
   void unsetAll(void);
 
-  void setContentLength(const off_t Length);
-  off_t getContentLength(void) const;
+  void setContentLength(const size_t Length);
+  size_t getContentLength(void) const;
 
   void setContentType(const char *extension);
   MediaType getContentType(void) const;
@@ -44,7 +44,7 @@ public:
 
 private:
   int _headersSet;
-  off_t _contentLength;
+  size_t _contentLength;
   MediaType _contentType;
 };
 
