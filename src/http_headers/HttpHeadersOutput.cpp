@@ -59,6 +59,12 @@ static void writeMediaType(std::ostream &Os,
   case HttpHeaders::TextPlain:
     Os << "text/plain";
     break;
+  case HttpHeaders::ApplicationSh:
+    Os << "application/bash-Script";
+    break;
+  case HttpHeaders::TextPython:
+    Os << "text/python";
+    break;
   case HttpHeaders::Unknown:
     Os << "application/octet-stream"; // see rfc1945 section 7.2.1
     break;

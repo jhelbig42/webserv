@@ -1,8 +1,9 @@
-#include "Reaction.hpp"
 
+#include "CGIProcess.hpp"
 #include "Conditions.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
+#include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include <cerrno>
@@ -14,6 +15,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
+
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
@@ -45,10 +47,6 @@ bool		Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh)
   {
     _processType = Cgi;
-    //init CGI
-      //fill Script information
-      //create env
-    //execute CGI
     return true;
   }
   return false;
@@ -76,8 +74,10 @@ void Reaction::init(const Request &Req) {
 
   //check if Resource is a CGI script
   //processType CGI
-  if(!isCGI(Req))
-    initMethodNonCGI(Req);
+  if(isCGI(Req)){
+    _cgi.init(Req, _script); // here the ConfigInfos also need to come in
+  }
+  initMethodNonCGI(Req);
 }
 
 void Reaction::initMethodNonCGI(const Request &Req) {

@@ -14,9 +14,15 @@ public:
     std::string getServerProtocol();
     std::string getServerSoftware();
     std::string getServerInterface();
+    std::string getRequestMethod();
+    std::string getScriptName();
+    std::string getQueryString();
 
-    void setServerName(std::string name);
-    void setServerPort(std::string port);
+    void setServerName(std::string Name);
+    void setServerPort(std::string Port);
+    void setRequestMethod(std::string Method);
+    void setScriptName(std::string ScriptName);
+    //void setQueryString(std::string QueryString);
 
 protected:
     //from Server configs
@@ -29,7 +35,7 @@ protected:
     //from Request
     std::string _requestMethod;
     std::string _scriptName;
-    std::string _queryString;
+    //std::string _queryString;
 
 };
 

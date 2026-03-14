@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include "CGIProcess.hpp"
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
 #include "Script.hpp"
@@ -68,9 +69,10 @@ private:
   bool _metadataSent;
   std::string _metadata;
 
-  int _fdIn;
-  FILE *_fdOut;
-  Buffer _buffer;
+  int     _fdIn;
+  FILE    *_fdOut;
+  Buffer  _buffer;
 
-  Script  _script; 
+  Script  _script;
+  CGIProcess _cgi; 
 };

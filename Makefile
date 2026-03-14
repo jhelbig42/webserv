@@ -30,6 +30,7 @@ vpath %.cpp $(SRC_DIR)/reaction
 SRC			+= Post.cpp
 SRC			+= Reaction.cpp
 SRC			+= ReactionProcess.cpp
+SRC			+= CGIProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 SRC			+= ParseHeaders.cpp
@@ -118,10 +119,8 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
-	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -O0
 	CPPFLAGS += -g3
-	CPPFLAGS += -fstandalone-debug
 
 endif
 
