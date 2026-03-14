@@ -20,9 +20,10 @@ class ListenMap {
 };
 
 class Server {
-
-	public:
+public:
 	std::map<int, Connection> cMap;
 	std::vector<pollfd> fds;
 	std::map<int, *Website> listenMap;
+
+
 };

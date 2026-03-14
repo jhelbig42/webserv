@@ -3,6 +3,7 @@
 #include "Buffer.hpp"
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
+#include "Script.hpp"
 #include <string>
 #include <sys/types.h>
 
@@ -47,7 +48,7 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
   void setDefaults(void);
-  void initMethod(const Request &Req);
+  void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(const Request &Req);
   void initPost(const Request &Req);
@@ -55,11 +56,13 @@ private:
   //for Post request
   bool receiveFile(const int Socket, const size_t Bytes);
 
-  Conditions _conditions;
+  bool		isCGI(const Request &Req);
+
+  Conditions  _conditions;
   HttpHeaders _headers;
   ProcessType _processType;
-  size_t  _reqContLen;
-  size_t  _receivedContLen;
+  size_t      _reqContLen;
+  size_t      _receivedContLen;
 
   // consider abstraction for metaData
   bool _metadataSent;
@@ -68,4 +71,6 @@ private:
   int _fdIn;
   FILE *_fdOut;
   Buffer _buffer;
+
+  Script  _script; 
 };

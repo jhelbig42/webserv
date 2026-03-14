@@ -20,7 +20,9 @@ static const struct {
                   {".png", HttpHeaders::ImagePng},
                   {".pdf", HttpHeaders::ApplicationPdf},
                   {".svg", HttpHeaders::ImageSvgXml},
-                  {".txt", HttpHeaders::TextPlain}};
+                  {".txt", HttpHeaders::TextPlain},
+                  {".sh", HttpHeaders::ApplicationSh},
+                  {".py", HttpHeaders::TextPython}};
 
 static const size_t globalMimeSize = sizeof(globalMime) / sizeof(*globalMime);
 

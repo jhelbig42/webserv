@@ -47,14 +47,7 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
-Conditions Connection::getConditions(void) const {
-  if (_req.getState() == COMPLETE)
-    return _react.getConditions();
-  return _req.getConditions();
-}
-
 // Setters
-
 void Connection::scheduleForDemolition(void) {
   _delete = true;
 }

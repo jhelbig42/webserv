@@ -69,6 +69,7 @@ class Request {
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
 		HttpHeaders	getHeaders() const;
+		
 
 	private:
 		HttpMethod	_method;

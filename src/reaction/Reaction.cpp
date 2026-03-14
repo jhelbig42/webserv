@@ -22,7 +22,6 @@ static void setMetadata(std::string &Metadata, const int Code,
 
 void Reaction::setDefaults(void) {
   _processType = NotInitialized;
-  //_postType = NotPost;
   _metadataSent = false;
   _fdIn = -1;
   _headers.unsetAll();
@@ -40,6 +39,19 @@ Conditions Reaction::getConditions(void) const {
 
 Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
+}
+
+bool		Reaction::isCGI(const Request &Req){
+  if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh)
+  {
+    _processType = Cgi;
+    //init CGI
+      //fill Script information
+      //create env
+    //execute CGI
+    return true;
+  }
+  return false;
 }
 
 void Reaction::init(const Request &Req) {
@@ -62,10 +74,13 @@ void Reaction::init(const Request &Req) {
   //
   //check if method is allowed in comparison to config
 
-  initMethod(Req);
+  //check if Resource is a CGI script
+  //processType CGI
+  if(!isCGI(Req))
+    initMethodNonCGI(Req);
 }
 
-void Reaction::initMethod(const Request &Req) {
+void Reaction::initMethodNonCGI(const Request &Req) {
   logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   switch (Req.getMethod()) {
   case Head:

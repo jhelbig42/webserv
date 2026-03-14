@@ -29,7 +29,9 @@ public:
     ImagePng,
     ApplicationPdf,
     ImageSvgXml,
-    TextPlain
+    TextPlain,
+    ApplicationSh,
+    TextPython
   } MediaType;
 
   bool isSet(const HeaderType Hdr) const;
