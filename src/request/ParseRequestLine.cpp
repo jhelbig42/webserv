@@ -32,9 +32,10 @@ void Request::parseResource(const std::string &Token)
 	const size_t pos = Token.find('.');
 	if (pos != std::string::npos)
 	{
-		const char * extension = strdup(Token.substr(pos).c_str());
+		char * extension = strdup(Token.substr(pos).c_str());
 		_headers.setContentType(extension);
 		logging::log2(logging::Debug, "extension of resource is: ", extension);
+		free(extension);
 		logging::log(logging::Debug, "parse status_line: Content header set");
 
 	}

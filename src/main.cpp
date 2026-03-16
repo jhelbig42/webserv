@@ -17,6 +17,7 @@
 
 // GET /home/julia/projects/webserv/hello.txt HTTP/1.0
 // GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
+// GET /home/jhelbig/Desktop/webserv/scripts/date.py HTTP/1.0
 //home/jhelbig/Desktop/webserv
 
 // Content_Length: 100

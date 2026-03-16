@@ -1,4 +1,5 @@
 #include "CGIProcess.hpp"
+#include "Logging.hpp"
 #include "Request.hpp"
 #include "Script.hpp"
 
@@ -8,6 +9,7 @@
 #include <sys/wait.h>
 
 #define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
+#define PY_DEFAULT_PATH "/usr/bin/python3"
 #define NB_OF_ENV 8
 
 CGIProcess::CGIProcess() : _env(NULL),
@@ -72,15 +74,17 @@ void CGIProcess::init(Request Req, Script Script){
     _env[8] = NULL;
 	
 	//create args
-	_args = (char **)malloc(sizeof(char *) * 2);
+	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return ;// error handling
-	_args[0] = strdup(Req.getResource().substr(1).c_str());
-	_args[1] = NULL;
+	_args[0] = strdup("python3");
+	_args[1] = strdup(Req.getResource().c_str());
+	_args[2] = NULL;
+	logging::log3(logging::Debug, _args[0], " ",_args[1]);
 	//create path
 		//resolve paths function - information from config file
 		//for now: handling bash so have bash as Default path
-	_path = strdup((SH_DEFAULT_PATH + Req.getResource()).c_str());
+	_path = strdup(PY_DEFAULT_PATH);
 	
 	// set up pipes
 	int intoCGI[2];
@@ -101,11 +105,18 @@ void CGIProcess::init(Request Req, Script Script){
 		close(fromCGI[0]); //read side
 		dup2(intoCGI[0], STDIN_FILENO);
 		dup2(fromCGI[1], STDOUT_FILENO);
+		close(intoCGI[0]);
+		close(fromCGI[1]);
 		execve(_path, _args, _env);
+		logging::log(logging::Debug, "execve failed in child");
+		exit(1);
 	}
 	//we are in parent here
 	logging::log(logging::Debug, "CGI init I am the parent");
-	usleep(1000);
+	
+	close(intoCGI[0]);
+	close(fromCGI[1]);
+	waitpid(_pid, 0, 0);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
 
