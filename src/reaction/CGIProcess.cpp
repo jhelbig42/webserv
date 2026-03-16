@@ -3,28 +3,45 @@
 #include "Script.hpp"
 
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-#define SH_DEFAULT_PATH "/bin/sh"
+#define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
 #define NB_OF_ENV 8
 
-CGIProcess::CGIProcess() : env(NULL),
-                            args(NULL),
-                            path(NULL),
-                            input_done(false)
+CGIProcess::CGIProcess() : _env(NULL),
+                            _args(NULL),
+                            _path(NULL),
+                            _inputDone(false)
 {
 
 }
 
 CGIProcess::~CGIProcess(){
-    for (int i = 0; env[i] != NULL; ++i){
-        free(env[i]);
-    }
-    free(env);
-    for (int i = 0; args[i] != NULL; ++i){
-        free(args[i]);
-    }
-    free(args);
-    free(path);
+	if (_env)
+	{
+    	for (int i = 0; _env[i] != NULL; ++i){
+        	free(_env[i]);
+    	}
+    	free(_env);
+	}
+	if (_args){
+		for (int i = 0; _args[i] != NULL; ++i){
+        	free(_args[i]);
+    	}
+    free(_args);
+	}
+   	free(_path);
+}
+
+bool CGIProcess::isInputDone() const{
+	return _inputDone;
+}
+
+int CGIProcess::getReadFd() const
+{
+    return _readFromCGI;
 }
 
 static char *createEnvMember(std::string Key, std::string Value){
@@ -35,15 +52,62 @@ static char *createEnvMember(std::string Key, std::string Value){
 }
 
 void CGIProcess::init(Request Req, Script Script){
-    env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
-    if (!env)
+	logging::log(logging::Debug, "CGI Process init");
+	// allowed methods are: Head/Get, Post
+    // create env:
+	_env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
+    if (!_env)
         return ; //error handling
-    env[0] = createEnvMember("SERVER_NAME", Script.getServerName());
-    env[1] = createEnvMember("SERVER_PORT", Script.getServerPort());
-    env[2] = createEnvMember("SERVER_PROTOCOL", Script.getServerProtocol());
-    env[3] = createEnvMember("SERVER_SOFTWARE", Script.getServerSoftware());
-    env[4] = createEnvMember("SERVER_INTERFACE", Script.getServerInterface());
-    
-    env[8] = NULL; 
+	//env from serverConfig
+    _env[0] = createEnvMember("SERVER_NAME", Script.getServerName());
+    _env[1] = createEnvMember("SERVER_PORT", Script.getServerPort());
+    _env[2] = createEnvMember("SERVER_PROTOCOL", Script.getServerProtocol());
+    _env[3] = createEnvMember("SERVER_SOFTWARE", Script.getServerSoftware());
+    _env[4] = createEnvMember("SERVER_INTERFACE", Script.getServerInterface());
+    //env from request
+	_env[5] = createEnvMember("REQUEST_METHOD", Req.getMethodString());
+	_env[6] = createEnvMember("SCRIPT_NAME", Req.getResource().substr(1));
+	_env[7] = createEnvMember("QUERY_STRING", NULL);
+    _env[8] = NULL;
+	
+	//create args
+	_args = (char **)malloc(sizeof(char *) * 2);
+	if (!_args)
+		return ;// error handling
+	_args[0] = strdup(Req.getResource().substr(1).c_str());
+	_args[1] = NULL;
+	//create path
+		//resolve paths function - information from config file
+		//for now: handling bash so have bash as Default path
+	_path = strdup((SH_DEFAULT_PATH + Req.getResource()).c_str());
+	
+	// set up pipes
+	int intoCGI[2];
+	int fromCGI[2];
+	if (pipe(intoCGI))
+		return; //error handling
+	if (pipe(fromCGI))
+		return; //error handling
+	logging::log(logging::Debug, "CGI init Pipes created");
+	//fork
+	_pid = fork(); // this pid needs to be added to poll-list
+	if (_pid == -1)
+		return; //error handling
+	if (_pid == 0)
+	{
+		//we are in child
+		close(intoCGI[1]); //write side
+		close(fromCGI[0]); //read side
+		dup2(intoCGI[0], STDIN_FILENO);
+		dup2(fromCGI[1], STDOUT_FILENO);
+		execve(_path, _args, _env);
+	}
+	//we are in parent here
+	logging::log(logging::Debug, "CGI init I am the parent");
+	_writeIntoCGI = intoCGI[1];
+	_readFromCGI = fromCGI[0];
+
+	//needs to go! just for testing for the moment
+	_inputDone = true;
     return ;
 }

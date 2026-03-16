@@ -68,7 +68,9 @@ class Request {
 		size_t		getMinorV() const;
 		const std::string &getResource() const;
 		HttpMethod 	getMethod() const;
+		std::string getMethodString() const;
 		HttpHeaders	getHeaders() const;
+		void setRequestContentType(void);
 		
 
 	private:

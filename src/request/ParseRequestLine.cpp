@@ -3,7 +3,7 @@
 #include <exception>
 #include <iostream>
 #include <sstream>
-#include <string>
+#include <string.h>
 #include <vector>
 
 #define MAX_REQUEST 1024
@@ -29,6 +29,15 @@ void Request::parseResource(const std::string &Token)
 		throw std::runtime_error("requestURI not given as absolute path");
 	_resource = Token;
 	logging::log(logging::Debug, "parse status_line: parse resource successfully");
+	const size_t pos = Token.find('.');
+	if (pos != std::string::npos)
+	{
+		const char * extension = strdup(Token.substr(pos).c_str());
+		_headers.setContentType(extension);
+		logging::log2(logging::Debug, "extension of resource is: ", extension);
+		logging::log(logging::Debug, "parse status_line: Content header set");
+
+	}
 }
 /**
  * \brief Parses the HTTP-version and sets this Version as Request attributes.
@@ -41,7 +50,7 @@ void Request::parseHttp(const std::string &Token)
 	if (Token.substr(0, 5) != "HTTP/")
 		throw std::runtime_error("invalid HTTP version");
 	const size_t tback = Token.size();
-	const size_t pos = Token.find(".");
+	const size_t pos = Token.find('.');
 	if (pos == std::string::npos || pos <= 5 || pos == tback - 1 ) //no . or no other char before .
 		throw std::runtime_error("no HTTP version given");
 	

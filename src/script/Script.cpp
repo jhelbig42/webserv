@@ -68,3 +68,4 @@ std::string Script::getScriptName(){
 //std::string Script::getQueryString(){
 //    return _queryString;
 //}
+

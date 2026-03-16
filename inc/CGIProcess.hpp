@@ -12,16 +12,19 @@ public:
 
     void init(Request Req, Script Script);
 
-private:
-    char **env;
-    char **args;
-    char *path;
-    
-    pid_t pid;
+	bool isInputDone() const;
+	int getReadFd() const;
 
-    int writeIntoCGI;   // write request body to CGI
-    int readFromCGI;  // read CGI output
+private:
+    char **_env;
+    char **_args;
+    char *_path;
+    
+    pid_t _pid;
+
+    int _writeIntoCGI;   // write request body to CGI
+    int _readFromCGI;  // read CGI output
 
     std::string output;
-    bool input_done;
+    bool _inputDone;
 };

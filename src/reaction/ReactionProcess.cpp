@@ -64,8 +64,11 @@ bool Reaction::process(const int Socket, int &ForwardSocket,
     return sendFile(Socket, Bytes);
   if (_processType == ReceiveFile && (Condition & SockRead))
 	  return receiveFile(Socket, Bytes);
+  if (_processType == Cgi && _cgi.isInputDone() == false)
+	  return initSendCGI(Socket);						
   return (false); 
 }
+
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (!_metadataSent) {

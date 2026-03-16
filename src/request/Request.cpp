@@ -131,6 +131,26 @@ HttpMethod Request::getMethod() const {
 	return _method;
 }
 
+std::string Request::getMethodString() const{
+	switch(_method)
+	{
+		case Head:
+			return "HEAD";
+			break;
+		case Get:
+			return "GET";
+			break;
+		case Post:
+			return "POST";
+			break;
+		case Delete:
+			return "DELETE";
+			break;
+		default:
+			return "INVALID";
+	}
+}
+
 ParseState Request::getState() const{
 	return _state;
 }
