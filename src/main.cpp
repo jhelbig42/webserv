@@ -61,13 +61,12 @@ int main(int argc, char **argv) {
     const Config conf(argv[1]);
 	const std::list<Website> websites = conf.getWebsites();
 	if (websites.empty()){
-		logging::log(logging::Error, "config file contains 0 websites");
-		exit(1);
+    throw std::runtime_error("config file contains 0 websites");
 	}
 	Server server(websites);
 	server.pollLoop();
   } catch (const std::exception &e) {
-    std::cerr << e.what() << '\n';
+    logging::log(logging::Error, e.what());
 	exit (1);
   }
 }

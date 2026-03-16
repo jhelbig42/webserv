@@ -3,7 +3,7 @@
 #include "Config.hpp"
 #include "Connection.hpp"
 #include "Logging.hpp"
-#include "Socket.hpp"
+//#include "Socket.hpp"
 #include "Website.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains
@@ -13,16 +13,17 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+struct SocketInfo {
+  const int fd;
+  enum { LISTEN, CLIENT } type; 
+  union
+  {
+	const Website *const website; // for LISTEN type
+	Connection const *connection; // for CLIENT type
+  };
+};
+
 class Server {
-
-	public:
-	//std::map<int, Connection> cMap;
-	//std::vector<pollfd> fds;
-	//std::map<int, Website*> listenMap;
-
-	std::vector<Socket> sockets;
-	Server(const std::list<Website>  &websites);
-	void pollLoop(void);
 
 	private:
 
@@ -30,8 +31,19 @@ class Server {
 
 	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
-	Socket initListeningSocket(const Listen &Interface, const Website &Web);
+	SocketInfo initListeningSocket(const Listen &Interface, const Website &Web);
 	struct addrinfo *getInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
+	SocketInfo getListeningSocket(struct addrinfo *Info, const Website &Web);
+	
+	public:
+
+	//std::vector<Socket> sockets;
+	Server(const std::list<Website>  &websites);
+	~Server();
+	void pollLoop(void);
+	
+	std::vector<pollfd> fds;
+	std::map<int, SocketInfo> sMap;
 };

@@ -1,10 +1,17 @@
 #pragma once
 
+#include "Website.hpp"
+
 class Socket {
 
-	public:
+	private:
+	int _fd;
+	bool _listening;
+	const Website &website;
 
-	int fd;
-	bool listening;
-	Website website;
+	public:
+	Socket(const int Fd, const bool Listening, const Website &web);
+	int getFd();
+	bool isListening();
+	const Website &getWebsite();
 };
