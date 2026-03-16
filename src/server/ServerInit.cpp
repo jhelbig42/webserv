@@ -45,7 +45,7 @@ SocketInfo Server::initListeningSocket(const Listen &Interface,
                                    const Website &Web) {
   checkPort(Interface.port);
   struct addrinfo *serverInfo = getInfo(Interface);
-  SocketInfo sInfo = getListeningSocket(serverInfo, Web);
+  SocketInfo sInfo = getListeningSocket(serverInfo, Web, Interface);
   freeaddrinfo(serverInfo);
   return (sInfo);
 }
@@ -63,7 +63,7 @@ struct addrinfo *Server::getInfo(const Listen &Interface) {
   return (info);
 }
 
-SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web) {
+SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface) {
 
   int sock;
   const struct addrinfo *p;
@@ -79,7 +79,8 @@ SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web)
     break;
   }
   if (p == NULL) {
-    logging::log(logging::Debug, "sever failed to find socket. Ensure that server is not already running another instance on the same port");
+    int error = errno;
+    handleBindFailure(Info, Interface, error);
     freeaddrinfo(Info);
     exit(1);
   }

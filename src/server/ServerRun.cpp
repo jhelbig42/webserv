@@ -7,7 +7,6 @@
 
 void Server::pollLoop(void) {
 
-  
   logging::log(logging::Debug, "<pollLoop>");
  
   /*

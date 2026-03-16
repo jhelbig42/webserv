@@ -8,9 +8,14 @@ SRC			:=
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/server
-SRC			+= Server.cpp
+SRC			+= Server.cpp\
+			ServerInit.cpp\
+			ServerRun.cpp\
+			ServerDebug.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
+vpath %.cpp $(SRC_DIR)/socket
+SRC			+= Socket.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= ConfigGlobals.cpp
 SRC			+= ConfigClass.cpp

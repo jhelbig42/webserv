@@ -34,12 +34,14 @@ class Server {
 	SocketInfo initListeningSocket(const Listen &Interface, const Website &Web);
 	struct addrinfo *getInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
-	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
-	SocketInfo getListeningSocket(struct addrinfo *Info, const Website &Web);
-	
-	public:
+	SocketInfo getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
 
-	//std::vector<Socket> sockets;
+	// debug
+	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
+	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
+	
+
+	public:
 	Server(const std::list<Website>  &websites);
 	~Server();
 	void pollLoop(void);

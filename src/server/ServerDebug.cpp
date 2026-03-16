@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include <cstring>
 
 // get_addr_info_str() is only for logging purposes.
 // The function builds a string from the contents of an addrinfo struct
@@ -24,4 +25,18 @@ std::string Server::addrinfoToStr(const struct addrinfo *Info,
       << "\tai_protocol = " << Info->ai_protocol << "\n"
       << "\tai_addrlen = " << Info->ai_addrlen << "\n";
   return (oss.str());
+}
+
+void Server::handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error) {
+  std::ostringstream msg;
+  msg << "bind: " << std::strerror(Error) << "\n"
+      << "Failed to bind to interface.\n"
+      << "IP:" << Interface.ip << "\n"
+      << "Port:" << Interface.port << "\n"
+      << "Ensure that config file contains no duplicate interfaces, and check that there is no other instance of webserv already running with the same interface.\n"
+      << "If bind continues to fail, check elsewhere for occupied interfaces, using ss or netstat & the flags -tulnp";
+  //    << addrinfoToStr(Info, "Interface info:");
+  // TODO better debug instructions, errno dependant & print more Info
+  (void) Info;
+  logging::log(logging::Error, msg.str());
 }
