@@ -11,11 +11,11 @@
 #define NB_OF_ENV 8
 
 CGIProcess::CGIProcess() : _env(NULL),
-                            _args(NULL),
-                            _path(NULL),
+							_args(NULL),
+							_path(NULL),
                             _inputDone(false)
-{
 
+{
 }
 
 CGIProcess::~CGIProcess(){
@@ -45,14 +45,15 @@ int CGIProcess::getReadFd() const
 }
 
 static char *createEnvMember(std::string Key, std::string Value){
-    char *line = strdup((Key + "=" + Value).c_str());
+    logging::log3(logging::Debug, __func__, " ", Value);
+	char *line = strdup((Key + "=" + Value).c_str());
     if (!line)
         return (NULL); //error handling
     return (line);
 }
 
 void CGIProcess::init(Request Req, Script Script){
-	logging::log(logging::Debug, "CGI Process init");
+	logging::log(logging::Debug, "CGI Process init called");
 	// allowed methods are: Head/Get, Post
     // create env:
 	_env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
@@ -67,7 +68,7 @@ void CGIProcess::init(Request Req, Script Script){
     //env from request
 	_env[5] = createEnvMember("REQUEST_METHOD", Req.getMethodString());
 	_env[6] = createEnvMember("SCRIPT_NAME", Req.getResource().substr(1));
-	_env[7] = createEnvMember("QUERY_STRING", NULL);
+	_env[7] = createEnvMember("QUERY_STRING", "");
     _env[8] = NULL;
 	
 	//create args
@@ -104,6 +105,7 @@ void CGIProcess::init(Request Req, Script Script){
 	}
 	//we are in parent here
 	logging::log(logging::Debug, "CGI init I am the parent");
+	usleep(1000);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
 

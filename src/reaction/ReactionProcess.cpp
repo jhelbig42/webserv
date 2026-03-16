@@ -64,7 +64,8 @@ bool Reaction::process(const int Socket, int &ForwardSocket,
     return sendFile(Socket, Bytes);
   if (_processType == ReceiveFile && (Condition & SockRead))
 	  return receiveFile(Socket, Bytes);
-  if (_processType == Cgi && _cgi.isInputDone() == false)
+	//also need here to option to check if the input is done or not through the childs pid 
+  if (_processType == Cgi && _cgi.isInputDone() == true)
 	  return initSendCGI(Socket);						
   return (false); 
 }

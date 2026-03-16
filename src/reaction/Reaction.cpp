@@ -44,12 +44,9 @@ Reaction::ProcessType Reaction::getProcessType(void) const{
 }
 
 bool		Reaction::isCGI(const Request &Req){
-	logging::log(logging::Debug, __func__);
-  std::cout << Req.getHeaders();
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
   {
-	logging::log(logging::Debug, "Reaction is CGI because of ContentType of Request");
     _processType = Cgi;
     return true;
   }
@@ -81,26 +78,28 @@ void Reaction::init(const Request &Req) {
   if(isCGI(Req)){
 	logging::log(logging::Debug, "Req is a CGI");
     _cgi.init(Req, _script); // here the ConfigInfos also need to come in
+	return;
   }
   initMethodNonCGI(Req);
 }
 
 void Reaction::initMethodNonCGI(const Request &Req) {
   logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-  switch (Req.getMethod()) {
-  case Head:
-  case Get:
-    initHeadGet(Req);
-    return;
-  case Delete:
-    initDelete(Req);
-    return;
-  case Post:
-	  initPost(Req);
-	  return;
-  case Generic:
-    initSendFile(CODE_501, FILE_501);
-    return;
+  switch (Req.getMethod()) 
+  {
+  	case Head:
+  	case Get:
+    	initHeadGet(Req);
+    	return;
+  	case Delete:
+    	initDelete(Req);
+    	return;
+  	case Post:
+	  	initPost(Req);
+	  	return;
+  	case Generic:
+    	initSendFile(CODE_501, FILE_501);
+    	return;
   }
 }
 
@@ -156,9 +155,7 @@ bool Reaction::initSendCGI(const int Socket){
 
 	logging::log(logging::Debug, "InitSendCGI");
 
-	//test here if childprocess is done
-	if (_cgi.isInputDone())
-	{
+	
     	_fdIn = _cgi.getReadFd();   // pipe from CGI stdout
     	_processType = SendFile;
     	_conditions = SockWrite;
@@ -166,7 +163,6 @@ bool Reaction::initSendCGI(const int Socket){
     	setMetadata(_metadata, CODE_200, _headers);
 		_metadataSent = false; 
     	return false;
-	}
 	return false;
 }
 
