@@ -79,9 +79,13 @@ void Reaction::init(const Request &Req) {
   //set request Type header just here, safe Query string, if we have one
   //invalid request if we have a query string, but not a script we asked for
   if(!isCGI(Req)){
-	if (Req.getQueryString() != "")
+	logging::log(logging::Debug, "Req is NOT a CGI");
+	if (Req.getQueryString() != ""){
 		initSendFile(CODE_400, FILE_400);
+		return;
+	}
 	initMethodNonCGI(Req);
+	return;
   }
   logging::log(logging::Debug, "Req is a CGI");
   _cgi.init(Req, _script); // here the ConfigInfos also need to come in
