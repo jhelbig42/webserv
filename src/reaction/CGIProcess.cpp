@@ -54,24 +54,32 @@ static char *createEnvMember(std::string Key, std::string Value){
     return (line);
 }
 
+char **createEnv(Request Req, Script Script){
+	char **env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
+    if (!env)
+        return NULL; //error handling
+	//env from serverConfig
+    env[0] = createEnvMember("SERVER_NAME", Script.getServerName());
+    env[1] = createEnvMember("SERVER_PORT", Script.getServerPort());
+    env[2] = createEnvMember("SERVER_PROTOCOL", Script.getServerProtocol());
+    env[3] = createEnvMember("SERVER_SOFTWARE", Script.getServerSoftware());
+    env[4] = createEnvMember("SERVER_INTERFACE", Script.getServerInterface());
+    //env from request
+	env[5] = createEnvMember("REQUEST_METHOD", Req.getMethodString());
+	env[6] = createEnvMember("SCRIPT_NAME", Req.getResource().substr(1));
+	env[7] = createEnvMember("QUERY_STRING", Req.getQueryString());
+	
+    env[8] = NULL;
+	return (env);
+}
+
 void CGIProcess::init(Request Req, Script Script){
 	logging::log(logging::Debug, "CGI Process init called");
 	// allowed methods are: Head/Get, Post
-    // create env:
-	_env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
-    if (!_env)
-        return ; //error handling
-	//env from serverConfig
-    _env[0] = createEnvMember("SERVER_NAME", Script.getServerName());
-    _env[1] = createEnvMember("SERVER_PORT", Script.getServerPort());
-    _env[2] = createEnvMember("SERVER_PROTOCOL", Script.getServerProtocol());
-    _env[3] = createEnvMember("SERVER_SOFTWARE", Script.getServerSoftware());
-    _env[4] = createEnvMember("SERVER_INTERFACE", Script.getServerInterface());
-    //env from request
-	_env[5] = createEnvMember("REQUEST_METHOD", Req.getMethodString());
-	_env[6] = createEnvMember("SCRIPT_NAME", Req.getResource().substr(1));
-	_env[7] = createEnvMember("QUERY_STRING", "");
-    _env[8] = NULL;
+    
+
+	// create env:
+	_env = createEnv(Req, Script);
 	
 	//create args
 	_args = (char **)malloc(sizeof(char *) * 3);
@@ -81,9 +89,10 @@ void CGIProcess::init(Request Req, Script Script){
 	_args[1] = strdup(Req.getResource().c_str());
 	_args[2] = NULL;
 	logging::log3(logging::Debug, _args[0], " ",_args[1]);
+	
 	//create path
 		//resolve paths function - information from config file
-		//for now: handling bash so have bash as Default path
+		//for now: handling py only
 	_path = strdup(PY_DEFAULT_PATH);
 	
 	// set up pipes
@@ -121,6 +130,8 @@ void CGIProcess::init(Request Req, Script Script){
 	_readFromCGI = fromCGI[0];
 
 	//needs to go! just for testing for the moment
+	//will be true for every CGI get Request 
+	//jsut post requests have a body
 	_inputDone = true;
     return ;
 }

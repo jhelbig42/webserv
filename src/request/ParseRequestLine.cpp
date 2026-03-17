@@ -27,13 +27,21 @@ void Request::parseResource(const std::string &Token)
 {
 	if (Token[0] != '/')
 		throw std::runtime_error("requestURI not given as absolute path");
-	_resource = Token;
 	logging::log(logging::Debug, "parse status_line: parse resource successfully");
-	const size_t pos = Token.find('.');
+	//extract Query String first
+	size_t pos = Token.find('?');
+	if (pos == std::string::npos)
+		_resource = Token;
+	else{
+		_resource = Token.substr(0, pos);
+		_queryString = Token.substr(pos + 1);
+	}
+	pos = _resource.find('.');
 	if (pos != std::string::npos)
 	{
-		char * extension = strdup(Token.substr(pos).c_str());
+		char * extension = strdup(_resource.substr(pos).c_str());
 		_headers.setContentType(extension);
+		logging::log2(logging::Debug, "QueryString is: ", _queryString);
 		logging::log2(logging::Debug, "extension of resource is: ", extension);
 		free(extension);
 		logging::log(logging::Debug, "parse status_line: Content header set");

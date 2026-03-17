@@ -12,7 +12,8 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_state(STATUS_LINE)
+	_state(STATUS_LINE),
+	_queryString("")
 {
 	_headers.unsetAll();
 }  
@@ -155,3 +156,6 @@ ParseState Request::getState() const{
 	return _state;
 }
 
+std::string Request::getQueryString(void) const {
+	return _queryString;
+}

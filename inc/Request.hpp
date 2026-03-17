@@ -70,8 +70,8 @@ class Request {
 		HttpMethod 	getMethod() const;
 		std::string getMethodString() const;
 		HttpHeaders	getHeaders() const;
+		std::string getQueryString(void) const;
 		void setRequestContentType(void);
-		
 
 	private:
 		HttpMethod	_method;
@@ -80,7 +80,8 @@ class Request {
 		size_t		_minorVersion;
 		Buffer		_buf;
 		ParseState	_state;
-		HttpHeaders	_headers;	
+		HttpHeaders	_headers;
+		std::string	_queryString;	
 };
 
 std::vector<std::string> split(const std::string& s, const std::string& delimiter);

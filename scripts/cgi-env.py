@@ -1,7 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 import os
-print "Content-Type: text/html\n"
-print "<html><body><table border='1'>"
-for k,v in sorted(os.environ.iteritems()):
-  print "<tr><th>%s</th><td>%s</td></tr>" % (k,v)
-print "</table></body></html>"
+
+print("Content-Type: text/html")
+print()
+
+print("<html><body><table border='1'>")
+
+for k, v in sorted(os.environ.items()):
+    print(f"<tr><th>{k}</th><td>{v}</td></tr>")
+
+print("</table></body></html>")
