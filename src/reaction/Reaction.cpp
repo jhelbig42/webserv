@@ -79,18 +79,18 @@ void Reaction::init(const Request &Req) {
   //set request Type header just here, safe Query string, if we have one
   //invalid request if we have a query string, but not a script we asked for
   if(!isCGI(Req)){
-	logging::log(logging::Debug, "Req is NOT a CGI");
-	if (Req.getQueryString() != ""){
-		initSendFile(CODE_400, FILE_400);
-		return;
-	}
-	initMethodNonCGI(Req);
-	return;
+	  logging::log(logging::Debug, "Req is NOT a CGI");
+	  if (Req.getQueryString() != ""){
+		  initSendFile(CODE_400, FILE_400);
+		  return;
+	  }
+	  initMethodNonCGI(Req);
+	  return;
   }
   logging::log(logging::Debug, "Req is a CGI");
-  _cgi.init(Req, _script); // here the ConfigInfos also need to come in
+  if (!_cgi.init(Req, _script))
+    initSendFile(CODE_500, FILE_500);; // here the ConfigInfos also need to come in
   return;
-  
 }
 
 void Reaction::initMethodNonCGI(const Request &Req) {
@@ -161,20 +161,19 @@ void Reaction::initSendFile(const int Code, const char *File) {
   _conditions = SockWrite;
 }
 
-bool Reaction::initSendCGI(const int Socket){
+void Reaction::initSendCGI(const int Socket, const size_t Bytes){
 
 	logging::log(logging::Debug, "InitSendCGI");
 
-	
-    	_fdIn = _cgi.getReadFd();   // pipe from CGI stdout
-    	_processType = SendFile;
-    	_conditions = SockWrite;
+ 	_fdIn = _cgi.getReadFd();   // pipe from CGI stdout
+ 	_processType = SendFile;
+ 	_conditions = SockWrite;
 
-    	setMetadata(_metadata, CODE_200, _headers);
-		_metadataSent = false; 
-    	return false;
-	return false;
+ 	setMetadata(_metadata, CODE_200, _headers);
+  _metadataSent = false; 
+  return ;
 }
+
 
 static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs) {

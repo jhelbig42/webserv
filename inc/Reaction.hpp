@@ -58,7 +58,7 @@ private:
   bool receiveFile(const int Socket, const size_t Bytes);
 
   bool		isCGI(const Request &Req);
-  bool		initSendCGI(const int Socket);
+  void		initSendCGI(const int Socket, const size_t Bytes);
 
 
   Conditions  _conditions;

@@ -4,27 +4,46 @@
 #include "Script.hpp"
 #include <string>
 
-class CGIProcess
-{
+class CGIProcess {
 public:
+    enum envMembers {
+        SERVER_NAME,
+        SERVER_PORT,
+        SERVER_PROTOCOL,
+        SERVER_SOFTWARE,
+        SERVER_INTERFACE,
+        REQUEST_METHOD,
+        SCRIPT_NAME,
+        QUERY_STRING,
+        NB_OF_ENV 
+    };
+
     CGIProcess();
     ~CGIProcess();
 
-    void init(Request Req, Script Script);
-
-	bool isInputDone() const;
-	int getReadFd() const;
+    bool init(Request Req, Script Script);
+    bool createEnv(Request& Req, Script& Script);
+    bool createArgs(Request &Req);
+    bool resolvePath();
+    
+    //Getters
+    bool isInputDone() const;
+    int getReadFd() const;
+    int getWriteFd() const;
 
 private:
-    char **_env;
-    char **_args;
-    char *_path;
+    void _clearEnv();
+    bool _envMember(envMembers index, const std::string& key, const std::string& value);
     
-    pid_t _pid;
+    std::string _getEnvKey(envMembers member) const;
+    std::string _getEnvValue(envMembers member, Request& Req, Script& Script) const;
 
-    int _writeIntoCGI;   // write request body to CGI
-    int _readFromCGI;  // read CGI output
-
-    std::string output;
-    bool _inputDone;
+    char** _env;
+    char** _args;
+    char* _path;
+    pid_t       _pid;
+    int         _writeIntoCGI;
+    int         _readFromCGI;
+    std::string _output;
+    bool        _inputDone;
 };

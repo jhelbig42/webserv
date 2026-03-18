@@ -1,6 +1,8 @@
 #include "CGIProcess.hpp"
+#include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
+#include "Reaction.hpp"
 #include "Script.hpp"
 
 #include <string.h>
@@ -10,7 +12,6 @@
 
 #define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
 #define PY_DEFAULT_PATH "/usr/bin/python3"
-#define NB_OF_ENV 8
 
 CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
@@ -46,67 +47,133 @@ int CGIProcess::getReadFd() const
     return _readFromCGI;
 }
 
-static char *createEnvMember(std::string Key, std::string Value){
-    logging::log3(logging::Debug, __func__, " ", Value);
-	char *line = strdup((Key + "=" + Value).c_str());
-    if (!line)
-        return (NULL); //error handling
-    return (line);
+int CGIProcess::getWriteFd() const
+{
+    return _writeIntoCGI;
 }
 
-char **createEnv(Request Req, Script Script){
-	char **env = (char **)malloc(sizeof(char *) * (NB_OF_ENV + 1));
-    if (!env)
-        return NULL; //error handling
-	//env from serverConfig
-    env[0] = createEnvMember("SERVER_NAME", Script.getServerName());
-    env[1] = createEnvMember("SERVER_PORT", Script.getServerPort());
-    env[2] = createEnvMember("SERVER_PROTOCOL", Script.getServerProtocol());
-    env[3] = createEnvMember("SERVER_SOFTWARE", Script.getServerSoftware());
-    env[4] = createEnvMember("SERVER_INTERFACE", Script.getServerInterface());
-    //env from request
-	env[5] = createEnvMember("REQUEST_METHOD", Req.getMethodString());
-	env[6] = createEnvMember("SCRIPT_NAME", Req.getResource().substr(1));
-	env[7] = createEnvMember("QUERY_STRING", Req.getQueryString());
-	
-    env[8] = NULL;
-	return (env);
+void CGIProcess::_clearEnv() {
+    if (_env) {
+        for (int i = 0; i < NB_OF_ENV; ++i) {
+            if (_env[i]) free(_env[i]);
+        }
+        free(_env);
+        _env = NULL;
+    }
 }
 
-void CGIProcess::init(Request Req, Script Script){
-	logging::log(logging::Debug, "CGI Process init called");
-	// allowed methods are: Head/Get, Post
-    
+// Maps the Enum to the actual String Key
+std::string CGIProcess::_getEnvKey(envMembers member) const {
+    static const char* keys[] = {
+        "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL", 
+        "SERVER_SOFTWARE", "SERVER_INTERFACE", "REQUEST_METHOD", 
+        "SCRIPT_NAME", "QUERY_STRING"
+    };
+    return keys[member];
+}
 
-	// create env:
-	_env = createEnv(Req, Script);
-	
-	//create args
+// Maps the Enum to the value retrieved from Request/Script
+std::string CGIProcess::_getEnvValue(envMembers member, Request& Req, Script& Script) const {
+    switch (member) {
+        case SERVER_NAME:      return Script.getServerName();
+        case SERVER_PORT:      return Script.getServerPort();
+        case SERVER_PROTOCOL:  return Script.getServerProtocol();
+        case SERVER_SOFTWARE:  return Script.getServerSoftware();
+        case SERVER_INTERFACE: return Script.getServerInterface();
+        case REQUEST_METHOD:   return Req.getMethodString();
+        case SCRIPT_NAME:      return Req.getResource().substr(1); // Remove leading '/'
+        case QUERY_STRING:     return Req.getQueryString();
+        default:               return "";
+    }
+}
+
+bool CGIProcess::_envMember(envMembers index, const std::string& key, const std::string& value) {
+    std::string entry = key + "=" + value;
+    _env[index] = strdup(entry.c_str());
+    return (_env[index] != NULL);
+}
+
+bool CGIProcess::createEnv(Request& Req, Script& Script) {
+    _env = static_cast<char**>(malloc(sizeof(char*) * (NB_OF_ENV + 1)));
+    if (!_env) 
+		return false;
+
+    for (int i = 0; i <= NB_OF_ENV; ++i)
+		_env[i] = NULL;
+
+    // Loop through the Enum
+    for (int i = 0; i < NB_OF_ENV; ++i) {
+        envMembers member = static_cast<envMembers>(i);
+        if (!_envMember(member, _getEnvKey(member), _getEnvValue(member, Req, Script))) {
+            _clearEnv();
+            return false;
+        }
+    }
+    _env[NB_OF_ENV] = NULL;
+    return true;
+}
+
+bool CGIProcess::createArgs(Request &Req){ 
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
-		return ;// error handling
-	_args[0] = strdup("python3");
+		return false;// error handling
+	HttpHeaders::MediaType type = Req.getHeaders().getContentType();
+	switch (type){
+		case HttpHeaders::ApplicationSh:
+			_args[0] = strdup("bash");
+			break;
+		case HttpHeaders::TextPython:
+			_args[0] = strdup("python3");
+			break;
+		default: // should never be reached
+			break;
+	} 
 	_args[1] = strdup(Req.getResource().c_str());
 	_args[2] = NULL;
+	if (!_args[0] || !_args[1])
+		return false;
 	logging::log3(logging::Debug, _args[0], " ",_args[1]);
+	return true;
+}
+
+bool CGIProcess::resolvePath(){
+	_path = strdup(PY_DEFAULT_PATH);
+	if (!_path)
+		return false;
+	return true;
+}
+
+bool CGIProcess::init(Request Req, Script Script){
+	logging::log(logging::Debug, "CGI Process init called");
+	// allowed methods are: Head/Get, Post
+	//still needs to be compared to allowed methods according to config
+    
+	// create env:
+	if (!createEnv(Req, Script))
+		return false; // error handling in Reaction
+						//errors here will all be 500
+	//create args
+	if (!createArgs(Req))
+		return false;
 	
 	//create path
 		//resolve paths function - information from config file
 		//for now: handling py only
-	_path = strdup(PY_DEFAULT_PATH);
+	if (!resolvePath())
+		return false;
 	
 	// set up pipes
 	int intoCGI[2];
 	int fromCGI[2];
 	if (pipe(intoCGI))
-		return; //error handling
+		return false; //error handling
 	if (pipe(fromCGI))
-		return; //error handling
+		return false; //error handling
 	logging::log(logging::Debug, "CGI init Pipes created");
 	//fork
 	_pid = fork(); // this pid needs to be added to poll-list
 	if (_pid == -1)
-		return; //error handling
+		return false; //error handling
 	if (_pid == 0)
 	{
 		//we are in child
@@ -118,14 +185,14 @@ void CGIProcess::init(Request Req, Script Script){
 		close(fromCGI[1]);
 		execve(_path, _args, _env);
 		logging::log(logging::Debug, "execve failed in child");
-		exit(1);
+		_exit(1);
 	}
 	//we are in parent here
 	logging::log(logging::Debug, "CGI init I am the parent");
 	
 	close(intoCGI[0]);
 	close(fromCGI[1]);
-	waitpid(_pid, 0, 0);
+	//waitpid(_pid, 0, 0);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
 
@@ -133,5 +200,5 @@ void CGIProcess::init(Request Req, Script Script){
 	//will be true for every CGI get Request 
 	//jsut post requests have a body
 	_inputDone = true;
-    return ;
+    return true;
 }

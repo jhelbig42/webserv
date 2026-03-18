@@ -37,14 +37,6 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
-// Reaction::process(const int Socket, const int SocketForward, const size_t
-// Bytes) {
-//   if (conditions & SockRead)
-//     //call something
-//   if (conditions & SockRead)
-//     //call something
-// }
-
 /// \brief writes the content of an std::string object to a socket
 ///
 /// side effects:
@@ -60,13 +52,14 @@ static bool stringToSocket(const int Socket, std::string &Str,
 bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes, const int Condition){
   (void)ForwardSocket;
+  logging::log(logging::Debug, __func__);
   if (_processType == SendFile && (Condition & SockWrite))
     return sendFile(Socket, Bytes);
   if (_processType == ReceiveFile && (Condition & SockRead))
 	  return receiveFile(Socket, Bytes);
 	//also need here to option to check if the input is done or not through the childs pid 
   if (_processType == Cgi && _cgi.isInputDone() == true)
-	  return initSendCGI(Socket);						
+	  return initSendCGI(Socket, Bytes);						
   return (false); 
 }
 
