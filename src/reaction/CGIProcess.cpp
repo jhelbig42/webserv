@@ -192,7 +192,7 @@ bool CGIProcess::init(Request Req, Script Script){
 	
 	close(intoCGI[0]);
 	close(fromCGI[1]);
-	//waitpid(_pid, 0, 0);
+	waitpid(_pid, 0, 0);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
 

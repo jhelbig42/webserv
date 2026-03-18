@@ -52,14 +52,14 @@ static bool stringToSocket(const int Socket, std::string &Str,
 bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes, const int Condition){
   (void)ForwardSocket;
-  logging::log(logging::Debug, __func__);
+  //logging::log(logging::Debug, __func__);
   if (_processType == SendFile && (Condition & SockWrite))
     return sendFile(Socket, Bytes);
   if (_processType == ReceiveFile && (Condition & SockRead))
 	  return receiveFile(Socket, Bytes);
 	//also need here to option to check if the input is done or not through the childs pid 
   if (_processType == Cgi && _cgi.isInputDone() == true)
-	  return initSendCGI(Socket, Bytes);						
+	  initSendCGI(Socket, Bytes);						
   return (false); 
 }
 
