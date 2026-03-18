@@ -17,7 +17,6 @@
 #include <utility>
 #include <vector>
 
-void checkPort(std::string str);
 static int clearSocket(const int Sock);
 static int bindToIP(const int Sock, const struct addrinfo *p);
 static int createSocket(const struct addrinfo *P);
@@ -34,24 +33,29 @@ void Server::initNetworking(const std::list<Website> &Websites) {
 	// contained within the Website's Listen struct
     for (std::list<Listen>::const_iterator itI = interfaces.begin();
          itI != interfaces.end(); itI++) {
-      int sock = initListeningSocket(*itI, *itW);
-      sMap.insert(std::make_pair(sInfo.fd, sInfo));
-      const pollfd newFd = {sInfo.fd, POLLIN, 0};
-      fds.push_back(newFd);
+      		initListeningSocket(*itI, *itW);
 	  }
   }
 }
 
 // Initialize the creation of a listening socket for an IP:port pair
 
-int Server::initListeningSocket(const Listen &Pair,
+void Server::initListeningSocket(const Listen &Pair,
                                    const Website &Web) {
-  checkPair(Pair);
-  checkPort(Pair.port);
-  struct addrinfo *serverInfo = getInfo(Interface);
-  SocketInfo sInfo = getListeningSocket(serverInfo, Web, Interface);
+  struct addrinfo *serverInfo;
+  int		sock;
+
+  checkPair(Pair); // pair is not already in use
+  checkPort(Pair.port); // port is uint16_t
+  
+  serverInfo = getAddrInfo(Pair);
+  sock = getListeningSocket(serverInfo, Web, Pair);
   freeaddrinfo(serverInfo);
-  return (sInfo);
+  
+  const pollfd newFd = {sock, POLLIN, 0};
+  fds.push_back(newFd);
+  listenMap.insert(std::make_pair(sock, &Web));
+  return;
 }
 
 
@@ -59,21 +63,21 @@ int Server::initListeningSocket(const Listen &Pair,
 // NGINX allows multiple websites to use the same pair -- It is our
 // choice to disallow it.
 
-void checkPair(const Listen &Pair){
+void Server::checkPair(const Listen &Pair){
 
 	std::string pair = Pair.ip + ":" + Pair.port;
 	if (pairsInUse.find(pair) == pairsInUse.end()){
-  		logging::log(logging::Debug, "Webserv does not support multiple websites with the same IP:Port pair. Check config file."
+  		logging::log(logging::Debug, "Webserv does not support multiple websites with the same IP:Port pair. Check config file.");
 	exit(1);
   }
-  pairsInUse.insert(pair);
+  pairsInUse.insert(make_pair(pair, true));
 }
 
 
 // Check that Port # is uint16_t. Using values outside of this type
 // could result in undefined behavior.
 
-void checkPort(std::string str){
+void Server::checkPort(std::string str){
 	
 	if (str.length() < 1 || str.length()> 5){
 		const std::string msg(str + " is not a valid port number");
@@ -125,7 +129,7 @@ int Server::getListeningSocket(struct addrinfo *Info, const Website &Web, const 
     exit(1);
   }
   logging::log(logging::Debug, "sever found socket. bind: success");
-  return (socket);
+  return (sock);
 }
 
 

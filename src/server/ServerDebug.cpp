@@ -48,7 +48,7 @@ void Server::handleBindFailure(const struct addrinfo *Info, const Listen &Interf
         << "Check that the IP address in the config file is correct for this machine\n"
         << "Use 127.0.0.1 for local host, or find the machine's IP by running 'ip addr' or 'ifconfig'\n";
         break;
-	msg << std::strerror(Error) << "\n" <, interfaceInfoToStr(Interface)
+	msg << std::strerror(Error) << "\n" << interfaceInfoToStr(Interface)
 		<< "Bind failure. Check that config file contents for invalid interfaces, and check that there is no other instance of webserv already running with the same config.\n"
 		<< "If bind continues to fail, check elsewhere for occupied interfaces, using ss or netstat & the flags -tulnp";
       // TODO handle additional errno cases

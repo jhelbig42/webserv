@@ -3,7 +3,6 @@
 #include "Config.hpp"
 #include "Connection.hpp"
 #include "Logging.hpp"
-//#include "Socket.hpp"
 #include "Website.hpp"
 // #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
 // complains
@@ -12,10 +11,6 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-
-// TODO change initListeningSocket and getListeningSocket to return
-// a socklen_t when positive -1 isn't needed / check that casting
-// from the necessary int isn't more work thatn it's worth
 
 struct SocketInfo {
   const int fd;
@@ -28,6 +23,19 @@ struct SocketInfo {
 };
 
 class Server {
+	
+	public:
+	Server(const std::list<Website>  &websites);
+	~Server();
+	void pollLoop(void);
+	void checkPair(const Listen &Pair);
+	void checkPort(const std::string str);
+
+	std::vector<pollfd> fds;
+	//std::map<int, std::vector<const Website *> > listenMap;
+	std::map<int, const Website*> listenMap;
+	std::map<int, Connection*> clientMap;
+	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 
 	private:
 
@@ -35,7 +43,7 @@ class Server {
 
 	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
-	int initListeningSocket(const Listen &Pair, const Website &Web);
+	void initListeningSocket(const Listen &Pair, const Website &Web);
 	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	int getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
@@ -45,16 +53,4 @@ class Server {
 	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 	
 
-	public:
-	Server(const std::list<Website>  &websites);
-	~Server();
-	void pollLoop(void);
-	void checkPair(const Listen &Pair);
-	void checkPort(std::string str);
-
-	std::vector<pollfd> fds;
-	//std::map<int, std::vector<const Website *> > listenMap;
-	std::map<int, const Website> listenMap;
-	std::map<int, Connection*> clientMap;
-	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 };

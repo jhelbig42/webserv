@@ -14,8 +14,6 @@ SRC			+= Server.cpp\
 			ServerDebug.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
-vpath %.cpp $(SRC_DIR)/socket
-SRC			+= Socket.cpp
 vpath %.cpp $(SRC_DIR)/config
 SRC			+= ConfigGlobals.cpp
 SRC			+= ConfigClass.cpp
