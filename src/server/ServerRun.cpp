@@ -9,7 +9,6 @@ void Server::pollLoop(void) {
 
   logging::log(logging::Debug, "<pollLoop>");
  
-  /*
     while (1) {
       const int res =
           poll(fds.data(), (nfds_t)fds.size(),
@@ -19,33 +18,16 @@ void Server::pollLoop(void) {
         std::ostringstream msg;
         msg << "poll: " << std::strerror(errno);
         logging::log(logging::Error, msg.str());
-
-        // TODO How to best handle poll() failure?
-        // Currently, logging error and exiting
-        // Could also log Warning and continue.
+		exit(1);
       }
-      process(Sock, cMap, fds);
+      process();
     }
-      */
 }
 
-// process() iterates through the vector of fds and handles the flags
-// that were set by poll() in fd[i]->events & fd[i]->revents.
-//
-// If one of the handling functions sets the Connection's _delete field
-// to true, due to client hang-up or error, the fd is closed,
-// and both the Connection & the fd are deleted.
-//
-// If a new connection is discovered, a new Connection and fd
-// are added.
-//
-// TODO Handle additional flags
+void Server::process(void) {
 
-/*
-void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
-                         std::vector<pollfd> &Fds) {
-
-  // logging::log(logging::Debug, "Networking::Process()\n");
+	logging::log(logging::Debug, "Process");
+  /*
   std::vector<pollfd> newFdBatch;
   for (std::vector<pollfd>::iterator it = Fds.begin(); it != Fds.end();) {
     if ((it->revents & POLLNVAL) | (it->revents & POLLERR) |
@@ -70,8 +52,10 @@ void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
   }
   Fds.insert(Fds.end(), newFdBatch.begin(), newFdBatch.end());
   newFdBatch.clear();
+*/
 }
 
+/*
 // acceptConnections() is a a wrapper for accept(), which extracts
 // the first connection request on the queue of pending connections
 // for the listening socket. Creates new socket for the

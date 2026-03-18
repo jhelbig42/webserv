@@ -29,7 +29,7 @@ class Server {
 	~Server();
 	void pollLoop(void);
 	void checkPair(const Listen &Pair);
-	void checkPort(const std::string str);
+	void checkPort(std::string str);
 
 	std::vector<pollfd> fds;
 	//std::map<int, std::vector<const Website *> > listenMap;
@@ -47,6 +47,9 @@ class Server {
 	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	int getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
+
+	//process
+	void process(void);
 
 	// debug
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);

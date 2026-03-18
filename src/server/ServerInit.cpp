@@ -66,8 +66,13 @@ void Server::initListeningSocket(const Listen &Pair,
 void Server::checkPair(const Listen &Pair){
 
 	std::string pair = Pair.ip + ":" + Pair.port;
-	if (pairsInUse.find(pair) == pairsInUse.end()){
-  		logging::log(logging::Debug, "Webserv does not support multiple websites with the same IP:Port pair. Check config file.");
+	logging::log2(logging::Debug, "checkpair():\n", pair);
+	if (pairsInUse.find(pair) != pairsInUse.end()){
+
+		std::ostringstream msg;
+		msg << "Webserv does not support multiple websites with the same IP:Port pair.\nCheck config file for duplicates of the following:\n"
+		<< pair;
+  		logging::log(logging::Error, msg.str());
 	exit(1);
   }
   pairsInUse.insert(make_pair(pair, true));
