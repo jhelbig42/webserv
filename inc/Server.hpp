@@ -31,8 +31,8 @@ class Server {
 
 	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
-	SocketInfo initListeningSocket(const Listen &Interface, const Website &Web);
-	struct addrinfo *getInfo(const Listen &Interface);
+	SocketInfo initListeningSocket(const Listen &Pair, const Website &Web);
+	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	SocketInfo getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
 
@@ -45,8 +45,12 @@ class Server {
 	Server(const std::list<Website>  &websites);
 	~Server();
 	void pollLoop(void);
-	
+	void checkPair(const Listen &Pair);
+	void checkPort(std::string str);
+
 	std::vector<pollfd> fds;
-	std::map<int, std::vector<const Website *> > listenMap;
+	//std::map<int, std::vector<const Website *> > listenMap;
+	std::map<int, const Website> listenMap;
 	std::map<int, Connection*> clientMap;
+	std::map<std::string> pairsInUse; // listening <IP:Port>
 };

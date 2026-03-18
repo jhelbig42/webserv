@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-static void checkPort(std::string str);
+void checkPort(std::string str);
 static int clearSocket(const int Sock);
 static int bindToIP(const int Sock, const struct addrinfo *p);
 static int createSocket(const struct addrinfo *P);
@@ -25,12 +25,13 @@ static int createSocket(const struct addrinfo *P);
 
 void Server::initNetworking(const std::list<Website> &Websites) {
 
-  // iterate through all websites from config file
+  // iterate through each website from config file
   for (std::list<Website>::const_iterator itW = Websites.begin();
        itW != Websites.end(); itW++) {
     const std::list<Listen> interfaces = itW->getInterfaces();
 
-    // iterate through all interfaces of a given website
+    // iterate through each IP:port pair of a given website,
+	// contained within the Website's Listen struct
     for (std::list<Listen>::const_iterator itI = interfaces.begin();
          itI != interfaces.end(); itI++) {
       SocketInfo sInfo = initListeningSocket(*itI, *itW);
@@ -41,20 +42,59 @@ void Server::initNetworking(const std::list<Website> &Websites) {
   }
 }
 
-SocketInfo Server::initListeningSocket(const Listen &Interface,
+// Initialize the creation of a listening socket for an IP:port pair
+
+SocketInfo Server::initListeningSocket(const Listen &Pair,
                                    const Website &Web) {
-  checkPort(Interface.port);
+  checkPair(Pair);
+  checkPort(Pair.port);
   struct addrinfo *serverInfo = getInfo(Interface);
   SocketInfo sInfo = getListeningSocket(serverInfo, Web, Interface);
   freeaddrinfo(serverInfo);
   return (sInfo);
 }
 
-struct addrinfo *Server::getInfo(const Listen &Interface) {
+
+// Checks that IP:port pair is not already being used by another website.
+// NGINX allows multiple websites to use the same pair -- It is our
+// choice to disallow it.
+
+void checkPair(const Listen &Pair){
+
+	std::string pair = Pair.ip + ":" + Pair.port;
+	if (pairsInUse.find(pair) == pairsInUse.end()){
+  		logging::log(logging::Debug, "Webserv does not support multiple websites with the same IP:Port pair. Check config file."
+	exit(1);
+  }
+  pairsInUse.insert(pair);
+}
+
+
+// Check that Port # is uint16_t. Using values outside of this type
+// could result in undefined behavior.
+
+void checkPort(std::string str){
+	
+	if (str.length() < 1 || str.length()> 5){
+		const std::string msg(str + " is not a valid port number");
+		logging::log(logging::Error, msg);
+		exit(1);
+  }
+	int port = std::atoi(str.c_str());
+	if 	(port < 0 || port > 65535){
+		const std::string msg(str + " is not a valid port number");
+		logging::log(logging::Error, msg);
+		exit(1);
+	}
+}
+
+
+// Wrapper for getaddrinfo()
+struct addrinfo *Server::getAddrInfo(const Listen &Interface) {
 
   struct addrinfo *info;
   logging::log2(logging::Debug, "getInfo() called with ip: ", Interface.ip);
-  const int ret = getaddrinfo(Interface.ip.c_str(), Interface.port.c_str(), &_hints, &info); // NULL = localhost
+  const int ret = getaddrinfo(Interface.ip.c_str(), Interface.port.c_str(), &_hints, &info);
   if (ret != 0) {
     const std::string msg(gai_strerror(ret));
     throw std::runtime_error("getaddrinfo: " + msg);
@@ -89,23 +129,6 @@ SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web,
   return (sInfo);
 }
 
-
-// Static Helper Functions:
-
-static void checkPort(std::string str){
-	
-	if (str.length() < 1 || str.length()> 5){
-		const std::string msg(str + " is not a valid port number");
-		logging::log(logging::Error, msg);
-		exit(1);
-  }
-	int port = std::atoi(str.c_str());
-	if 	(port < 0 || port > 65535){
-		const std::string msg(str + " is not a valid port number");
-		logging::log(logging::Error, msg);
-		exit(1);
-	}
-}
 
 static int clearSocket(const int Sock) {
   int yes = 1;
