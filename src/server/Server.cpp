@@ -18,4 +18,3 @@ Server::~Server(void) {
 	//close(it->fd);
 }
 
-//

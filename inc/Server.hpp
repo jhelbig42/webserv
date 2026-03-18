@@ -18,7 +18,7 @@ struct SocketInfo {
   enum { LISTEN, CLIENT } type; 
   union
   {
-	const Website *const website; // for LISTEN type
+	std::vector<Website> *const website; // for LISTEN type
 	Connection const *connection; // for CLIENT type
   };
 };
@@ -47,5 +47,6 @@ class Server {
 	void pollLoop(void);
 	
 	std::vector<pollfd> fds;
-	std::map<int, SocketInfo> sMap;
+	std::map<int, std::vector<const Website *> > listenMap;
+	std::map<int, Connection*> clientMap;
 };
