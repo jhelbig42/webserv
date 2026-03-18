@@ -34,7 +34,7 @@ void Server::initNetworking(const std::list<Website> &Websites) {
 	// contained within the Website's Listen struct
     for (std::list<Listen>::const_iterator itI = interfaces.begin();
          itI != interfaces.end(); itI++) {
-      SocketInfo sInfo = initListeningSocket(*itI, *itW);
+      int sock = initListeningSocket(*itI, *itW);
       sMap.insert(std::make_pair(sInfo.fd, sInfo));
       const pollfd newFd = {sInfo.fd, POLLIN, 0};
       fds.push_back(newFd);
@@ -44,7 +44,7 @@ void Server::initNetworking(const std::list<Website> &Websites) {
 
 // Initialize the creation of a listening socket for an IP:port pair
 
-SocketInfo Server::initListeningSocket(const Listen &Pair,
+int Server::initListeningSocket(const Listen &Pair,
                                    const Website &Web) {
   checkPair(Pair);
   checkPort(Pair.port);
@@ -103,7 +103,7 @@ struct addrinfo *Server::getAddrInfo(const Listen &Interface) {
   return (info);
 }
 
-SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface) {
+int Server::getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface) {
 
   int sock;
   const struct addrinfo *p;
@@ -125,8 +125,7 @@ SocketInfo Server::getListeningSocket(struct addrinfo *Info, const Website &Web,
     exit(1);
   }
   logging::log(logging::Debug, "sever found socket. bind: success");
-  SocketInfo sInfo = {sock, SocketInfo::LISTEN, &Web};
-  return (sInfo);
+  return (socket);
 }
 
 

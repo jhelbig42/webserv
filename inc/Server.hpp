@@ -13,6 +13,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+// TODO change initListeningSocket and getListeningSocket to return
+// a socklen_t when positive -1 isn't needed / check that casting
+// from the necessary int isn't more work thatn it's worth
+
 struct SocketInfo {
   const int fd;
   enum { LISTEN, CLIENT } type; 
@@ -31,10 +35,10 @@ class Server {
 
 	// init Networking
 	void initNetworking(const std::list<Website> &Websites);
-	SocketInfo initListeningSocket(const Listen &Pair, const Website &Web);
+	int initListeningSocket(const Listen &Pair, const Website &Web);
 	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
-	SocketInfo getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
+	int getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
 
 	// debug
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
@@ -52,5 +56,5 @@ class Server {
 	//std::map<int, std::vector<const Website *> > listenMap;
 	std::map<int, const Website> listenMap;
 	std::map<int, Connection*> clientMap;
-	std::map<std::string> pairsInUse; // listening <IP:Port>
+	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 };
