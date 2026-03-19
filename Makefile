@@ -11,6 +11,7 @@ vpath %.cpp $(SRC_DIR)/server
 SRC			+= Server.cpp\
 			ServerInit.cpp\
 			ServerRun.cpp\
+			ServerPollHandling.cpp\
 			ServerDebug.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp

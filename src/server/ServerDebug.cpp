@@ -56,3 +56,14 @@ void Server::handleBindFailure(const struct addrinfo *Info, const Listen &Interf
   (void) Info;
   logging::log(logging::Error, msg.str());
 }
+
+void Server::printFcntlFlags(const int Sock) {
+  const int flags = fcntl(Sock, F_GETFL);
+  logging::log3(logging::Debug, Sock, " fcntl flags = ", flags);
+  if (flags & O_NONBLOCK) {
+    logging::log2(logging::Debug, Sock, " is NON-BLOCKING");
+  } else {
+    logging::log2(logging::Debug, Sock, " is BLOCKING");
+  }
+}
+

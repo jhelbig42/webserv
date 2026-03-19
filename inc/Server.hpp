@@ -12,6 +12,14 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+struct ClientAddr {
+
+  struct sockaddr_storage addr;
+  int clientSock;
+  socklen_t addrSize;
+  // char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
+};
+
 struct SocketInfo {
   const int fd;
   enum { LISTEN, CLIENT } type; 
@@ -34,8 +42,9 @@ class Server {
 	std::vector<pollfd> fds;
 	//std::map<int, std::vector<const Website *> > listenMap;
 	std::map<int, const Website*> listenMap;
-	std::map<int, Connection*> clientMap;
+	std::map<int, Connection*> clientMap; // TODO make non-pointer?
 	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
+	std::vector<pollfd> newFdBatch;
 
 	private:
 
@@ -47,13 +56,26 @@ class Server {
 	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	int getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
+	
+	// poll handling
+	bool reventsAreTerminal(int revents);
+	void handleTerminalCondition(struct pollfd &polled);
+	void handlePollnval(int Fd);
+	void handlePollerr(int Fd);
+	void handlePollrdhup(int Fd);
 
-	//process
+	void handleServableCondition(struct pollfd &polled);
+	void handlePollin(int Fd);
+	void handlePollout(int Fd);
+
+	// process
 	void process(void);
+	int acceptConnection(int ListenerFd, ClientAddr *Candidate);
+	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// debug
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
 	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
-	
+	void printFcntlFlags(const int Sock);	
 
 };
