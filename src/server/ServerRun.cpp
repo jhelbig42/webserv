@@ -88,8 +88,13 @@ int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
 
 void Server::addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate) {
 
+  const Website *website;
+  try {
+  	website = listenMap.at(ListenerFd);
+  } catch (std::out_of_range &e) {
+  	logging::log(logging::Error, "addConnectionToMap(): Connection could not be created because ListenerFd was not found in listenMap. This should never happen.");
+  }
   Connection* const  newConnection =
-      new Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize);
-	// TODO add website
+      new Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize, *website);
   clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

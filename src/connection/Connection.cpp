@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/06 15:41:52 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/20 16:56:45 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@
 // Construct & Destruct
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
-                       const socklen_t Addr_size)
-    : _sock(Sock), _delete(false), _addrSize(sizeof _addr) {
+                       const socklen_t Addr_size, const Website &website)
+    : _sock(Sock), _delete(false), _addrSize(sizeof _addr), _website(website) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
