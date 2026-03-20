@@ -82,7 +82,7 @@ int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
   }
   logging::log2(logging::Debug, "Connection accepted on socket ",
                 Candidate->clientSock);
-  printFcntlFlags(Candidate->clientSock);
+  // printFcntlFlags(Candidate->clientSock);
   return (0);
 }
 

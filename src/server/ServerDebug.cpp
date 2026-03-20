@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include <cstring> // for strerror
 #include <cerrno>  // for errno
+// #include <fcntl.h> // for demonstration purposes only, forbidden function
 
 // get_addr_info_str() is only for logging purposes.
 // The function builds a string from the contents of an addrinfo struct
@@ -57,6 +58,7 @@ void Server::handleBindFailure(const struct addrinfo *Info, const Listen &Interf
   logging::log(logging::Error, msg.str());
 }
 
+/*
 void Server::printFcntlFlags(const int Sock) {
   const int flags = fcntl(Sock, F_GETFL);
   logging::log3(logging::Debug, Sock, " fcntl flags = ", flags);
@@ -66,4 +68,4 @@ void Server::printFcntlFlags(const int Sock) {
     logging::log2(logging::Debug, Sock, " is BLOCKING");
   }
 }
-
+*/
