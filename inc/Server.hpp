@@ -13,7 +13,6 @@
 #include <sys/types.h>
 
 struct ClientAddr {
-
   struct sockaddr_storage addr;
   int clientSock;
   socklen_t addrSize;

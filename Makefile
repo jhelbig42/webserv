@@ -26,12 +26,6 @@ vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
-vpath %.cpp $(SRC_DIR)/networking
-SRC			+= Networking.cpp\
-			   NetworkingInitSocket.cpp\
-			   NetworkingInitServer.cpp\
-			   NetworkingRun.cpp\
-			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
 SRC			+= Post.cpp
 SRC			+= Reaction.cpp
