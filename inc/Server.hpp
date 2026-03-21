@@ -32,7 +32,7 @@ struct SocketInfo {
 class Server {
 	
 	public:
-	Server(const std::list<Website>  &websites);
+	explicit Server(const std::list<Website>  &websites);
 	~Server();
 	void pollLoop(void);
 	void checkPair(const Listen &Pair);
