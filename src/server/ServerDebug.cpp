@@ -1,6 +1,6 @@
 #include "Server.hpp"
-#include <cstring> // for strerror
 #include <cerrno>  // for errno
+#include <cstring> // for strerror
 // #include <fcntl.h> // for demonstration purposes only, forbidden function
 
 // get_addr_info_str() is only for logging purposes.

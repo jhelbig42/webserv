@@ -1,9 +1,9 @@
+#include "Config.hpp"
+#include "Networking.hpp"
 #include "Scanner.hpp"
 #include "Server.hpp"
-#include "Request.hpp"
 #include "Reaction.hpp"
-#include "Networking.hpp"
-#include "Config.hpp"
+#include "Request.hpp"
 #include <unistd.h>
 #include <iostream>
 

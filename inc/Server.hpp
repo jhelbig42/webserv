@@ -4,8 +4,6 @@
 #include "Connection.hpp"
 #include "Logging.hpp"
 #include "Website.hpp"
-// #define _GNU_SOURCE // for extra poll() macros // defined elsewhere? Compiler
-// complains
 #include <map>
 #include <netdb.h>
 #include <poll.h>
@@ -39,7 +37,6 @@ class Server {
 	void checkPort(std::string str);
 
 	std::vector<pollfd> fds;
-	//std::map<int, std::vector<const Website *> > listenMap;
 	std::map<int, const Website*> listenMap;
 	std::map<int, Connection*> clientMap; // TODO make non-pointer?
 	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
