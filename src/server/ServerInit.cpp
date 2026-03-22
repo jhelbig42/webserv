@@ -83,14 +83,16 @@ void Server::checkPair(const Listen &Pair){
 // could result in undefined behavior.
 
 void Server::checkPort(std::string str){
-	
-	if (str.length() < 1 || str.length()> 5){
+
+  const int maxPortDigits = 5;
+  const int maxPortValue = 65535;
+	if (str.length() < 1 || str.length()> maxPortDigits){
 		const std::string msg(str + " is not a valid port number");
 		logging::log(logging::Error, msg);
 		exit(1);
   }
 	int port = std::atoi(str.c_str());
-	if 	(port < 0 || port > 65535){
+	if 	(port < 0 || port > maxPortValue){
 		const std::string msg(str + " is not a valid port number");
 		logging::log(logging::Error, msg);
 		exit(1);
