@@ -49,7 +49,7 @@ void Server::initListeningSocket(const Listen &Pair,
   checkPort(Pair.port); // port is uint16_t
   
   serverInfo = getAddrInfo(Pair);
-  sock = getListeningSocket(serverInfo, Web, Pair);
+  sock = getListeningSocket(serverInfo, Pair);
   freeaddrinfo(serverInfo);
   
   const pollfd newFd = {sock, POLLIN, 0};
@@ -112,7 +112,7 @@ struct addrinfo *Server::getAddrInfo(const Listen &Interface) {
   return (info);
 }
 
-int Server::getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface) {
+int Server::getListeningSocket(struct addrinfo *Info, const Listen &Interface) {
 
   int sock;
   const struct addrinfo *p;

@@ -51,7 +51,7 @@ class Server {
 	void initListeningSocket(const Listen &Pair, const Website &Web);
 	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
-	int getListeningSocket(struct addrinfo *Info, const Website &Web, const Listen &Interface);
+	int getListeningSocket(struct addrinfo *Info, const Listen &Interface);
 	
 	// poll handling
 	bool reventsAreTerminal(int revents);
