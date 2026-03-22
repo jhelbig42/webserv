@@ -1,7 +1,5 @@
 #include "Connection.hpp"
 #include "Logging.hpp"
-#include "Networking.hpp"
-#include "NetworkingDefines.hpp" // can be removed?
 #include "Server.hpp"
 #include <map>
 #include <poll.h>

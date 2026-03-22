@@ -19,7 +19,7 @@ void Server::pollLoop(void) {
         std::ostringstream msg;
         msg << "poll: " << std::strerror(errno);
         logging::log(logging::Error, msg.str());
-		exit(1);
+		    exit(1);
       }
       process();
     }
@@ -56,9 +56,10 @@ void Server::process(void) {
       			it++;
     		}
 		}
-  	}
-  	fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
-  	newFdBatch.clear();
+    it->revents = 0;
+  }
+  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
+  newFdBatch.clear();
 }
 
 // acceptConnections() is a a wrapper for accept(), which extracts
@@ -70,6 +71,7 @@ void Server::process(void) {
 
 int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
 
+  logging::log2(logging::Debug, "acceptConnection() on socket ", ListenerFd);
   Candidate->clientSock = accept(
       ListenerFd, (struct sockaddr *)&Candidate->addr, &Candidate->addrSize);
   if (Candidate->clientSock == -1) {
@@ -78,6 +80,7 @@ int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
         << " (can continue trying to accept connections)";
     logging::log(logging::Error,
                  msg.str()); // may downgrade log level at some point
+    exit(1); //temp
     return (-1);
   }
   logging::log2(logging::Debug, "Connection accepted on socket ",

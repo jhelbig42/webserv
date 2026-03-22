@@ -1,5 +1,4 @@
 #include "Config.hpp"
-#include "Networking.hpp"
 #include "Scanner.hpp"
 #include "Server.hpp"
 #include "Reaction.hpp"
@@ -59,7 +58,7 @@ int main(int argc, char **argv) {
   
   try {
     const Config conf(argv[1]);
-	const std::list<Website> websites = conf.getWebsites();
+	const std::list<Website> &websites = conf.getWebsites();
 	if (websites.empty()){
     throw std::runtime_error("config file contains 0 websites");
 	}

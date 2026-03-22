@@ -53,6 +53,7 @@ void Server::initListeningSocket(const Listen &Pair,
   freeaddrinfo(serverInfo);
   
   const pollfd newFd = {sock, POLLIN, 0};
+  logging::log2(logging::Debug, "Listening socket created on socket ", sock);
   fds.push_back(newFd);
   listenMap.insert(std::make_pair(sock, &Web));
   return;
@@ -135,6 +136,7 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Interface) {
     freeaddrinfo(Info);
     exit(1);
   }
+  setToListen(sock);
   logging::log(logging::Debug, "sever found socket. bind: success");
   return (sock);
 }
@@ -174,4 +176,20 @@ static int createSocket(const struct addrinfo *P) {
   }
   //networking::printFcntlFlags(sock);
   return (sock);
+}
+
+// setToListen() is a wrapper for listen(), which marks the
+// server's socket as a "possive socket". This means it will
+// be used to accept incoming connection requests using accept().
+//
+// The second arguments of listen() is backlog, the maximum
+// length to which the queue of pending connections may grow.
+
+void Server::setToListen(const int Sock) {
+
+  if (listen(Sock, BACKLOG) == -1) {
+    std::ostringstream msg;
+    msg << "listen: " << std::strerror(errno);
+    throw std::runtime_error(msg.str());
+  }
 }
