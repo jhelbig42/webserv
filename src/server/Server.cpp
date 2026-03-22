@@ -1,6 +1,6 @@
 #include "Server.hpp"
-#include <unistd.h> // for close()
 #include <cstring>  // for memset()
+#include <unistd.h> // for close()
 
 Server::Server(const std::list<Website> &Websites) {
   
