@@ -42,7 +42,7 @@ class Server {
 
 	std::vector<pollfd> fds;
 	std::map<int, const Website*> listenMap;
-	std::map<int, Connection*> clientMap; // TODO make non-pointer?
+	std::map<int, Connection> clientMap; // TODO make non-pointer?
 	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 	std::vector<pollfd> newFdBatch;
 

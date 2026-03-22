@@ -45,14 +45,14 @@ void Server::process(void) {
     	}
 		if (clientMap.find(it->fd) != clientMap.end()){ // if socket belongs to a client
 		// TODO make this a getter socketIsClient
-			if (clientMap.at(it->fd)->getDeleteStatus() == true) { // if should be deleted, delete
+			if (clientMap.at(it->fd).getDeleteStatus() == true) { // if should be deleted, delete
       			close(it->fd);
       			clientMap.erase(it->fd);
       			it = fds.erase(it);
     		}	
 			else { // else, hand off Connection object to be further handled
-        		clientMap.at(it->fd)->processData();
-        		clientMap.at(it->fd)->resetConditions();
+        		clientMap.at(it->fd).processData();
+        		clientMap.at(it->fd).resetConditions();
       			it++;
     		}
 		}
@@ -97,7 +97,6 @@ void Server::addConnectionToMap(int ListenerFd, const struct ClientAddr &Candida
   } catch (std::out_of_range &e) {
   	logging::log(logging::Error, "addConnectionToMap(): Connection could not be created because ListenerFd was not found in listenMap. This should never happen.");
   }
-  Connection* const  newConnection =
-      new Connection(Candidate.clientSock, Candidate.addr, Candidate.addrSize, *website);
+  Connection newConnection(Candidate.clientSock, Candidate.addr, Candidate.addrSize, *website);
   clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

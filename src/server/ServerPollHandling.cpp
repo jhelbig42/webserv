@@ -64,7 +64,7 @@ void Server::handlePollnval(int Fd) {
                 "invalid fd. fd = ",
                 Fd);
   try {
-    clientMap.at(Fd)->scheduleForDemolition();
+    clientMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "
@@ -87,7 +87,7 @@ void Server::handlePollrdhup(int Fd) {
                 " fd = ",
                 Fd);
   try {
-    clientMap.at(Fd)->scheduleForDemolition();
+    clientMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "
@@ -107,7 +107,7 @@ void Server::handlePollerr(int Fd) {
                 "disconnected abruptly using RST, or socket is broken.\n fd = ",
                 Fd); // downgrade to Warning?
   try {
-    clientMap.at(Fd)->scheduleForDemolition();
+    clientMap.at(Fd).scheduleForDemolition();
   } catch (std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "
@@ -131,9 +131,9 @@ void Server::handlePollin(int Fd) {
       newFdBatch.push_back(newFd);
     }
   } else {
-    const std::map<int, Connection*>::iterator itC = clientMap.find(Fd);
+    const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
     if (itC != clientMap.end()) {
-      (itC->second)->addToConditions(SockRead);
+      (itC->second).addToConditions(SockRead);
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
@@ -147,10 +147,10 @@ void Server::handlePollin(int Fd) {
 
 void Server::handlePollout(int Fd) {
   //  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
-  const std::map<int, Connection*>::iterator itC = clientMap.find(Fd);
+  const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
   if (itC != clientMap.end()) {
     // logging::log2(logging::Debug, "Ready to send to ", Fd);
-    (itC->second)->addToConditions(SockWrite);
+    (itC->second).addToConditions(SockWrite);
   } else {
     logging::log(logging::Error, "process: Connection not found in map "
                                  "container (This should never happen)");
