@@ -38,11 +38,11 @@ class Server {
 	~Server();
 	void pollLoop(void);
 	void checkPair(const Listen &Pair);
-	void checkPort(std::string str);
+	void checkPort(const std::string &str);
 
 	std::vector<pollfd> fds;
 	std::map<int, const Website*> listenMap;
-	std::map<int, Connection> clientMap; // TODO make non-pointer?
+	std::map<int, Connection> clientMap;
 	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 	std::vector<pollfd> newFdBatch;
 

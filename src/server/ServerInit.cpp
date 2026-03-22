@@ -83,7 +83,7 @@ void Server::checkPair(const Listen &Pair){
 // Check that Port # is uint16_t. Using values outside of this type
 // could result in undefined behavior.
 
-void Server::checkPort(std::string str){
+void Server::checkPort(const std::string &str){
 
   const int maxPortDigits = 5;
   const int maxPortValue = 65535;
