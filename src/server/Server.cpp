@@ -13,8 +13,8 @@ Server::Server(const std::list<Website> &Websites) {
 }
 
 Server::~Server(void) {
- // for (std::vector<Socket>::iterator it = sockets.begin(); it != sockets.end();
-	  // it++) {
-	//close(it->fd);
+  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end(); it++) {
+	  close(it->fd);
+  }
 }
 

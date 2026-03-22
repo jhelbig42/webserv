@@ -26,8 +26,8 @@ void Server::pollLoop(void) {
 }
 
 bool Server::reventsAreTerminal(int revents){
-	if ((revents & POLLNVAL) | (revents & POLLERR) |
-        (revents & POLLHUP) | (revents & POLLPRI) |
+	if ((revents & POLLNVAL) || (revents & POLLERR) ||
+        (revents & POLLHUP) || (revents & POLLPRI) ||
         (revents & POLLRDHUP)) {
 			return true;
 	}
@@ -36,7 +36,6 @@ bool Server::reventsAreTerminal(int revents){
 
 void Server::process(void) {
 
-	logging::log(logging::Debug, "Process");
 	for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     	if (reventsAreTerminal(it->revents)){
       		handleTerminalCondition(*it);
@@ -49,14 +48,15 @@ void Server::process(void) {
       			close(it->fd);
       			clientMap.erase(it->fd);
       			it = fds.erase(it);
-    		}	
+            continue;
+      }	
 			else { // else, hand off Connection object to be further handled
         		clientMap.at(it->fd).processData();
         		clientMap.at(it->fd).resetConditions();
-      			it++;
     		}
 		}
     it->revents = 0;
+    it++;
   }
   fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
   newFdBatch.clear();
