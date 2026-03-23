@@ -62,32 +62,6 @@ void Server::process(void) {
   newFdBatch.clear();
 }
 
-// acceptConnections() is a a wrapper for accept(), which extracts
-// the first connection request on the queue of pending connections
-// for the listening socket. Creates new socket for the
-// incoming connection.
-//
-// RETURNS: fd for new socket
-
-int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
-
-  logging::log2(logging::Debug, "acceptConnection() on socket ", ListenerFd);
-  Candidate->clientSock = accept(
-      ListenerFd, (struct sockaddr *)&Candidate->addr, &Candidate->addrSize);
-  if (Candidate->clientSock == -1) {
-    std::ostringstream msg;
-    msg << "accept: " << std::strerror(errno)
-        << " (can continue trying to accept connections)";
-    logging::log(logging::Error,
-                 msg.str()); // may downgrade log level at some point
-    exit(1); //temp
-    return (-1);
-  }
-  logging::log2(logging::Debug, "Connection accepted on socket ",
-                Candidate->clientSock);
-  // printFcntlFlags(Candidate->clientSock);
-  return (0);
-}
 
 void Server::addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate) {
 

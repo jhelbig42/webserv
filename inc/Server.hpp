@@ -50,13 +50,19 @@ class Server {
 
 	addrinfo _hints;
 
-	// init Networking
+	// ServerInit.hpp -- init Networking
 	void initNetworking(const std::list<Website> &Websites);
 	void initListeningSocket(const Listen &Pair, const Website &Web);
-	struct addrinfo *getAddrInfo(const Listen &Interface);
 	struct addrinfo createHints(void);
 	int getListeningSocket(struct addrinfo *Info, const Listen &Interface);
-	void setToListen(const int Sock);
+
+	// ServerWrappers.hpp -- networking wrappers	
+	struct addrinfo *getAddrInfo(const Listen &Pair);
+	int createSocket(const struct addrinfo *P); // socket()
+	int clearSocket(const int Sock); // setsockopt()
+	int bindToIP(const int Sock, const struct addrinfo *p); //bind()
+	void setToListen(const int Sock); // listen()
+	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
 	
 	// poll handling
 	bool reventsAreTerminal(int revents);
@@ -71,12 +77,14 @@ class Server {
 
 	// process
 	void process(void);
-	int acceptConnection(int ListenerFd, ClientAddr *Candidate);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
-	// debug
+	// error handling
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
-	static std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
+
+	// debug
+	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
+	std::string interfaceInfoToStr(const Listen &Interface);
 	void printFcntlFlags(const int Sock);	
 
 };
