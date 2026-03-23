@@ -52,14 +52,8 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
     exit(1);
   }
   if (Polled.revents & POLLHUP) {
-    logging::log2(logging::Debug, "Hangup from fd ", Polled.fd);
-    exit(1);
-    // TODO
-  }
-  if (Polled.revents & POLLPRI) {
-    logging::log2(logging::Debug, "POLLPRI from fd ", Polled.fd);
-    exit(1);
-    // TODO
+    handlePollhup(Polled.fd);
+	exit(1);
   }
 }
 
@@ -73,6 +67,10 @@ void Server::handleServableCondition(struct pollfd &Polled) {
   	// TODO
   }
   */
+  if (Polled.revents & POLLPRI) {
+    logging::log2(logging::Info, "POLLPRI from fd ", Polled.fd);
+	handlePollin(Polled.fd);
+  }
   if (Polled.revents & POLLIN) {
     handlePollin(Polled.fd);
   }
