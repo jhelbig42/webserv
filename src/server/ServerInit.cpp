@@ -146,12 +146,14 @@ void Server::checkPort(const std::string &str) {
 int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
 
   int sock;
+  bool found_sock = 0;
   const struct addrinfo *p;
   for (p = Info; p != NULL; p = p->ai_next) {
     sock = createSocket(p);
     if (sock == -1) {
       continue;
     }
+	found_sock = 1;
     clearSocket(sock);
     if (bindToIP(sock, p) == -1) {
       continue;
@@ -160,8 +162,13 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
   }
   if (p == NULL) {
     int error = errno;
-    handleBindFailure(Info, Pair, error);
-    freeaddrinfo(Info);
+  	if (found_sock == 0){
+    	handleSocketFailure(Pair, error);
+	}
+	else {
+    	handleBindFailure(Pair, error);
+    }
+	freeaddrinfo(Info);
     exit(1);
   }
   setToListen(sock);

@@ -4,8 +4,7 @@
 #include <cerrno>  // for errno
 #include <cstring> // for strerror
 
-void Server::handleBindFailure(const struct addrinfo *Info,
-                               const Listen &Interface, const int Error) {
+void Server::handleBindFailure(const Listen &Interface, const int Error) {
   std::ostringstream msg;
   msg << "bind: ";
   switch (Error) {
@@ -30,9 +29,16 @@ void Server::handleBindFailure(const struct addrinfo *Info,
            "already running with the same config.\n"
         << "If bind continues to fail, check elsewhere for occupied "
            "interfaces, using ss or netstat & the flags -tulnp";
-    // TODO handle additional errno cases
+    
+	// TODO (optional) add specific troubleshooting tips for 
+	// additional errno cases
   };
-  (void)Info; // TODO port:ip are complex to extract from Info, but it could be
-  // useful for additional logging
+  logging::log(logging::Error, msg.str());
+}
+
+void Server::handleSocketFailure(const Listen &Interface, const int Error) {
+  std::ostringstream msg;
+  msg << "socket: " << std::strerror(Error) << "\n"
+  		<< interfaceInfoToStr(Interface);
   logging::log(logging::Error, msg.str());
 }

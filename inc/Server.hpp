@@ -82,8 +82,9 @@ class Server {
 	// ServerHandlePollout.hpp
 	void handlePollout(int Fd);
 
-	// error handling
-	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
+	// ServerErrorHandling.hpp
+	void handleSocketFailure(const Listen &Interface, const int Error);
+	void handleBindFailure(const Listen &Interface, const int Error);
 
 	// debug
 	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);

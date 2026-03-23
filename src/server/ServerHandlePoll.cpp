@@ -45,20 +45,24 @@ bool Server::reventsAreTerminal(int revents) {
 void Server::handleTerminalCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLNVAL) {
     handlePollnval(Polled.fd);
-    exit(1);
+    return;
   }
   if (Polled.revents & POLLERR) {
     handlePollerr(Polled.fd);
-    exit(1);
+    return;
   }
   if (Polled.revents & POLLHUP) {
     handlePollhup(Polled.fd);
-	exit(1);
+	return;
   }
 }
 
-// handleServableCondition() handles POLLIN & POLLOUT
-// through the use of additional helper functions
+/**	
+*	\brief handleServableCondition() handles POLLIN & POLLOUT
+*	as well as POLLPRI (high priority POLLIN)
+*	& POLLRDHUP (client has finished writing but may still read)
+*
+*/
 
 void Server::handleServableCondition(struct pollfd &Polled) {
 
@@ -67,12 +71,10 @@ void Server::handleServableCondition(struct pollfd &Polled) {
   	// TODO
   }
   */
-  if (Polled.revents & POLLPRI) {
+  // POLLPRI = high priority data to read.
+  if (Polled.revents & POLLIN || Polled.revents & POLLPRI) {
     logging::log2(logging::Info, "POLLPRI from fd ", Polled.fd);
 	handlePollin(Polled.fd);
-  }
-  if (Polled.revents & POLLIN) {
-    handlePollin(Polled.fd);
   }
   if (Polled.revents & POLLOUT) {
     handlePollout(Polled.fd);

@@ -76,20 +76,3 @@ void Server::handlePollerr(int Fd) {
   }
 }
 
-// handlePollpri() handles POLLPRI:
-// 		Exceptional condition
-
-void Server::handlePollerr(int Fd) {
-  const std::ostringstream msg;
-  logging::log2(logging::Error,
-                "networking::process(): POLLERR \n\tclient may have "
-                "disconnected abruptly using RST, or socket is broken.\n fd = ",
-                Fd); // downgrade to Warning?
-  try {
-    clientMap.at(Fd).scheduleForDemolition();
-  } catch (std::out_of_range &e) {
-    logging::log(logging::Error,
-                 "Connection could not be marked for deletion because there is "
-                 "no Connection with this fd.");
-  }
-}
