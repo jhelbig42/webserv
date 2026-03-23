@@ -11,7 +11,10 @@ vpath %.cpp $(SRC_DIR)/server
 SRC			+= Server.cpp\
 			ServerInit.cpp\
 			ServerRun.cpp\
-			ServerPollHandling.cpp\
+			ServerHandlePoll.cpp\
+			ServerHandlePollin.cpp\
+			ServerHandlePollout.cpp\
+			ServerHandlePollErrs.cpp\
 			ServerErrorHandling.cpp\
 			ServerDebug.cpp\
 			ServerWrappers.cpp

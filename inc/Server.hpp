@@ -65,9 +65,9 @@ class Server {
 	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
 	
 	// ServerRun.hpp -- outer PollLoop() is public
-//	void process(void);
-//	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
-
+	void process(void);
+	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+	bool reventsAreTerminal(int revents);
 
 	// poll handling
 	void handleTerminalCondition(struct pollfd &polled);
