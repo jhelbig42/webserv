@@ -8,7 +8,7 @@
 #include <iostream>
 
 //#define OFFLINE
-//#define PARSING
+#define PARSING
 
 #define CHUNK_SIZE 1024
 

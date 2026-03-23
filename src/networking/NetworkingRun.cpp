@@ -113,7 +113,8 @@ void networking::process(const int ListenSock, std::map<int, Connection> &CMap,
       it = Fds.erase(it);
     } else {
       if (it->fd != ListenSock) {
-        CMap.at(it->fd).processData();
+        // cMap.at(it->fd).serve(MAX_REQUEST);
+        CMap.at(it->fd).serve();
         CMap.at(it->fd).resetConditions();
       }
       it++;

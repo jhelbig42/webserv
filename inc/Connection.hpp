@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:00:20 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/20 16:57:35 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/23 17:27:30 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,7 @@ public:
   // send & receive
   //void readData(void);
   bool serve(const size_t Bytes);
-  Conditions getConditions() const;
-  void processData(void);
+  void serve(void);
   Request _req;
   Reaction _react;
 
