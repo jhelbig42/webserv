@@ -133,12 +133,6 @@ void Server::checkPort(const std::string &str) {
  * \param	Info	pre-filled addrinfo struct, built from IP:port pair
  * \param	Pair	associated Website's IP:port pair Listen struct
  *
- * TODO handleBindFailure() currently handles both socket() and bind()
- * Introduction of a static variable could track which system call failed
- * for even more specific error messages. Currently, the system-call
- * specific errno message will print, but always with the phrase "bind"
- * See handleBindFailure()
- *
  * \return	int		fd of listening socket, already successfully
  *					set to listen and bound to ip:port pair
  */
@@ -153,7 +147,7 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
     if (sock == -1) {
       continue;
     }
-	found_sock = 1;
+    found_sock = 1;
     clearSocket(sock);
     if (bindToIP(sock, p) == -1) {
       continue;
@@ -162,13 +156,12 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
   }
   if (p == NULL) {
     int error = errno;
-  	if (found_sock == 0){
-    	handleSocketFailure(Pair, error);
-	}
-	else {
-    	handleBindFailure(Pair, error);
+    if (found_sock == 0) {
+      handleSocketFailure(Pair, error);
+    } else {
+      handleBindFailure(Pair, error);
     }
-	freeaddrinfo(Info);
+    freeaddrinfo(Info);
     exit(1);
   }
   setToListen(sock);

@@ -86,7 +86,7 @@ class Server {
 	void handleSocketFailure(const Listen &Interface, const int Error);
 	void handleBindFailure(const Listen &Interface, const int Error);
 
-	// debug
+	// ServerDebug.hpp
 	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 	std::string interfaceInfoToStr(const Listen &Interface);
 	void printFcntlFlags(const int Sock);

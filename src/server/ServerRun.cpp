@@ -5,16 +5,16 @@
 #include <cstring>
 #include <unistd.h> // for close
 
-/** 
-*	\brief pollLoop() introduces the while(1) networking loop that
-* 	will run for the duration of the webserver.
-*  
-*	- calls poll() with the array of pollfd structs in the
-*    Server's poll vector. -1 as third argument means no timeout.
-* 	- calls process() to process the results
-*
-*	If poll fails (an unlikely system call failure), webserver exits.
-*/
+/**
+ *	\brief pollLoop() introduces the while(1) networking loop that
+ * 	will run for the duration of the webserver.
+ *
+ *	- calls poll() with the array of pollfd structs in the
+ *    Server's poll vector. -1 as third argument means no timeout.
+ * 	- calls process() to process the results
+ *
+ *	If poll fails (an unlikely system call failure), webserver exits.
+ */
 
 void Server::pollLoop(void) {
 
@@ -42,7 +42,7 @@ void Server::pollLoop(void) {
 *
 *	- Checks each fd's revents field, which was set by poll()
 *	- Calls the relevant handling function, which will either
-		- set conditions in a client connection, or accept new connections
+    - set conditions in a client connection, or accept new connections
 *	- If the fd belongs to a client
 *		- if Connection is markeid for deletion, close and delete
 *		- otherwise, send to parser for next steps
@@ -62,16 +62,13 @@ void Server::process(void) {
     } else {
       handleServableCondition(*it);
     }
-    if (clientMap.find(it->fd) !=
-        clientMap.end()) { // if socket belongs to a client
-                           // TODO make this a getter socketIsClient
-      if (clientMap.at(it->fd).getDeleteStatus() ==
-          true) { // if should be deleted, delete
+    if (socketIsClient(it->fd)) {
+      if (clientMap.at(it->fd).getDeleteStatus() == true) {
         close(it->fd);
         clientMap.erase(it->fd);
         it = fds.erase(it);
         continue;
-      } else { // else, hand off Connection object to be further handled
+      } else {
         clientMap.at(it->fd).processData();
         clientMap.at(it->fd).resetConditions();
       }

@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <vector>
 
-
 // ServerHandlePollErrs.cpp
 //
 // These functions handle revents which indicate that the connection
@@ -75,4 +74,3 @@ void Server::handlePollerr(int Fd) {
                  "no Connection with this fd.");
   }
 }
-

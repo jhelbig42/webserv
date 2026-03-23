@@ -15,16 +15,15 @@
 // which are indicated by flags contained within the "revents"
 // field of a given connection's pollfd struct.
 
-
 /////////////////////////////////////////////////////////////////////////
 
-/** 
-*	\brief reventsAreTerminal() checks if poll returned error or
-*	hangup in revents, which means the connection should be terminated
-*
-*	\param	revents, the field in pollfd filled by poll()
-*	\return true if conditions are found, otherwise false
-*/
+/**
+ *	\brief reventsAreTerminal() checks if poll returned error or
+ *	hangup in revents, which means the connection should be terminated
+ *
+ *	\param	revents, the field in pollfd filled by poll()
+ *	\return true if conditions are found, otherwise false
+ */
 
 bool Server::reventsAreTerminal(int revents) {
   if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
@@ -35,12 +34,12 @@ bool Server::reventsAreTerminal(int revents) {
 }
 
 /**
-*	\brief handleTerminalCondition() handles revents flags
-*	which indicate hangup or error. In this case, the Connection
-*	is scheduled for deletion.
-*
-*	\param Polled	pollfd belonging to a client connection
-*/
+ *	\brief handleTerminalCondition() handles revents flags
+ *	which indicate hangup or error. In this case, the Connection
+ *	is scheduled for deletion.
+ *
+ *	\param Polled	pollfd belonging to a client connection
+ */
 
 void Server::handleTerminalCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLNVAL) {
@@ -53,28 +52,29 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
   }
   if (Polled.revents & POLLHUP) {
     handlePollhup(Polled.fd);
-	return;
+    return;
   }
 }
 
-/**	
-*	\brief handleServableCondition() handles POLLIN & POLLOUT
-*	as well as POLLPRI (high priority POLLIN)
-*	& POLLRDHUP (client has finished writing but may still read)
-*
-*/
+/**
+ *	\brief handleServableCondition() handles POLLIN & POLLOUT
+ *	as well as POLLPRI (high priority POLLIN)
+ *	& POLLRDHUP (client has finished writing but may still read)
+ *
+ */
 
 void Server::handleServableCondition(struct pollfd &Polled) {
 
   /*
   if (Polled.revents & POLLRDHUP) {
-  	// TODO
+    // TODO handling POLLRDHUP is a good argument for changing fd.events
+  // between calls to poll()
   }
   */
   // POLLPRI = high priority data to read.
   if (Polled.revents & POLLIN || Polled.revents & POLLPRI) {
     logging::log2(logging::Info, "POLLPRI from fd ", Polled.fd);
-	handlePollin(Polled.fd);
+    handlePollin(Polled.fd);
   }
   if (Polled.revents & POLLOUT) {
     handlePollout(Polled.fd);

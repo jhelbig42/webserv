@@ -10,10 +10,10 @@
 #include <vector>
 
 // \brief	handlePollin() handles POLLIN:
-// 	
+//
 // \param	fd of socket for which poll() returned POLLIN
 
-void Server::handlePollin(int Fd){ 
+void Server::handlePollin(int Fd) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
   if (socketIsListener(Fd)) {
     ClientAddr candidate;
@@ -34,4 +34,3 @@ void Server::handlePollin(int Fd){
     }
   }
 }
-
