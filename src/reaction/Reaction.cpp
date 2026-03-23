@@ -25,13 +25,12 @@ void Reaction::setDefaults(void) {
   //_postType = NotPost;
   _metadataSent = false;
   _fdIn = -1;
-  _fdOut = -1;
   _headers.unsetAll();
   _conditions = Unconditional;
 }
 
 Reaction::Reaction()
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1) {
   _headers.unsetAll();
 }
 
@@ -105,8 +104,7 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 Reaction::Reaction(const Request &Req)
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1),
-    _fdOut(-1) 
+    : _processType(NotInitialized),  _receivedContLen(0), _metadataSent(false), _fdIn(-1)
 {
   init(Req);
 }
@@ -124,13 +122,12 @@ void Reaction::initSendFile(const int Code, const char *File) {
     return;
 
   if (File != NULL) {
-    _headers.setContentLength(statbuf.st_size);
+    _headers.setContentLength(static_cast<size_t>(statbuf.st_size));
     _headers.setContentType(strrchr(File, '.'));
   }
 
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
-  _fdOut = -1;
   _processType = SendFile;
   _conditions = SockWrite;
 }
