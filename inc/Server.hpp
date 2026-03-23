@@ -18,7 +18,8 @@ struct ClientAddr {
   struct sockaddr_storage addr;
   int clientSock;
   socklen_t addrSize;
-  // char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
+  // char client_IP[INET6_ADDRSTRLEN];
+  // Beej uses this - do we need it?
 };
 
 class Server {
@@ -54,22 +55,25 @@ class Server {
 	void setToListen(const int Sock); // listen()
 	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
 	
-	// ServerRun.hpp -- outer PollLoop() is public
+	// ServerRun.hpp -- outer loop function PollLoop() is public
 	void process(void);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
-	bool reventsAreTerminal(int revents);
 
-	// poll handling
+	// ServerHandlePoll.hpp
+	bool reventsAreTerminal(int revents);
 	void handleTerminalCondition(struct pollfd &polled);
+	void handleServableCondition(struct pollfd &polled);
+	
+	// ServerHandlePollErrs.hpp
 	void handlePollnval(int Fd);
 	void handlePollerr(int Fd);
 	void handlePollrdhup(int Fd);
 
-	void handleServableCondition(struct pollfd &polled);
+	// ServerHandlPollin.hpp
 	void handlePollin(int Fd);
-	void handlePollout(int Fd);
 
-	// process
+	// ServerHandlePollout.hpp
+	void handlePollout(int Fd);
 
 	// error handling
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
@@ -77,6 +81,6 @@ class Server {
 	// debug
 	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 	std::string interfaceInfoToStr(const Listen &Interface);
-	void printFcntlFlags(const int Sock);	
+	void printFcntlFlags(const int Sock);
 
 };

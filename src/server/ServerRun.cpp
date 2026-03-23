@@ -83,23 +83,6 @@ void Server::process(void) {
   newFdBatch.clear();
 }
 
-/** 
-*	\brief reventsAreTerminal() checks if poll returned revents
-*   that indicate the connection should be terminated, due to client
-*   hang-up or error
-*
-*	\param	revents, the field in pollfd filled by poll()
-*	\return true if conditions are found, otherwise false
-*/
-
-bool Server::reventsAreTerminal(int revents) {
-  if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
-      (revents & POLLPRI) || (revents & POLLRDHUP)) {
-    return true;
-  }
-  return false;
-}
-
 // adds new connection to clientMap -- move to pollhandling??
 
 void Server::addConnectionToMap(int ListenerFd,

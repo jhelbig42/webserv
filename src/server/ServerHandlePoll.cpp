@@ -18,11 +18,32 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-// handleTerminalCondition() handles flags which indicate a hangup or
-// error. This path is in the logic is separated so we can skip checks
-// for POLLIN and POLLOUT. Terminal conditions are handled with additional
-// helper functions, which log specific errors / debug messages and mark
-// the connection for deletion.
+/** 
+*	\brief reventsAreTerminal() checks if poll returned error or
+*	hangup in revents, which means the connection should be terminated
+*
+*	\param	revents, the field in pollfd filled by poll()
+*	\return true if conditions are found, otherwise false
+*/
+
+bool Server::reventsAreTerminal(int revents) {
+  if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
+      (revents & POLLPRI) || (revents & POLLRDHUP)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+*	\brief handleTerminalCondition() handles flags which indicate
+*	a hangup or error.
+*	This path is in the logic is separated so we can skip checks
+*	for POLLIN and POLLOUT. Terminal conditions are handled with
+*	additional helper functions, which log specific errors / debug
+*	messages and mark the connection for deletion.
+*
+*	\param Polled	pollfd belonging to a client connection
+*/
 
 void Server::handleTerminalCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLNVAL) {
@@ -59,7 +80,3 @@ void Server::handleServableCondition(struct pollfd &Polled) {
     handlePollout(Polled.fd);
   }
 }
-
-// handlePollnval() handles POLLNVAL:
-// 		invalid request: fd not open.
-
