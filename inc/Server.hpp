@@ -21,16 +21,6 @@ struct ClientAddr {
   // char client_IP[INET6_ADDRSTRLEN]; // Beej uses this - do we need it?
 };
 
-struct SocketInfo {
-  const int fd;
-  enum { LISTEN, CLIENT } type; 
-  union
-  {
-	std::vector<Website> *const website; // for LISTEN type
-	Connection const *connection; // for CLIENT type
-  };
-};
-
 class Server {
 	
 	public:
