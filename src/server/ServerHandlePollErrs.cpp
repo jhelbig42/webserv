@@ -1,17 +1,12 @@
-#include "Connection.hpp"
 #include "Logging.hpp"
 #include "Server.hpp"
-#include <map>
 #include <poll.h>
 #include <sstream>
 #include <stdexcept>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <vector>
 
-// These functions handle the results of poll(), which are indicated
-// by flags contained within the "revents" field of a given connection's
-// pollfd struct.
+// handlePollErrs.cpp is for the handling of poll revents which result
+// in connection removal, including both errors and hangups.
+
 
 // handleTerminalCondition() handles flags which indicate a hangup or
 // error. This path is in the logic is separated so we can skip checks
@@ -43,18 +38,6 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
   }
 }
 
-// handleServableCondition() handles POLLIN & POLLOUT
-// through the use of additional helper functions
-
-void Server::handleServableCondition(struct pollfd &Polled) {
-  if (Polled.revents & POLLIN) { // data to read | hang-up
-    handlePollin(Polled.fd);
-  }
-  if (Polled.revents & POLLOUT) {
-    handlePollout(Polled.fd);
-  }
-}
-
 // handlePollnval() handles POLLNVAL:
 // 		invalid request: fd not open.
 
@@ -71,6 +54,7 @@ void Server::handlePollnval(int Fd) {
                  "no Connection with this fd.");
   }
 }
+
 
 // handlePollrdhup() handles POLLRDHUP:
 // 		Stream  socket peer closed connection, or shut down writing half
@@ -115,46 +99,3 @@ void Server::handlePollerr(int Fd) {
   }
 }
 
-// handlePollin() handles POLLIN:
-// 		There is data to read.
-
-void Server::handlePollin(int Fd) {
-  logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (listenMap.find(Fd) !=
-      listenMap.end()) { // listening socket got new connection
-                         // TODO make this a getter if connectionIsListener
-    ClientAddr candidate;
-    if (acceptConnection(Fd, &candidate) != -1) {
-      addConnectionToMap(Fd, candidate);
-      const short events =
-          POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
-      const pollfd newFd = {candidate.clientSock, events, 0};
-      newFdBatch.push_back(newFd);
-    }
-  } else {
-    const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
-    if (itC != clientMap.end()) {
-      (itC->second).addToConditions(SockRead);
-    } else {
-      logging::log(logging::Error, "process: Connection not found in map "
-                                   "container (This should never happen)");
-      // could be removed after thorough testing
-    }
-  }
-}
-
-// handlePollout() handles POLLOUT:
-// 		Writing is now possible.
-
-void Server::handlePollout(int Fd) {
-  //  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
-  const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
-  if (itC != clientMap.end()) {
-    // logging::log2(logging::Debug, "Ready to send to ", Fd);
-    (itC->second).addToConditions(SockWrite);
-  } else {
-    logging::log(logging::Error, "process: Connection not found in map "
-                                 "container (This should never happen)");
-    // could be removed after thorough testing
-  }
-}

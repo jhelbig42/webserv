@@ -5,9 +5,6 @@
 #include <cstring>
 #include <unistd.h> // for close
 
-static void Server::process(void);
-static bool Server::reventsAreTerminal(int revents);
-
 /** 
 *	\brief pollLoop() introduces the while(1) networking loop that
 * 	will run for the duration of the webserver.
@@ -57,7 +54,7 @@ void Server::pollLoop(void) {
 *
 */
 
-static void Server::process(void) {
+void Server::process(void) {
 
   for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
     if (reventsAreTerminal(it->revents)) {
@@ -89,13 +86,13 @@ static void Server::process(void) {
 /** 
 *	\brief reventsAreTerminal() checks if poll returned revents
 *   that indicate the connection should be terminated, due to client
-*   hang-up or unrecoverable error
+*   hang-up or error
 *
 *	\param	revents, the field in pollfd filled by poll()
 *	\return true if conditions are found, otherwise false
 */
 
-static bool reventsAreTerminal(int revents) {
+bool Server::reventsAreTerminal(int revents) {
   if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
       (revents & POLLPRI) || (revents & POLLRDHUP)) {
     return true;
@@ -103,6 +100,7 @@ static bool reventsAreTerminal(int revents) {
   return false;
 }
 
+// adds new connection to clientMap -- move to pollhandling??
 
 void Server::addConnectionToMap(int ListenerFd,
                                 const struct ClientAddr &Candidate) {
