@@ -34,19 +34,19 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLHUP) {
     logging::log2(logging::Debug, "Hangup from fd ", Polled.fd);
     exit(1);
-	// TODO
+    // TODO
   }
   if (Polled.revents & POLLPRI) {
     logging::log2(logging::Debug, "POLLPRI from fd ", Polled.fd);
     exit(1);
-	// TODO
+    // TODO
   }
 }
 
 // handleServableCondition() handles POLLIN & POLLOUT
 // through the use of additional helper functions
 
-void Server::handleServableCondition(struct pollfd &Polled){
+void Server::handleServableCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLIN) { // data to read | hang-up
     handlePollin(Polled.fd);
   }
@@ -98,7 +98,7 @@ void Server::handlePollrdhup(int Fd) {
 // handlePollerr() handles POLLERR:
 // 		Error  condition. This bit is also set for a file descriptor
 //		referring  to  the  write  end of a pipe when the read end has been
-//closed.
+// closed.
 
 void Server::handlePollerr(int Fd) {
   const std::ostringstream msg;
@@ -120,8 +120,9 @@ void Server::handlePollerr(int Fd) {
 
 void Server::handlePollin(int Fd) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (listenMap.find(Fd) != listenMap.end()){ // listening socket got new connection
-  // TODO make this a getter if connectionIsListener
+  if (listenMap.find(Fd) !=
+      listenMap.end()) { // listening socket got new connection
+                         // TODO make this a getter if connectionIsListener
     ClientAddr candidate;
     if (acceptConnection(Fd, &candidate) != -1) {
       addConnectionToMap(Fd, candidate);

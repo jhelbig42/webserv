@@ -2,20 +2,25 @@
 #include <cerrno>  // for errno
 #include <cstring> // for strerror
 
+//////////////////////////////////////////////////////////////////////////
+
 // #include <fcntl.h> // for demonstration purposes only
 // fcntl() is not an allowed function, but can be used to demonstrate
 // that client sockets are blockinb by default. Uncomment printFcntlFlags()
 
+///////////////////////////////////////////////////////////////////////////
+
+
 /**
-* \brief Converts addrinfo struct to a string for logging purposes.
-*
-* Currently, it is only used by getServerInfo().
-*
-* \param    Info pointer to an addrinfo struct
-* \param    Msg a string to be included in the output, i.e. a label / title
-*
-* \return a string with all info to be printed
-*/
+ * \brief Converts addrinfo struct to a string for logging purposes.
+ *
+ * Currently, it is only used by getServerInfo().
+ *
+ * \param    Info pointer to an addrinfo struct
+ * \param    Msg a string to be included in the output, i.e. a label / title
+ *
+ * \return a string with all info to be printed
+ */
 
 std::string Server::addrinfoToStr(const struct addrinfo *Info,
                                   const std::string &Msg) {
@@ -31,7 +36,8 @@ std::string Server::addrinfoToStr(const struct addrinfo *Info,
 
 std::string Server::interfaceInfoToStr(const Listen &Interface) {
   std::ostringstream msg;
-      msg << "\n" << "IP: " << Interface.ip << "\n"
+  msg << "\n"
+      << "IP: " << Interface.ip << "\n"
       << "Port: " << Interface.port << "\n\n";
   return (msg.str());
 }

@@ -36,9 +36,8 @@ class Server {
 	public:
 	explicit Server(const std::list<Website>  &websites);
 	~Server();
+	
 	void pollLoop(void);
-	void checkPair(const Listen &Pair);
-	void checkPort(const std::string &str);
 
 	std::vector<pollfd> fds;
 	std::map<int, const Website*> listenMap;
@@ -48,24 +47,29 @@ class Server {
 
 	private:
 
-	addrinfo _hints;
+	addrinfo _hints; // our specifications for getaddrinfo
 
-	// ServerInit.hpp -- init Networking
+	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
 	void initNetworking(const std::list<Website> &Websites);
+	void checkPair(const Listen &Pair);
+	void checkPort(const std::string &str);
 	void initListeningSocket(const Listen &Pair, const Website &Web);
-	struct addrinfo createHints(void);
-	int getListeningSocket(struct addrinfo *Info, const Listen &Interface);
+	int getListeningSocket(struct addrinfo *Info, const Listen &Pair);
 
-	// ServerWrappers.hpp -- networking wrappers	
-	struct addrinfo *getAddrInfo(const Listen &Pair);
+	// ServerWrappers.hpp -- networking wrappers
+	struct addrinfo *getAddrInfo(const Listen &Pair); // getaddrinfo()
 	int createSocket(const struct addrinfo *P); // socket()
 	int clearSocket(const int Sock); // setsockopt()
 	int bindToIP(const int Sock, const struct addrinfo *p); //bind()
 	void setToListen(const int Sock); // listen()
 	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
 	
+	// ServerRun.hpp -- outer PollLoop() is public
+//	void process(void);
+//	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+
+
 	// poll handling
-	bool reventsAreTerminal(int revents);
 	void handleTerminalCondition(struct pollfd &polled);
 	void handlePollnval(int Fd);
 	void handlePollerr(int Fd);
@@ -76,8 +80,6 @@ class Server {
 	void handlePollout(int Fd);
 
 	// process
-	void process(void);
-	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// error handling
 	void handleBindFailure(const struct addrinfo *Info, const Listen &Interface, const int Error);
