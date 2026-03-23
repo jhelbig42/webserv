@@ -1,3 +1,4 @@
+//#define _GNU_SOURCE 
 #include "Config.hpp"
 #include "Scanner.hpp"
 #include "Server.hpp"

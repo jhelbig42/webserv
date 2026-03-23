@@ -28,19 +28,16 @@
 
 bool Server::reventsAreTerminal(int revents) {
   if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
-      (revents & POLLPRI) || (revents & POLLRDHUP)) {
+      (revents & POLLPRI)) {
     return true;
   }
   return false;
 }
 
 /**
-*	\brief handleTerminalCondition() handles flags which indicate
-*	a hangup or error.
-*	This path is in the logic is separated so we can skip checks
-*	for POLLIN and POLLOUT. Terminal conditions are handled with
-*	additional helper functions, which log specific errors / debug
-*	messages and mark the connection for deletion.
+*	\brief handleTerminalCondition() handles revents flags
+*	which indicate hangup or error. In this case, the Connection
+*	is scheduled for deletion.
 *
 *	\param Polled	pollfd belonging to a client connection
 */
@@ -53,9 +50,6 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
   if (Polled.revents & POLLERR) {
     handlePollerr(Polled.fd);
     exit(1);
-  }
-  if (Polled.revents & POLLRDHUP) {
-    handlePollrdhup(Polled.fd);
   }
   if (Polled.revents & POLLHUP) {
     logging::log2(logging::Debug, "Hangup from fd ", Polled.fd);
@@ -73,7 +67,13 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
 // through the use of additional helper functions
 
 void Server::handleServableCondition(struct pollfd &Polled) {
-  if (Polled.revents & POLLIN) { // data to read | hang-up
+
+  /*
+  if (Polled.revents & POLLRDHUP) {
+  	// TODO
+  }
+  */
+  if (Polled.revents & POLLIN) {
     handlePollin(Polled.fd);
   }
   if (Polled.revents & POLLOUT) {

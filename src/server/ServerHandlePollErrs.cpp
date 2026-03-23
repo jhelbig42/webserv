@@ -40,10 +40,9 @@ void Server::handlePollnval(int Fd) {
 //		(before  including  any header files) in order to obtain this definition.
 //
 // TODO : inclusion of _GNU_SOURCE gave compiler error due to already defined?
-// We clearly don't need it becuase POLLRDHUP is recognized, but perhaps there
-// should be some kind of ifndef? May be machine specific?
+// I've tried including at the top of main, and compiler still complains
 
-void Server::handlePollrdhup(int Fd) {
+void Server::handlePollhup(int Fd) {
   logging::log2(logging::Debug,
                 "networking::process(): POLLRDHUP.\n\t client hung up."
                 " fd = ",

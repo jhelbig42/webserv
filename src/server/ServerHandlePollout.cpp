@@ -21,6 +21,5 @@ void Server::handlePollout(int Fd) {
   } else {
     logging::log(logging::Error, "process: Connection not found in map "
                                  "container (This should never happen)");
-    // could be removed after thorough testing
   }
 }

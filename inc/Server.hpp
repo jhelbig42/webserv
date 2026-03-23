@@ -25,16 +25,23 @@ struct ClientAddr {
 class Server {
 	
 	public:
-	explicit Server(const std::list<Website>  &websites);
-	~Server();
 	
-	void pollLoop(void);
-
+	// variables
 	std::vector<pollfd> fds;
 	std::map<int, const Website*> listenMap;
 	std::map<int, Connection> clientMap;
 	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 	std::vector<pollfd> newFdBatch;
+
+	// Server.cpp
+	explicit Server(const std::list<Website>  &websites);
+	~Server();
+	bool socketIsListener(int Fd);
+	bool socketIsClient(int Fd);
+	
+	// ServerRun.cpp
+	void pollLoop(void);
+
 
 	private:
 
@@ -67,7 +74,7 @@ class Server {
 	// ServerHandlePollErrs.hpp
 	void handlePollnval(int Fd);
 	void handlePollerr(int Fd);
-	void handlePollrdhup(int Fd);
+	void handlePollhup(int Fd);
 
 	// ServerHandlPollin.hpp
 	void handlePollin(int Fd);

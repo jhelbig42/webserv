@@ -9,15 +9,13 @@
 #include <sys/types.h>
 #include <vector>
 
-// handlePollin() handles POLLIN:
-// 		There is data to read.
-//	TODO break into helper functions for readability
+// \brief	handlePollin() handles POLLIN:
+// 	
+// \param	fd of socket for which poll() returned POLLIN
 
 void Server::handlePollin(int Fd){ 
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (listenMap.find(Fd) !=
-      listenMap.end()) { // listening socket got new connection
-                         // TODO make this a getter if connectionIsListener
+  if (socketIsListener(Fd)) {
     ClientAddr candidate;
     if (acceptConnection(Fd, &candidate) != -1) {
       addConnectionToMap(Fd, candidate);
@@ -33,7 +31,6 @@ void Server::handlePollin(int Fd){
     } else {
       logging::log(logging::Error, "process: Connection not found in map "
                                    "container (This should never happen)");
-      // could be removed after thorough testing
     }
   }
 }
