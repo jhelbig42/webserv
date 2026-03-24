@@ -31,6 +31,7 @@ public:
     bool isInputDone() const;
     int getReadFd() const;
     int getWriteFd() const;
+	int getPid() const ;
 
 private:
     void _clearEnv();

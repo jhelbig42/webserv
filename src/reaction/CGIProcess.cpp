@@ -5,8 +5,10 @@
 #include "Reaction.hpp"
 #include "Script.hpp"
 
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -16,6 +18,7 @@
 CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
 							_path(NULL),
+							_pid(-1),
 							_writeIntoCGI(-1),
 							_readFromCGI(-1),
 							_inputDone(false)
@@ -52,6 +55,10 @@ int CGIProcess::getReadFd() const
 int CGIProcess::getWriteFd() const
 {
     return _writeIntoCGI;
+}
+
+int CGIProcess::getPid() const {
+	return _pid;
 }
 
 void CGIProcess::_clearEnv() {
@@ -169,6 +176,8 @@ bool CGIProcess::initPipes(){
 		close(fromCGI[1]);
 		execve(_path, _args, _env);
 		logging::log(logging::Debug, "execve failed in child");
+		perror("execvp");
+    	fprintf(stderr, "errno: %d\n", errno);
 		_exit(1);
 	}
 	//we are in parent here

@@ -3,12 +3,14 @@
 #include "Buffer.hpp"
 #include "Logging.hpp"
 #include "Conditions.hpp"
+#include "StatusCodes.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 // TODO: Compare data sent with header Content-Length instead of only relying on
@@ -49,12 +51,41 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-
+bool Reaction::checkOnChild(void){
+	
+	pid_t pid = _cgi.getPid();
+	if (pid == -1) // no CGI
+		return true;
+	logging::log2(logging::Debug, __func__, " called and there is a CGI");
+	pid_t result = waitpid(pid, 0, WNOHANG);
+	logging::log2(logging::Debug, "pid: ", pid);
+	logging::log2(logging::Debug, "result: ", result);
+	if (result == -1){
+		initSendFile(CODE_500, FILE_500);
+		return false; // waitpid failed => internal server error
+	}
+	if (result == 0) // child not finished yet
+		return true;
+	
+	if (result == pid){ // child somehow exited
+		if(WIFEXITED(result)) { //true if child exited normally
+			//processTypes is no longer CGI?
+			logging::log(logging::Debug, "child exited normally");
+			return true;
+		}
+		logging::log(logging::Debug, "child exited, but not normally");
+		//we are here because the child exited, but not normally
+	
+		return false; //internal server error
+	}
+	return false;
+}
 
 bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes, const int Condition){
 	//check on CGI child if existing
-	
+  if (!checkOnChild()) 
+		return false; // return in case of error within child, otherwise continue
   (void)ForwardSocket;
   //logging::log(logging::Debug, __func__);
   if (_processType == SendFile && (Condition & SockWrite))

@@ -89,7 +89,7 @@ void Reaction::init(const Request &Req) {
   }
   logging::log(logging::Debug, "Req is a CGI");
   if (!_cgi.init(Req, _script))
-    initSendFile(CODE_500, FILE_500);; // here the ConfigInfos also need to come in
+    initSendFile(CODE_500, FILE_500); // here the ConfigInfos also need to come in
   return;
 }
 
@@ -170,8 +170,8 @@ void Reaction::initSendCGI(const int Socket, const size_t Bytes){
  	_conditions = SockWrite;
 
  	setMetadata(_metadata, CODE_200, _headers);
-  _metadataSent = false; 
-  return ;
+    _metadataSent = false; 
+    return ;
 }
 
 

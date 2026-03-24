@@ -54,6 +54,8 @@ private:
   void initDelete(const Request &Req);
   void initPost(const Request &Req);
 
+  bool checkOnChild(void);
+
   //for Post request
   bool receiveFile(const int Socket, const size_t Bytes);
 
