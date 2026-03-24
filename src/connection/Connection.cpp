@@ -70,8 +70,7 @@ void Connection::serve(void) {
 		//_req.reset();
 	}
 	// we have a initialized Reaction - act on it.
-	int dummy = -1;
-	if(_react.process(_sock, dummy, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+	if(_react.process(_sock, _sockForward, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
 		scheduleForDemolition();
 }
 
