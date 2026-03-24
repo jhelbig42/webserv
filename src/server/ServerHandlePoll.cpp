@@ -26,8 +26,7 @@
  */
 
 bool Server::reventsAreTerminal(int revents) {
-  if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) ||
-      (revents & POLLPRI)) {
+  if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP) {
     return true;
   }
   return false;
