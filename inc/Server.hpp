@@ -26,8 +26,10 @@ class Server {
 	std::vector<pollfd> fds;
 	std::map<int, const Website*> listenMap;
 	std::map<int, Connection> clientMap;
-	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
+	std::map<int, Connection&> cgiWriteMap;
+	std::map<int, Connection&> cgiReadMap;
 	std::vector<pollfd> newFdBatch;
+	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
 
 	// Server.cpp
 	explicit Server(const std::list<Website>  &websites);
