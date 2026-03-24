@@ -152,7 +152,7 @@ void Server::setToListen(const int Sock) {
  * \return fd for new socket, or -1 if accept() fails.
  */
 
-int Server::acceptConnection(int ListenerFd, ClientAddr *Candidate) {
+int Server::acceptConnection(const int ListenerFd, ClientAddr *Candidate) {
 
   logging::log2(logging::Debug, "acceptConnection() on socket ", ListenerFd);
   Candidate->clientSock = accept(
