@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "Parser.hpp"
 
 #include "Token.hpp"
 #include <cstddef>
@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-Config::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token>::const_iterator It) { 
+Parser::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token>::const_iterator It) { 
   std::list<Token>::const_iterator it = It;
   while (it->getNum() > 1 && it->getLine() == It->getLine())
     --it;
@@ -32,19 +32,18 @@ Config::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token
   std::string showStr = lineStr.substr(0, linePosition + 1);
   for (size_t i = 0; i != linePosition; ++i) {
     if (showStr[i] != '\t')
-      showStr[i] = '-';
+      showStr[i] = ' ';
   }
   showStr[linePosition] = '^';
   std::ostringstream oss;
   oss << "Unexpected token in line " << It->getLine() << ":\n";
   oss << lineStr << '\n';
-  oss << /*"\x1B[32m" << */showStr << "\033[0m";
+  oss << "\x1B[31m" << showStr << "\033[0m";
   _report = oss.str();
 }
 
-const char *Config::UnexpectedTokenException::what() const throw() {
+const char *Parser::UnexpectedTokenException::what() const throw() {
   return _report.c_str();
 }
 
-Config::UnexpectedTokenException::~UnexpectedTokenException(void) throw() { }
-
+Parser::UnexpectedTokenException::~UnexpectedTokenException(void) throw() { }

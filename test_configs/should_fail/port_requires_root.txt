@@ -1,0 +1,6 @@
+server
+{
+  autoindex on;
+  listen 127.0.0.1:880;
+  root /www/var/ ;
+}
