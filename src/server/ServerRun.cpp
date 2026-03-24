@@ -69,7 +69,7 @@ void Server::process(void) {
         it = fds.erase(it);
         continue;
       } else {
-        clientMap.at(it->fd).processData();
+        clientMap.at(it->fd).serve();
         clientMap.at(it->fd).resetConditions();
       }
     }

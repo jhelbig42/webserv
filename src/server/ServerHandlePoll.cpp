@@ -73,7 +73,6 @@ void Server::handleServableCondition(struct pollfd &Polled) {
   */
   // POLLPRI = high priority data to read.
   if (Polled.revents & POLLIN || Polled.revents & POLLPRI) {
-    logging::log2(logging::Info, "POLLPRI from fd ", Polled.fd);
     handlePollin(Polled.fd);
   }
   if (Polled.revents & POLLOUT) {

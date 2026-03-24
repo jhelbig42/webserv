@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/20 17:07:55 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/24 11:14:01 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,11 +47,13 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
+/*
 Conditions Connection::getConditions(void) const {
   if (_req.getState() == COMPLETE)
     return _react.getConditions();
   return _req.getConditions();
 }
+*/
 
 // Setters
 

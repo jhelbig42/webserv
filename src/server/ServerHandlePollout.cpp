@@ -13,7 +13,7 @@
 // 		Writing is now possible.
 
 void Server::handlePollout(int Fd) {
-  //  logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
+ // logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
   const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
   if (itC != clientMap.end()) {
     // logging::log2(logging::Debug, "Ready to send to ", Fd);
