@@ -49,8 +49,12 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
+
+
 bool Reaction::process(const int Socket, int &ForwardSocket,
                        const size_t Bytes, const int Condition){
+	//check on CGI child if existing
+	
   (void)ForwardSocket;
   //logging::log(logging::Debug, __func__);
   if (_processType == SendFile && (Condition & SockWrite))

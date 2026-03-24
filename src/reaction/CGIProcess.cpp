@@ -16,7 +16,9 @@
 CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
 							_path(NULL),
-                            _inputDone(false)
+							_writeIntoCGI(-1),
+							_readFromCGI(-1),
+							_inputDone(false)
 
 {
 }
@@ -143,25 +145,7 @@ bool CGIProcess::resolvePath(){
 	return true;
 }
 
-bool CGIProcess::init(Request Req, Script Script){
-	logging::log(logging::Debug, "CGI Process init called");
-	// allowed methods are: Head/Get, Post
-	//still needs to be compared to allowed methods according to config
-    
-	// create env:
-	if (!createEnv(Req, Script))
-		return false; // error handling in Reaction
-						//errors here will all be 500
-	//create args
-	if (!createArgs(Req))
-		return false;
-	
-	//create path
-		//resolve paths function - information from config file
-		//for now: handling py only
-	if (!resolvePath())
-		return false;
-	
+bool CGIProcess::initPipes(){
 	// set up pipes
 	int intoCGI[2];
 	int fromCGI[2];
@@ -192,9 +176,32 @@ bool CGIProcess::init(Request Req, Script Script){
 	
 	close(intoCGI[0]);
 	close(fromCGI[1]);
-	waitpid(_pid, 0, 0);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
+	return true;
+}
+
+bool CGIProcess::init(Request Req, Script Script){
+	logging::log(logging::Debug, "CGI Process init called");
+	// allowed methods are: Head/Get, Post
+	//still needs to be compared to allowed methods according to config
+    
+	// create env:
+	if (!createEnv(Req, Script))
+		return false; // error handling in Reaction
+						//errors here will all be 500
+	//create args
+	if (!createArgs(Req))
+		return false;
+	
+	//create path
+		//resolve paths function - information from config file
+		//for now: handling py only
+	if (!resolvePath())
+		return false;
+	
+	if (!initPipes())
+		return (false);
 
 	//needs to go! just for testing for the moment
 	//will be true for every CGI get Request 

@@ -70,6 +70,7 @@ void Connection::serve(void) {
 		//_req.reset();
 	}
 	// we have a initialized Reaction - act on it.
+	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
 	if(_react.process(_sock, _sockForward, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
 		scheduleForDemolition();
 }

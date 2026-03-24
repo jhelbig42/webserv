@@ -25,6 +25,7 @@ public:
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req);
     bool resolvePath();
+	bool initPipes();
     
     //Getters
     bool isInputDone() const;
