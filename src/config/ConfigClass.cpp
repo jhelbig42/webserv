@@ -1,5 +1,4 @@
 #include "Config.hpp"
-
 #include "Parser.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"

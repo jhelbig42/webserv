@@ -7,6 +7,17 @@ OBJ_DIR		:= obj
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
+vpath %.cpp $(SRC_DIR)/server
+SRC			+= Server.cpp\
+			ServerInit.cpp\
+			ServerRun.cpp\
+			ServerHandlePoll.cpp\
+			ServerHandlePollin.cpp\
+			ServerHandlePollout.cpp\
+			ServerHandlePollErrs.cpp\
+			ServerErrorHandling.cpp\
+			ServerDebug.cpp\
+			ServerWrappers.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
@@ -20,12 +31,6 @@ vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
-vpath %.cpp $(SRC_DIR)/networking
-SRC			+= Networking.cpp\
-			   NetworkingInitSocket.cpp\
-			   NetworkingInitServer.cpp\
-			   NetworkingRun.cpp\
-			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
 SRC			+= Post.cpp
 SRC			+= Reaction.cpp
