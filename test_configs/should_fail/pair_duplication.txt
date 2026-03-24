@@ -1,0 +1,12 @@
+server{
+  listen 127.0.0.1:8080;
+  root /h/ome/    ;
+  autoindex off;
+}
+server
+{
+  autoindex on;
+  listen 127.0.0.1:6666;
+  listen 127.0.0.1:8080;
+  root /www/var/ ;
+}

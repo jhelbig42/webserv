@@ -6,16 +6,17 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:00:20 by hallison          #+#    #+#             */
-/*   Updated: 2026/02/25 15:48:57 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/23 17:38:09 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Conditions.hpp"
-#include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
+#include "NetworkingDefines.hpp"
+#include "Website.hpp"
 #include <netdb.h>
 #include <sys/socket.h>
 
@@ -23,12 +24,13 @@ class Connection {
 public:
    
   Connection(const int Sock, const sockaddr_storage &Addr,
-             const socklen_t addrSize);
+             const socklen_t addrSize, const Website &website);
   ~Connection();
 
   // getters
   int getSock(void) const;
   bool getDeleteStatus(void) const;
+  Conditions getConditions(void) const;
 
   // setters
   void scheduleForDemolition(void);
@@ -50,6 +52,7 @@ private:
 
   int _sock; // client socket fd
   int _sockForward;
+  const Website &_website;
 
   // networking
   bool _delete; // set by scheduleForDemolition
