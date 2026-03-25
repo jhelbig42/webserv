@@ -32,7 +32,11 @@ public:
     int getReadFd() const;
     int getWriteFd() const;
 	int getPid() const ;
+    int getErrCode() const ;
 
+    //setters
+    void setPid(pid_t pid);
+    
 private:
     void _clearEnv();
     bool _envMember(envMembers index, const std::string& key, const std::string& value);
@@ -40,10 +44,11 @@ private:
     std::string _getEnvKey(envMembers member) const;
     std::string _getEnvValue(envMembers member, Request& Req, Script& Script) const;
 
-    char** _env;
-    char** _args;
-    char* _path;
+    char**      _env;
+    char**      _args;
+    char*       _path;
     pid_t       _pid;
+    int         _errCode;
     int         _writeIntoCGI;
     int         _readFromCGI;
     std::string _output;

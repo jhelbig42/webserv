@@ -57,28 +57,43 @@ bool Reaction::checkOnChild(void){
 	if (pid == -1) // no CGI
 		return true;
 	logging::log2(logging::Debug, __func__, " called and there is a CGI");
-	pid_t result = waitpid(pid, 0, WNOHANG);
+  
+  if (_cgi.getErrCode())//is not 0, then execve failed
+  {
+    logging::log(logging::Debug, "execve failed");
+    _cgi.setPid(-1);
+		initSendFile(CODE_500, FILE_500);
+		return false;
+  }
+  
+  int status;
+	pid_t result = waitpid(pid, &status, WNOHANG);
 	logging::log2(logging::Debug, "pid: ", pid);
 	logging::log2(logging::Debug, "result: ", result);
-	if (result == -1){
+	
+  if (result == -1){
+    _cgi.setPid(-1);
 		initSendFile(CODE_500, FILE_500);
 		return false; // waitpid failed => internal server error
 	}
+
 	if (result == 0) // child not finished yet
-		return true;
+		return true; //come back later
 	
-	if (result == pid){ // child somehow exited
-		if(WIFEXITED(result)) { //true if child exited normally
-			//processTypes is no longer CGI?
-			logging::log(logging::Debug, "child exited normally");
-			return true;
-		}
-		logging::log(logging::Debug, "child exited, but not normally");
-		//we are here because the child exited, but not normally
-	
-		return false; //internal server error
-	}
-	return false;
+	if (WIFEXITED(status)) { //child somehow exited
+    if (WEXITSTATUS(status) == 0) {
+      logging::log(logging::Debug, "CGI exited normally with 0");
+      return true;
+    }
+    
+    logging::log(logging::Debug, "CGI exited with error code");
+    
+  } else if (WIFSIGNALED(status)) {
+        logging::log(logging::Debug, "CGI was killed by signal");
+    }
+    _cgi.setPid(-1);
+    initSendFile(CODE_500, FILE_500);
+    return false;
 }
 
 bool Reaction::process(const int Socket, int &ForwardSocket,

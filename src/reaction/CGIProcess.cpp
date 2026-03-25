@@ -19,6 +19,7 @@ CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
 							_path(NULL),
 							_pid(-1),
+							_errCode(0),
 							_writeIntoCGI(-1),
 							_readFromCGI(-1),
 							_inputDone(false)
@@ -59,6 +60,14 @@ int CGIProcess::getWriteFd() const
 
 int CGIProcess::getPid() const {
 	return _pid;
+}
+
+int CGIProcess::getErrCode() const {
+	return _errCode;
+}
+
+void CGIProcess::setPid(pid_t pid){
+	_pid = pid;
 }
 
 void CGIProcess::_clearEnv() {
@@ -175,9 +184,7 @@ bool CGIProcess::initPipes(){
 		close(intoCGI[0]);
 		close(fromCGI[1]);
 		execve(_path, _args, _env);
-		logging::log(logging::Debug, "execve failed in child");
-		perror("execvp");
-    	fprintf(stderr, "errno: %d\n", errno);
+		_errCode = errno;
 		_exit(1);
 	}
 	//we are in parent here
@@ -215,6 +222,6 @@ bool CGIProcess::init(Request Req, Script Script){
 	//needs to go! just for testing for the moment
 	//will be true for every CGI get Request 
 	//jsut post requests have a body
-	_inputDone = true;
+	//_inputDone = true;
     return true;
 }
