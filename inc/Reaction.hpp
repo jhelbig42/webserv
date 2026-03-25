@@ -54,6 +54,8 @@ private:
 
   //for Post request
   bool receiveFile(const int Socket, const size_t Bytes);
+  std::string _finalPath;
+  std::string _tmpPath;
 
   Conditions _conditions;
   HttpHeaders _headers;

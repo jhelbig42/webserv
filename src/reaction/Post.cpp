@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <stdio.h>
 #include <string>
+#include <unistd.h>
 
 #define DEFAULT_PATH "./post"
 // think about body is coming in chunks
@@ -30,11 +31,12 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	const std::string pathname = DEFAULT_PATH + Req.getResource();
-	_fdOut = fopen(pathname.c_str(), "w");
+	_finalPath = DEFAULT_PATH + Req.getResource();
+	_tmpPath = _finalPath + ".tmp";
+	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
-	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", pathname);
+	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", _tmpPath);
 	_processType = ReceiveFile;
   	_conditions = SockRead;
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
@@ -59,8 +61,10 @@ bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 		return (false);
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
-	fclose(_fdOut);
+	fclose(_fdOut); //close tmp file
+	unlink(_finalPath.c_str());
+	rename(_tmpPath.c_str(), _finalPath.c_str());
 	_buffer.reset();
 	initSendFile(CODE_201, NULL);
-	return false;
+	return true;
 }
