@@ -1,5 +1,6 @@
 #include "Parser.hpp"
 
+#include "HttpMethods.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
 #include <string>
@@ -57,6 +58,29 @@ void Parser::parseAutoindex(Website &site) {
   site.setAutoindex(parseOnOff());
 }
 
+void Parser::parseAllow(Website &site) {
+  gap();
+  while (nextType() != TokenType::Semicolon) {
+    if (match(TokenType::Asterisk)) {
+      site.addAllow(Head);
+      site.addAllow(Get);
+      site.addAllow(Post);
+      site.addAllow(Delete);
+    }
+    else if (match(TokenType::Head))
+      site.addAllow(Head);
+    else if (match(TokenType::Get))
+      site.addAllow(Get);
+    else if (match(TokenType::Post))
+      site.addAllow(Post);
+    else if (match(TokenType::Delete))
+      site.addAllow(Delete);
+    else
+      throwTokenError();
+    skipSep();
+  }
+}
+
 void Parser::addEntry(Website &Site) {
   if (match(TokenType::Listen)) {
     parseListen(Site);
@@ -64,6 +88,8 @@ void Parser::addEntry(Website &Site) {
     parseRoot(Site);
   } else if (match(TokenType::Autoindex)) {
     parseAutoindex(Site);
+  } else if (match(TokenType::Allow)) {
+    parseAllow(Site);
   } else
     throwTokenError();
 }

@@ -35,11 +35,12 @@ private:
 
   void gap(void);
   void populateInterface(Listen &Interface);
-  void parseListen(Website &site);
-  void parseRoot(Website &site);
-  void parseAutoindex(Website &site);
+  void parseListen(Website &Site);
+  void parseRoot(Website &Site);
+  void parseAutoindex(Website &Site);
+  void parseAllow(Website &Site);
 
-  void addEntry(Website &site);
+  void addEntry(Website &Site);
 
   void addIpv4(Listen &Interface);
   void addPort(Listen &Interface);

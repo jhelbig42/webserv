@@ -6,13 +6,15 @@
 static void printInterfaces(std::ostream &Os, const Website &Site);
 static void printRoot(std::ostream &Os, const Website &Site);
 static void printAutoindex(std::ostream &Os, const Website &Site);
+static void printAllow(std::ostream &Os, const Website &Site);
 
-Website::Website(void): _setMembers(0), _autoindex(false) {
+Website::Website(void)
+    : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
 }
 
 Website::Website(const Website &other)
     : _setMembers(other._setMembers), _interfaces(other._interfaces),
-      _root(other._root), _autoindex(other._autoindex) {
+      _root(other._root), _autoindex(other._autoindex), _allow(other._allow) {
 }
 
 Website &Website::operator=(const Website &other) {
@@ -21,6 +23,7 @@ Website &Website::operator=(const Website &other) {
     _interfaces = other._interfaces;
     _root = other._root;
     _autoindex = other._autoindex;
+    _allow = other._allow;
   }
   return *this;
 }
@@ -60,6 +63,7 @@ std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printInterfaces(Os, Site);
   printRoot(Os, Site);
   printAutoindex(Os, Site);
+  printAllow(Os, Site);
   return Os;
 }
 
@@ -88,13 +92,37 @@ static void printAutoindex(std::ostream &Os, const Website &Site) {
   Os << '\n';
 }
 
+static void printAllow(std::ostream &Os, const Website &Site) {
+  if (!Site.isSetAllow())
+    return;
+  Os << "allow:";
+  if (Site.getAllow() & Head)
+    Os << " HEAD";
+  if (Site.getAllow() & Get)
+    Os << " GET";
+  if (Site.getAllow() & Post)
+    Os << " POST";
+  if (Site.getAllow() & Delete)
+    Os << " DELETE";
+  Os << '\n';
+}
+
 bool Website::getAutoindex(void) const {
   return _autoindex;
+}
+
+int Website::getAllow(void) const {
+  return _allow;
 }
 
 void Website::setAutoindex(const bool IsOn) {
   _autoindex = IsOn;
   _setMembers |= Website::Autoindex;
+}
+
+void Website::addAllow(const HttpMethod Method) {
+  _allow |= Method;
+  _setMembers |= Website::Allow;
 }
 
 bool Website::isSetAutoindex(void) const {
@@ -107,4 +135,8 @@ bool Website::isSetRoot(void) const {
 
 bool Website::isSetInterfaces(void) const {
   return _setMembers & Website::Interfaces;
+}
+
+bool Website::isSetAllow(void) const {
+  return _setMembers & Website::Allow;
 }
