@@ -24,6 +24,8 @@ struct TokenType {
     Delete,
     On,
     Off,
+    ErrorPage,
+    Return,
     Listen,
     Number,
     Root,

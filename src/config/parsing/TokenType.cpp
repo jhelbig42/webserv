@@ -15,8 +15,8 @@ static bool isReserved(const std::string &word);
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
 static const TokenType globalTokenTypes[] = {
-    {"Name", "abcdefghijklmnopqrstuvwxyz", TokenType::Name,
-     TokenType::Charset},
+    {"Name", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+     TokenType::Name, TokenType::Charset},
     {"Number", "0123456789", TokenType::Number, TokenType::Charset},
     {"Semicolon", ";", TokenType::Semicolon, TokenType::SingleChar},
     {"Asterisk", "*", TokenType::Asterisk, TokenType::SingleChar},
@@ -29,6 +29,8 @@ static const TokenType globalTokenTypes[] = {
     {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
     {"On", "on", TokenType::On, TokenType::Keyword},
     {"Off", "off", TokenType::Off, TokenType::Keyword},
+    {"ErrorPage", "error_page", TokenType::ErrorPage, TokenType::Keyword},
+    {"Return", "return", TokenType::Return, TokenType::Keyword},
     {"Root", "root", TokenType::Root, TokenType::Keyword},
     {"Autoindex", "autoindex", TokenType::Autoindex, TokenType::Keyword},
     {"Allow", "allow", TokenType::Allow, TokenType::Keyword},

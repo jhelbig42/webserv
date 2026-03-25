@@ -45,7 +45,10 @@ private:
   void addIpv4(Listen &Interface);
   void addPort(Listen &Interface);
 
+  void parseErrorPage(Website &Site);
+
   void parseEntry(Website &Website);
+  std::string parseResource(void);
   std::string parseAbsPath(void);
 
   void throwTokenError(void);

@@ -40,45 +40,57 @@ void Parser::populateInterface(Listen &Interface) {
   addPort(Interface);
 }
 
-void Parser::parseListen(Website &site) {
+void Parser::parseListen(Website &Site) {
   gap();
   Listen interface;
   populateInterface(interface);
-  site.addInterface(interface);
+  Site.addInterface(interface);
 }
 
-void Parser::parseRoot(Website &site) {
+void Parser::parseRoot(Website &Site) {
   gap();
   const std::string root = parseAbsPath();
-  site.setRoot(root);
+  Site.setRoot(root);
 }
 
-void Parser::parseAutoindex(Website &site) {
+void Parser::parseAutoindex(Website &Site) {
   gap();
-  site.setAutoindex(parseOnOff());
+  Site.setAutoindex(parseOnOff());
 }
 
-void Parser::parseAllow(Website &site) {
+void Parser::parseAllow(Website &Site) {
   gap();
   while (nextType() != TokenType::Semicolon) {
     if (match(TokenType::Asterisk)) {
-      site.addAllow(Head);
-      site.addAllow(Get);
-      site.addAllow(Post);
-      site.addAllow(Delete);
+      Site.addAllow(Head);
+      Site.addAllow(Get);
+      Site.addAllow(Post);
+      Site.addAllow(Delete);
     }
     else if (match(TokenType::Head))
-      site.addAllow(Head);
+      Site.addAllow(Head);
     else if (match(TokenType::Get))
-      site.addAllow(Get);
+      Site.addAllow(Get);
     else if (match(TokenType::Post))
-      site.addAllow(Post);
+      Site.addAllow(Post);
     else if (match(TokenType::Delete))
-      site.addAllow(Delete);
+      Site.addAllow(Delete);
     else
       throwTokenError();
     skipSep();
   }
+}
+
+void Parser::parseErrorPage(Website &Site) {
+  gap();
+  if (nextType() != TokenType::Number)
+    throwTokenError();
+  std::list<std::string> numbers;
+  while (nextType() == TokenType::Number) {
+    numbers.push_back(matchGetLexeme(TokenType::Number));
+    skipSep();
+  }
+  Site.addErrorPage(numbers, parseResource);
 }
 
 void Parser::addEntry(Website &Site) {
@@ -90,6 +102,8 @@ void Parser::addEntry(Website &Site) {
     parseAutoindex(Site);
   } else if (match(TokenType::Allow)) {
     parseAllow(Site);
+  } else if (match(TokenType::ErrorPage)) {
+    parseErrorPage(Site);
   } else
     throwTokenError();
 }
@@ -122,6 +136,25 @@ void Parser::addPort(Listen &interface) {
     interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
     throwTokenError();
+  }
+}
+
+std::string Parser::parseResource(void) {
+  std::string path = matchGetLexeme(TokenType::Slash);
+  if (sep() || nextType() == TokenType::Semicolon)
+    return path;
+  while (true) {
+    if (nextType() == TokenType::Slash)
+      throwTokenError();
+    while (nextType() != TokenType::Newline &&
+           nextType() != TokenType::Whitespace &&
+           nextType() != TokenType::Semicolon &&
+           nextType() != TokenType::Slash) {
+      path += peek().getLexeme();
+      eat();
+    }
+    if (sep() || nextType() == TokenType::Semicolon)
+      return path;
   }
 }
 
