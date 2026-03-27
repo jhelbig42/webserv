@@ -56,15 +56,7 @@ bool Reaction::checkOnChild(void){
 	pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
-	logging::log2(logging::Debug, __func__, " called and there is a CGI");
-  
-  if (_cgi.getErrCode())//is not 0, then execve failed
-  {
-    logging::log(logging::Debug, "execve failed");
-    _cgi.setPid(-1);
-		initSendFile(CODE_500, FILE_500);
-		return false;
-  }
+	//logging::log2(logging::Debug, __func__, " called and there is a CGI");
   
   int status;
 	pid_t result = waitpid(pid, &status, WNOHANG);

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -19,9 +20,7 @@ CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
 							_path(NULL),
 							_pid(-1),
-							_errCode(0),
-							_writeIntoCGI(-1),
-							_readFromCGI(-1),
+							_forwardSocket(-1),
 							_inputDone(false)
 
 {
@@ -48,23 +47,14 @@ bool CGIProcess::isInputDone() const{
 	return _inputDone;
 }
 
-int CGIProcess::getReadFd() const
-{
-    return _readFromCGI;
-}
-
-int CGIProcess::getWriteFd() const
-{
-    return _writeIntoCGI;
+int CGIProcess::getForwardSocket() const{
+	return _forwardSocket;
 }
 
 int CGIProcess::getPid() const {
 	return _pid;
 }
 
-int CGIProcess::getErrCode() const {
-	return _errCode;
-}
 
 void CGIProcess::setPid(pid_t pid){
 	_pid = pid;
@@ -154,6 +144,7 @@ bool CGIProcess::createArgs(Request &Req){
 	return true;
 }
 
+//likely to be replaced be the general resolvePath function, that will be executed before Reaction init
 bool CGIProcess::resolvePath(){
 	_path = strdup(PY_DEFAULT_PATH);
 	if (!_path)
@@ -161,6 +152,7 @@ bool CGIProcess::resolvePath(){
 	return true;
 }
 
+/*
 bool CGIProcess::initPipes(){
 	// set up pipes
 	int intoCGI[2];
@@ -184,7 +176,6 @@ bool CGIProcess::initPipes(){
 		close(intoCGI[0]);
 		close(fromCGI[1]);
 		execve(_path, _args, _env);
-		_errCode = errno;
 		_exit(1);
 	}
 	//we are in parent here
@@ -194,8 +185,39 @@ bool CGIProcess::initPipes(){
 	close(fromCGI[1]);
 	_writeIntoCGI = intoCGI[1];
 	_readFromCGI = fromCGI[0];
+	_inputDone = true;
 	return true;
 }
+*/
+
+bool CGIProcess::initPipes() {
+    int sv[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) return false;
+
+    _pid = fork();
+    if (_pid == -1) {
+        close(sv[0]); close(sv[1]);
+        return false;
+    }
+
+    if (_pid == 0) { // Child
+        close(sv[0]);
+        dup2(sv[1], STDIN_FILENO);
+        dup2(sv[1], STDOUT_FILENO);
+        close(sv[1]);
+        
+        execve(_path, _args, _env);
+        _exit(127);
+    }
+
+    // Parent
+    close(sv[1]);
+    _forwardSocket = sv[0];
+	//just handles get requests at the moment. no body is given
+	_inputDone = true;
+    return true;
+}
+
 
 bool CGIProcess::init(Request Req, Script Script){
 	logging::log(logging::Debug, "CGI Process init called");

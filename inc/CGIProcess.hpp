@@ -29,10 +29,8 @@ public:
     
     //Getters
     bool isInputDone() const;
-    int getReadFd() const;
-    int getWriteFd() const;
 	int getPid() const ;
-    int getErrCode() const ;
+    int getForwardSocket() const;
 
     //setters
     void setPid(pid_t pid);
@@ -48,9 +46,7 @@ private:
     char**      _args;
     char*       _path;
     pid_t       _pid;
-    int         _errCode;
-    int         _writeIntoCGI;
-    int         _readFromCGI;
+    int         _forwardSocket;
     std::string _output;
     bool        _inputDone;
 };

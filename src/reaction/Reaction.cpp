@@ -165,13 +165,14 @@ void Reaction::initSendCGI(const int Socket, const size_t Bytes){
 
 	logging::log(logging::Debug, "InitSendCGI");
 
- 	_fdIn = _cgi.getReadFd();   // pipe from CGI stdout
+ 	_fdIn = _cgi.getForwardSocket();   // pipe from CGI stdout
  	_processType = SendFile;
  	_conditions = SockWrite;
 
- 	setMetadata(_metadata, CODE_200, _headers);
-    _metadataSent = false; 
-    return ;
+  // CGI handles its own headers
+ 	//setMetadata(_metadata, CODE_200, _headers);
+   // _metadataSent = false; 
+  return ;
 }
 
 
