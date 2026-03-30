@@ -34,6 +34,7 @@ public:
 
     //setters
     void setPid(pid_t pid);
+    void setInputDone(bool done);
     
 private:
     void _clearEnv();

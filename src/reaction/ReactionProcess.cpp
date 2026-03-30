@@ -88,21 +88,40 @@ bool Reaction::checkOnChild(void){
     return false;
 }
 
-bool Reaction::process(const int Socket, int &ForwardSocket,
-                       const size_t Bytes, const int Condition){
-	//check on CGI child if existing
-  if (!checkOnChild()) 
-		return false; // return in case of error within child, otherwise continue
-  (void)ForwardSocket;
-  //logging::log(logging::Debug, __func__);
-  if (_processType == SendFile && (Condition & SockWrite))
+bool Reaction::process(const int Socket, const size_t Bytes, const int Condition){
+  if (!checkOnChild())
+    return false;
+
+  if (Condition & FSockRead)   
+    sendFromCGI(Socket, Bytes);
+  if (Condition & FSockWrite)  
+    sendToCGI(Socket, Bytes);
+  if (Condition & SockRead)    
+    recvFromClient(Socket, Bytes);
+  if (Condition & SockWrite)   
+    return sendToClient(Socket, Bytes);
+  return false;
+}
+
+void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
+  if (_processType == ReceiveFile)
+    receiveFile(Socket, Bytes);
+  else if (_processType == Cgi && !_cgi.isInputDone())
+    _buffer.socketToBuf(Socket, Bytes);
+}
+
+bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
+  if (_processType == SendFile)
     return sendFile(Socket, Bytes);
-  if (_processType == ReceiveFile && (Condition & SockRead))
-	  return receiveFile(Socket, Bytes);
-	//also need here to option to check if the input is done or not through the childs pid 
-  if (_processType == Cgi && _cgi.isInputDone() == true)
-	  initSendCGI(Socket, Bytes);						
-  return (false); 
+  if (_processType == Cgi && _cgi.isInputDone()) {
+    if (!_metadataSent) {
+      _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+      return false;
+    }
+    if (_buffer.getUsed() > 0)
+      _buffer.bufToSocket(Socket, Bytes);
+  }
+  return false;
 }
 
 

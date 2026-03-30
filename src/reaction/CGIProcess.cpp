@@ -60,6 +60,10 @@ void CGIProcess::setPid(pid_t pid){
 	_pid = pid;
 }
 
+void CGIProcess::setInputDone(bool done){
+	_inputDone = done;
+}
+
 void CGIProcess::_clearEnv() {
     if (_env) {
         for (int i = 0; i < NB_OF_ENV; ++i) {
@@ -213,8 +217,6 @@ bool CGIProcess::initPipes() {
     // Parent
     close(sv[1]);
     _forwardSocket = sv[0];
-	//just handles get requests at the moment. no body is given
-	_inputDone = true;
     return true;
 }
 
@@ -241,9 +243,7 @@ bool CGIProcess::init(Request Req, Script Script){
 	if (!initPipes())
 		return (false);
 
-	//needs to go! just for testing for the moment
-	//will be true for every CGI get Request 
-	//jsut post requests have a body
-	//_inputDone = true;
+	// POST has a body to forward; all other methods are immediately done
+	_inputDone = (Req.getMethod() != Post);
     return true;
 }
