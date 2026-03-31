@@ -51,6 +51,8 @@ public:
   /// 
   /// \param Socket socket associated with Reaction
   /// \param Bytes the maximum amount of Bytes to process by system calls
+  /// \param Conditions the Conditions that are fullfilled for this Conncetion
+  /// within this specific cal
   ///
   /// \return true if Reaction got fully processed otherwise false
   bool process(const int Socket, const size_t Bytes, const int Condition);

@@ -30,32 +30,36 @@ typedef enum  {
 
 class Request {
 	public:
-
-
-/// called on initialisation of Connection.
 		Request();
-		// request(const request&);
-		// request& operator=(const request&);
-		// ~request();
-    	// Request(const HttpMethod Method, const std::string &Resource, const unsigned int MajorV, const unsigned int MinorV, const bool Valid);
 		
 		explicit Request(std::string &input); //just used in test main
 		void init(const std::string &input); // to be removed
 
-/// \brief Resets to default values to be ready for new Request
-/// Just neccessarry if Connection is kept alive
+	/// \brief Resets to default values to be ready for new Request
+	/// Just neccessarry if Connection is kept alive
 		void reset( void );
 
-/// \brief process() handles reading from socket into Request and parsing until the Request is complete
-/// A Request is considered complete, when the StatusLine and Headers are read.
-/// This is the case when "\r\n\r\n" is found.
+	/// \brief process() handles reading from socket into Request and parsing until the Request is complete
+	/// A Request is considered complete, when the StatusLine and Headers are read.
+	/// This is the case when "\r\n\r\n" is found.
 		void process(const int Socket);
 		void readFromSocket(int Fd);
 		
+	///\brief Parses the status line to construct a Request instance. 
+	///On any invalid syntax within the status line Request is set to be INVALID. 
+	///Otherwise, when a 
 		bool parseRequestLineFromBuffer();
 		void parseRequestLine(const std::string &RequestLine);
 		void parseMethod(const std::string &Token);
 		void parseResource(const std::string &Token);
+	
+ 	
+	/// \brief Parses the HTTP-version and sets this an attribute of the 
+	/// Request instance.
+ 	/// parseHttp uses stringstream into size_t as this gives the option
+	/// to catch invalid inputs like 1.1a(by setting the failbit) which is
+	/// more diffiult with atoi(which would just return 0 on error, where
+	/// further checks are necessary)
 		void parseHttp(const std::string &Token);
 
 		bool parseHeadersFromBuffer();

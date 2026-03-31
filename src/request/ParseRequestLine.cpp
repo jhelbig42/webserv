@@ -30,7 +30,6 @@ void Request::parseResource(const std::string &Token)
 	if (Token[0] != '/')
 		throw std::runtime_error("requestURI not given as absolute path");
 	logging::log(logging::Debug, "parse status_line: parse resource successfully");
-	//extract Query String first
 	size_t pos = Token.find('?');
 	if (pos == std::string::npos)
 		_resource = Token;
@@ -50,12 +49,7 @@ void Request::parseResource(const std::string &Token)
 
 	}
 }
-/**
- * \brief Parses the HTTP-version and sets this Version as Request attributes.
- * parseHttp uses stringstream into size_t as this gives the option to catch
- * invalid inputs like 1.1a(by setting the failbit) which is more diffiult with atoi(which would just return 0 on error, where further checks are necessary)
- * \return nothing but fills the Request attributes _majorVersion and _minorVersion. On error exceptions are thrown, that will be caught in parseStatusLine()
- */
+
 void Request::parseHttp(const std::string &Token)
 {
 	if (Token.substr(0, 5) != "HTTP/")
@@ -77,13 +71,6 @@ void Request::parseHttp(const std::string &Token)
 }
 
 
-///
-///\brief Parses the status line to construct a Request instance. 
-///On any invalid syntax within the status line Request is set to be INVALID. 
-///Otherwise, when a
-/// 
-///\param buffer handed over from connection. does not yet need bytes, as it is assumed currently to only get the full statusline and nothing else
-///
 void Request::parseRequestLine(const std::string &RequestLine)
 {
 	logging::log(logging::Debug, "parseStatusLine()");
