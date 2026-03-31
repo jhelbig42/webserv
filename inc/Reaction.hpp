@@ -36,10 +36,11 @@ public:
   /// \param Bytes the maximum amount of Bytes to process by system calls
   ///
   /// \return true if Reaction got fully processed otherwise false
-  bool process(const int Socket, int &ForwardSocket, const size_t Bytes, const int Condition);
+  bool process(const int Socket, const size_t Bytes, const int Condition);
 
   Conditions getConditions(void) const;
   ProcessType getProcessType(void) const;
+  int getForwardSocket(void) const;
 
 private:
   // sending files + metadata
@@ -60,7 +61,10 @@ private:
   bool receiveFile(const int Socket, const size_t Bytes);
 
   bool		isCGI(const Request &Req);
-  void		initSendCGI(const int Socket, const size_t Bytes);
+  void		sendFromCGI(const int Socket, const size_t Bytes);
+  void		sendToCGI(const int Socket, const size_t Bytes);
+  void		recvFromClient(const int Socket, const size_t Bytes);
+  bool		sendToClient(const int Socket, const size_t Bytes);
 
 
   Conditions  _conditions;

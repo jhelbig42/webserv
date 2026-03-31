@@ -43,6 +43,10 @@ Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
 }
 
+int Reaction::getForwardSocket(void) const {
+  return _cgi.getForwardSocket();
+}
+
 bool		Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
@@ -88,9 +92,21 @@ void Reaction::init(const Request &Req) {
 	  return;
   }
   logging::log(logging::Debug, "Req is a CGI");
-  if (!_cgi.init(Req, _script))
-    initSendFile(CODE_500, FILE_500); // here the ConfigInfos also need to come in
-  return;
+  if (!_cgi.init(Req, _script)) {
+    initSendFile(CODE_500, FILE_500);
+    return;
+  }
+  if (Req.getMethod() == Post) {
+    if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
+      logging::log(logging::Debug, "CGI POST: Content-Length header missing");
+      initSendFile(CODE_400, FILE_400);
+      return;
+    }
+    _reqContLen = Req.getHeaders().getContentLength();
+    _receivedContLen = 0;
+    _buffer = Req.getBuffer();
+    _conditions = FSockWrite;
+  }
 }
 
 void Reaction::initMethodNonCGI(const Request &Req) {
@@ -161,18 +177,44 @@ void Reaction::initSendFile(const int Code, const char *File) {
   _conditions = SockWrite;
 }
 
-void Reaction::initSendCGI(const int Socket, const size_t Bytes){
+void Reaction::sendToCGI(const int Socket, const size_t Bytes){
+  if (_processType != Cgi || _cgi.isInputDone()) return;
+  logging::log(logging::Debug, "sendToCGI");
+  (void)Socket;
 
-	logging::log(logging::Debug, "InitSendCGI");
+  // forward buffered body data to the CGI process
+  const size_t toSend = std::min(_reqContLen - _receivedContLen, _buffer.getUsed());
+  if (toSend > 0) {
+    const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+    if (sent > 0) {
+      _receivedContLen += static_cast<size_t>(sent);
+      _buffer.deleteFront(static_cast<size_t>(sent));
+    }
+  }
 
- 	_fdIn = _cgi.getForwardSocket();   // pipe from CGI stdout
- 	_processType = SendFile;
- 	_conditions = SockWrite;
+  // once the full body is forwarded, mark input as done
+  // the CGI script is expected to use CONTENT_LENGTH to know how many bytes to read
+  if (_receivedContLen >= _reqContLen) {
+    logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
+    _cgi.setInputDone(true);
+    _buffer.reset();
+  }
+}
 
-  // CGI handles its own headers
- 	//setMetadata(_metadata, CODE_200, _headers);
-   // _metadataSent = false; 
-  return ;
+void Reaction::sendFromCGI(const int Socket, const size_t Bytes){
+	if (_processType != Cgi || !_cgi.isInputDone()) return;
+	logging::log(logging::Debug, "sendfromCGI");
+	(void)Socket;
+
+	// fill buffer from CGI socket — FSockRead guarantees data is available
+	_buffer.optimize(Bytes);
+	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+	if (rc == 0) {
+		// EOF from forwardSocket transition to SendFile from remaining buffer
+		_fdIn = -1;
+		_processType = SendFile;
+		_conditions = SockWrite;
+	}
 }
 
 

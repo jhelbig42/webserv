@@ -25,7 +25,7 @@ public:
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req);
     bool resolvePath();
-	bool initPipes();
+	bool initForwardSocket();
     
     //Getters
     bool isInputDone() const;
@@ -34,6 +34,7 @@ public:
 
     //setters
     void setPid(pid_t pid);
+    void setInputDone(bool done);
     
 private:
     void _clearEnv();

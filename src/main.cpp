@@ -27,8 +27,7 @@
 int main(void) {
   const Request req(METHOD " " PATH " " VERSION);
   Reaction res(req);
-  int dummy = -1;
-  while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
+  while (!res.process(STDOUT_FILENO, CHUNK_SIZE, Unconditional))
     ;
 }
 
