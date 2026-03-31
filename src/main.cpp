@@ -1,11 +1,11 @@
 //#define _GNU_SOURCE 
 #include "Config.hpp"
-#include "Scanner.hpp"
-#include "Server.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include <unistd.h>
+#include "Scanner.hpp"
+#include "Server.hpp"
 #include <iostream>
+#include <unistd.h>
 
 //#define OFFLINE
 //#define PARSING
