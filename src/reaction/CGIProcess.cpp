@@ -2,19 +2,20 @@
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
-#include "Reaction.hpp"
 #include "Script.hpp"
 
-#include <errno.h>
+#include <string>
 #include <string.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#include <unistd.h>
 
 #define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
 #define PY_DEFAULT_PATH "/usr/bin/python3"
+
+#define EXECVE_ERR 127
 
 CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
@@ -32,13 +33,13 @@ CGIProcess::~CGIProcess(){
     	for (int i = 0; _env[i] != NULL; ++i){
         	free(_env[i]);
     	}
-    	free(_env);
+    	free((void *)_env);
 	}
 	if (_args){
 		for (int i = 0; _args[i] != NULL; ++i){
         	free(_args[i]);
     	}
-    free(_args);
+    free((void *)_args);
 	}
    	free(_path);
 }
@@ -64,18 +65,18 @@ void CGIProcess::setInputDone(bool done){
 	_inputDone = done;
 }
 
-void CGIProcess::_clearEnv() {
+void CGIProcess::clearEnv() {
     if (_env) {
         for (int i = 0; i < NB_OF_ENV; ++i) {
             if (_env[i]) free(_env[i]);
         }
-        free(_env);
+        free((void *)_env);
         _env = NULL;
     }
 }
 
 // Maps the Enum to the actual String Key
-std::string CGIProcess::_getEnvKey(envMembers member) const {
+std::string CGIProcess::getEnvKey(EnvMembers member) const {
     static const char* keys[] = {
         "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL", 
         "SERVER_SOFTWARE", "SERVER_INTERFACE", "REQUEST_METHOD", 
@@ -85,7 +86,7 @@ std::string CGIProcess::_getEnvKey(envMembers member) const {
 }
 
 // Maps the Enum to the value retrieved from Request/Script
-std::string CGIProcess::_getEnvValue(envMembers member, Request& Req, Script& Script) const {
+std::string CGIProcess::getEnvValue(EnvMembers member, Request& Req, Script& Script) const {
     switch (member) {
         case SERVER_NAME:      
 			return Script.getServerName();
@@ -108,8 +109,8 @@ std::string CGIProcess::_getEnvValue(envMembers member, Request& Req, Script& Sc
     }
 }
 
-bool CGIProcess::_envMember(envMembers index, const std::string& key, const std::string& value) {
-    std::string entry = key + "=" + value;
+bool CGIProcess::envMember(EnvMembers index, const std::string& key, const std::string& value) {
+    const std::string entry = key + "=" + value;
     _env[index] = strdup(entry.c_str());
     return (_env[index] != NULL);
 }
@@ -124,9 +125,9 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
 
     // Loop through the Enum
     for (int i = 0; i < NB_OF_ENV; ++i) {
-        envMembers member = static_cast<envMembers>(i);
-        if (!_envMember(member, _getEnvKey(member), _getEnvValue(member, Req, Script))) {
-            _clearEnv();
+        const EnvMembers member = static_cast<EnvMembers>(i);
+        if (!envMember(member, getEnvKey(member), getEnvValue(member, Req, Script))) {
+            clearEnv();
             return false;
         }
     }
@@ -138,7 +139,7 @@ bool CGIProcess::createArgs(Request &Req){
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return false;// error handling
-	HttpHeaders::MediaType type = Req.getHeaders().getContentType();
+	const HttpHeaders::MediaType type = Req.getHeaders().getContentType();
 	switch (type){
 		case HttpHeaders::ApplicationSh:
 			_args[0] = strdup("bash");
@@ -147,6 +148,7 @@ bool CGIProcess::createArgs(Request &Req){
 			_args[0] = strdup("python3");
 			break;
 		default: // should never be reached
+			_args[0] = NULL;
 			break;
 	} 
 	_args[1] = strdup(Req.getResource().c_str());
@@ -182,7 +184,7 @@ bool CGIProcess::initForwardSocket() {
         close(sv[1]);
         
         execve(_path, _args, _env);
-        _exit(127);
+        _exit(EXECVE_ERR);
     }
 
     // Parent

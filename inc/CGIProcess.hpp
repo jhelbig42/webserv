@@ -6,7 +6,7 @@
 
 class CGIProcess {
 public:
-    enum envMembers {
+    enum EnvMembers {
         SERVER_NAME,
         SERVER_PORT,
         SERVER_PROTOCOL,
@@ -37,11 +37,11 @@ public:
     void setInputDone(bool done);
     
 private:
-    void _clearEnv();
-    bool _envMember(envMembers index, const std::string& key, const std::string& value);
+    void clearEnv();
+    bool envMember(EnvMembers index, const std::string& key, const std::string& value);
     
-    std::string _getEnvKey(envMembers member) const;
-    std::string _getEnvValue(envMembers member, Request& Req, Script& Script) const;
+    std::string getEnvKey(EnvMembers member) const;
+    std::string getEnvValue(EnvMembers member, Request& Req, Script& Script) const;
 
     char**      _env;
     char**      _args;

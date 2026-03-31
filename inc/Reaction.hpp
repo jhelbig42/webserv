@@ -11,13 +11,13 @@
 class Reaction {
 public:
   Reaction();
-  // Reaction(const Reaction&);
-  // Reaction& operator=(const Reaction&);
-  // ~Reaction();
-  //typedef enum { NotPost, NotInitialized, Invalid, ContinueReading, DoneReading, ReadyToProcess } PostType;
+  
   typedef enum { NotInitialized, SendFile, ReceiveFile, Cgi } ProcessType;
 
+
   explicit Reaction(const Request &Req);
+
+
   void init(const Request &Req);
 
   /// \fn bool process(const int Socket, const size_t Bytes);
@@ -58,11 +58,11 @@ private:
   bool checkOnChild(void);
 
   //for Post request
-  bool receiveFile(const int Socket, const size_t Bytes);
+  bool		receiveFile(const int Socket, const size_t Bytes);
 
   bool		isCGI(const Request &Req);
-  void		sendFromCGI(const int Socket, const size_t Bytes);
-  void		sendToCGI(const int Socket, const size_t Bytes);
+  void		receiveFromCGI(const size_t Bytes);
+  void		sendToCGI(const size_t Bytes);
   void		recvFromClient(const int Socket, const size_t Bytes);
   bool		sendToClient(const int Socket, const size_t Bytes);
 
@@ -74,13 +74,13 @@ private:
   size_t      _receivedContLen;
 
   // consider abstraction for metaData
-  bool _metadataSent;
-  std::string _metadata;
+  bool			_metadataSent;
+  std::string 	_metadata;
 
-  int     _fdIn;
-  FILE    *_fdOut;
-  Buffer  _buffer;
+  int     		_fdIn;
+  FILE    		*_fdOut;
+  Buffer  		_buffer;
 
-  Script  _script;
-  CGIProcess _cgi; 
+  Script  		_script;
+  CGIProcess 	_cgi; 
 };

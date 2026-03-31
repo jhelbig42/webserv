@@ -13,9 +13,10 @@
 #pragma once
 
 #include "Conditions.hpp"
+#include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include "NetworkingDefines.hpp"
+
 #include "Website.hpp"
 #include <netdb.h>
 #include <sys/socket.h>

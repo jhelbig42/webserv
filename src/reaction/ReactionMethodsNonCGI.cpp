@@ -4,20 +4,63 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
-#include <algorithm>
+#include <cerrno>
 #include <cstddef>
 #include <cstdio>
 #include <stdio.h>
 #include <string>
+#include <string.h>
+#include <unistd.h>
 
 #define DEFAULT_PATH "./post"
+
+
+
+void Reaction::initMethodNonCGI(const Request &Req) {
+  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
+  switch (Req.getMethod()) 
+  {
+  	case Head:
+  	case Get:
+    	initHeadGet(Req);
+    	return;
+  	case Delete:
+    	initDelete(Req);
+    	return;
+  	case Post:
+	  	initPost(Req);
+	  	return;
+  	case Generic:
+    	initSendFile(CODE_501, FILE_501);
+    	return;
+  }
+}
+
+void Reaction::initDelete(const Request &Req) {
+  errno = 0;
+  if (std::remove(Req.getResource().c_str()) != 0) {
+    initError(errno);
+    return;
+  }
+  initSendFile(CODE_202, NULL);
+}
+
+void Reaction::initHeadGet(const Request &Req) {
+  initSendFile(CODE_200, Req.getResource().c_str());
+  if (Req.getMethod() == Get || _fdIn < 0)
+    return;
+  errno = 0;
+  if (close(_fdIn) < 0)
+    logging::log2(logging::Error, "close: ", strerror(errno));
+  _fdIn = -1;
+}
+
+
 // think about body is coming in chunks
 // maybe Reaction also needs state
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-	//check if method is allowed -> config file
-		//initSendFile(CODE_501, FILE_501);
-	//check content-length header is present --> BadRequest
+
 	if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)){
 		logging::log(logging::Debug, "Reaction: Content Length Header is not Present");
 		initSendFile(CODE_400, FILE_400);
@@ -40,27 +83,3 @@ void Reaction::initPost(const Request &Req){
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
 }
 
-bool Reaction::receiveFile(const int Socket, const size_t Bytes){
-	// fill buffer with new data from socket
-	_buffer.socketToBuf(Socket, Bytes);
-	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
-	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
-	if (toReceive > 0)
-	{
-		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
-		if (copied == -1)
-			return (false);
-		_receivedContLen += static_cast<size_t>(copied);
-		_buffer.deleteFront(static_cast<size_t>(copied));
-		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
-	}
-
-	if (!(_receivedContLen == _reqContLen))
-		return (false);
-	// if we received enough data in comparison to given content length
-	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
-	fclose(_fdOut);
-	_buffer.reset();
-	initSendFile(CODE_201, NULL);
-	return false;
-}

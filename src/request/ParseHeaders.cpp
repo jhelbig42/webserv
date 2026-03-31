@@ -1,5 +1,6 @@
-#include "Request.hpp"
+
 #include "Logging.hpp"
+#include "Request.hpp"
 #include <string>
 #include <sstream>
 #include <sys/types.h>

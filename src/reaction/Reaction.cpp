@@ -14,8 +14,6 @@
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
-#include <unistd.h>
-
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
@@ -60,7 +58,7 @@ bool		Reaction::isCGI(const Request &Req){
 void Reaction::init(const Request &Req) {
   setDefaults();
 
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
+  logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
@@ -109,51 +107,6 @@ void Reaction::init(const Request &Req) {
   }
 }
 
-void Reaction::initMethodNonCGI(const Request &Req) {
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-  switch (Req.getMethod()) 
-  {
-  	case Head:
-  	case Get:
-    	initHeadGet(Req);
-    	return;
-  	case Delete:
-    	initDelete(Req);
-    	return;
-  	case Post:
-	  	initPost(Req);
-	  	return;
-  	case Generic:
-    	initSendFile(CODE_501, FILE_501);
-    	return;
-  }
-}
-
-void Reaction::initDelete(const Request &Req) {
-  errno = 0;
-  if (std::remove(Req.getResource().c_str()) != 0) {
-    initError(errno);
-    return;
-  }
-  initSendFile(CODE_202, NULL);
-}
-
-void Reaction::initHeadGet(const Request &Req) {
-  initSendFile(CODE_200, Req.getResource().c_str());
-  if (Req.getMethod() == Get || _fdIn < 0)
-    return;
-  errno = 0;
-  if (close(_fdIn) < 0)
-    logging::log2(logging::Error, "close: ", strerror(errno));
-  _fdIn = -1;
-}
-
-Reaction::Reaction(const Request &Req)
-    : _processType(NotInitialized),  _receivedContLen(0), _metadataSent(false), _fdIn(-1)
-{
-  init(Req);
-}
-
 // TODO:
 // Check if recursion is safe and
 // potentially disable clang-tidy for this part.
@@ -175,46 +128,6 @@ void Reaction::initSendFile(const int Code, const char *File) {
   _metadataSent = false;
   _processType = SendFile;
   _conditions = SockWrite;
-}
-
-void Reaction::sendToCGI(const int Socket, const size_t Bytes){
-  if (_processType != Cgi || _cgi.isInputDone()) return;
-  logging::log(logging::Debug, "sendToCGI");
-  (void)Socket;
-
-  // forward buffered body data to the CGI process
-  const size_t toSend = std::min(_reqContLen - _receivedContLen, _buffer.getUsed());
-  if (toSend > 0) {
-    const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-    if (sent > 0) {
-      _receivedContLen += static_cast<size_t>(sent);
-      _buffer.deleteFront(static_cast<size_t>(sent));
-    }
-  }
-
-  // once the full body is forwarded, mark input as done
-  // the CGI script is expected to use CONTENT_LENGTH to know how many bytes to read
-  if (_receivedContLen >= _reqContLen) {
-    logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
-    _cgi.setInputDone(true);
-    _buffer.reset();
-  }
-}
-
-void Reaction::sendFromCGI(const int Socket, const size_t Bytes){
-	if (_processType != Cgi || !_cgi.isInputDone()) return;
-	logging::log(logging::Debug, "sendfromCGI");
-	(void)Socket;
-
-	// fill buffer from CGI socket — FSockRead guarantees data is available
-	_buffer.optimize(Bytes);
-	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
-	if (rc == 0) {
-		// EOF from forwardSocket transition to SendFile from remaining buffer
-		_fdIn = -1;
-		_processType = SendFile;
-		_conditions = SockWrite;
-	}
 }
 
 
