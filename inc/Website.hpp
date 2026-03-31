@@ -11,6 +11,21 @@ struct Listen {
   std::string port;
 };
 
+struct Return {
+  std::string code;
+  std::string url;
+};
+
+struct Location {
+  std::string path;
+  Return ret;
+  int allow;
+  std::string redirect;
+  bool returnSet;
+  bool allowSet;
+  bool redirectSet;
+};
+
 class Website {
 public:
   Website();
@@ -20,7 +35,9 @@ public:
 
   explicit Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
+  void addLocation(Location &Loc);
   const std::list<Listen> &getInterfaces(void) const;
+  const std::list<Location> &getLocations(void) const;
   void setRoot(const std::string &RootDir);
   void addAllow(const HttpMethod Method);
   std::string getRoot(void) const;
@@ -42,6 +59,7 @@ private:
 
   int _setMembers;
   std::list<Listen> _interfaces; 
+  std::list<Location> _locations; 
   std::string _root;
   bool _autoindex;
   int _allow;

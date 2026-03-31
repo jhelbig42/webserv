@@ -93,6 +93,45 @@ void Parser::parseErrorPage(Website &Site) {
   Site.addErrorPage(numbers, parseResource);
 }
 
+void Parser::parseLocation(Website &Site) {
+  gap();
+  if (nextType() != TokenType::Slash)
+    throwTokenError();
+  Location newLocation;
+  newLocation.path = "";
+  while (nextType() != TokenType::Newline && nextType() != TokenType::Whitespace && TokenType::BracesLeft) {
+    newLocation.path += peek().getLexeme();
+    eat();
+  }
+  skipSep();
+  while (!match(TokenType::BracesRight)) {
+    parseLocationEntry(newLocation);
+  }
+  Site.addLocation(newLocation);
+}
+
+void Parser::parseLocationEntry(Location &Loc) {
+  skipSep();
+  addLocationEntry(Website);
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
+  skipSep();
+}
+
+void Parser::addLocationEntry(Location &Loc) {
+  if (match(TokenType::Return)) {
+    parseReturn(Loc);
+  } else if (match(TokenType::Redirect)) {
+    parseRedirect(Loc);
+  } else if (match(TokenType::Allow)) {
+    parseLocationAllow(Loc);
+  } else if (match(TokenType::Cgi)) {
+    parseCgi(Loc);
+  } else
+    throwTokenError();
+}
+
 void Parser::addEntry(Website &Site) {
   if (match(TokenType::Listen)) {
     parseListen(Site);
@@ -104,6 +143,8 @@ void Parser::addEntry(Website &Site) {
     parseAllow(Site);
   } else if (match(TokenType::ErrorPage)) {
     parseErrorPage(Site);
+  } else if (match(TokenType::Location)) {
+    parseLocation(Site);
   } else
     throwTokenError();
 }

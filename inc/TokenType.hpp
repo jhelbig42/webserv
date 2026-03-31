@@ -25,6 +25,7 @@ struct TokenType {
     On,
     Off,
     ErrorPage,
+    Location,
     Return,
     Listen,
     Number,
