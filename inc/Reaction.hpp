@@ -50,6 +50,7 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool initError(const int Errno);
   void setDefaults(void);
+  
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(const Request &Req);

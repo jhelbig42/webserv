@@ -21,6 +21,18 @@ public:
     CGIProcess();
     ~CGIProcess();
 
+	/// @fn bool init(Request Req, Script Script)
+    /// @brief initialize Reaction if Request calls for CGI execution
+    /// @param Req 
+    /// @param Script 
+    /// @return false on any error
+	/// This includes creating a child process using fork(). This child process
+	// will execute the CGI script. Within the function the environment 
+	/// variables and arguments that are needed for the scripts execution are 
+	/// set.
+	/// The filedescriptor leading of the created socket is saved a member of 
+	/// the CGIProcess Class. The coresponding instance of Connection will 
+	/// check for it an include it in the poll() map.
     bool init(Request Req, Script Script);
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req);
@@ -37,9 +49,11 @@ public:
     void setInputDone(bool done);
     
 private:
-    void clearEnv();
+   
     bool envMember(EnvMembers index, const std::string& key, const std::string& value);
     
+	void clearEnv();
+
     std::string getEnvKey(EnvMembers member) const;
     std::string getEnvValue(EnvMembers member, Request& Req, Script& Script) const;
 

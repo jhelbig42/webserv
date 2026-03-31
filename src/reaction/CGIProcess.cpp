@@ -67,8 +67,9 @@ void CGIProcess::setInputDone(bool done){
 
 void CGIProcess::clearEnv() {
     if (_env) {
-        for (int i = 0; i < NB_OF_ENV; ++i) {
-            if (_env[i]) free(_env[i]);
+        for (int i = 0; _env[i] != NULL; ++i) {
+            if (_env[i]) 
+				free(_env[i]);
         }
         free((void *)_env);
         _env = NULL;
@@ -101,7 +102,7 @@ std::string CGIProcess::getEnvValue(EnvMembers member, Request& Req, Script& Scr
         case REQUEST_METHOD:   
 			return Req.getMethodString();
         case SCRIPT_NAME:      
-			return Req.getResource().substr(1); // Remove leading '/'
+			return Req.getResource().substr(1); // Remove leading '/' from Resource
         case QUERY_STRING:     
 			return Req.getQueryString();
         default:               
@@ -167,6 +168,7 @@ bool CGIProcess::resolvePath(){
 	return true;
 }
 
+//setting up the ForwardSocket, create the child process handling the script
 bool CGIProcess::initForwardSocket() {
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) return false;
