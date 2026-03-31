@@ -219,8 +219,6 @@ bool CGIProcess::init(Request Req, Script Script){
 	
 	if (!initForwardSocket())
 		return (false);
-
-	// POST has a body to forward; all other methods are immediately done inputwise
-	_inputDone = (Req.getMethod() != Post);
+	
     return true;
 }

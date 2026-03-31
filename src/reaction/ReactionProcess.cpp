@@ -14,8 +14,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-// TODO: Compare data sent with header Content-Length instead of only relying on
-// read() return values
 
 /// \brief reads data from a file descriptor and writes it to a socket
 ///
@@ -54,7 +52,7 @@ static bool stringToSocket(const int Socket, std::string &Str,
 
 bool Reaction::process(const int Socket, const size_t Bytes, const int Condition){
   
-	if (!checkOnChild())
+  if (!checkOnChild())
     return false;
 
   if (Condition & FSockRead)   

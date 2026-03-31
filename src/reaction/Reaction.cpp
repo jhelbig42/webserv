@@ -26,6 +26,7 @@ void Reaction::setDefaults(void) {
   _fdIn = -1;
   _headers.unsetAll();
   _conditions = Unconditional;
+  
 }
 
 Reaction::Reaction()
@@ -45,7 +46,7 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
-bool		Reaction::isCGI(const Request &Req){
+bool Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
   {
@@ -76,35 +77,22 @@ void Reaction::init(const Request &Req) {
   //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
-  //processType CGI
-
-  //set request Type header just here, safe Query string, if we have one
-  //invalid request if we have a query string, but not a script we asked for
   if(!isCGI(Req)){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
-	  if (Req.getQueryString() != ""){
+	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
 		  initSendFile(CODE_400, FILE_400);
 		  return;
 	  }
 	  initMethodNonCGI(Req);
 	  return;
   }
+
   logging::log(logging::Debug, "Req is a CGI");
   if (!_cgi.init(Req, _script)) {
     initSendFile(CODE_500, FILE_500);
     return;
   }
-  if (Req.getMethod() == Post) {
-    if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
-      logging::log(logging::Debug, "CGI POST: Content-Length header missing");
-      initSendFile(CODE_400, FILE_400);
-      return;
-    }
-    _reqContLen = Req.getHeaders().getContentLength();
-    _receivedContLen = 0;
-    _buffer = Req.getBuffer();
-    _conditions = FSockWrite;
-  }
+  initCGIMethod(Req);
 }
 
 // TODO:

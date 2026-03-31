@@ -68,6 +68,7 @@ void Reaction::initPost(const Request &Req){
 	}
 	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
 	_reqContLen = Req.getHeaders().getContentLength();
+	_receivedContLen = 0;
 
 	//copy buffer if still in buffer
 	_buffer	= Req.getBuffer();
@@ -81,5 +82,24 @@ void Reaction::initPost(const Request &Req){
 	_processType = ReceiveFile;
   	_conditions = SockRead;
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
+}
+
+void Reaction::initCGIMethod(const Request &Req){
+	if (Req.getMethod() == Post) {
+    	if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
+      		logging::log(logging::Debug, "CGI POST: Content-Length header missing");
+      		initSendFile(CODE_400, FILE_400);
+      		return;
+    	}
+    	_reqContLen = Req.getHeaders().getContentLength();
+    	_receivedContLen = 0;
+    	_buffer = Req.getBuffer();
+    	_conditions = FSockWrite;
+		return ;
+  	}
+	// is CGI but not POST
+	// POST has a body to forward; all other methods are immediately done inputwise
+	_cgi.setInputDone(true);
+	_conditions = FSockRead; //we never write into Socket, just wait to be allowed to read
 }
 
