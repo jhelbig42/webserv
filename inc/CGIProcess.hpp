@@ -25,7 +25,7 @@ public:
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req);
     bool resolvePath();
-	bool initPipes();
+	bool initForwardSocket();
     
     //Getters
     bool isInputDone() const;

@@ -206,11 +206,11 @@ void Reaction::sendFromCGI(const int Socket, const size_t Bytes){
 	logging::log(logging::Debug, "sendfromCGI");
 	(void)Socket;
 
-	// fill buffer from CGI socket — FSockRead guarantees data is available, no blocking
+	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
 	if (rc == 0) {
-		// EOF: CGI closed its end; transition to SendFile to drain remaining buffer
+		// EOF from forwardSocket transition to SendFile from remaining buffer
 		_fdIn = -1;
 		_processType = SendFile;
 		_conditions = SockWrite;

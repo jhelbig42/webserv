@@ -87,15 +87,24 @@ std::string CGIProcess::_getEnvKey(envMembers member) const {
 // Maps the Enum to the value retrieved from Request/Script
 std::string CGIProcess::_getEnvValue(envMembers member, Request& Req, Script& Script) const {
     switch (member) {
-        case SERVER_NAME:      return Script.getServerName();
-        case SERVER_PORT:      return Script.getServerPort();
-        case SERVER_PROTOCOL:  return Script.getServerProtocol();
-        case SERVER_SOFTWARE:  return Script.getServerSoftware();
-        case SERVER_INTERFACE: return Script.getServerInterface();
-        case REQUEST_METHOD:   return Req.getMethodString();
-        case SCRIPT_NAME:      return Req.getResource().substr(1); // Remove leading '/'
-        case QUERY_STRING:     return Req.getQueryString();
-        default:               return "";
+        case SERVER_NAME:      
+			return Script.getServerName();
+        case SERVER_PORT:      
+			return Script.getServerPort();
+        case SERVER_PROTOCOL:  
+			return Script.getServerProtocol();
+        case SERVER_SOFTWARE:  
+			return Script.getServerSoftware();
+        case SERVER_INTERFACE: 
+			return Script.getServerInterface();
+        case REQUEST_METHOD:   
+			return Req.getMethodString();
+        case SCRIPT_NAME:      
+			return Req.getResource().substr(1); // Remove leading '/'
+        case QUERY_STRING:     
+			return Req.getQueryString();
+        default:               
+			return "";
     }
 }
 
@@ -156,45 +165,7 @@ bool CGIProcess::resolvePath(){
 	return true;
 }
 
-/*
-bool CGIProcess::initPipes(){
-	// set up pipes
-	int intoCGI[2];
-	int fromCGI[2];
-	if (pipe(intoCGI))
-		return false; //error handling
-	if (pipe(fromCGI))
-		return false; //error handling
-	logging::log(logging::Debug, "CGI init Pipes created");
-	//fork
-	_pid = fork(); // this pid needs to be added to poll-list
-	if (_pid == -1)
-		return false; //error handling
-	if (_pid == 0)
-	{
-		//we are in child
-		close(intoCGI[1]); //write side
-		close(fromCGI[0]); //read side
-		dup2(intoCGI[0], STDIN_FILENO);
-		dup2(fromCGI[1], STDOUT_FILENO);
-		close(intoCGI[0]);
-		close(fromCGI[1]);
-		execve(_path, _args, _env);
-		_exit(1);
-	}
-	//we are in parent here
-	logging::log(logging::Debug, "CGI init I am the parent");
-	
-	close(intoCGI[0]);
-	close(fromCGI[1]);
-	_writeIntoCGI = intoCGI[1];
-	_readFromCGI = fromCGI[0];
-	_inputDone = true;
-	return true;
-}
-*/
-
-bool CGIProcess::initPipes() {
+bool CGIProcess::initForwardSocket() {
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) return false;
 
@@ -225,6 +196,8 @@ bool CGIProcess::init(Request Req, Script Script){
 	logging::log(logging::Debug, "CGI Process init called");
 	// allowed methods are: Head/Get, Post
 	//still needs to be compared to allowed methods according to config
+	// allowed methods will be handled before Reaction init, along with resolve path
+	// is we are here, the method is allowed
     
 	// create env:
 	if (!createEnv(Req, Script))
@@ -240,10 +213,10 @@ bool CGIProcess::init(Request Req, Script Script){
 	if (!resolvePath())
 		return false;
 	
-	if (!initPipes())
+	if (!initForwardSocket())
 		return (false);
 
-	// POST has a body to forward; all other methods are immediately done
+	// POST has a body to forward; all other methods are immediately done inputwise
 	_inputDone = (Req.getMethod() != Post);
     return true;
 }
