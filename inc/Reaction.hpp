@@ -20,15 +20,15 @@ public:
 	Reaction();
     explicit Reaction(const Request &Req);
 	
-	/// @fn void init(const Request &Req)
-    /// @brief initialize Reaction from Request
-    /// @param Req
-	/// The function processes the Request object. During this inavlid Requests
-	/// cause a Error File to be send.
-	/// Function also determines if Request is pointing to a CGI or not. It is
-	/// decided then will the specific function need to initialize a Response 
-	/// depending on the Request Method.
-	///
+  /// @fn void init(const Request &Req)
+  /// @brief initialize Reaction from Request
+  /// @param Req
+  /// The function processes the Request object. During this inavlid Requests
+  /// cause a Error File to be send.
+  /// Function also determines if Request is pointing to a CGI or not. It is
+  /// decided then will the specific function need to initialize a Response 
+  /// depending on the Request Method.
+  ///
 
 	void init(const Request &Req);
 
@@ -57,7 +57,9 @@ public:
   /// \param Condition the Conditions that are fullfilled for the corresponding
   /// Conncetion within this specific Call
   ///
-  /// \return true if Reaction got fully processed otherwise false
+  /// \return true if Reaction got fully processed otherwise false. If true is
+  /// returned, this Connection will be closed by the server. This is why only
+  /// after sending to the Client process can return true.
   bool process(const int Socket, const size_t Bytes, const int Condition);
 
   Conditions	getConditions(void) const;
@@ -86,8 +88,9 @@ private:
   // called by process()
   /// \fn checkOnChild(void)
   /// \brief checks if the child process belonging to a CGI is finished.
-  /// \return true if there is no CGI, or if the CGI exited without error.
-  /// 		Returns false on any error otherwise.
+  /// If any error is encountered, sending an error code is initialised.
+  /// \return true if there is no CGI, if it is still running or if the CGI
+  /// exited without error. Returns false on any error otherwise.
   bool checkOnChild(void);
   void receiveFromCGI(const size_t Bytes);
   void sendToCGI(const size_t Bytes);
