@@ -132,6 +132,29 @@ void Parser::addLocationEntry(Location &Loc) {
     throwTokenError();
 }
 
+void Parser::parseLocationAllow(Location &Loc) {
+  gap();
+  while (nextType() != TokenType::Semicolon) {
+    if (match(TokenType::Asterisk)) {
+      Loc.addAllow(Head);
+      Loc.addAllow(Get);
+      Loc.addAllow(Post);
+      Loc.addAllow(Delete);
+    }
+    else if (match(TokenType::Head))
+      Loc.addAllow(Head);
+    else if (match(TokenType::Get))
+      Loc.addAllow(Get);
+    else if (match(TokenType::Post))
+      Loc.addAllow(Post);
+    else if (match(TokenType::Delete))
+      Loc.addAllow(Delete);
+    else
+      throwTokenError();
+    skipSep();
+  }
+}
+
 void Parser::addEntry(Website &Site) {
   if (match(TokenType::Listen)) {
     parseListen(Site);

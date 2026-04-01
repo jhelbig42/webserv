@@ -16,14 +16,43 @@ struct Return {
   std::string url;
 };
 
-struct Location {
-  std::string path;
-  Return ret;
-  int allow;
-  std::string redirect;
-  bool returnSet;
-  bool allowSet;
-  bool redirectSet;
+class Location {
+public:
+  Location();
+  Location(const Location &Other);
+  Location &operator=(const Location &Other);
+  ~Location();
+
+  explicit Location(const std::string &Path);
+
+  void setReturn(const std::string &RootDir);
+  void addAllow(const HttpMethod Method);
+  void setRedirect(const std::string &Redirect);
+  void setCgi(const std::string &Cgi);
+
+  void getReturn(int &Code, std::string &Url);
+  bool isAllowed(const HttpMethod Method);
+  void getRedirect(std::string &Redirect);
+  void getCgi(std::string &Cgi);
+
+  bool isSetReturn(void);
+  bool isAddAllow(void);
+  bool isSetRedirect(void);
+  bool isSetCgi(void);
+
+private:
+  typedef enum {
+    Interfaces = (1u << 0),
+    Return = (1u << 1),
+    Redirect = (1u << 2),
+    Allow = (1u << 3)
+  } SetMembers;
+
+  int _setMembers;
+  const std::string _path;
+  Return _ret;
+  int _allow;
+  std::string _redirect;
 };
 
 class Website {
