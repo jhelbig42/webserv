@@ -35,6 +35,9 @@ public:
 
   explicit Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
+
+  /// \fun addLocation
+  /// \brief if a location with the same path already exists it is replaced
   void addLocation(Location &Loc);
   const std::list<Listen> &getInterfaces(void) const;
   const std::list<Location> &getLocations(void) const;

@@ -140,3 +140,18 @@ bool Website::isSetInterfaces(void) const {
 bool Website::isSetAllow(void) const {
   return _setMembers & Website::Allow;
 }
+
+void Website::addLocation(Location &Loc) {
+  std::list<Location>::iterator it = _locations.begin();
+  while (it != _locations.end()) {
+    if (Loc.path == it->path) {
+      *it = Loc;
+      return;
+    }
+    if (Loc.path < it->path)
+      break;
+    ++it;
+  }
+  _locations.insert(it, Loc);
+  return true;
+}
