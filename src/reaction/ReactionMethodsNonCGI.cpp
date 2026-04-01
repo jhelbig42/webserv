@@ -94,12 +94,11 @@ void Reaction::initCGIMethod(const Request &Req){
     	_reqContLen = Req.getHeaders().getContentLength();
     	_receivedContLen = 0;
     	_buffer = Req.getBuffer();
-    	_conditions = FSockWrite;
 		return ;
   	}
 	// is CGI but not POST
 	// POST has a body to forward; all other methods are immediately done inputwise
 	_cgi.setInputDone(true);
-	_conditions = FSockRead; //we never write into Socket, just wait to be allowed to read
+	//we never write into Socket, just wait to be allowed to read
 }
 

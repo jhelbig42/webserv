@@ -73,12 +73,12 @@ bool Reaction::checkOnChild(void){
 		return true;
 	//logging::log2(logging::Debug, __func__, " called and there is a CGI");
   
-  int status;
+  	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
 	logging::log2(logging::Debug, "pid: ", pid);
 	logging::log2(logging::Debug, "result: ", result);
 	
-  if (result == -1){
+  	if (result == -1){
     _cgi.setPid(-1);
 		initSendFile(CODE_500, FILE_500);
 		return false; // waitpid failed => internal server error
@@ -95,7 +95,7 @@ bool Reaction::checkOnChild(void){
     
     logging::log(logging::Debug, "CGI exited with error code");
     
-  } else if (WIFSIGNALED(status)) {
+    } else if (WIFSIGNALED(status)) {
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
@@ -110,8 +110,8 @@ void Reaction::sendToCGI(const size_t Bytes){
   logging::log(logging::Debug, "sendToCGI");
 
   // forward buffered body data to the CGI process, max Bytes bytes 
-	// TO DO: is it necessary to limit it to Bytes bytes? because it is a server internal process
-	// only what is in the buffer can be send. As we just read Bytes bytes into in, it cannot execeed Bytes bytes
+  // TO DO: is it necessary to limit it to Bytes bytes? because it is a server internal process
+  // only what is in the buffer can be send. As we just read Bytes bytes into in, it cannot execeed Bytes bytes
   const size_t toSend = std::min(_reqContLen - _receivedContLen, _buffer.getUsed());
   if (toSend > 0) {
     const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
@@ -155,15 +155,24 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
-  if (_processType == Cgi && _cgi.isInputDone()) {
-    if (!_metadataSent) {
+  if (_processType == Cgi && _cgi.isInputDone()) 
+  {
+    if (!_metadataSent) 
+	{
       _metadataSent = stringToSocket(Socket, _metadata, Bytes);
       return false;
-    }
-    if (_buffer.getUsed() > 0)
-      _buffer.bufToSocket(Socket, Bytes);
+	}
+	const size_t used = _buffer.getUsed();
+    if (used > 0)
+	{
+       const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
+	    if ((rc >= 0) && (size_t)rc == used)
+  			return true;
+		return false;
+	}
+	return false;
   }
-  return false;
+  return false; // should never be reached
 }
 
 
