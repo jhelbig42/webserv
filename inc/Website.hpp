@@ -18,6 +18,13 @@ struct Return {
 
 class Location {
 public:
+  typedef enum {
+    None,
+    Cgi,
+    Return,
+    Redirect,
+  } Type;
+
   Location();
   Location(const Location &Other);
   Location &operator=(const Location &Other);
@@ -25,32 +32,26 @@ public:
 
   explicit Location(const std::string &Path);
 
+  Type getType(void) const;
   void setReturn(const std::string &RootDir);
   void addAllow(const HttpMethod Method);
   void setRedirect(const std::string &Redirect);
   void setCgi(const std::string &Cgi);
 
-  void getReturn(int &Code, std::string &Url);
-  bool isAllowed(const HttpMethod Method);
-  void getRedirect(std::string &Redirect);
-  void getCgi(std::string &Cgi);
+  bool isAllowed(const HttpMethod Method) const;
+  const Return &getReturn(void) const;
+  const std::string &getPath(void) const;
+  const std::string &getRedirect(void) const;
+  const std::string &getCgi(void) const;
 
-  bool isSetReturn(void);
-  bool isAddAllow(void);
-  bool isSetRedirect(void);
-  bool isSetCgi(void);
+
+  bool isSetAllowed(void) const;
 
 private:
-  typedef enum {
-    Interfaces = (1u << 0),
-    Return = (1u << 1),
-    Redirect = (1u << 2),
-    Allow = (1u << 3)
-  } SetMembers;
-
-  int _setMembers;
+  Type _type;
   const std::string _path;
-  Return _ret;
+  Return _return;
+  bool _allowSet;
   int _allow;
   std::string _redirect;
 };
@@ -98,4 +99,6 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);
-std::ostream &operator<<(std::ostream &Os, const Website &site);
+std::ostream &operator<<(std::ostream &Os, const Website &Site);
+std::ostream &operator<<(std::ostream &Os, const Location &Loc);
+std::ostream &operator<<(std::ostream &Os, const Return &Ret);

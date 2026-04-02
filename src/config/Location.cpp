@@ -1,17 +1,20 @@
 #include "Website.hpp"
 
-Location::Location() : _setMembers(0), _path(""), _allow(0), _redirect("") {
+Location::Location() : _type(None), _path(Path), _allowSet(false) {
 }
 
 Location::Location(const Location &Other)
-    : _setMembers(Other._setMembers), _path(Other._path), _ret(Other._ret),
-      _allow(Other._allow), _redirect(Other._redirect) {
+    : _type(Other._type), _path(Other._path), _return(Other._return),
+      _allowSet(Other._allowSet), _allow(Other._allow),
+      _redirect(Other._redirect) {
 }
 
 Location &Location::operator=(const Location &Other) {
   if (this == &Other) {
-    _setMembers = Other._setMembers;
-    _ret = Other._ret;
+    _type = Other._type;
+    _path = Other._path;
+    _return = Other._return;
+    _allowSet = Other._allowSet;
     _allow = Other._allow;
     _redirect = Other._redirect;
   }
@@ -22,68 +25,85 @@ Location::~Location() {
 }
 
 explicit Location::Location(const std::string &Path)
-    : _setMembers(0), _path(Path) {
+    : _type(None), _path(Path), _allowSet(false) {
+}
+
+Location::Type Location::getType(void) const {
+  return _type;
 }
 
 void Location::setReturn(const std::string &Code, const std::string &Uri) {
-  _redirect.code = Code;
-  _redirect.uri = Uri;
-  _setMembers |= Location::Redirect;
+  _return.code = Code;
+  _return.uri = Uri;
+  _type = Return;
 }
 
 void Location::addAllow(const HttpMethod Method) {
   _allow |= Method;
-  _setMembers |= Location::Allow;
+  _allowSet = true;
 }
 
 void Location::setRedirect(const std::string &Redirect) {
   _redirect = Redirect;
-  _setMembers |= Location::Redirect;
+  _type = Redirect;
 }
 
 void Location::setCgi(const std::string &Cgi) {
   _cgi = Cgi;
-  _setMembers |= Location::Cgi;
+  _type = Cgi;
 }
 
-bool Location::getReturn(std::string &Code, std::string &Url) {
-  if (!isSetRedirect())
-    return false;
-  Code = _redirect.code;
-  Uri = _redirect.uri;
-  return true;
+const Return &Location::getReturn(void) const {
+  return _return;
 }
 
-bool Location::isAllowed(const HttpMethod Method) {
-  return _allow & Method;
+const std::string &Location::getPath(void) const {
+  return _path;
 }
 
-bool Location::getRedirect(std::string &Redirect) {
-  if (!isSetRedirect())
-    return false;
-  Redirect = _redirect;
-  return true;
+const std::string &Location::getRedirect(void) const {
+  return _redirect;
 }
 
-bool Location::getCgi(std::string &Cgi) {
-  if (!isSetCgi())
-    return false;
-  Cgi = _cgi;
-  return true;
+const std::string &Location::getCgi(void) const {
+  return _cgi;
 }
 
-bool Location::isSetReturn(void) {
-  return _setMembers & Location::Return;
+bool Location::isAllowed(const HttpMethod Method) const {
+  return _allowSet;
 }
 
-bool Location::isSetAllow(void) {
-  return _setMembers & Location::Allow;
+std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
+  Os << "location " << Loc.getPath() << " {\n\t";
+  if (Loc.isSetAllowed()) {
+    Os << "allowed:";
+    if (Loc.isAllowed(Post))
+      Os << " POST";
+    if (Loc.isAllowed(Get))
+      Os << " GET";
+    if (Loc.isAllowed(Delete))
+      Os << " DELETE";
+    if (Loc.isAllowed(Head))
+      Os << " HEAD";
+    Os << '\n';
+  }
+  switch (Loc.getType()) {
+    case Location::Cgi:
+      Os << "\tcgi: " << Loc.getCgi() << '\n';
+      break;
+    case Location::Return:
+      Os << "\treturn: " << Loc.getReturn() << '\n';
+      break;
+    case Location::Redirect:
+      Os << "\treturn: " << Loc.getRedirect() << '\n';
+      break;
+    case Location::None:
+      break;
+  }
+  Os << "}\n";
+  return Os;
 }
 
-bool Location::isSetRedirect(void) {
-  return _setMembers & Location::Redirect;
-}
-
-bool Location::isSetCgi(void) {
-  return _setMembers & Location::Cgi;
+std::ostream &operator<<(std::ostream &Os, const Return &Ret) {
+  Os << Ret.code << ' ' << Ret.url;
 }
