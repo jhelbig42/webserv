@@ -27,6 +27,7 @@ private:
   bool match(const TokenType::Type Type);
   bool noMatch(const TokenType::Type Type);
   TokenType::Type nextType(void) const;
+  bool isNextType(const TokenType::Type Type) const;
   const std::string &matchGetLexeme(TokenType::Type Type);
 
   Website expression(void);

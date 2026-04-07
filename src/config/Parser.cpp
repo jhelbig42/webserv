@@ -28,6 +28,10 @@ void Parser::parse(void) {
 
 Parser::~Parser() { }
 
+bool isNextType(const TokenType::Type Type) const {
+  return nextType() == Type;
+}
+
 std::string Parser::parseWord(void) {
   std::string word("");
   while (nextType() != TokenType::Newline &&

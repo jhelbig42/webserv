@@ -83,7 +83,7 @@ void Parser::parseAllow(Website &Site) {
 
 void Parser::parseErrorPage(Website &Site) {
   gap();
-  if (nextType() != TokenType::Number)
+  if (!isNextType(TokenType::Number))
     throwTokenError();
   std::list<std::string> numbers;
   while (nextType() == TokenType::Number) {
@@ -99,8 +99,9 @@ void Parser::parseLocation(Website &Site) {
     throwTokenError();
   Location newLocation;
   newLocation.path = "";
-  while (nextType() != TokenType::Newline &&
-         nextType() != TokenType::Whitespace && TokenType::BracesLeft) {
+  while (!isNextType(TokenType::Newline) &&
+         !isNextType(TokenType::Whitespace) &&
+         !isNextType(TokenType::BracesRight)) {
     newLocation.path += peek().getLexeme();
     eat();
   }
@@ -133,6 +134,17 @@ void Parser::addLocationEntry(Location &Loc) {
     throwTokenError();
 }
 
+void Parser::parseReturn(Location &Loc) {
+  Return ret;
+  if (!isNextType(TokenType::Number))
+    throwTokenError();
+  ret.code = peek().getLexeme();
+  eat();
+  skipSep();
+  ret.url = parseWord();
+  Loc.setReturn(ret);
+}
+
 void Parser::parseRedirect(Location &Loc) {
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
@@ -149,7 +161,7 @@ void Parser::parseCgi(Location &Loc) {
 
 void Parser::parseLocationAllow(Location &Loc) {
   gap();
-  while (nextType() != TokenType::Semicolon) {
+  while (!isNextType(TokenType::Semicolon)) {
     if (match(TokenType::Asterisk)) {
       Loc.addAllow(Head);
       Loc.addAllow(Get);
@@ -225,10 +237,10 @@ std::string Parser::parseResource(void) {
   while (true) {
     if (nextType() == TokenType::Slash)
       throwTokenError();
-    while (nextType() != TokenType::Newline &&
-           nextType() != TokenType::Whitespace &&
-           nextType() != TokenType::Semicolon &&
-           nextType() != TokenType::Slash) {
+    while (!isNextType(TokenType::Semicolon) &&
+           !isNextType(TokenType::Newline) &&
+           !isNextType(TokenType::Whitespace) &&
+           !isNextType(TokenType::Slash))
       path += peek().getLexeme();
       eat();
     }
@@ -239,22 +251,22 @@ std::string Parser::parseResource(void) {
 
 std::string Parser::parseAbsPath(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
-  if (sep() || nextType() == TokenType::Semicolon)
+  if (sep() || isNextType(TokenType::Semicolon))
     return path;
   while (true) {
     if (nextType() == TokenType::Slash)
       throwTokenError();
-    while (nextType() != TokenType::Newline &&
-           nextType() != TokenType::Whitespace &&
-           nextType() != TokenType::Semicolon &&
-           nextType() != TokenType::Slash) {
+    while (!isNextType(TokenType::Semicolon) &&
+           !isNextType(TokenType::Newline) &&
+           !isNextType(TokenType::Whitespace) &&
+           !isNextType(TokenType::Slash))
       path += peek().getLexeme();
       eat();
     }
     if (!match(TokenType::Slash))
       throwTokenError();
     path += "/";
-    if (sep() || nextType() == TokenType::Semicolon)
+    if (sep() || isNextType(TokenType::Semicolon))
       return path;
   }
 }
