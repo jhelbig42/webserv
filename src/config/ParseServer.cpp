@@ -99,7 +99,8 @@ void Parser::parseLocation(Website &Site) {
     throwTokenError();
   Location newLocation;
   newLocation.path = "";
-  while (nextType() != TokenType::Newline && nextType() != TokenType::Whitespace && TokenType::BracesLeft) {
+  while (nextType() != TokenType::Newline &&
+         nextType() != TokenType::Whitespace && TokenType::BracesLeft) {
     newLocation.path += peek().getLexeme();
     eat();
   }
@@ -112,7 +113,7 @@ void Parser::parseLocation(Website &Site) {
 
 void Parser::parseLocationEntry(Location &Loc) {
   skipSep();
-  addLocationEntry(Website);
+  addLocationEntry(Loc);
   skipSep();
   if (!match(TokenType::Semicolon))
     throwTokenError();
@@ -130,6 +131,20 @@ void Parser::addLocationEntry(Location &Loc) {
     parseCgi(Loc);
   } else
     throwTokenError();
+}
+
+void Parser::parseRedirect(Location &Loc) {
+  std::string pathRedirect = parseWord();
+  if (pathRedirect == "")
+    throwTokenError();
+  Loc.addRedirect(pathRedirect);
+}
+
+void Parser::parseCgi(Location &Loc) {
+  std::string pathCgi = parseWord();
+  if (pathCgi == "")
+    throwTokenError();
+  Loc.addCgi(pathCgi);
 }
 
 void Parser::parseLocationAllow(Location &Loc) {

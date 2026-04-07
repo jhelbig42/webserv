@@ -153,5 +153,4 @@ void Website::addLocation(Location &Loc) {
     ++it;
   }
   _locations.insert(it, Loc);
-  return true;
 }

@@ -50,6 +50,7 @@ private:
   void parseEntry(Website &Website);
   std::string parseResource(void);
   std::string parseAbsPath(void);
+  std::string parseWord(void);
 
   void throwTokenError(void);
 

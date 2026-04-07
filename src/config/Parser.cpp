@@ -28,6 +28,17 @@ void Parser::parse(void) {
 
 Parser::~Parser() { }
 
+std::string Parser::parseWord(void) {
+  std::string word("");
+  while (nextType() != TokenType::Newline &&
+         nextType() != TokenType::Whitespace &&
+         nextType() != TokenType::Semicolon) {
+    word += peek().getLexeme();
+    eat();
+  }
+  return word;
+}
+
 const Token &Parser::peek(void) const {
   return *_it;
 }
