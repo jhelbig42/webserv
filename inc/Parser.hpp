@@ -40,6 +40,11 @@ private:
   void parseRoot(Website &Site);
   void parseAutoindex(Website &Site);
   void parseAllow(Website &Site);
+  void parseLocation(Website &Site);
+  void parseRedirect(Location &Loc);
+  void parseCgi(Location &Loc);
+  void parseReturn(Location &Loc);
+  void parseLocationAllow(Location &Loc);
 
   void addEntry(Website &Site);
 
@@ -47,6 +52,8 @@ private:
   void addPort(Listen &Interface);
 
   void parseErrorPage(Website &Site);
+  void parseLocationEntry(Location &Loc);
+  void addLocationEntry(Location &Loc);
 
   void parseEntry(Website &Website);
   std::string parseResource(void);

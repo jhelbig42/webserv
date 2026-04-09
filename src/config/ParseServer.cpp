@@ -90,22 +90,22 @@ void Parser::parseErrorPage(Website &Site) {
     numbers.push_back(matchGetLexeme(TokenType::Number));
     skipSep();
   }
-  Site.addErrorPage(numbers, parseResource);
+  Site.addErrorPage(numbers, parseResource());
 }
 
 void Parser::parseLocation(Website &Site) {
   gap();
   if (nextType() != TokenType::Slash)
     throwTokenError();
-  Location newLocation;
-  newLocation.path = "";
+  std::string path = "";
   while (!isNextType(TokenType::Newline) &&
          !isNextType(TokenType::Whitespace) &&
          !isNextType(TokenType::BracesRight)) {
-    newLocation.path += peek().getLexeme();
+    path += peek().getLexeme();
     eat();
   }
   skipSep();
+  Location newLocation(path);
   while (!match(TokenType::BracesRight)) {
     parseLocationEntry(newLocation);
   }
@@ -135,7 +135,7 @@ void Parser::addLocationEntry(Location &Loc) {
 }
 
 void Parser::parseReturn(Location &Loc) {
-  Return ret;
+  ReturnData ret;
   if (!isNextType(TokenType::Number))
     throwTokenError();
   ret.code = peek().getLexeme();
@@ -149,14 +149,14 @@ void Parser::parseRedirect(Location &Loc) {
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
     throwTokenError();
-  Loc.addRedirect(pathRedirect);
+  Loc.setRedirect(pathRedirect);
 }
 
 void Parser::parseCgi(Location &Loc) {
   std::string pathCgi = parseWord();
   if (pathCgi == "")
     throwTokenError();
-  Loc.addCgi(pathCgi);
+  Loc.setCgi(pathCgi);
 }
 
 void Parser::parseLocationAllow(Location &Loc) {
@@ -240,7 +240,7 @@ std::string Parser::parseResource(void) {
     while (!isNextType(TokenType::Semicolon) &&
            !isNextType(TokenType::Newline) &&
            !isNextType(TokenType::Whitespace) &&
-           !isNextType(TokenType::Slash))
+           !isNextType(TokenType::Slash)) {
       path += peek().getLexeme();
       eat();
     }
@@ -259,7 +259,7 @@ std::string Parser::parseAbsPath(void) {
     while (!isNextType(TokenType::Semicolon) &&
            !isNextType(TokenType::Newline) &&
            !isNextType(TokenType::Whitespace) &&
-           !isNextType(TokenType::Slash))
+           !isNextType(TokenType::Slash)) {
       path += peek().getLexeme();
       eat();
     }

@@ -75,6 +75,14 @@ static void printInterfaces(std::ostream &Os, const Website &Site) {
     Os << "listen: " << *it++ << '\n';
 }
 
+static void printLocations(std::ostream &Os, const Website &Site) {
+  if (!Site.isSetLocations())
+    return;
+  std::list<Location>::const_iterator it = Site.getLocations().begin();
+  while (it != Site.getLocations().end())
+    Os << *it++ << '\n';
+}
+
 static void printRoot(std::ostream &Os, const Website &Site) {
   if (!Site.isSetRoot())
     return;
@@ -144,13 +152,14 @@ bool Website::isSetAllow(void) const {
 void Website::addLocation(Location &Loc) {
   std::list<Location>::iterator it = _locations.begin();
   while (it != _locations.end()) {
-    if (Loc.path == it->path) {
+    if (Loc.getPath() == it->getPath()) {
       *it = Loc;
       return;
     }
-    if (Loc.path < it->path)
+    if (Loc.getPath() < it->getPath())
       break;
     ++it;
   }
   _locations.insert(it, Loc);
+  _setMembers |= Website::Locations;
 }

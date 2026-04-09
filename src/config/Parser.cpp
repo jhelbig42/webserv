@@ -28,7 +28,7 @@ void Parser::parse(void) {
 
 Parser::~Parser() { }
 
-bool isNextType(const TokenType::Type Type) const {
+bool Parser::isNextType(const TokenType::Type Type) const {
   return nextType() == Type;
 }
 

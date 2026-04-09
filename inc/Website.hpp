@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HttpMethods.hpp"
+#include "Location.hpp"
 #include "Token.hpp"
 #include <list>
 #include <ostream>
@@ -35,6 +36,7 @@ public:
   bool isSetAutoindex(void) const;
   bool isSetRoot(void) const;
   bool isSetInterfaces(void) const;
+  bool isSetLocations(void) const;
   bool isSetAllow(void) const;
 
 private:
@@ -42,7 +44,8 @@ private:
     Interfaces = (1u << 0),
     Root = (1u << 1),
     Autoindex = (1u << 2),
-    Allow = (1u << 3)
+    Allow = (1u << 3),
+    Locations = (1u << 4)
   } SetMembers;
 
   int _setMembers;
@@ -55,5 +58,3 @@ private:
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);
 std::ostream &operator<<(std::ostream &Os, const Website &Site);
-std::ostream &operator<<(std::ostream &Os, const Location &Loc);
-std::ostream &operator<<(std::ostream &Os, const Return &Ret);

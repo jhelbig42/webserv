@@ -1,8 +1,9 @@
 #pragma once
 
 #include "HttpMethods.hpp"
+#include <string>
 
-struct Return {
+struct ReturnData {
   std::string code;
   std::string url;
 };
@@ -13,7 +14,7 @@ public:
     None,
     Cgi,
     Return,
-    Redirect,
+    Redirect
   } Type;
 
   Location();
@@ -24,13 +25,13 @@ public:
   explicit Location(const std::string &Path);
 
   Type getType(void) const;
-  void setReturn(const std::string &RootDir);
+  void setReturn(const ReturnData &Ret);
   void addAllow(const HttpMethod Method);
   void setRedirect(const std::string &Redirect);
   void setCgi(const std::string &Cgi);
 
   bool isAllowed(const HttpMethod Method) const;
-  const Return &getReturn(void) const;
+  const ReturnData &getReturn(void) const;
   const std::string &getPath(void) const;
   const std::string &getRedirect(void) const;
   const std::string &getCgi(void) const;
@@ -40,8 +41,11 @@ public:
 private:
   Type _type;
   const std::string _path;
-  Return _return;
+  ReturnData _return;
   bool _allowSet;
   int _allow;
   std::string _redirect;
 };
+
+std::ostream &operator<<(std::ostream &Os, const Location &Loc);
+std::ostream &operator<<(std::ostream &Os, const ReturnData &Ret);
