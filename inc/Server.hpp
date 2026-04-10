@@ -22,15 +22,6 @@ class Server {
 	
 	public:
 	
-	// variables
-	std::vector<pollfd> fds;
-	std::map<int, const Website*> listenMap;
-	std::map<int, Connection> clientMap;
-	std::map<int, Connection&> cgiWriteMap;
-	std::map<int, Connection&> cgiReadMap;
-	std::vector<pollfd> newFdBatch;
-	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
-
 	// Server.cpp
 	explicit Server(const std::list<Website>  &websites);
 	~Server();
@@ -43,7 +34,16 @@ class Server {
 
 	private:
 
+	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
+	std::vector<pollfd> _fds;
+	std::map<int, const Website*> listenMap;
+	std::map<int, Connection> clientMap;
+	std::map<int, Connection&> cgiWriteMap;
+	std::map<int, Connection&> cgiReadMap;
+	std::vector<pollfd> newFdBatch;
+	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
+
 
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
 	void initNetworking(const std::list<Website> &Websites);
