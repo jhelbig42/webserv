@@ -22,8 +22,8 @@ void Server::pollLoop(void) {
 
   while (1) {
     const int res =
-        poll(fds.data(), (nfds_t)fds.size(),
-             -1); // without restriction to fds.size this cast is unsafe
+        poll(_fds.data(), (nfds_t)_fds.size(),
+             -1); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
@@ -37,7 +37,7 @@ void Server::pollLoop(void) {
 
 /**
 *
-*	\brief	process() iterates through Server's vector of pollfds
+*	\brief	process() iterates through Server's vector of poll_fds
 *	after poll() has been called. For each:
 *
 *	- Checks each fd's revents field, which was set by poll()
@@ -49,52 +49,52 @@ void Server::pollLoop(void) {
 *		- reset _conditions
 *
 *	After iteration is complete
-*	- adds any newly accepted Connections to fds and clientMap
+*	- adds any newly accepted Connections to _fds and _clientMap
 *	- clears list of new Connections to be added
 *
 */
 
 void Server::process(void) {
 
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     if (reventsAreTerminal(it->revents)) {
       handleTerminalCondition(*it);
     } else {
       handleServableCondition(*it);
     }
     if (socketIsClient(it->fd)) {
-      if (clientMap.at(it->fd).getDeleteStatus() == true) {
+      if (_clientMap.at(it->fd).getDeleteStatus() == true) {
         close(it->fd);
-        clientMap.erase(it->fd);
-        it = fds.erase(it);
+        _clientMap.erase(it->fd);
+        it = _fds.erase(it);
         continue;
       } else {
-        clientMap.at(it->fd).serve();
-        clientMap.at(it->fd).resetConditions();
+        _clientMap.at(it->fd).serve();
+        _clientMap.at(it->fd).resetConditions();
       }
     }
     it->revents = 0;
     it++;
   }
-  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
-  newFdBatch.clear();
+  _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
+  _newFdBatch.clear();
 }
 
-// adds new connection to clientMap -- move to pollhandling??
+// adds new connection to _clientMap -- move to pollhandling??
 
 void Server::addConnectionToMap(int ListenerFd,
                                 const struct ClientAddr &Candidate) {
 
   const Website *website;
   try {
-    website = listenMap.at(ListenerFd);
+    website = _listenMap.at(ListenerFd);
   } catch (std::out_of_range &e) {
     logging::log(
         logging::Error,
         "addConnectionToMap(): Connection could not be created because "
-        "ListenerFd was not found in listenMap. This should never happen.");
+        "ListenerFd was not found in _listenMap. This should never happen.");
   }
   Connection newConnection(Candidate.clientSock, Candidate.addr,
                            Candidate.addrSize, *website);
-  clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
+  _clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

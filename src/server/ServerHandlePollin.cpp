@@ -22,11 +22,11 @@ void Server::handlePollin(int Fd) {
       const short events =
           POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
       const pollfd newFd = {candidate.clientSock, events, 0};
-      newFdBatch.push_back(newFd);
+      _newFdBatch.push_back(newFd);
     }
   } else {
-    const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
-    if (itC != clientMap.end()) {
+    const std::map<int, Connection>::iterator itC = _clientMap.find(Fd);
+    if (itC != _clientMap.end()) {
       (itC->second).addToConditions(SockRead);
     } else {
       logging::log(logging::Error, "process: Connection not found in map "

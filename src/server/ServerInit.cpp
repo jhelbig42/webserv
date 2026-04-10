@@ -50,7 +50,7 @@ void Server::initNetworking(const std::list<Website> &Websites) {
  *  3) calls getaddrinfo() via a wrapper, to get an addrinfo struct
  *  4) calls getListeningSocket, kicking off socket creation and set-up
  *  5) frees the addrinfo via freeaddrinfo()
- *  6) adds socket to the Server's vector of pollfds
+ *  6) adds socket to the Server's vector of poll_fds
  *  7) adds socket to the Server's listenMap
  *
  * \param Pair	ip:port on which we want to listen, needed for socket setup
@@ -70,8 +70,8 @@ void Server::initListeningSocket(const Listen &Pair, const Website &Web) {
 
   const pollfd newFd = {sock, POLLIN, 0};
   logging::log2(logging::Debug, "Listening socket created on socket ", sock);
-  fds.push_back(newFd);
-  listenMap.insert(std::make_pair(sock, &Web));
+  _fds.push_back(newFd);
+  _listenMap.insert(std::make_pair(sock, &Web));
   return;
 }
 
@@ -83,7 +83,7 @@ void Server::checkPair(const Listen &Pair) {
 
   std::string pair = Pair.ip + ":" + Pair.port;
   logging::log2(logging::Debug, "checkpair():\n", pair);
-  if (pairsInUse.find(pair) != pairsInUse.end()) {
+  if (_pairsInUse.find(pair) != _pairsInUse.end()) {
 
     std::ostringstream msg;
     msg << "Webserv does not support multiple websites with the same IP:Port "
@@ -92,7 +92,7 @@ void Server::checkPair(const Listen &Pair) {
     logging::log(logging::Error, msg.str());
     exit(1);
   }
-  pairsInUse.insert(make_pair(pair, true));
+  _pairsInUse.insert(make_pair(pair, true));
 }
 
 // Check that Port # is uint16_t.

@@ -25,7 +25,7 @@ void Server::handlePollnval(int Fd) {
                 "invalid fd. fd = ",
                 Fd);
   try {
-    clientMap.at(Fd).scheduleForDemolition();
+    _clientMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "
@@ -47,7 +47,7 @@ void Server::handlePollhup(int Fd) {
                 " fd = ",
                 Fd);
   try {
-    clientMap.at(Fd).scheduleForDemolition();
+    _clientMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "
@@ -67,7 +67,7 @@ void Server::handlePollerr(int Fd) {
                 "disconnected abruptly using RST, or socket is broken.\n fd = ",
                 Fd); // downgrade to Warning?
   try {
-    clientMap.at(Fd).scheduleForDemolition();
+    _clientMap.at(Fd).scheduleForDemolition();
   } catch (std::out_of_range &e) {
     logging::log(logging::Error,
                  "Connection could not be marked for deletion because there is "

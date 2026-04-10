@@ -37,13 +37,12 @@ class Server {
 	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
 	std::vector<pollfd> _fds;
-	std::map<int, const Website*> listenMap;
-	std::map<int, Connection> clientMap;
-	std::map<int, Connection&> cgiWriteMap;
-	std::map<int, Connection&> cgiReadMap;
-	std::vector<pollfd> newFdBatch;
-	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
-
+	std::map<int, const Website*> _listenMap;
+	std::map<int, Connection> _clientMap;
+	std::map<int, Connection&> _cgiWriteMap;
+	std::map<int, Connection&> _cgiReadMap;
+	std::vector<pollfd> _newFdBatch;
+	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
 	void initNetworking(const std::list<Website> &Websites);

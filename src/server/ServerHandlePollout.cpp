@@ -14,8 +14,8 @@
 
 void Server::handlePollout(int Fd) {
  // logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
-  const std::map<int, Connection>::iterator itC = clientMap.find(Fd);
-  if (itC != clientMap.end()) {
+  const std::map<int, Connection>::iterator itC = _clientMap.find(Fd);
+  if (itC != _clientMap.end()) {
     // logging::log2(logging::Debug, "Ready to send to ", Fd);
     (itC->second).addToConditions(SockWrite);
   } else {
