@@ -63,7 +63,7 @@ bool Reaction::process(const int Socket, int &ForwardSocket,
   if (_processType == SendFile && (Condition & SockWrite))
     return sendFile(Socket, Bytes);
   if (_processType == ReceiveFile && (Condition & SockRead))
-	  return receiveFile(Socket, Bytes);
+	return receiveFile(Socket, Bytes);
   return (false); 
 }
 
