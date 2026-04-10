@@ -53,7 +53,7 @@ bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 		if (copied == -1)
 			return (false);
 		_receivedContLen += static_cast<size_t>(copied);
-		_buffer.deleteFront(static_cast<size_t>(copied));
+		//_buffer.deleteFront(static_cast<size_t>(copied));
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 	}
 
