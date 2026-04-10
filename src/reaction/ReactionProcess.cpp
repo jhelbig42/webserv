@@ -117,7 +117,7 @@ void Reaction::sendToCGI(const size_t Bytes){
     const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
     if (sent > 0) {
       _receivedContLen += static_cast<size_t>(sent);
-      _buffer.deleteFront(static_cast<size_t>(sent));
+      //_buffer.deleteFront(static_cast<size_t>(sent));
     }
   }
 
