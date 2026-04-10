@@ -14,8 +14,6 @@
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
-#include <unistd.h>
-
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
@@ -28,6 +26,7 @@ void Reaction::setDefaults(void) {
   _fdIn = -1;
   _headers.unsetAll();
   _conditions = Unconditional;
+  
 }
 
 Reaction::Reaction()
@@ -43,7 +42,11 @@ Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
 }
 
-bool		Reaction::isCGI(const Request &Req){
+int Reaction::getForwardSocket(void) const {
+  return _cgi.getForwardSocket();
+}
+
+bool Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
   {
@@ -56,7 +59,7 @@ bool		Reaction::isCGI(const Request &Req){
 void Reaction::init(const Request &Req) {
   setDefaults();
 
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
+  logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
@@ -74,68 +77,22 @@ void Reaction::init(const Request &Req) {
   //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
-  //processType CGI
-
-  //set request Type header just here, safe Query string, if we have one
-  //invalid request if we have a query string, but not a script we asked for
   if(!isCGI(Req)){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
-	  if (Req.getQueryString() != ""){
+	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
 		  initSendFile(CODE_400, FILE_400);
 		  return;
 	  }
 	  initMethodNonCGI(Req);
 	  return;
   }
+
   logging::log(logging::Debug, "Req is a CGI");
-  if (!_cgi.init(Req, _script))
-    initSendFile(CODE_500, FILE_500);; // here the ConfigInfos also need to come in
-  return;
-}
-
-void Reaction::initMethodNonCGI(const Request &Req) {
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-  switch (Req.getMethod()) 
-  {
-  	case Head:
-  	case Get:
-    	initHeadGet(Req);
-    	return;
-  	case Delete:
-    	initDelete(Req);
-    	return;
-  	case Post:
-	  	initPost(Req);
-	  	return;
-  	case Generic:
-    	initSendFile(CODE_501, FILE_501);
-    	return;
-  }
-}
-
-void Reaction::initDelete(const Request &Req) {
-  errno = 0;
-  if (std::remove(Req.getResource().c_str()) != 0) {
-    initError(errno);
+  if (!_cgi.init(Req, _script)) {
+    initSendFile(CODE_500, FILE_500);
     return;
   }
-  initSendFile(CODE_202, NULL);
-}
-
-void Reaction::initHeadGet(const Request &Req) {
-  initSendFile(CODE_200, Req.getResource().c_str());
-  if (Req.getMethod() == Get || _fdIn < 0)
-    return;
-  errno = 0;
-  if (close(_fdIn) < 0)
-    logging::log2(logging::Error, "close: ", strerror(errno));
-  _fdIn = -1;
-}
-
-Reaction::Reaction(const Request &Req)
-    : _processType(NotInitialized),  _receivedContLen(0), _metadataSent(false), _fdIn(-1)
-{
-  init(Req);
+  initCGIMethod(Req);
 }
 
 // TODO:
@@ -159,19 +116,6 @@ void Reaction::initSendFile(const int Code, const char *File) {
   _metadataSent = false;
   _processType = SendFile;
   _conditions = SockWrite;
-}
-
-void Reaction::initSendCGI(const int Socket, const size_t Bytes){
-
-	logging::log(logging::Debug, "InitSendCGI");
-
- 	_fdIn = _cgi.getReadFd();   // pipe from CGI stdout
- 	_processType = SendFile;
- 	_conditions = SockWrite;
-
- 	setMetadata(_metadata, CODE_200, _headers);
-  _metadataSent = false; 
-  return ;
 }
 
 

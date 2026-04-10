@@ -18,13 +18,13 @@ public:
     std::string getScriptName();
     std::string getQueryString();
 
-    void setServerName(std::string Name);
-    void setServerPort(std::string Port);
-    void setRequestMethod(std::string Method);
-    void setScriptName(std::string ScriptName);
+    void setServerName(std::string &Name);
+    void setServerPort(std::string &Port);
+    void setRequestMethod(std::string &Method);
+    void setScriptName(std::string &ScriptName);
     //void setQueryString(std::string QueryString);
 
-protected:
+private:
     //from Server configs
     std::string _serverName;
     std::string _serverPort;

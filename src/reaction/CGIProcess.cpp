@@ -2,22 +2,26 @@
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
-#include "Reaction.hpp"
 #include "Script.hpp"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
 #include <string.h>
-#include <unistd.h>
+#include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#include <unistd.h>
 
 #define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
 #define PY_DEFAULT_PATH "/usr/bin/python3"
 
+#define EXECVE_ERR 127
+
 CGIProcess::CGIProcess() : _env(NULL),
 							_args(NULL),
 							_path(NULL),
-							_writeIntoCGI(-1),
-							_readFromCGI(-1),
+							_pid(-1),
+							_forwardSocket(-1),
 							_inputDone(false)
 
 {
@@ -29,13 +33,13 @@ CGIProcess::~CGIProcess(){
     	for (int i = 0; _env[i] != NULL; ++i){
         	free(_env[i]);
     	}
-    	free(_env);
+    	free((void *)_env);
 	}
 	if (_args){
 		for (int i = 0; _args[i] != NULL; ++i){
         	free(_args[i]);
     	}
-    free(_args);
+    free((void *)_args);
 	}
    	free(_path);
 }
@@ -44,28 +48,36 @@ bool CGIProcess::isInputDone() const{
 	return _inputDone;
 }
 
-int CGIProcess::getReadFd() const
-{
-    return _readFromCGI;
+int CGIProcess::getForwardSocket() const{
+	return _forwardSocket;
 }
 
-int CGIProcess::getWriteFd() const
-{
-    return _writeIntoCGI;
+int CGIProcess::getPid() const {
+	return _pid;
 }
 
-void CGIProcess::_clearEnv() {
+
+void CGIProcess::setPid(pid_t pid){
+	_pid = pid;
+}
+
+void CGIProcess::setInputDone(bool done){
+	_inputDone = done;
+}
+
+void CGIProcess::clearEnv() {
     if (_env) {
-        for (int i = 0; i < NB_OF_ENV; ++i) {
-            if (_env[i]) free(_env[i]);
+        for (int i = 0; _env[i] != NULL; ++i) {
+            if (_env[i]) 
+				free(_env[i]);
         }
-        free(_env);
+        free((void *)_env);
         _env = NULL;
     }
 }
 
 // Maps the Enum to the actual String Key
-std::string CGIProcess::_getEnvKey(envMembers member) const {
+std::string CGIProcess::getEnvKey(EnvMembers member) const {
     static const char* keys[] = {
         "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL", 
         "SERVER_SOFTWARE", "SERVER_INTERFACE", "REQUEST_METHOD", 
@@ -75,22 +87,31 @@ std::string CGIProcess::_getEnvKey(envMembers member) const {
 }
 
 // Maps the Enum to the value retrieved from Request/Script
-std::string CGIProcess::_getEnvValue(envMembers member, Request& Req, Script& Script) const {
+std::string CGIProcess::getEnvValue(EnvMembers member, Request& Req, Script& Script) const {
     switch (member) {
-        case SERVER_NAME:      return Script.getServerName();
-        case SERVER_PORT:      return Script.getServerPort();
-        case SERVER_PROTOCOL:  return Script.getServerProtocol();
-        case SERVER_SOFTWARE:  return Script.getServerSoftware();
-        case SERVER_INTERFACE: return Script.getServerInterface();
-        case REQUEST_METHOD:   return Req.getMethodString();
-        case SCRIPT_NAME:      return Req.getResource().substr(1); // Remove leading '/'
-        case QUERY_STRING:     return Req.getQueryString();
-        default:               return "";
+        case SERVER_NAME:      
+			return Script.getServerName();
+        case SERVER_PORT:      
+			return Script.getServerPort();
+        case SERVER_PROTOCOL:  
+			return Script.getServerProtocol();
+        case SERVER_SOFTWARE:  
+			return Script.getServerSoftware();
+        case SERVER_INTERFACE: 
+			return Script.getServerInterface();
+        case REQUEST_METHOD:   
+			return Req.getMethodString();
+        case SCRIPT_NAME:      
+			return Req.getResource().substr(1); // Remove leading '/' from Resource
+        case QUERY_STRING:     
+			return Req.getQueryString();
+        default:               
+			return "";
     }
 }
 
-bool CGIProcess::_envMember(envMembers index, const std::string& key, const std::string& value) {
-    std::string entry = key + "=" + value;
+bool CGIProcess::envMember(EnvMembers index, const std::string& key, const std::string& value) {
+    const std::string entry = key + "=" + value;
     _env[index] = strdup(entry.c_str());
     return (_env[index] != NULL);
 }
@@ -105,9 +126,9 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
 
     // Loop through the Enum
     for (int i = 0; i < NB_OF_ENV; ++i) {
-        envMembers member = static_cast<envMembers>(i);
-        if (!_envMember(member, _getEnvKey(member), _getEnvValue(member, Req, Script))) {
-            _clearEnv();
+        const EnvMembers member = static_cast<EnvMembers>(i);
+        if (!envMember(member, getEnvKey(member), getEnvValue(member, Req, Script))) {
+            clearEnv();
             return false;
         }
     }
@@ -119,7 +140,7 @@ bool CGIProcess::createArgs(Request &Req){
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return false;// error handling
-	HttpHeaders::MediaType type = Req.getHeaders().getContentType();
+	const HttpHeaders::MediaType type = Req.getHeaders().getContentType();
 	switch (type){
 		case HttpHeaders::ApplicationSh:
 			_args[0] = strdup("bash");
@@ -128,6 +149,7 @@ bool CGIProcess::createArgs(Request &Req){
 			_args[0] = strdup("python3");
 			break;
 		default: // should never be reached
+			_args[0] = NULL;
 			break;
 	} 
 	_args[1] = strdup(Req.getResource().c_str());
@@ -138,6 +160,7 @@ bool CGIProcess::createArgs(Request &Req){
 	return true;
 }
 
+//likely to be replaced be the general resolvePath function, that will be executed before Reaction init
 bool CGIProcess::resolvePath(){
 	_path = strdup(PY_DEFAULT_PATH);
 	if (!_path)
@@ -145,46 +168,40 @@ bool CGIProcess::resolvePath(){
 	return true;
 }
 
-bool CGIProcess::initPipes(){
-	// set up pipes
-	int intoCGI[2];
-	int fromCGI[2];
-	if (pipe(intoCGI))
-		return false; //error handling
-	if (pipe(fromCGI))
-		return false; //error handling
-	logging::log(logging::Debug, "CGI init Pipes created");
-	//fork
-	_pid = fork(); // this pid needs to be added to poll-list
-	if (_pid == -1)
-		return false; //error handling
-	if (_pid == 0)
-	{
-		//we are in child
-		close(intoCGI[1]); //write side
-		close(fromCGI[0]); //read side
-		dup2(intoCGI[0], STDIN_FILENO);
-		dup2(fromCGI[1], STDOUT_FILENO);
-		close(intoCGI[0]);
-		close(fromCGI[1]);
-		execve(_path, _args, _env);
-		logging::log(logging::Debug, "execve failed in child");
-		_exit(1);
-	}
-	//we are in parent here
-	logging::log(logging::Debug, "CGI init I am the parent");
-	
-	close(intoCGI[0]);
-	close(fromCGI[1]);
-	_writeIntoCGI = intoCGI[1];
-	_readFromCGI = fromCGI[0];
-	return true;
+//setting up the ForwardSocket, create the child process handling the script
+bool CGIProcess::initForwardSocket() {
+    int sv[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) return false;
+
+    _pid = fork();
+    if (_pid == -1) {
+        close(sv[0]); close(sv[1]);
+        return false;
+    }
+
+    if (_pid == 0) { // Child
+        close(sv[0]);
+        dup2(sv[1], STDIN_FILENO);
+        dup2(sv[1], STDOUT_FILENO);
+        close(sv[1]);
+        
+        execve(_path, _args, _env);
+        _exit(EXECVE_ERR);
+    }
+
+    // Parent
+    close(sv[1]);
+    _forwardSocket = sv[0];
+    return true;
 }
+
 
 bool CGIProcess::init(Request Req, Script Script){
 	logging::log(logging::Debug, "CGI Process init called");
 	// allowed methods are: Head/Get, Post
 	//still needs to be compared to allowed methods according to config
+	// allowed methods will be handled before Reaction init, along with resolve path
+	// is we are here, the method is allowed
     
 	// create env:
 	if (!createEnv(Req, Script))
@@ -200,12 +217,8 @@ bool CGIProcess::init(Request Req, Script Script){
 	if (!resolvePath())
 		return false;
 	
-	if (!initPipes())
+	if (!initForwardSocket())
 		return (false);
-
-	//needs to go! just for testing for the moment
-	//will be true for every CGI get Request 
-	//jsut post requests have a body
-	_inputDone = true;
+	
     return true;
 }

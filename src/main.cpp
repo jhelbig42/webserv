@@ -1,11 +1,11 @@
 //#define _GNU_SOURCE 
 #include "Config.hpp"
-#include "Scanner.hpp"
-#include "Server.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include <unistd.h>
+#include "Scanner.hpp"
+#include "Server.hpp"
 #include <iostream>
+#include <unistd.h>
 
 //#define OFFLINE
 //#define PARSING
@@ -27,8 +27,7 @@
 int main(void) {
   const Request req(METHOD " " PATH " " VERSION);
   Reaction res(req);
-  int dummy = -1;
-  while (!res.process(STDOUT_FILENO, dummy, CHUNK_SIZE))
+  while (!res.process(STDOUT_FILENO, CHUNK_SIZE, Unconditional))
     ;
 }
 

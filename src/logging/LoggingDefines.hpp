@@ -1,10 +1,10 @@
 #pragma once
 
-#define DEBUG_STREAM std::cerr
+#define DEBUG_STREAM std::cout
 #define DEBUG_COLOR ""
 #define DEBUG_LABEL "[DEBUG]  "
 
-#define INFO_STREAM std::cerr
+#define INFO_STREAM std::cout
 #define INFO_COLOR ""
 #define INFO_LABEL "[INFO]   "
 

@@ -1,0 +1,15 @@
+Add forwardMap, and take account of whether a socket is a forward socket within handleServabaleConditions / which conditions are set.
+
+In Server.process(), place "else { ... serve... reset conditions}" in a separate second loop that starts at the beginning, and iterates through all client Connections"
+
+
+make variables private
+
+
+Server::acceptConnection
+make ListenerFd const
+
+
+Server::reventsAreTerminal
+remove POLLPRI
+

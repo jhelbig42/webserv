@@ -2,6 +2,7 @@
 #include "Logging.hpp"
 #include "Request.hpp"
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 #define MAX_REQUEST 1024

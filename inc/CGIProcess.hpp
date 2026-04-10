@@ -6,7 +6,7 @@
 
 class CGIProcess {
 public:
-    enum envMembers {
+    enum EnvMembers {
         SERVER_NAME,
         SERVER_PORT,
         SERVER_PROTOCOL,
@@ -21,30 +21,47 @@ public:
     CGIProcess();
     ~CGIProcess();
 
+	/// @fn bool init(Request Req, Script Script)
+    /// @brief initialize Reaction if Request calls for CGI execution
+    /// @param Req 
+    /// @param Script 
+    /// @return false on any error
+	/// This includes creating a child process using fork(). This child process
+	// will execute the CGI script. Within the function the environment 
+	/// variables and arguments that are needed for the scripts execution are 
+	/// set.
+	/// The filedescriptor leading of the created socket is saved a member of 
+	/// the CGIProcess Class. The coresponding instance of Connection will 
+	/// check for it an include it in the poll() map.
     bool init(Request Req, Script Script);
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req);
     bool resolvePath();
-	bool initPipes();
+	bool initForwardSocket();
     
     //Getters
     bool isInputDone() const;
-    int getReadFd() const;
-    int getWriteFd() const;
+	int getPid() const ;
+    int getForwardSocket() const;
 
-private:
-    void _clearEnv();
-    bool _envMember(envMembers index, const std::string& key, const std::string& value);
+    //setters
+    void setPid(pid_t pid);
+    void setInputDone(bool done);
     
-    std::string _getEnvKey(envMembers member) const;
-    std::string _getEnvValue(envMembers member, Request& Req, Script& Script) const;
+private:
+   
+    bool envMember(EnvMembers index, const std::string& key, const std::string& value);
+    
+	void clearEnv();
 
-    char** _env;
-    char** _args;
-    char* _path;
+    std::string getEnvKey(EnvMembers member) const;
+    std::string getEnvValue(EnvMembers member, Request& Req, Script& Script) const;
+
+    char**      _env;
+    char**      _args;
+    char*       _path;
     pid_t       _pid;
-    int         _writeIntoCGI;
-    int         _readFromCGI;
+    int         _forwardSocket;
     std::string _output;
     bool        _inputDone;
 };

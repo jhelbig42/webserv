@@ -7,8 +7,6 @@ Script::Script() : _serverProtocol("HTTP/1.0"),
                     _serverInterface("CGI/1.1")
 {
     //get the information from the serverconfig File here
-    setServerName("name");
-    setServerPort("1234");
 }
 
 Script::~Script()
@@ -16,19 +14,19 @@ Script::~Script()
     
 }
 
-void Script::setServerName(std::string ServerName){
+void Script::setServerName(std::string &ServerName){
     _serverName = ServerName;
 }
 
-void Script::setServerPort(std::string Port){
+void Script::setServerPort(std::string &Port){
     _serverPort = Port;
 }
 
-void Script::setRequestMethod(std::string Method){
+void Script::setRequestMethod(std::string &Method){
     _requestMethod = Method;
 }
 
-void Script::setScriptName(std::string ScriptName){
+void Script::setScriptName(std::string &ScriptName){
     _serverPort = ScriptName;
 }
 
