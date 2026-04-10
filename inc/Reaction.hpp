@@ -82,8 +82,10 @@ private:
   
   void initCGIMethod(const Request &Req);
 
-  // used to handle POST Requests
-  bool	receiveFile(const int Socket, const size_t Bytes);
+  //for Post request
+  bool receiveFile(const int Socket, const size_t Bytes);
+  std::string _finalPath;
+  std::string _tmpPath;
 
   // called by process()
   /// \fn checkOnChild(void)
