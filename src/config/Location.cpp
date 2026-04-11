@@ -1,6 +1,6 @@
 #include "Website.hpp"
 
-Location::Location() : _type(None), _path(Path), _allowSet(false) {
+Location::Location() : _type(None), _path(""), _allowSet(false) {
 }
 
 Location::Location(const Location &Other)
@@ -24,7 +24,7 @@ Location &Location::operator=(const Location &Other) {
 Location::~Location() {
 }
 
-explicit Location::Location(const std::string &Path)
+Location::Location(const std::string &Path)
     : _type(None), _path(Path), _allowSet(false) {
 }
 
@@ -32,9 +32,9 @@ Location::Type Location::getType(void) const {
   return _type;
 }
 
-void Location::setReturn(const std::string &Code, const std::string &Uri) {
+void Location::setReturn(const std::string &Code, const std::string &Url) {
   _return.code = Code;
-  _return.uri = Uri;
+  _return.url = Url;
   _type = Return;
 }
 
@@ -43,17 +43,17 @@ void Location::addAllow(const HttpMethod Method) {
   _allowSet = true;
 }
 
-void Location::setRedirect(const std::string &Redirect) {
-  _redirect = Redirect;
+void Location::setRedirect(const std::string &RedirectPath) {
+  _redirect = RedirectPath;
   _type = Redirect;
 }
 
-void Location::setCgi(const std::string &Cgi) {
-  _cgi = Cgi;
+void Location::setCgi(const std::string &CgiPath) {
+  _redirect = CgiPath;
   _type = Cgi;
 }
 
-const Return &Location::getReturn(void) const {
+const ReturnData &Location::getReturn(void) const {
   return _return;
 }
 
@@ -66,7 +66,7 @@ const std::string &Location::getRedirect(void) const {
 }
 
 const std::string &Location::getCgi(void) const {
-  return _cgi;
+  return _redirect;
 }
 
 bool Location::isAllowed(const HttpMethod Method) const {
@@ -104,6 +104,7 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
   return Os;
 }
 
-std::ostream &operator<<(std::ostream &Os, const Return &Ret) {
+std::ostream &operator<<(std::ostream &Os, const ReturnData &Ret) {
   Os << Ret.code << ' ' << Ret.url;
+  return Os;
 }

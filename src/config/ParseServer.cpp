@@ -148,11 +148,11 @@ void Parser::parseReturn(Location &Loc) {
   ReturnData ret;
   if (!isNextType(TokenType::Number))
     throwTokenError();
-  ret.code = peek().getLexeme();
+  const std::string code = peek().getLexeme();
   eat();
   skipSep();
-  ret.url = parseWord();
-  Loc.setReturn(ret);
+  const std::string url = parseWord();
+  Loc.setReturn(code, url);
 }
 
 void Parser::parseRedirect(Location &Loc) {
