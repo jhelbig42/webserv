@@ -43,6 +43,10 @@ void Location::addAllow(const HttpMethod Method) {
   _allowSet = true;
 }
 
+bool Location::isSetAllowed(void) const {
+  return _allowSet;
+}
+
 void Location::setRedirect(const std::string &RedirectPath) {
   _redirect = RedirectPath;
   _type = Redirect;

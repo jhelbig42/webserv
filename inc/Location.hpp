@@ -25,7 +25,7 @@ public:
   explicit Location(const std::string &Path);
 
   Type getType(void) const;
-  void setReturn(const ReturnData &Ret);
+  void setReturn(const std::string &Code, const std::string &Url);
   void addAllow(const HttpMethod Method);
   void setRedirect(const std::string &Redirect);
   void setCgi(const std::string &Cgi);
@@ -40,7 +40,7 @@ public:
 
 private:
   Type _type;
-  const std::string _path;
+  std::string _path;
   ReturnData _return;
   bool _allowSet;
   int _allow;
