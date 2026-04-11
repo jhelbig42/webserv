@@ -3,6 +3,9 @@
 #include "HttpMethods.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
 #include <string>
 
 Website Parser::server(void) {
@@ -90,7 +93,14 @@ void Parser::parseErrorPage(Website &Site) {
     numbers.push_back(matchGetLexeme(TokenType::Number));
     skipSep();
   }
-  Site.addErrorPage(numbers, parseResource());
+  const std::string resource = parseResource();
+  for (std::list<std::string>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
+    errno = 0;
+    unsigned long num = strtoul(it->c_str(), NULL, 10);
+    if (errno == ERANGE || num > std::numeric_limits<unsigned int>::max())
+      continue;
+    Site.addErrorPage(static_cast<unsigned int>(num), resource);
+  }
 }
 
 void Parser::parseLocation(Website &Site) {

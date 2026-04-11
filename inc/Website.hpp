@@ -4,7 +4,9 @@
 #include "Location.hpp"
 #include "Token.hpp"
 #include <list>
+#include <map>
 #include <ostream>
+#include <string>
 
 struct Listen {
   bool operator==(const Listen &other) const;
@@ -25,6 +27,8 @@ public:
   /// \fun addLocation
   /// \brief if a location with the same path already exists it is replaced
   void addLocation(Location &Loc);
+  void addErrorPage(const unsigned int Code, const std::string &Path);
+  const char *getErrorPage(const unsigned int Code);
   const std::list<Listen> &getInterfaces(void) const;
   const std::list<Location> &getLocations(void) const;
   void setRoot(const std::string &RootDir);
@@ -52,6 +56,7 @@ private:
   std::list<Listen> _interfaces; 
   std::list<Location> _locations; 
   std::string _root;
+  std::map<unsigned int, std::string> _errorPages;
   bool _autoindex;
   int _allow;
 };

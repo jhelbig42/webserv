@@ -163,3 +163,14 @@ void Website::addLocation(Location &Loc) {
   _locations.insert(it, Loc);
   _setMembers |= Website::Locations;
 }
+
+void Website::addErrorPage(const unsigned int Code, const std::string &Path) {
+  _errorPages.insert(std::pair<unsigned int, std::string>(Code, Path));
+}
+
+const char *Website::getErrorPage(const unsigned int Code) {
+  const std::map<unsigned int, std::string>::const_iterator it = _errorPages.find(Code);
+  if (it == _errorPages.end())
+    return NULL;
+  return it->second.c_str();
+}
