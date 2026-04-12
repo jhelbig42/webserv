@@ -121,6 +121,8 @@ ifeq ($(DEBUG), 1)
 	CPPFLAGS += -O0
 	CPPFLAGS += -g3
 	CPPFLAGS += -fstandalone-debug
+	CXXFLAGS	+= -Wno-unused-parameter
+	CXXFLAGS	+= -Wno-unused-function
 endif
 
 ifeq ($(ASAN), 1)

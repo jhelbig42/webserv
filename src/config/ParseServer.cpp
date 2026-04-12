@@ -25,9 +25,6 @@ void Parser::parseEntry(Website &Website) {
   skipSep();
   addEntry(Website);
   skipSep();
-  if (!match(TokenType::Semicolon))
-    throwTokenError();
-  skipSep();
 }
 
 void Parser::gap(void) {
@@ -47,18 +44,24 @@ void Parser::parseListen(Website &Site) {
   gap();
   Listen interface;
   populateInterface(interface);
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
   Site.addInterface(interface);
 }
 
 void Parser::parseRoot(Website &Site) {
   gap();
   const std::string root = parseAbsPath();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
   Site.setRoot(root);
 }
 
 void Parser::parseAutoindex(Website &Site) {
   gap();
   Site.setAutoindex(parseOnOff());
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
 }
 
 void Parser::parseAllow(Website &Site) {
@@ -82,6 +85,8 @@ void Parser::parseAllow(Website &Site) {
       throwTokenError();
     skipSep();
   }
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
 }
 
 void Parser::parseErrorPage(Website &Site) {
@@ -101,6 +106,8 @@ void Parser::parseErrorPage(Website &Site) {
       continue;
     Site.addErrorPage(static_cast<unsigned int>(num), resource);
   }
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
 }
 
 void Parser::parseLocation(Website &Site) {
@@ -110,12 +117,14 @@ void Parser::parseLocation(Website &Site) {
   std::string path = "";
   while (!isNextType(TokenType::Newline) &&
          !isNextType(TokenType::Whitespace) &&
-         !isNextType(TokenType::BracesRight)) {
+         !isNextType(TokenType::BracesLeft)) {
     path += peek().getLexeme();
     eat();
   }
   skipSep();
   Location newLocation(path);
+  if (!match(TokenType::BracesLeft))
+    throwTokenError();
   while (!match(TokenType::BracesRight)) {
     parseLocationEntry(newLocation);
   }
@@ -145,6 +154,7 @@ void Parser::addLocationEntry(Location &Loc) {
 }
 
 void Parser::parseReturn(Location &Loc) {
+  gap();
   ReturnData ret;
   if (!isNextType(TokenType::Number))
     throwTokenError();
@@ -156,6 +166,7 @@ void Parser::parseReturn(Location &Loc) {
 }
 
 void Parser::parseRedirect(Location &Loc) {
+  gap();
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
     throwTokenError();
@@ -163,6 +174,7 @@ void Parser::parseRedirect(Location &Loc) {
 }
 
 void Parser::parseCgi(Location &Loc) {
+  gap();
   std::string pathCgi = parseWord();
   if (pathCgi == "")
     throwTokenError();
