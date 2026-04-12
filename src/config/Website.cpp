@@ -3,6 +3,7 @@
 #include <list>
 #include <ostream>
 
+static void printLocations(std::ostream &Os, const Website &Site);
 static void printInterfaces(std::ostream &Os, const Website &Site);
 static void printRoot(std::ostream &Os, const Website &Site);
 static void printAutoindex(std::ostream &Os, const Website &Site);
@@ -64,6 +65,7 @@ std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printRoot(Os, Site);
   printAutoindex(Os, Site);
   printAllow(Os, Site);
+  printLocations(Os, Site);
   return Os;
 }
 
@@ -76,8 +78,6 @@ static void printInterfaces(std::ostream &Os, const Website &Site) {
 }
 
 static void printLocations(std::ostream &Os, const Website &Site) {
-  if (!Site.isSetLocations())
-    return;
   std::list<Location>::const_iterator it = Site.getLocations().begin();
   while (it != Site.getLocations().end())
     Os << *it++ << '\n';
@@ -173,4 +173,8 @@ const char *Website::getErrorPage(const unsigned int Code) {
   if (it == _errorPages.end())
     return NULL;
   return it->second.c_str();
+}
+
+const std::list<Location> &Website::getLocations(void) const {
+  return _locations;
 }
