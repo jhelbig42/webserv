@@ -35,6 +35,14 @@ void Server::pollLoop(void) {
   }
 }
 
+void	Server::serveAll(void){
+	
+	for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
+        (it->second).serve();
+        (it->second).resetConditions();
+    }
+}
+
 /**
 *
 *	\brief	process() iterates through Server's vector of poll_fds
@@ -56,22 +64,18 @@ void Server::pollLoop(void) {
 
 void Server::process(void) {
 
-  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-    handleCondition(*it);
-	if (socketIsClient(it->fd)) {
-      if (_clientMap.at(it->fd).getDeleteStatus() == true) {
-        close(it->fd);
-        _clientMap.erase(it->fd);
-        it = _fds.erase(it);
-        continue;
-      } else {
-        _clientMap.at(it->fd).serve();
-        _clientMap.at(it->fd).resetConditions();
-      }
-    }
-    it->revents = 0;
-    it++;
-  }
+	for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+    	handleCondition(*it); // sets conditions in client Connection, or accepts new connections
+		if (socketIsClient(it->fd) && _clientMap.at(it->fd).getDeleteStatus() == true) {
+        	close(it->fd);
+        	_clientMap.erase(it->fd);
+       		it = _fds.erase(it);
+			continue;
+		}
+    	it->revents = 0;
+    	it++;
+	}
+	serveAll();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   _newFdBatch.clear();
 }

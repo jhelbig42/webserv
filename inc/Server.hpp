@@ -61,6 +61,7 @@ class Server {
 	
 	// ServerRun.hpp -- outer loop function PollLoop() is public
 	void process(void);
+	void serveAll(void);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// ServerHandlePoll.hpp
