@@ -36,11 +36,11 @@ void Server::pollLoop(void) {
 }
 
 void	Server::serveAll(void){
-	
-for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
+	for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
         (it->second).serve();
         (it->second).resetConditions();
     }
+
 }
 
 /**
@@ -65,9 +65,8 @@ void Server::process(void) {
 
 	for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     	handleCondition(*it); // sets conditions in client Connection, or accepts new connections
-		if (socketIsClient(it->fd) && _clientMap.at(it->fd).getDeleteStatus() == true) {
-        	close(it->fd);
-        	_clientMap.erase(it->fd);
+		if (shouldBeDeleted(it->fd) == true) {
+			closeAndDelete(it->fd);
        		it = _fds.erase(it);
 			continue;
 		}
@@ -77,6 +76,46 @@ void Server::process(void) {
 	serveAll();
 	_fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
 	_newFdBatch.clear();
+}
+
+void Server::closeAndDelete(int Fd){
+       
+	close(Fd);
+	if (socketIsClient(Fd))
+   		_clientMap.erase(Fd);
+	if (socketIsFwd(Fd))
+		_fwdMap.erase(Fd);
+}
+
+
+bool Server::shouldBeDeleted(int Fd){
+	if (socketIsClient(Fd) && _clientMap.at(Fd).getDeleteStatus() == true) {
+		return (true);
+	}
+	int clientFd;
+  	try {
+    	clientFd = _fwdMap.at(Fd).getSock();
+  	}
+	catch (std::out_of_range &e) {
+    logging::log3(
+        logging::Error,
+        "shouldBeDeleted(): Fd ", Fd, "not found in _clientMap or _fwdMap"
+        "This should never happen.");
+		return (false);
+  	}
+	try {
+		if (_clientMap.at(clientFd).getDeleteStatus() == true){
+			return (true);
+		}
+	}
+	catch (std::out_of_range &e) {
+	logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd, " is fwd socket"
+				"associated with client socket ");
+    logging::log2(
+        logging::Error, clientFd, ", not found in _clientMap. Should never happen");
+		return (false);
+  	}
+	return (false);
 }
 
 // adds new connection to _clientMap -- move to pollhandling??

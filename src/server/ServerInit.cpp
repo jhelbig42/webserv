@@ -165,6 +165,6 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
     exit(1);
   }
   setToListen(sock);
-  logging::log(logging::Debug, "sever found socket. bind: success");
+  logging::log(logging::Debug, "server found socket. bind: success");
   return (sock);
 }
