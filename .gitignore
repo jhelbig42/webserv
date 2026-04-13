@@ -9,4 +9,6 @@
 example.ebnf
 docs/*
 sa/*
+tester
+cgi_tester
 webserv
