@@ -65,6 +65,7 @@ class Server {
 
 	// ServerHandlePoll.hpp
 	bool reventsAreTerminal(int revents);
+	void handleCondition(struct pollfd &polled);
 	void handleTerminalCondition(struct pollfd &polled);
 	void handleServableCondition(struct pollfd &polled);
 	

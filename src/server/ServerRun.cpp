@@ -57,12 +57,8 @@ void Server::pollLoop(void) {
 void Server::process(void) {
 
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-    if (reventsAreTerminal(it->revents)) {
-      handleTerminalCondition(*it);
-    } else {
-      handleServableCondition(*it);
-    }
-    if (socketIsClient(it->fd)) {
+    handleCondition(*it);
+	if (socketIsClient(it->fd)) {
       if (_clientMap.at(it->fd).getDeleteStatus() == true) {
         close(it->fd);
         _clientMap.erase(it->fd);

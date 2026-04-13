@@ -17,6 +17,14 @@
 
 /////////////////////////////////////////////////////////////////////////
 
+void	Server::handleCondition(struct pollfd &polled){
+    if (reventsAreTerminal(polled.revents)) {
+      handleTerminalCondition(polled);
+    } else {
+      handleServableCondition(polled);
+    }
+}
+
 /**
  *	\brief reventsAreTerminal() checks if poll returned error or
  *	hangup in revents, which means the connection should be terminated
