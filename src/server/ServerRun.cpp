@@ -37,7 +37,7 @@ void Server::pollLoop(void) {
 
 void	Server::serveAll(void){
 	
-	for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
+for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
         (it->second).serve();
         (it->second).resetConditions();
     }
@@ -50,13 +50,12 @@ void	Server::serveAll(void){
 *
 *	- Checks each fd's revents field, which was set by poll()
 *	- Calls the relevant handling function, which will either
-    - set conditions in a client connection, or accept new connections
-*	- If the fd belongs to a client
-*		- if Connection is markeid for deletion, close and delete
-*		- otherwise, send to parser for next steps
-*		- reset _conditions
+    	- set conditions in a client connection, or accept new connections
+*	- if Connection is markeid for deletion, close and delete
+*	- reset _conditions
 *
 *	After iteration is complete
+*	- calls function to serve all connections	
 *	- adds any newly accepted Connections to _fds and _clientMap
 *	- clears list of new Connections to be added
 *
@@ -76,8 +75,8 @@ void Server::process(void) {
     	it++;
 	}
 	serveAll();
-  _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
-  _newFdBatch.clear();
+	_fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
+	_newFdBatch.clear();
 }
 
 // adds new connection to _clientMap -- move to pollhandling??

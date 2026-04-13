@@ -39,8 +39,9 @@ class Server {
 	std::vector<pollfd> _fds;
 	std::map<int, const Website*> _listenMap;
 	std::map<int, Connection> _clientMap;
-	std::map<int, Connection&> _cgiWriteMap;
-	std::map<int, Connection&> _cgiReadMap;
+	std::map<int, Connection&> _fwdMap;
+//	std::map<int, Connection&> _cgiWriteMap;
+//	std::map<int, Connection&> _cgiReadMap;
 	std::vector<pollfd> _newFdBatch;
 	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
