@@ -9,6 +9,16 @@
 #include <sys/types.h>
 #include <vector>
 
+void Server::setSockRead(int Fd){
+    const std::map<int, Connection>::iterator itC = _clientMap.find(Fd);
+    if (itC != _clientMap.end()) {
+      (itC->second).addToConditions(SockRead);
+    } else {
+      logging::log(logging::Error, "process: Connection not found in _clientMap "
+                                   "container (This should never happen)");
+    }
+}
+
 
 void Server::handleNewConnection(int Fd){
     ClientAddr candidate;
@@ -29,13 +39,22 @@ void Server::handlePollin(int Fd) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
   if (socketIsListener(Fd)) {
   	handleNewConnection(Fd);
-  } else {
-    const std::map<int, Connection>::iterator itC = _clientMap.find(Fd);
-    if (itC != _clientMap.end()) {
+	return;
+  }
+  /*
+  if (socketIsFwd(Fd)) {
+    const std::map<int, Connection>::iterator it = _fwdMap.find(Fd);
+    if (it != _fwdMap.end()) {
       (itC->second).addToConditions(SockRead);
     } else {
-      logging::log(logging::Error, "process: Connection not found in map "
+      logging::log(logging::Error, "process: Connection not found in _fwdMap "
                                    "container (This should never happen)");
     }
+  	
+  }
+  */
+
+  else {
+  	setSockRead(Fd);
   }
 }
