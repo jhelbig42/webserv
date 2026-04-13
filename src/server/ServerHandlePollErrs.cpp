@@ -16,6 +16,31 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
+void Server::markClientDeletion(int Fd){
+  try {
+    _clientMap.at(Fd).scheduleForDemolition();
+  } catch (const std::out_of_range &e) {
+    logging::log3(logging::Error,
+                 "markClientDeletion(): ", Fd, 
+				 " could not be marked for deletion because there is "
+                 "no Connection in _clientMap with this fd."
+				 "(This should never happen).");
+  }
+}
+
+void Server::markFwdDeletion(int Fd){
+  try {
+    _fwdMap.at(Fd).scheduleForDemolition();
+  } catch (const std::out_of_range &e) {
+    logging::log3(logging::Error,
+                 "markFwdDeletion(): ", Fd, 
+				 " could not be marked for deletion because there is "
+                 "no Connection in _fwdMap with this fd."
+				 "(This should never happen).");
+  }
+}
+
+
 // handlePollnval() handles POLLNVAL:
 // 		invalid request: fd not open.
 
@@ -24,13 +49,15 @@ void Server::handlePollnval(int Fd) {
                 "networking::process(): POLLNAL.\n\tpoll() tried to read "
                 "invalid fd. fd = ",
                 Fd);
-  try {
-    _clientMap.at(Fd).scheduleForDemolition();
-  } catch (const std::out_of_range &e) {
-    logging::log(logging::Error,
-                 "Connection could not be marked for deletion because there is "
-                 "no Connection with this fd.");
-  }
+	if (socketIsClient(Fd)){
+		logging::log2(logging::Error, Fd, " is a client socket");
+		markClientDeletion(Fd);
+	}
+	if (socketIsFwd(Fd)){
+		logging::log2(logging::Error, Fd, " is forward socket");
+		// TODO how to handle this
+		//markFwdDeletion(Fd);
+	}
 }
 
 // handlePollrdhup() handles POLLRDHUP:
