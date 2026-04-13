@@ -33,9 +33,9 @@ bool Server::socketIsFwd(int Fd) {
   return false;
 }
 
-
 Server::~Server(void) {
-  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++) {
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();
+       it++) {
     close(it->fd);
   }
 }

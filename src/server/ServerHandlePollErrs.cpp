@@ -16,30 +16,27 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-void Server::markClientDeletion(int Fd){
+void Server::markClientDeletion(int Fd) {
   try {
     _clientMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
-    logging::log3(logging::Error,
-                 "markClientDeletion(): ", Fd, 
-				 " could not be marked for deletion because there is "
-                 "no Connection in _clientMap with this fd."
-				 "(This should never happen).");
+    logging::log3(logging::Error, "markClientDeletion(): ", Fd,
+                  " could not be marked for deletion because there is "
+                  "no Connection in _clientMap with this fd."
+                  "(This should never happen).");
   }
 }
 
-void Server::markFwdDeletion(int Fd){
+void Server::markFwdDeletion(int Fd) {
   try {
     _fwdMap.at(Fd).scheduleForDemolition();
   } catch (const std::out_of_range &e) {
-    logging::log3(logging::Error,
-                 "markFwdDeletion(): ", Fd, 
-				 " could not be marked for deletion because there is "
-                 "no Connection in _fwdMap with this fd."
-				 "(This should never happen).");
+    logging::log3(logging::Error, "markFwdDeletion(): ", Fd,
+                  " could not be marked for deletion because there is "
+                  "no Connection in _fwdMap with this fd."
+                  "(This should never happen).");
   }
 }
-
 
 // handlePollnval() handles POLLNVAL:
 // 		invalid request: fd not open.
@@ -49,17 +46,17 @@ void Server::handlePollnval(int Fd) {
                 "networking::process(): POLLNAL.\n\tpoll() tried to read "
                 "invalid fd. fd = ",
                 Fd);
-	if (socketIsClient(Fd)){
-		logging::log2(logging::Error, Fd, " is a client socket");
-		markClientDeletion(Fd);
-		return;
-	}
-	if (socketIsFwd(Fd)){
-		logging::log2(logging::Error, Fd, " is forward socket");
-		// TODO how to handle this
-		//markFwdDeletion(Fd);
-		return;
-	}
+  if (socketIsClient(Fd)) {
+    logging::log2(logging::Error, Fd, " is a client socket");
+    markClientDeletion(Fd);
+    return;
+  }
+  if (socketIsFwd(Fd)) {
+    logging::log2(logging::Error, Fd, " is forward socket");
+    // TODO how to handle this
+    // markFwdDeletion(Fd);
+    return;
+  }
 }
 
 // handlePollrdhup() handles POLLRDHUP:
@@ -95,15 +92,15 @@ void Server::handlePollerr(int Fd) {
                 "networking::process(): POLLERR \n\tclient may have "
                 "disconnected abruptly using RST, or socket is broken.\n fd = ",
                 Fd); // downgrade to Warning?
-	if (socketIsClient(Fd)){
-		logging::log2(logging::Error, Fd, " is a client socket");
-		markClientDeletion(Fd);
-		return;
-	}
-	if (socketIsFwd(Fd)){
-		logging::log2(logging::Error, Fd, " is forward socket");
-		// TODO how to handle this
-		//markFwdDeletion(Fd);
-		return;
-	}
+  if (socketIsClient(Fd)) {
+    logging::log2(logging::Error, Fd, " is a client socket");
+    markClientDeletion(Fd);
+    return;
+  }
+  if (socketIsFwd(Fd)) {
+    logging::log2(logging::Error, Fd, " is forward socket");
+    // TODO how to handle this
+    // markFwdDeletion(Fd);
+    return;
+  }
 }

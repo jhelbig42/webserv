@@ -17,12 +17,12 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-void	Server::handleCondition(struct pollfd &polled){
-    if (reventsAreTerminal(polled.revents)) {
-      handleTerminalCondition(polled);
-    } else {
-      handleServableCondition(polled);
-    }
+void Server::handleCondition(struct pollfd &polled) {
+  if (reventsAreTerminal(polled.revents)) {
+    handleTerminalCondition(polled);
+  } else {
+    handleServableCondition(polled);
+  }
 }
 
 /**
