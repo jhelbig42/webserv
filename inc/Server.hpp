@@ -79,6 +79,7 @@ class Server {
 
 	// ServerHandlPollin.hpp
 	void handlePollin(int Fd);
+	void handleNewConnection(int Fd);
 
 	// ServerHandlePollout.hpp
 	void handlePollout(int Fd);

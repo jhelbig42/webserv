@@ -9,13 +9,8 @@
 #include <sys/types.h>
 #include <vector>
 
-// \brief	handlePollin() handles POLLIN:
-//
-// \param	fd of socket for which poll() returned POLLIN
 
-void Server::handlePollin(int Fd) {
-  logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (socketIsListener(Fd)) {
+void Server::handleNewConnection(int Fd){
     ClientAddr candidate;
     if (acceptConnection(Fd, &candidate) != -1) {
       addConnectionToMap(Fd, candidate);
@@ -24,6 +19,16 @@ void Server::handlePollin(int Fd) {
       const pollfd newFd = {candidate.clientSock, events, 0};
       _newFdBatch.push_back(newFd);
     }
+}
+
+// \brief	handlePollin() handles POLLIN:
+//
+// \param	fd of socket for which poll() returned POLLIN
+
+void Server::handlePollin(int Fd) {
+  logging::log2(logging::Debug, "POLLIN: fd ", Fd);
+  if (socketIsListener(Fd)) {
+  	handleNewConnection(Fd);
   } else {
     const std::map<int, Connection>::iterator itC = _clientMap.find(Fd);
     if (itC != _clientMap.end()) {
