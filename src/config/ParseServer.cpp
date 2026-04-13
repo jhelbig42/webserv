@@ -101,7 +101,7 @@ void Parser::parseErrorPage(Website &Site) {
   const std::string resource = parseResource();
   for (std::list<std::string>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
     errno = 0;
-    unsigned long num = strtoul(it->c_str(), NULL, 10);
+    unsigned long num = strtoul(it->c_str(), NULL, 0);
     if (errno == ERANGE || num > std::numeric_limits<unsigned int>::max())
       continue;
     Site.addErrorPage(static_cast<unsigned int>(num), resource);
@@ -230,23 +230,23 @@ bool Parser::parseOnOff(void) {
   return false;
 }
 
-void Parser::addIpv4(Listen &interface) {
+void Parser::addIpv4(Listen &Interface) {
   try {
-    interface.ip = matchGetLexeme(TokenType::Number);
-    interface.ip += matchGetLexeme(TokenType::Dot);
-    interface.ip += matchGetLexeme(TokenType::Number);
-    interface.ip += matchGetLexeme(TokenType::Dot);
-    interface.ip += matchGetLexeme(TokenType::Number);
-    interface.ip += matchGetLexeme(TokenType::Dot);
-    interface.ip += matchGetLexeme(TokenType::Number);
+    Interface.ip = matchGetLexeme(TokenType::Number);
+    Interface.ip += matchGetLexeme(TokenType::Dot);
+    Interface.ip += matchGetLexeme(TokenType::Number);
+    Interface.ip += matchGetLexeme(TokenType::Dot);
+    Interface.ip += matchGetLexeme(TokenType::Number);
+    Interface.ip += matchGetLexeme(TokenType::Dot);
+    Interface.ip += matchGetLexeme(TokenType::Number);
   } catch (...) {
     throwTokenError();
   }
 }
 
-void Parser::addPort(Listen &interface) {
+void Parser::addPort(Listen &Interface) {
   try {
-    interface.port = matchGetLexeme(TokenType::Number);
+    Interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
     throwTokenError();
   }

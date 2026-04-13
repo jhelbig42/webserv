@@ -1,10 +1,11 @@
-#include "Scanner.hpp"
-#include "Request.hpp"
-#include "Reaction.hpp"
-#include "Networking.hpp"
 #include "Config.hpp"
-#include <unistd.h>
+#include "Networking.hpp"
+#include "Reaction.hpp"
+#include "Request.hpp"
+#include "Scanner.hpp"
 #include <iostream>
+#include <iostream>
+#include <unistd.h>
 
 //#define OFFLINE
 #define PARSING

@@ -1,4 +1,5 @@
-#include "Website.hpp"
+#include "Location.hpp"
+#include <ostream>
 
 Location::Location() : _type(None), _path(""), _allowSet(false) {
 }
@@ -74,7 +75,7 @@ const std::string &Location::getCgi(void) const {
 }
 
 bool Location::isAllowed(const HttpMethod Method) const {
-  return _allowSet;
+  return _allow & Method;
 }
 
 std::ostream &operator<<(std::ostream &Os, const Location &Loc) {

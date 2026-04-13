@@ -33,5 +33,7 @@ CheckOptions:
     value: camelBack
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: CamelCase
 
 # Include any additional options here

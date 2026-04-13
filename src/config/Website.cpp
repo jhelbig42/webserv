@@ -13,18 +13,18 @@ Website::Website(void)
     : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
 }
 
-Website::Website(const Website &other)
-    : _setMembers(other._setMembers), _interfaces(other._interfaces),
-      _root(other._root), _autoindex(other._autoindex), _allow(other._allow) {
+Website::Website(const Website &Other)
+    : _setMembers(Other._setMembers), _interfaces(Other._interfaces),
+      _root(Other._root), _autoindex(Other._autoindex), _allow(Other._allow) {
 }
 
-Website &Website::operator=(const Website &other) {
-  if (this != &other) {
-    _setMembers = other._setMembers;
-    _interfaces = other._interfaces;
-    _root = other._root;
-    _autoindex = other._autoindex;
-    _allow = other._allow;
+Website &Website::operator=(const Website &Other) {
+  if (this != &Other) {
+    _setMembers = Other._setMembers;
+    _interfaces = Other._interfaces;
+    _root = Other._root;
+    _autoindex = Other._autoindex;
+    _allow = Other._allow;
   }
   return *this;
 }
@@ -48,8 +48,8 @@ std::string Website::getRoot(void) const {
   return _root;
 }
 
-bool Listen::operator==(const Listen &other) const {
-  return ip == other.ip && port == other.port;
+bool Listen::operator==(const Listen &Other) const {
+  return ip == Other.ip && port == Other.port;
 }
 
 const std::list<Listen> &Website::getInterfaces(void) const {
@@ -79,8 +79,10 @@ static void printInterfaces(std::ostream &Os, const Website &Site) {
 
 static void printLocations(std::ostream &Os, const Website &Site) {
   std::list<Location>::const_iterator it = Site.getLocations().begin();
-  while (it != Site.getLocations().end())
-    Os << *it++ << '\n';
+  while (it != Site.getLocations().end()) {
+    Os << *it << '\n';
+    ++it;
+  }
 }
 
 static void printRoot(std::ostream &Os, const Website &Site) {

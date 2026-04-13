@@ -10,7 +10,7 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It);
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It);
-static bool isReserved(const std::string &word);
+static bool isReserved(const std::string &Word);
 
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
@@ -111,9 +111,9 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
   return true;
 }
 
-static bool isReserved(const std::string &word) {
+static bool isReserved(const std::string &Word) {
   for (size_t i = 0; i != globalTokenTypesSize; ++i) {
-    if (globalTokenTypes[i].category == TokenType::Keyword && word == globalTokenTypes[i].tokenStr)
+    if (globalTokenTypes[i].category == TokenType::Keyword && Word == globalTokenTypes[i].tokenStr)
       return true;
   }
   return false;
@@ -140,7 +140,7 @@ const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
   throw std::runtime_error("unrecognized token");
 }
 
-TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &str)
-    : std::runtime_error(str) {
+TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &Str)
+    : std::runtime_error(Str) {
 }
 

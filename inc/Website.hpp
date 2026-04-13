@@ -9,7 +9,7 @@
 #include <string>
 
 struct Listen {
-  bool operator==(const Listen &other) const;
+  bool operator==(const Listen &Other) const;
   std::string ip;
   std::string port;
 };
