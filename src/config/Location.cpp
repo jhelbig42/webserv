@@ -79,7 +79,7 @@ bool Location::isAllowed(const HttpMethod Method) const {
 }
 
 std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
-  Os << "location " << Loc.getPath() << " {\n\t";
+  Os << "location " << Loc.getPath() << " {\n";
   if (Loc.isSetAllowed()) {
     Os << "allowed:";
     if (Loc.isAllowed(Post))
@@ -94,13 +94,13 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
   }
   switch (Loc.getType()) {
     case Location::Cgi:
-      Os << "\tcgi: " << Loc.getCgi() << '\n';
+      Os << "    cgi: " << Loc.getCgi() << '\n';
       break;
     case Location::Return:
-      Os << "\treturn: " << Loc.getReturn() << '\n';
+      Os << "    return: " << Loc.getReturn() << '\n';
       break;
     case Location::Redirect:
-      Os << "\treturn: " << Loc.getRedirect() << '\n';
+      Os << "    return: " << Loc.getRedirect() << '\n';
       break;
     case Location::None:
       break;

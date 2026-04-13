@@ -15,13 +15,15 @@ Website::Website(void)
 
 Website::Website(const Website &Other)
     : _setMembers(Other._setMembers), _interfaces(Other._interfaces),
-      _root(Other._root), _autoindex(Other._autoindex), _allow(Other._allow) {
+      _locations(Other._locations), _root(Other._root),
+      _autoindex(Other._autoindex), _allow(Other._allow) {
 }
 
 Website &Website::operator=(const Website &Other) {
   if (this != &Other) {
     _setMembers = Other._setMembers;
     _interfaces = Other._interfaces;
+    _locations = Other._locations;
     _root = Other._root;
     _autoindex = Other._autoindex;
     _allow = Other._allow;
