@@ -85,6 +85,8 @@ class Server {
 
 	// ServerHandlePollout.hpp
 	void handlePollout(int Fd);
+	void setSockWrite(int Fd);
+	void setFSockWrite(int Fd);
 
 	// ServerErrorHandling.hpp
 	void handleSocketFailure(const Listen &Interface, const int Error);

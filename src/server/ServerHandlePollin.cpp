@@ -14,9 +14,8 @@ void Server::setSockRead(int Fd){
     if (itC != _clientMap.end()) {
       (itC->second).addToConditions(SockRead);
     } else {
-      logging::log(logging::Error, "process: Connection not found in _clientMap "
-                                   "container (This should never happen)");
-    }
+      logging::log3(logging::Error, "setSockRead(): ", Fd, " not found in _clientMap. (This should never happen)");
+	}
 }
 
 void Server::setFSockRead(int Fd){
@@ -24,8 +23,7 @@ void Server::setFSockRead(int Fd){
     if (itC != _fwdMap.end()) {
       (itC->second).addToConditions(FSockRead);
     } else {
-      logging::log(logging::Error, "process: Connection not found in _fwdMap "
-                                   "container (This should never happen)");
+      logging::log3(logging::Error, "setFSockRead(): ", Fd, " not found in _fwdMap. (This should never happen)");
     }
 }
 
