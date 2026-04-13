@@ -80,6 +80,8 @@ class Server {
 	// ServerHandlPollin.hpp
 	void handlePollin(int Fd);
 	void handleNewConnection(int Fd);
+	void setSockRead(int Fd);
+	void setFSockRead(int Fd);
 
 	// ServerHandlePollout.hpp
 	void handlePollout(int Fd);

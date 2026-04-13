@@ -19,6 +19,15 @@ void Server::setSockRead(int Fd){
     }
 }
 
+void Server::setFSockRead(int Fd){
+    const std::map<int, Connection&>::iterator itC = _fwdMap.find(Fd);
+    if (itC != _fwdMap.end()) {
+      (itC->second).addToConditions(FSockRead);
+    } else {
+      logging::log(logging::Error, "process: Connection not found in _fwdMap "
+                                   "container (This should never happen)");
+    }
+}
 
 void Server::handleNewConnection(int Fd){
     ClientAddr candidate;
@@ -41,20 +50,12 @@ void Server::handlePollin(int Fd) {
   	handleNewConnection(Fd);
 	return;
   }
-  /*
-  if (socketIsFwd(Fd)) {
-    const std::map<int, Connection>::iterator it = _fwdMap.find(Fd);
-    if (it != _fwdMap.end()) {
-      (itC->second).addToConditions(SockRead);
-    } else {
-      logging::log(logging::Error, "process: Connection not found in _fwdMap "
-                                   "container (This should never happen)");
-    }
-  	
-  }
-  */
-
-  else {
+  if (socketIsClient(Fd)) {
   	setSockRead(Fd);
+	return;
+  }
+  if (socketIsFwd(Fd)) {
+  	setFSockRead(Fd);
+	return;
   }
 }
