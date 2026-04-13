@@ -27,7 +27,8 @@ class Server {
 	~Server();
 	bool socketIsListener(int Fd);
 	bool socketIsClient(int Fd);
-	
+	bool socketIsFwd(int Fd);
+
 	// ServerRun.cpp
 	void pollLoop(void);
 

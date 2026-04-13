@@ -26,6 +26,13 @@ bool Server::socketIsClient(int Fd) {
   return false;
 }
 
+bool Server::socketIsFwd(int Fd) {
+  if (_fwdMap.find(Fd) != _fwdMap.end()) {
+    return true;
+  }
+  return false;
+}
+
 
 Server::~Server(void) {
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++) {
