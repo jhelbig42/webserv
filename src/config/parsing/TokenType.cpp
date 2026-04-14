@@ -43,7 +43,8 @@ static const TokenType globalTokenTypes[] = {
     {"Delete", "DELETE", TokenType::Delete, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
-    {"Newline", "", TokenType::Newline, TokenType::Special}};
+    {"Newline", "", TokenType::Newline, TokenType::Special},
+    {"Unknown", "", TokenType::Unknown, TokenType::UnknownCat}};
 
 static const size_t globalTokenTypesSize =
     sizeof(globalTokenTypes) / sizeof(*globalTokenTypes);
@@ -69,9 +70,8 @@ const TokenType &TokenType::getTokenType(const std::string &Str,
       return globalTokenTypes[i];
     ++i;
   }
-  std::ostringstream oss;
-  oss << "Unrecognized token: `" << *It << '\'';
-  throw UnrecognizedTokenException(oss.str());
+  ++ItNew;
+  return globalTokenTypes[globalTokenTypesSize - 1];
 }
 
 bool TokenType::matchType(const std::string &Str,
@@ -85,6 +85,8 @@ bool TokenType::matchType(const std::string &Str,
     return isCharset(tokenStr, Str, ItNew);
   case Keyword:
     return isKeyword(tokenStr, Str, ItNew);
+  case UnknownCat:
+    return false;
   case Special:
     return false;
   }

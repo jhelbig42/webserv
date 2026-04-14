@@ -5,6 +5,7 @@
 
 struct TokenType {
   typedef enum {
+    Unknown,
     Eof,
     Newline,
     Semicolon,
@@ -35,7 +36,7 @@ struct TokenType {
     Name
   } Type;
 
-  typedef enum { Special, SingleChar, Charset, Keyword } Category;
+  typedef enum { Special, SingleChar, Charset, Keyword, UnknownCat } Category;
 
   bool matchType(const std::string &Str, const std::string::const_iterator It,
                  std::string::const_iterator &ItNew) const;
