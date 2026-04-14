@@ -100,7 +100,7 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
       Os << "    return: " << Loc.getReturn() << '\n';
       break;
     case Location::Redirect:
-      Os << "    return: " << Loc.getRedirect() << '\n';
+      Os << "    redirect: " << Loc.getRedirect() << '\n';
       break;
     case Location::None:
       break;
