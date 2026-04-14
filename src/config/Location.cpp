@@ -1,13 +1,15 @@
 #include "Location.hpp"
 #include <ostream>
 
+static void printLocations(std::ostream &Os, const Location &Loc);
+
 Location::Location() : _type(None), _path(""), _allowSet(false), _allow(0) {
 }
 
 Location::Location(const Location &Other)
     : _type(Other._type), _path(Other._path), _return(Other._return),
       _allowSet(Other._allowSet), _allow(Other._allow),
-      _redirect(Other._redirect) {
+      _redirect(Other._redirect), _locations(Other._locations) {
 }
 
 Location &Location::operator=(const Location &Other) {
@@ -18,6 +20,7 @@ Location &Location::operator=(const Location &Other) {
     _allowSet = Other._allowSet;
     _allow = Other._allow;
     _redirect = Other._redirect;
+    _locations = Other._locations;
   }
   return *this;
 }
@@ -105,6 +108,7 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
     case Location::None:
       break;
   }
+  printLocations(Os, Loc);
   Os << "}";
   return Os;
 }
@@ -112,4 +116,30 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
 std::ostream &operator<<(std::ostream &Os, const ReturnData &Ret) {
   Os << Ret.code << ' ' << Ret.url;
   return Os;
+}
+
+const std::list<Location> &Location::getLocations(void) const {
+  return _locations;
+}
+
+static void printLocations(std::ostream &Os, const Location &Loc) {
+  std::list<Location>::const_iterator it = Loc.getLocations().begin();
+  while (it != Loc.getLocations().end()) {
+    Os << *it << '\n';
+    ++it;
+  }
+}
+
+void Location::addLocation(Location &Loc) {
+  std::list<Location>::iterator it = _locations.begin();
+  while (it != _locations.end()) {
+    if (Loc.getPath() == it->getPath()) {
+      *it = Loc;
+      return;
+    }
+    if (Loc.getPath() < it->getPath())
+      break;
+    ++it;
+  }
+  _locations.insert(it, Loc);
 }

@@ -21,9 +21,24 @@ Website Parser::server(void) {
   return newWebsite;
 }
 
-void Parser::parseEntry(Website &Website) {
+void Parser::parseEntry(Website &Site) {
   skipSep();
-  addEntry(Website);
+  if (match(TokenType::Listen)) {
+    parseListen(Site);
+  } else if (match(TokenType::Root)) {
+    parseRoot(Site);
+  } else if (match(TokenType::Autoindex)) {
+    parseAutoindex(Site);
+  } else if (match(TokenType::Allow)) {
+    parseAllow(Site);
+  } else if (match(TokenType::ErrorPage)) {
+    parseErrorPage(Site);
+  } else if (match(TokenType::MaxRequestBody)) {
+    parseMaxReqBody(Site);
+  } else if (match(TokenType::Location)) {
+    parseLocation(Site);
+  } else
+    throwTokenError();
   skipSep();
 }
 
@@ -131,16 +146,29 @@ void Parser::parseLocation(Website &Site) {
   Site.addLocation(newLocation);
 }
 
-void Parser::parseLocationEntry(Location &Loc) {
-  skipSep();
-  addLocationEntry(Loc);
-  skipSep();
-  if (!match(TokenType::Semicolon))
+void Parser::parseLocation(Location &Loc) {
+  gap();
+  if (nextType() != TokenType::Slash)
     throwTokenError();
+  std::string path = "";
+  while (!isNextType(TokenType::Newline) &&
+         !isNextType(TokenType::Whitespace) &&
+         !isNextType(TokenType::BracesLeft)) {
+    path += peek().getLexeme();
+    eat();
+  }
   skipSep();
+  Location newLocation(path);
+  if (!match(TokenType::BracesLeft))
+    throwTokenError();
+  while (!match(TokenType::BracesRight)) {
+    parseLocationEntry(newLocation);
+  }
+  Loc.addLocation(newLocation);
 }
 
-void Parser::addLocationEntry(Location &Loc) {
+void Parser::parseLocationEntry(Location &Loc) {
+  skipSep();
   if (match(TokenType::Return)) {
     parseReturn(Loc);
   } else if (match(TokenType::Redirect)) {
@@ -149,8 +177,11 @@ void Parser::addLocationEntry(Location &Loc) {
     parseLocationAllow(Loc);
   } else if (match(TokenType::Cgi)) {
     parseCgi(Loc);
+  } else if (match(TokenType::Location)) {
+    parseLocation(Loc);
   } else
     throwTokenError();
+  skipSep();
 }
 
 void Parser::parseReturn(Location &Loc) {
@@ -162,6 +193,9 @@ void Parser::parseReturn(Location &Loc) {
   eat();
   skipSep();
   const std::string url = parseWord();
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
   Loc.setReturn(code, url);
 }
 
@@ -185,6 +219,9 @@ void Parser::parseRedirect(Location &Loc) {
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
     throwTokenError();
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
   Loc.setRedirect(pathRedirect);
 }
 
@@ -192,6 +229,9 @@ void Parser::parseCgi(Location &Loc) {
   gap();
   std::string pathCgi = parseResource();
   if (pathCgi == "")
+    throwTokenError();
+  skipSep();
+  if (!match(TokenType::Semicolon))
     throwTokenError();
   Loc.setCgi(pathCgi);
 }
@@ -217,24 +257,7 @@ void Parser::parseLocationAllow(Location &Loc) {
       throwTokenError();
     skipSep();
   }
-}
-
-void Parser::addEntry(Website &Site) {
-  if (match(TokenType::Listen)) {
-    parseListen(Site);
-  } else if (match(TokenType::Root)) {
-    parseRoot(Site);
-  } else if (match(TokenType::Autoindex)) {
-    parseAutoindex(Site);
-  } else if (match(TokenType::Allow)) {
-    parseAllow(Site);
-  } else if (match(TokenType::ErrorPage)) {
-    parseErrorPage(Site);
-  } else if (match(TokenType::MaxRequestBody)) {
-    parseMaxReqBody(Site);
-  } else if (match(TokenType::Location)) {
-    parseLocation(Site);
-  } else
+  if (!match(TokenType::Semicolon))
     throwTokenError();
 }
 

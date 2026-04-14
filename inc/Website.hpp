@@ -43,7 +43,6 @@ public:
   bool isSetAutoindex(void) const;
   bool isSetRoot(void) const;
   bool isSetInterfaces(void) const;
-  bool isSetLocations(void) const;
   bool isSetAllow(void) const;
   bool isSetMaxReqBody(void) const;
 
@@ -53,8 +52,7 @@ private:
     Root = (1u << 1),
     Autoindex = (1u << 2),
     Allow = (1u << 3),
-    Locations = (1u << 4),
-    MaxReqBody = (1u << 5)
+    MaxReqBody = (1u << 4)
   } SetMembers;
 
   int _setMembers;

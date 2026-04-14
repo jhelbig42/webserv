@@ -185,7 +185,6 @@ void Website::addLocation(Location &Loc) {
     ++it;
   }
   _locations.insert(it, Loc);
-  _setMembers |= Website::Locations;
 }
 
 void Website::addErrorPage(const unsigned int Code, const std::string &Path) {

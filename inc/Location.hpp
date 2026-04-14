@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HttpMethods.hpp"
+#include <list>
 #include <string>
 
 struct ReturnData {
@@ -29,6 +30,8 @@ public:
   void addAllow(const HttpMethod Method);
   void setRedirect(const std::string &Redirect);
   void setCgi(const std::string &Cgi);
+  const std::list<Location> &getLocations(void) const;
+  void addLocation(Location &Loc);
 
   bool isAllowed(const HttpMethod Method) const;
   const ReturnData &getReturn(void) const;
@@ -45,6 +48,7 @@ private:
   bool _allowSet;
   int _allow;
   std::string _redirect;
+  std::list<Location> _locations; 
 };
 
 std::ostream &operator<<(std::ostream &Os, const Location &Loc);
