@@ -1,7 +1,7 @@
 #include "Location.hpp"
 #include <ostream>
 
-Location::Location() : _type(None), _path(""), _allowSet(false) {
+Location::Location() : _type(None), _path(""), _allowSet(false), _allow(0) {
 }
 
 Location::Location(const Location &Other)
@@ -11,7 +11,7 @@ Location::Location(const Location &Other)
 }
 
 Location &Location::operator=(const Location &Other) {
-  if (this == &Other) {
+  if (this != &Other) {
     _type = Other._type;
     _path = Other._path;
     _return = Other._return;
@@ -26,7 +26,7 @@ Location::~Location() {
 }
 
 Location::Location(const std::string &Path)
-    : _type(None), _path(Path), _allowSet(false) {
+    : _type(None), _path(Path), _allowSet(false), _allow(0) {
 }
 
 Location::Type Location::getType(void) const {
@@ -81,7 +81,7 @@ bool Location::isAllowed(const HttpMethod Method) const {
 std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
   Os << "location " << Loc.getPath() << " {\n";
   if (Loc.isSetAllowed()) {
-    Os << "allowed:";
+    Os << "  allow:";
     if (Loc.isAllowed(Post))
       Os << " POST";
     if (Loc.isAllowed(Get))
@@ -105,7 +105,7 @@ std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
     case Location::None:
       break;
   }
-  Os << "}\n";
+  Os << "}";
   return Os;
 }
 

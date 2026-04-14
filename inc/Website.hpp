@@ -31,6 +31,7 @@ public:
   const char *getErrorPage(const unsigned int Code);
   const std::list<Listen> &getInterfaces(void) const;
   const std::list<Location> &getLocations(void) const;
+  const std::map<unsigned int, std::string> &getErrorPages(void) const;
   void setRoot(const std::string &RootDir);
   void addAllow(const HttpMethod Method);
   std::string getRoot(void) const;

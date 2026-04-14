@@ -8,6 +8,7 @@ static void printInterfaces(std::ostream &Os, const Website &Site);
 static void printRoot(std::ostream &Os, const Website &Site);
 static void printAutoindex(std::ostream &Os, const Website &Site);
 static void printAllow(std::ostream &Os, const Website &Site);
+static void printErrorPages(std::ostream &Os, const Website &Site);
 
 Website::Website(void)
     : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
@@ -16,7 +17,8 @@ Website::Website(void)
 Website::Website(const Website &Other)
     : _setMembers(Other._setMembers), _interfaces(Other._interfaces),
       _locations(Other._locations), _root(Other._root),
-      _autoindex(Other._autoindex), _allow(Other._allow) {
+      _errorPages(Other._errorPages), _autoindex(Other._autoindex),
+      _allow(Other._allow) {
 }
 
 Website &Website::operator=(const Website &Other) {
@@ -25,6 +27,7 @@ Website &Website::operator=(const Website &Other) {
     _interfaces = Other._interfaces;
     _locations = Other._locations;
     _root = Other._root;
+    _errorPages = Other._errorPages;
     _autoindex = Other._autoindex;
     _allow = Other._allow;
   }
@@ -68,6 +71,7 @@ std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printAutoindex(Os, Site);
   printAllow(Os, Site);
   printLocations(Os, Site);
+  printErrorPages(Os, Site);
   return Os;
 }
 
@@ -173,7 +177,8 @@ void Website::addErrorPage(const unsigned int Code, const std::string &Path) {
 }
 
 const char *Website::getErrorPage(const unsigned int Code) {
-  const std::map<unsigned int, std::string>::const_iterator it = _errorPages.find(Code);
+  const std::map<unsigned int, std::string>::const_iterator it =
+      _errorPages.find(Code);
   if (it == _errorPages.end())
     return NULL;
   return it->second.c_str();
@@ -181,4 +186,16 @@ const char *Website::getErrorPage(const unsigned int Code) {
 
 const std::list<Location> &Website::getLocations(void) const {
   return _locations;
+}
+
+static void printErrorPages(std::ostream &Os, const Website &Site) {
+  for (std::map<unsigned int, std::string>::const_iterator it =
+           Site.getErrorPages().begin();
+       it != Site.getErrorPages().end(); ++it) {
+    Os << it->first << " -> " << it->second << '\n';
+  }
+}
+
+const std::map<unsigned int, std::string> &Website::getErrorPages(void) const {
+  return _errorPages;
 }
