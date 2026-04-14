@@ -175,7 +175,7 @@ void Parser::parseRedirect(Location &Loc) {
 
 void Parser::parseCgi(Location &Loc) {
   gap();
-  std::string pathCgi = parseWord();
+  std::string pathCgi = parseResource();
   if (pathCgi == "")
     throwTokenError();
   Loc.setCgi(pathCgi);
