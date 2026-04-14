@@ -11,6 +11,7 @@ struct TokenType {
     Semicolon,
     BracesLeft,
     BracesRight,
+    MaxRequestBody,
     Dot,
     Slash,
     Asterisk,

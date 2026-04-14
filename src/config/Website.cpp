@@ -9,13 +9,14 @@ static void printRoot(std::ostream &Os, const Website &Site);
 static void printAutoindex(std::ostream &Os, const Website &Site);
 static void printAllow(std::ostream &Os, const Website &Site);
 static void printErrorPages(std::ostream &Os, const Website &Site);
+static void printMaxReqBody(std::ostream &Os, const Website &Site);
 
 Website::Website(void)
     : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
 }
 
 Website::Website(const Website &Other)
-    : _setMembers(Other._setMembers), _interfaces(Other._interfaces),
+    : _setMembers(Other._setMembers), _maxReqBody(Other._maxReqBody), _interfaces(Other._interfaces),
       _locations(Other._locations), _root(Other._root),
       _errorPages(Other._errorPages), _autoindex(Other._autoindex),
       _allow(Other._allow) {
@@ -24,6 +25,7 @@ Website::Website(const Website &Other)
 Website &Website::operator=(const Website &Other) {
   if (this != &Other) {
     _setMembers = Other._setMembers;
+    _maxReqBody = Other._maxReqBody;
     _interfaces = Other._interfaces;
     _locations = Other._locations;
     _root = Other._root;
@@ -49,8 +51,12 @@ void Website::setRoot(const std::string &RootDir) {
   _setMembers |= Website::Root;
 }
 
-std::string Website::getRoot(void) const {
+const std::string &Website::getRoot(void) const {
   return _root;
+}
+
+unsigned int Website::getMaxReqBody(void) const {
+  return _maxReqBody;
 }
 
 bool Listen::operator==(const Listen &Other) const {
@@ -67,6 +73,7 @@ std::ostream &operator<<(std::ostream &Os, const Listen &If) {
 
 std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printInterfaces(Os, Site);
+  printMaxReqBody(Os, Site);
   printRoot(Os, Site);
   printAutoindex(Os, Site);
   printAllow(Os, Site);
@@ -136,6 +143,11 @@ void Website::setAutoindex(const bool IsOn) {
   _setMembers |= Website::Autoindex;
 }
 
+void Website::setMaxReqBody(const unsigned int MaxBody) {
+  _maxReqBody = MaxBody;
+  _setMembers |= Website::MaxReqBody;
+}
+
 void Website::addAllow(const HttpMethod Method) {
   _allow |= Method;
   _setMembers |= Website::Allow;
@@ -143,6 +155,10 @@ void Website::addAllow(const HttpMethod Method) {
 
 bool Website::isSetAutoindex(void) const {
   return _setMembers & Website::Autoindex;
+}
+
+bool Website::isSetMaxReqBody(void) const {
+  return _setMembers & Website::MaxReqBody;
 }
 
 bool Website::isSetRoot(void) const {
@@ -198,4 +214,9 @@ static void printErrorPages(std::ostream &Os, const Website &Site) {
 
 const std::map<unsigned int, std::string> &Website::getErrorPages(void) const {
   return _errorPages;
+}
+
+static void printMaxReqBody(std::ostream &Os, const Website &Site) {
+  if (Site.isSetMaxReqBody())
+    Os << "max_request_body: " << Site.getMaxReqBody() << '\n';
 }

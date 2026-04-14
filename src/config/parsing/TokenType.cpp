@@ -15,7 +15,7 @@ static bool isReserved(const std::string &Word);
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
 static const TokenType globalTokenTypes[] = {
-    {"Name", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    {"Name", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_",
      TokenType::Name, TokenType::Charset},
     {"Number", "0123456789", TokenType::Number, TokenType::Charset},
     {"Semicolon", ";", TokenType::Semicolon, TokenType::SingleChar},
@@ -29,12 +29,14 @@ static const TokenType globalTokenTypes[] = {
     {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
     {"On", "on", TokenType::On, TokenType::Keyword},
     {"Off", "off", TokenType::Off, TokenType::Keyword},
-    {"ErrorPage", "error", TokenType::ErrorPage, TokenType::Keyword},
+    {"ErrorPage", "error_page", TokenType::ErrorPage, TokenType::Keyword},
     {"Location", "location", TokenType::Location, TokenType::Keyword},
     {"Return", "return", TokenType::Return, TokenType::Keyword},
     {"Redirect", "redirect", TokenType::Redirect, TokenType::Keyword},
     {"Cgi", "cgi", TokenType::Cgi, TokenType::Keyword},
     {"Root", "root", TokenType::Root, TokenType::Keyword},
+    {"MaxRequestBody", "max_request_body", TokenType::MaxRequestBody,
+     TokenType::Keyword},
     {"Autoindex", "autoindex", TokenType::Autoindex, TokenType::Keyword},
     {"Allow", "allow", TokenType::Allow, TokenType::Keyword},
     {"Head", "HEAD", TokenType::Head, TokenType::Keyword},

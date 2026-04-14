@@ -45,6 +45,7 @@ private:
   void parseCgi(Location &Loc);
   void parseReturn(Location &Loc);
   void parseLocationAllow(Location &Loc);
+  void parseMaxReqBody(Website &Site);
 
   void addEntry(Website &Site);
 

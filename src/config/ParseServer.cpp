@@ -165,6 +165,21 @@ void Parser::parseReturn(Location &Loc) {
   Loc.setReturn(code, url);
 }
 
+void Parser::parseMaxReqBody(Website &Site) {
+  gap();
+  if (!isNextType(TokenType::Number))
+    throwTokenError();
+  errno = 0;
+  unsigned long num = strtoul(peek().getLexeme().c_str(), NULL, 0);
+  if (errno == ERANGE || num > std::numeric_limits<unsigned int>::max())
+    throwTokenError();
+  Site.setMaxReqBody(static_cast<unsigned int>(num));
+  eat();
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError();
+}
+
 void Parser::parseRedirect(Location &Loc) {
   gap();
   std::string pathRedirect = parseWord();
@@ -215,6 +230,8 @@ void Parser::addEntry(Website &Site) {
     parseAllow(Site);
   } else if (match(TokenType::ErrorPage)) {
     parseErrorPage(Site);
+  } else if (match(TokenType::MaxRequestBody)) {
+    parseMaxReqBody(Site);
   } else if (match(TokenType::Location)) {
     parseLocation(Site);
   } else
