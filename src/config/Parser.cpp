@@ -3,6 +3,9 @@
 #include "Config.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
 #include <list>
 #include <string>
 
@@ -93,4 +96,15 @@ const std::string &Parser::matchGetLexeme(TokenType::Type Type) {
   if (!match(Type))
     throwTokenError();
   return itDup->getLexeme();
+}
+
+unsigned int Parser::parseUnsignedInt(void) {
+  if (!isNextType(TokenType::Number))
+    throwTokenError();
+  errno = 0;
+  unsigned long code = strtoul(peek().getLexeme().c_str(), NULL, 0);
+  if (errno == ERANGE || code > std::numeric_limits<unsigned int>::max())
+    throwTokenError();
+  eat();
+  return static_cast<unsigned int>(code);
 }

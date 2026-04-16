@@ -36,7 +36,7 @@ Location::Type Location::getType(void) const {
   return _type;
 }
 
-void Location::setReturn(const std::string &Code, const std::string &Url) {
+void Location::setReturn(const unsigned int Code, const std::string &Url) {
   _return.code = Code;
   _return.url = Url;
   _type = Return;

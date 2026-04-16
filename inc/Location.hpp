@@ -5,7 +5,7 @@
 #include <string>
 
 struct ReturnData {
-  std::string code;
+  unsigned int code;
   std::string url;
 };
 
@@ -26,7 +26,7 @@ public:
   explicit Location(const std::string &Path);
 
   Type getType(void) const;
-  void setReturn(const std::string &Code, const std::string &Url);
+  void setReturn(const unsigned int Code, const std::string &Url);
   void addAllow(const HttpMethod Method);
   void setRedirect(const std::string &Redirect);
   void setCgi(const std::string &Cgi);

@@ -34,6 +34,7 @@ private:
 
   Website server(void);
 
+  unsigned int parseUnsignedInt(void);
   void gap(void);
   void populateInterface(Listen &Interface);
   void parseListen(Website &Site);

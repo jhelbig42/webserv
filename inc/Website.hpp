@@ -14,11 +14,13 @@ struct Listen {
   std::string port;
 };
 
+class PathInfo;
+
 class Website {
 public:
   Website();
-  Website(const Website &);
-  Website &operator=(const Website &);
+  Website(const Website &Other);
+  Website &operator=(const Website &Other);
   ~Website();
 
   explicit Website(std::list<Token>::const_iterator It);
@@ -46,6 +48,8 @@ public:
   bool isSetAllow(void) const;
   bool isSetMaxReqBody(void) const;
 
+  PathInfo getPathInfo(const std::string &Path);
+
 private:
   typedef enum {
     Interfaces = (1u << 0),
@@ -62,6 +66,37 @@ private:
   std::string _root;
   std::map<unsigned int, std::string> _errorPages;
   bool _autoindex;
+  int _allow;
+};
+
+class PathInfo {
+public:
+  typedef enum {
+    Default,
+    Return,
+    Cgi
+  } Action;
+
+  PathInfo(void);
+  PathInfo(const PathInfo &Other);
+  PathInfo &operator=(const PathInfo &Other);
+  ~PathInfo(void);
+
+  PathInfo(const Website &Site, const std::string &Path);
+
+  const std::string &getCgiPath(void) const;
+  const std::string &getRealPath(void) const;
+  int getAllowed(void) const;
+  Action getAction(void) const;
+  unsigned int getCode(void) const;
+
+private:
+  void resolveLocations(const std::list<Location> &Locations);
+  void populateFromLocation(const Location &Loc);
+  std::string _cgiPath;
+  std::string _realPath;
+  Action _action;
+  unsigned int _code;
   int _allow;
 };
 

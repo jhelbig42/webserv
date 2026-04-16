@@ -3,9 +3,6 @@
 #include "HttpMethods.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
-#include <cerrno>
-#include <cstdlib>
-#include <limits>
 #include <string>
 
 Website Parser::server(void) {
@@ -114,13 +111,9 @@ void Parser::parseErrorPage(Website &Site) {
     skipSep();
   }
   const std::string resource = parseResource();
-  for (std::list<std::string>::const_iterator it = numbers.begin(); it != numbers.end(); ++it) {
-    errno = 0;
-    unsigned long num = strtoul(it->c_str(), NULL, 0);
-    if (errno == ERANGE || num > std::numeric_limits<unsigned int>::max())
-      continue;
-    Site.addErrorPage(static_cast<unsigned int>(num), resource);
-  }
+  for (std::list<std::string>::const_iterator it = numbers.begin();
+       it != numbers.end(); ++it)
+    Site.addErrorPage(parseUnsignedInt(), resource);
   if (!match(TokenType::Semicolon))
     throwTokenError();
 }
@@ -187,27 +180,18 @@ void Parser::parseLocationEntry(Location &Loc) {
 void Parser::parseReturn(Location &Loc) {
   gap();
   ReturnData ret;
-  if (!isNextType(TokenType::Number))
-    throwTokenError();
-  const std::string code = peek().getLexeme();
-  eat();
+  unsigned int code = parseUnsignedInt();
   skipSep();
   const std::string url = parseWord();
   skipSep();
   if (!match(TokenType::Semicolon))
     throwTokenError();
-  Loc.setReturn(code, url);
+  Loc.setReturn(code, url); 
 }
 
 void Parser::parseMaxReqBody(Website &Site) {
   gap();
-  if (!isNextType(TokenType::Number))
-    throwTokenError();
-  errno = 0;
-  unsigned long num = strtoul(peek().getLexeme().c_str(), NULL, 0);
-  if (errno == ERANGE || num > std::numeric_limits<unsigned int>::max())
-    throwTokenError();
-  Site.setMaxReqBody(static_cast<unsigned int>(num));
+  Site.setMaxReqBody(parseUnsignedInt());
   eat();
   skipSep();
   if (!match(TokenType::Semicolon))
