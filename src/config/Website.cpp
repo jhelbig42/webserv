@@ -10,6 +10,7 @@ static void printAutoindex(std::ostream &Os, const Website &Site);
 static void printAllow(std::ostream &Os, const Website &Site);
 static void printErrorPages(std::ostream &Os, const Website &Site);
 static void printMaxReqBody(std::ostream &Os, const Website &Site);
+static int comparePath(const std::string &P1, const std::string &P2);
 
 Website::Website(void)
     : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
@@ -173,6 +174,18 @@ bool Website::isSetAllow(void) const {
   return _setMembers & Website::Allow;
 }
 
+static int comparePath(const std::string &P1, const std::string &P2) {
+  if (P1.length() > P2.length())
+    return -1;
+  if (P1.length() < P2.length())
+    return 1;
+  if (P1 < P2)
+    return -1;
+  if (P1 > P2)
+    return 1;
+  return 0;
+}
+
 void Website::addLocation(Location &Loc) {
   std::list<Location>::iterator it = _locations.begin();
   while (it != _locations.end()) {
@@ -180,7 +193,7 @@ void Website::addLocation(Location &Loc) {
       *it = Loc;
       return;
     }
-    if (Loc.getPath() < it->getPath())
+    if (comparePath(Loc.getPath(), it->getPath()) == -1)
       break;
     ++it;
   }
