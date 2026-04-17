@@ -41,10 +41,6 @@ class Server {
 	std::map<int, const Website*> _listenMap;
 	std::map<int, Connection> _clientMap;
 	std::map<int, Connection *const> _fwdMap;
-	// for fwd_Map, Connection was previously
-	// a reference but this causes a compiler error ("forming reference to reference type"
-	// on Mac
-	// TODO is this the correct syntax for making the pointer const but not the object itself? And is this really what I want here?
 //	std::map<int, Connection&> _cgiWriteMap;
 //	std::map<int, Connection&> _cgiReadMap;
 	std::vector<pollfd> _newFdBatch;
