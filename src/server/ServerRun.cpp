@@ -94,7 +94,7 @@ bool Server::shouldBeDeleted(int Fd) {
   }
   int clientFd;
   try {
-    clientFd = _fwdMap.at(Fd).getSock();
+    clientFd = _fwdMap.at(Fd)->getSock();
   } catch (std::out_of_range &e) {
     logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd,
                   "not found in _clientMap or _fwdMap"

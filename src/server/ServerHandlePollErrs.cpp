@@ -29,7 +29,7 @@ void Server::markClientDeletion(int Fd) {
 
 void Server::markFwdDeletion(int Fd) {
   try {
-    _fwdMap.at(Fd).scheduleForDemolition();
+    _fwdMap.at(Fd)->scheduleForDemolition();
   } catch (const std::out_of_range &e) {
     logging::log3(logging::Error, "markFwdDeletion(): ", Fd,
                   " could not be marked for deletion because there is "

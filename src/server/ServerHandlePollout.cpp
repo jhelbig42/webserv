@@ -21,9 +21,9 @@ void Server::setSockWrite(int Fd) {
 }
 
 void Server::setFSockWrite(int Fd) {
-  const std::map<int, Connection &>::iterator itC = _fwdMap.find(Fd);
+  const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
   if (itC != _fwdMap.end()) {
-    (itC->second).addToConditions(FSockWrite);
+    (itC->second)->addToConditions(FSockWrite);
   } else {
     logging::log3(logging::Error, "setFSockWrite(): ", Fd,
                   " not found in _fwdMap. (This should never happen)");

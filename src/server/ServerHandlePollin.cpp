@@ -20,9 +20,9 @@ void Server::setSockRead(int Fd) {
 }
 
 void Server::setFSockRead(int Fd) {
-  const std::map<int, Connection &>::iterator itC = _fwdMap.find(Fd);
+  const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
   if (itC != _fwdMap.end()) {
-    (itC->second).addToConditions(FSockRead);
+    (itC->second)->addToConditions(FSockRead);
   } else {
     logging::log3(logging::Error, "setFSockRead(): ", Fd,
                   " not found in _fwdMap. (This should never happen)");
