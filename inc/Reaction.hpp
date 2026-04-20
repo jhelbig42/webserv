@@ -2,6 +2,7 @@
 
 #include "Buffer.hpp"
 #include "CGIProcess.hpp"
+#include "Conditions.hpp"
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
 #include "Script.hpp"
@@ -15,7 +16,8 @@ public:
 		NotInitialized,
 		SendFile,
 		ReceiveFile, 
-		Cgi } ProcessType;
+		CgiPost,
+		CgiNotPost } ProcessType;
 	
 	Reaction();
     explicit Reaction(const Request &Req);
@@ -62,7 +64,6 @@ public:
   /// after sending to the Client process can return true.
   bool process(const int Socket, const size_t Bytes, const int Condition);
 
-  Conditions	getConditions(void) const;
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
 
@@ -102,7 +103,6 @@ private:
   //called within init()
   bool isCGI(const Request &Req);
 
-  Conditions  _conditions;
   HttpHeaders _headers;
   ProcessType _processType;
   size_t      _reqContLen;

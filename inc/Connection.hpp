@@ -48,8 +48,11 @@ public:
 private:
   Connection(); // should not be possible
 
+  void updateConditionsWanted(Reaction::ProcessType ProcessType);
+
   // serve reads from
   int _conditionsFulfilled;
+  int _conditionsWanted;
 
   int _sock; // client socket fd
   int _sockForward;
