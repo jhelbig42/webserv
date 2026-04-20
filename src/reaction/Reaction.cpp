@@ -24,9 +24,7 @@ void Reaction::setDefaults(void) {
   _processType = NotInitialized;
   _metadataSent = false;
   _fdIn = -1;
-  _headers.unsetAll();
-  _conditions = Unconditional;
-  
+  _headers.unsetAll();  
 }
 
 Reaction::Reaction()
@@ -34,9 +32,6 @@ Reaction::Reaction()
   _headers.unsetAll();
 }
 
-Conditions Reaction::getConditions(void) const {
-  return _conditions;
-}
 
 Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
@@ -50,7 +45,6 @@ bool Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
   {
-    _processType = Cgi;
     return true;
   }
   return false;
@@ -115,7 +109,6 @@ void Reaction::initSendFile(const int Code, const char *File) {
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
   _processType = SendFile;
-  _conditions = SockWrite;
 }
 
 

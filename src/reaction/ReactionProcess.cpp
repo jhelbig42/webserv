@@ -54,7 +54,7 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
-
+	// we just polled for what we nee
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
   if (Condition & FSockWrite)  
@@ -104,7 +104,7 @@ bool Reaction::checkOnChild(void){
 }
 
 void Reaction::sendToCGI(const size_t Bytes){
-  if (_processType != Cgi || _cgi.isInputDone())
+  if (_processType != CgiPost || _cgi.isInputDone())
   	return; // should never happen
 
   logging::log(logging::Debug, "sendToCGI");
@@ -131,7 +131,9 @@ void Reaction::sendToCGI(const size_t Bytes){
 }
 
 void Reaction::receiveFromCGI(const size_t Bytes){
-	if (_processType != Cgi || !_cgi.isInputDone()) return;
+	if ((_processType != CgiPost && _processType != CgiNotPost)
+		|| !_cgi.isInputDone())
+			return;
 	logging::log(logging::Debug, "sendfromCGI");
 
 	// fill buffer from CGI socket — FSockRead guarantees data is available
@@ -141,21 +143,21 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 		// EOF from forwardSocket transition to SendFile from remaining buffer
 		_fdIn = -1;
 		_processType = SendFile;
-		_conditions = SockWrite;
 	}
 }
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
   if (_processType == ReceiveFile)
     receiveFile(Socket, Bytes);
-  else if (_processType == Cgi && !_cgi.isInputDone())
+  else if (_processType == CgiPost && !_cgi.isInputDone())
     _buffer.socketToBuf(Socket, Bytes);
 }
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
-  if (_processType == Cgi && _cgi.isInputDone()) 
+  if ((_processType == CgiPost || _processType == CgiNotPost) 
+  		&& _cgi.isInputDone()) 
   {
     if (!_metadataSent) 
 	{
