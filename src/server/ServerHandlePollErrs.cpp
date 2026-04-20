@@ -80,7 +80,7 @@ void Server::handlePollnval(int Fd, int Type) {
   if (Type == IS_CLIENT) {
     logging::log2(logging::Error, Fd, " is a client socket");
     //markClientDeletion(Fd);
-	_fwdMap.at(Fd).scheduleForDemolition();
+	_fwdMap.at(Fd)->scheduleForDemolition();
 	return;
   }
   if (Type == IS_FWD) {
@@ -106,7 +106,7 @@ void Server::handlePollhup(int Fd, int Type) {
                 Fd);
   if (Type == IS_CLIENT) {
     _clientMap.at(Fd).scheduleForDemolition();
-  } else {
+  } else if (Type == IS_FWD) {
     logging::log3(logging::Debug,
                   "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
                   ". This is not necessarily an error but interesting to "
