@@ -26,7 +26,7 @@
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size, const Website &website)
-    : _sock(Sock), _website(website), _delete(false), _addrSize(sizeof _addr) {
+    : _conditionsWanted(SockRead), _sock(Sock), _website(website), _delete(false), _addrSize(sizeof _addr)  {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -60,6 +60,27 @@ void Connection::scheduleForDemolition(void) {
   _delete = true;
 }
 
+void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
+	switch (ProcessType){
+		case Reaction::SendFile:
+			_conditionsWanted = SockWrite;
+			break;
+		case Reaction::ReceiveFile:
+			_conditionsWanted = SockRead;
+			break;
+		case Reaction::CgiPost:
+			_conditionsWanted = SockWrite & SockRead & FSockWrite & FSockRead;
+			break;
+		case Reaction::CgiNotPost:
+			_conditionsWanted = SockWrite & FSockRead;
+			break;
+		case Reaction::NotInitialized:
+		default:
+			_conditionsWanted = SockRead;
+
+	}
+}
+
 void Connection::serve(void) {
 	//if request is not yet complete, read and parse until it is
 	if( (_conditionsFulfilled & SockRead) 
@@ -80,6 +101,9 @@ void Connection::serve(void) {
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
 	if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
 		scheduleForDemolition();
+	//update ConditionsWanted here - from Reaction
+	//before process is called in the next round
+	updateConditionsWanted(_react.getProcessType());
 }
 
 // Conditions
