@@ -33,14 +33,22 @@ void Server::setFSockWrite(int Fd) {
 // handlePollout() handles POLLOUT:
 // 		Writing is now possible.
 
-void Server::handlePollout(int Fd) {
+void Server::handlePollout(int Fd, int Type) {
   // logging::log2(logging::Debug, "POLLOUT: fd ", Fd);
-  if (socketIsClient(Fd)) {
+  if (Type == IS_CLIENT) {
     setSockWrite(Fd);
     return;
   }
-  if (socketIsFwd(Fd)) {
+  if (Type == IS_FWD) {
     setFSockWrite(Fd);
     return;
   }
+}
+
+void Server::handlePollrdhup(int Fd, int Type) {
+
+  // TODO unset pollin from wanted conditions
+  (void)Fd;
+  (void)Type;
+  return;
 }

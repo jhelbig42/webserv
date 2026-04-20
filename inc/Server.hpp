@@ -34,7 +34,12 @@ class Server {
 
 
 	private:
-
+	    enum FdTypePolled {
+        IS_CLIENT,
+        IS_FWD,
+		IS_LISTENER
+    };
+	
 	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
 	std::vector<pollfd> _fds;
@@ -63,32 +68,34 @@ class Server {
 	
 	// ServerRun.hpp -- outer loop function PollLoop() is public
 	void process(void);
+	int  getSocketType(int Fd);
 	void serveAll(void);
 	bool shouldBeDeleted(int Fd);
 	void closeAndDelete(int Fd);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// ServerHandlePoll.hpp
-	bool reventsAreTerminal(int revents);
+	//bool reventsAreTerminal(int revents);
 	void handleCondition(struct pollfd &polled);
-	void handleTerminalCondition(struct pollfd &polled);
-	void handleServableCondition(struct pollfd &polled);
+	//void handleTerminalCondition(struct pollfd &polled);
+	//void handleServableCondition(struct pollfd &polled);
 	
 	// ServerHandlePollErrs.hpp
-	void handlePollnval(int Fd);
-	void handlePollerr(int Fd);
-	void handlePollhup(int Fd);
+	void handlePollnval(int Fd, int Type);
+	void handlePollerr(int Fd, int Type);
+	void handlePollhup(int Fd, int Type);
 	void markClientDeletion(int Fd);
 	void markFwdDeletion(int Fd);
 
 	// ServerHandlPollin.hpp
-	void handlePollin(int Fd);
+	void handlePollin(int Fd, int Type);
 	void handleNewConnection(int Fd);
 	void setSockRead(int Fd);
 	void setFSockRead(int Fd);
 
 	// ServerHandlePollout.hpp
-	void handlePollout(int Fd);
+	void handlePollout(int Fd, int Type);
+	void handlePollrdhup(int Fd, int Type);
 	void setSockWrite(int Fd);
 	void setFSockWrite(int Fd);
 

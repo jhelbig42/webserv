@@ -33,6 +33,19 @@ bool Server::socketIsFwd(int Fd) {
   return false;
 }
 
+int Server::getSocketType(int Fd) {
+  if (socketIsClient(Fd)) {
+    return IS_CLIENT;
+  }
+  if (socketIsFwd(Fd)) {
+    return IS_FWD;
+  }
+  if (socketIsListener(Fd)) {
+    return IS_LISTENER;
+  }
+  return (-1);
+}
+
 Server::~Server(void) {
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();
        it++) {

@@ -44,17 +44,17 @@ void Server::handleNewConnection(int Fd) {
 //
 // \param	fd of socket for which poll() returned POLLIN
 
-void Server::handlePollin(int Fd) {
+void Server::handlePollin(int Fd, int Type) {
   logging::log2(logging::Debug, "POLLIN: fd ", Fd);
-  if (socketIsListener(Fd)) {
+  if (Type == IS_LISTENER) {
     handleNewConnection(Fd);
     return;
   }
-  if (socketIsClient(Fd)) {
+  if (Type == IS_CLIENT) {
     setSockRead(Fd);
     return;
   }
-  if (socketIsFwd(Fd)) {
+  if (Type == IS_FWD) {
     setFSockRead(Fd);
     return;
   }
