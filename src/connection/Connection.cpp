@@ -69,10 +69,10 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 			_conditionsWanted = SockRead;
 			break;
 		case Reaction::CgiPost:
-			_conditionsWanted = SockWrite & SockRead & FSockWrite & FSockRead;
+			_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
 			break;
 		case Reaction::CgiNotPost:
-			_conditionsWanted = SockWrite & FSockRead;
+			_conditionsWanted = SockWrite | FSockRead;
 			break;
 		case Reaction::NotInitialized:
 		default:
