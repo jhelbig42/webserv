@@ -151,9 +151,9 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
   if (_processType == ReceiveFile)
-    receiveFile(Socket, Bytes);
+    receiveBodyIntoServerFile(Socket, Bytes);
   else if (_processType == CgiPost && !_cgi.isInputDone())
-    _buffer.socketToBuf(Socket, Bytes);
+    receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
@@ -189,15 +189,35 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
-bool Reaction::receiveFile(const int Socket, const size_t Bytes){
+bool Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for CGI Post Request: ", toReceive);
 	try {
-		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
-			return ;
+		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+		if (received == -1) //not possible to read anything into the buffer
+			return false; //means we are just done for this round
+		_receivedContLen += static_cast<size_t>(received);
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
+		if (_receivedContLen == _reqContLen)
+			_cgi.setInputDone(true);
 	}
 	catch (std::runtime_error){
 		initSendFile(CODE_500, FILE_500);
-		return ;
+		return false;
+	}
+	return (false);
+}
+
+bool Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	try {
+		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
+			return false; //means we are just done
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return false;
 	}
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
@@ -207,7 +227,6 @@ bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 		if (copied == -1)
 			return (false);
 		_receivedContLen += static_cast<size_t>(copied);
-		//_buffer.deleteFront(static_cast<size_t>(copied));
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 	}
 

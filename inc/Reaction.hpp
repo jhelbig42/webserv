@@ -84,7 +84,8 @@ private:
   void initCGIMethod(const Request &Req);
 
   //for Post request
-  bool receiveFile(const int Socket, const size_t Bytes);
+  bool receiveBodyIntoServerFile(const int Socket, const size_t Bytes);
+  bool receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
   std::string _finalPath;
   std::string _tmpPath;
 
