@@ -189,14 +189,14 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
-bool Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
+void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for CGI Post Request: ", toReceive);
 	try {
 		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
 		if (received == -1) //not possible to read anything into the buffer
-			return false; //means we are just done for this round
+			return ; //means we are just done for this round
 		_receivedContLen += static_cast<size_t>(received);
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 		if (_receivedContLen == _reqContLen)
@@ -204,20 +204,20 @@ bool Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 	}
 	catch (std::runtime_error){
 		initSendFile(CODE_500, FILE_500);
-		return false;
+		return ;
 	}
-	return (false);
+	return ;
 }
 
-bool Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
+void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
 	try {
 		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
-			return false; //means we are just done
+			return ; //means we are just done
 	}
 	catch (std::runtime_error){
 		initSendFile(CODE_500, FILE_500);
-		return false;
+		return ;
 	}
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
@@ -225,19 +225,19 @@ bool Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	{
 		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
 		if (copied == -1)
-			return (false);
+			return ;
 		_receivedContLen += static_cast<size_t>(copied);
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 	}
 
 	if (!(_receivedContLen == _reqContLen))
-		return (false);
+		return ;
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
 	_buffer.reset();
 	initSendFile(CODE_201, NULL);
-	return false;
+	return ;
 }
 
 
