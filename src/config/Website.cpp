@@ -236,3 +236,10 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site) {
 PathInfo Website::getPathInfo(const std::string &Path) const {
   return PathInfo(*this, Path);
 }
+
+void Website::allowAll(void) {
+  addAllow(Head);
+  addAllow(Get);
+  addAllow(Post);
+  addAllow(Delete);
+}

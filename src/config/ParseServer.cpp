@@ -15,6 +15,8 @@ Website Parser::server(void) {
   while (!match(TokenType::BracesRight)) {
     parseEntry(newWebsite);
   }
+  if (!newWebsite.isSetAllow())
+    newWebsite.allowAll();
   return newWebsite;
 }
 

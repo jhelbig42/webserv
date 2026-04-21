@@ -34,6 +34,7 @@ public:
   void addLocation(Location &Loc);
 
   bool isAllowed(const HttpMethod Method) const;
+  int getAllow(void) const;
   const ReturnData &getReturn(void) const;
   const std::string &getPath(void) const;
   const std::string &getRedirect(void) const;

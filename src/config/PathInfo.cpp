@@ -32,6 +32,8 @@ PathInfo::~PathInfo(void) {
 }
 
 void PathInfo::populateFromLocation(const Location &Loc) {
+  if (Loc.isSetAllowed())
+  _allow = Loc.getAllow();
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
@@ -41,14 +43,15 @@ void PathInfo::populateFromLocation(const Location &Loc) {
   } else if (Loc.getType() == Location::Redirect) {
     _realPath = substitutePath(_realPath, Loc.getRedirect());
     resolveLocations(Loc.getLocations());
+  } else {
+    logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
   }
-  logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
 }
 
 void PathInfo::resolveLocations(const std::list<Location> &Locations) {
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
-    if (match(it->getPath(), _realPath)) {
+    if (match(_realPath, it->getPath())) {
       populateFromLocation(*it);
       break;
     }
@@ -101,7 +104,7 @@ static bool match(const std::string &Path, const std::string &LocationPath) {
 
 static std::string substitutePath(const std::string &Path, const std::string &Substitute) {
   if (Substitute[Substitute.length() - 1] == '/')
-    return Substitute + Path.substr(Substitute.length());
+    return Substitute + Path.substr(Substitute.length() + 1);
   return Substitute;
 }
 

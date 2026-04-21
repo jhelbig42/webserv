@@ -143,3 +143,7 @@ void Location::addLocation(Location &Loc) {
   }
   _locations.insert(it, Loc);
 }
+
+int Location::getAllow(void) const {
+  return _allow;
+}
