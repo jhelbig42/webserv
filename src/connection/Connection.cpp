@@ -43,6 +43,10 @@ int Connection::getSock(void) const {
   return (_sock);
 }
 
+int Connection::getSockForward(void) const{
+	return (_sockForward);
+}
+
 bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
