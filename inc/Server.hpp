@@ -70,13 +70,13 @@ class Server {
 	void process(void);
 	int  getSocketType(int Fd);
 	void serveAll(void);
-	bool shouldBeDeleted(int Fd);
-	void closeAndDelete(int Fd);
+	bool shouldBeDeleted(int Fd, int Type);
+	void closeAndDelete(int Fd, int Type);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);
-	void handleCondition(struct pollfd &polled);
+	void handleCondition(struct pollfd &polled, int Type);
 	//void handleTerminalCondition(struct pollfd &polled);
 	//void handleServableCondition(struct pollfd &polled);
 	

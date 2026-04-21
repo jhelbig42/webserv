@@ -17,40 +17,28 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-void Server::handleCondition(struct pollfd &polled) {
-  /*
-  if (reventsAreTerminal(polled.revents)) {
-    handleTerminalCondition(polled);
-  } else {
-    handleServableCondition(polled);
-  }
-  */
-  int type = getSocketType(polled.fd);
-  if (type == -1) {
-    logging::log3(logging::Error, "handleCondition(): fd ", polled.fd,
-                  "is not found in _clientMap or _fwdMap");
-    return;
-  }
+void Server::handleCondition(struct pollfd &polled, int Type) {
+  
   if (polled.revents & POLLNVAL) {
-    handlePollnval(polled.fd, type);
+    handlePollnval(polled.fd, Type);
     return;
   }
   if (polled.revents & POLLERR) {
-    handlePollerr(polled.fd, type);
+    handlePollerr(polled.fd, Type);
     return;
   }
   if (polled.revents & POLLHUP) {
-    handlePollhup(polled.fd, type);
+    handlePollhup(polled.fd, Type);
     return;
   }
   if ((polled.revents & POLLIN) || polled.revents & POLLPRI) {
-    handlePollin(polled.fd, type);
+    handlePollin(polled.fd, Type);
   }
   if (polled.revents & POLLOUT) {
-    handlePollout(polled.fd, type);
+    handlePollout(polled.fd, Type);
   }
   if (polled.revents & POLLRDHUP) {
-    handlePollrdhup(polled.fd, type);
+    handlePollrdhup(polled.fd, Type);
   }
 }
 

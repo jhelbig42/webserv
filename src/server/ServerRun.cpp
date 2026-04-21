@@ -2,6 +2,7 @@
 #include "Server.hpp"
 
 #include <cerrno>
+#include <cstdlib> // for exit
 #include <cstring>
 #include <unistd.h> // for close
 
@@ -64,10 +65,16 @@ void Server::serveAll(void) {
 void Server::process(void) {
 
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-    handleCondition(*it); // sets conditions in client Connection, or accepts
+  	int type = getSocketType(it->fd);
+  	if (type != IS_CLIENT && type != IS_FWD) {
+    	logging::log3(logging::Error, "handleCondition(): fd ", it->fd,
+                  "is not found in _clientMap or _fwdMap.");
+    	exit (1);
+  	}
+    handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
-    if (shouldBeDeleted(it->fd) == true) {
-      closeAndDelete(it->fd);
+    if (shouldBeDeleted(it->fd, type) == true) {
+      closeAndDelete(it->fd, type);
       it = _fds.erase(it);
       continue;
     }
@@ -79,7 +86,7 @@ void Server::process(void) {
   _newFdBatch.clear();
 }
 
-void Server::closeAndDelete(int Fd) {
+void Server::closeAndDelete(int Fd, int type) {
 
   close(Fd);
   if (socketIsClient(Fd))
@@ -88,32 +95,22 @@ void Server::closeAndDelete(int Fd) {
     _fwdMap.erase(Fd);
 }
 
-bool Server::shouldBeDeleted(int Fd) {
-  if (socketIsClient(Fd) && _clientMap.at(Fd).getDeleteStatus() == true) {
-    return (true);
+/* shouldBeDeleted is called only by Server::process, which
+	guarantees that Type will be IS_CLINET or IS_FWD */
+
+bool Server::shouldBeDeleted(int Fd, int Type) {
+  if (Type == IS_CLIENT){
+	return (_clientMap.at(Fd).getDeleteStatus());
   }
-  int clientFd;
-  try {
-    clientFd = _fwdMap.at(Fd)->getSock();
-  } catch (std::out_of_range &e) {
-    logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd,
-                  "not found in _clientMap or _fwdMap"
-                  "This should never happen.");
-    return (false);
+  else if (Type == IS_FWD) {
+  	int clientFd = _fwdMap.at(Fd)->getSock();
+  	return (_clientMap.at(clientFd).getDeleteStatus());
   }
-  try {
-    if (_clientMap.at(clientFd).getDeleteStatus() == true) {
-      return (true);
-    }
-  } catch (std::out_of_range &e) {
-    logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd,
-                  " is fwd socket"
-                  "associated with client socket ");
-    logging::log2(logging::Error, clientFd,
-                  ", not found in _clientMap. Should never happen");
-    return (false);
-  }
-  return (false);
+  else {
+	logging::log(logging::Error, "Server::shouldBeDeleted "
+		"expected IS_CLIENT or IS_FWD fd");
+		exit (1);
+	}
 }
 
 // adds new connection to _clientMap -- move to pollhandling??
