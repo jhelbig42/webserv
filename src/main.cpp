@@ -40,8 +40,10 @@ int main(int argc, char **argv) {
     const Config conf(argv[1]);
     std::cout << conf;
 
-    if (conf.getWebsites().begin() != conf.getWebsites().end())
-      std::cout << conf.getWebsites().begin()->getPathInfo(argv[2]);
+    if (conf.getWebsites().begin() != conf.getWebsites().end()) {
+      PathInfo info = conf.getWebsites().begin()->getPathInfo(argv[2]);
+      std::cout << info;
+    }
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }
