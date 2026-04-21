@@ -105,15 +105,15 @@ void Parser::parseErrorPage(Website &Site) {
   gap();
   if (!isNextType(TokenType::Number))
     throwTokenError("expected a number");
-  std::list<std::string> numbers;
+  std::list<unsigned int> numbers;
   while (nextType() == TokenType::Number) {
-    numbers.push_back(matchGetLexeme(TokenType::Number));
+    numbers.push_back(parseUnsignedInt());
     skipSep();
   }
   const std::string resource = parseResource();
-  for (std::list<std::string>::const_iterator it = numbers.begin();
+  for (std::list<unsigned int>::const_iterator it = numbers.begin();
        it != numbers.end(); ++it)
-    Site.addErrorPage(parseUnsignedInt(), resource);
+    Site.addErrorPage(*it, resource);
   if (!match(TokenType::Semicolon))
     throwTokenError("expected ';'");
 }
@@ -192,7 +192,6 @@ void Parser::parseReturn(Location &Loc) {
 void Parser::parseMaxReqBody(Website &Site) {
   gap();
   Site.setMaxReqBody(parseUnsignedInt());
-  eat();
   skipSep();
   if (!match(TokenType::Semicolon))
     throwTokenError("expected ';'");
