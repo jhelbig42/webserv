@@ -75,11 +75,11 @@ bool Reaction::checkOnChild(void){
   
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
-	logging::log2(logging::Debug, "pid: ", pid);
-	logging::log2(logging::Debug, "result: ", result);
+	//logging::log2(logging::Debug, "pid: ", pid);
+	//logging::log2(logging::Debug, "result: ", result);
 	
   	if (result == -1){
-    _cgi.setPid(-1);
+    	_cgi.setPid(-1);
 		initSendFile(CODE_500, FILE_500);
 		return false; // waitpid failed => internal server error
 	}
@@ -88,14 +88,14 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	
 	if (WIFEXITED(status)) { //child somehow exited
-    if (WEXITSTATUS(status) == 0) {
-      logging::log(logging::Debug, "CGI exited normally with 0");
-      return true;
-    }
-    
-    logging::log(logging::Debug, "CGI exited with error code");
-    
-    } else if (WIFSIGNALED(status)) {
+    	if (WEXITSTATUS(status) == 0) {
+      		logging::log(logging::Debug, "CGI exited normally with 0");
+			_cgi.setPid(-1);
+      		return true;
+    	}
+    	logging::log(logging::Debug, "CGI exited with error code");
+    } 
+	else if (WIFSIGNALED(status)) {
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
