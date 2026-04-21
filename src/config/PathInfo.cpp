@@ -37,18 +37,18 @@ void PathInfo::populateFromLocation(const Location &Loc) {
     _cgiPath = Loc.getCgi();
   } else if (Loc.getType() == Location::Return) {
     _code = Loc.getReturn().code;
-    _realPath = Loc.getReturn().path;
+    _realPath = Loc.getReturn().url;
   } else if (Loc.getType() == Location::Redirect) {
     _realPath = substitutePath(_realPath, Loc.getRedirect());
     resolveLocations(Loc.getLocations());
   }
-  Logging::log2(Logging::Warning, __func__, ": Unreachable code reached!");
+  logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
 }
 
 void PathInfo::resolveLocations(const std::list<Location> &Locations) {
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
-    if (match(it->getPath(), Path)) {
+    if (match(it->getPath(), _realPath)) {
       populateFromLocation(*it);
       break;
     }
@@ -62,7 +62,7 @@ PathInfo::PathInfo(const Website &Site, const std::string &Path)
   resolveLocations(Site.getLocations());
 
   if (_action != Return)
-    _realPath = Site.getRealPath() + _realPath;
+    _realPath = Site.getRoot() + _realPath;
 }
 
 const std::string &PathInfo::getCgiPath(void) const {
@@ -73,11 +73,11 @@ const std::string &PathInfo::getRealPath(void) const {
   return _realPath;
 }
 
-const int PathInfo::getAllowed(void) const {
+int PathInfo::getAllowed(void) const {
   return _allow;
 }
 
-Action PathInfo::getAction(void) const {
+PathInfo::Action PathInfo::getAction(void) const {
   return _action;
 }
 
@@ -105,3 +105,28 @@ static std::string substitutePath(const std::string &Path, const std::string &Su
   return Substitute;
 }
 
+std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
+  Os << "class PathInfo: {\n";
+  Os << "  allow:";
+  if (Info.getAllowed() & Head)
+    Os << " HEAD";
+  if (Info.getAllowed() & Get)
+    Os << " GET";
+  if (Info.getAllowed() & Post)
+    Os << " POST";
+  if (Info.getAllowed() & Delete)
+    Os << " DELETE";
+  Os << '\n';
+  switch (Info.getAction()) {
+    case PathInfo::Return:
+      Os << "  return: " << Info.getCode() << ": " << Info.getRealPath();
+      break;
+    case PathInfo::Cgi:
+      Os << "  cgi: " << Info.getCgiPath() << ": " << Info.getRealPath();
+      break;
+    case PathInfo::Default:
+      Os << "  " << Info.getRealPath();
+      break;
+  }
+  return Os << "\n}\n";
+}
