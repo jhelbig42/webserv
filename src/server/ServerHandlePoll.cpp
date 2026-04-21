@@ -17,6 +17,43 @@
 
 /////////////////////////////////////////////////////////////////////////
 
+void Server::handleCondition(struct pollfd &polled) {
+  /*
+  if (reventsAreTerminal(polled.revents)) {
+    handleTerminalCondition(polled);
+  } else {
+    handleServableCondition(polled);
+  }
+  */
+  int type = getSocketType(polled.fd);
+  if (type == -1) {
+    logging::log3(logging::Error, "handleCondition(): fd ", polled.fd,
+                  "is not found in _clientMap or _fwdMap");
+    return;
+  }
+  if (polled.revents & POLLNVAL) {
+    handlePollnval(polled.fd, type);
+    return;
+  }
+  if (polled.revents & POLLERR) {
+    handlePollerr(polled.fd, type);
+    return;
+  }
+  if (polled.revents & POLLHUP) {
+    handlePollhup(polled.fd, type);
+    return;
+  }
+  if ((polled.revents & POLLIN) || polled.revents & POLLPRI) {
+    handlePollin(polled.fd, type);
+  }
+  if (polled.revents & POLLOUT) {
+    handlePollout(polled.fd, type);
+  }
+  if (polled.revents & POLLRDHUP) {
+    handlePollrdhup(polled.fd, type);
+  }
+}
+
 /**
  *	\brief reventsAreTerminal() checks if poll returned error or
  *	hangup in revents, which means the connection should be terminated
@@ -25,12 +62,14 @@
  *	\return true if conditions are found, otherwise false
  */
 
+/*
 bool Server::reventsAreTerminal(int revents) {
-  if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP)) {
-    return true;
-  }
-  return false;
+ if ((revents & POLLNVAL) || (revents & POLLERR) || (revents & POLLHUP)) {
+   return true;
+ }
+ return false;
 }
+ */
 
 /**
  *	\brief handleTerminalCondition() handles revents flags
@@ -40,20 +79,22 @@ bool Server::reventsAreTerminal(int revents) {
  *	\param Polled	pollfd belonging to a client connection
  */
 
+/*
 void Server::handleTerminalCondition(struct pollfd &Polled) {
-  if (Polled.revents & POLLNVAL) {
-    handlePollnval(Polled.fd);
-    return;
-  }
-  if (Polled.revents & POLLERR) {
-    handlePollerr(Polled.fd);
-    return;
-  }
-  if (Polled.revents & POLLHUP) {
-    handlePollhup(Polled.fd);
-    return;
-  }
+ if (Polled.revents & POLLNVAL) {
+   handlePollnval(Polled.fd);
+   return;
+ }
+ if (Polled.revents & POLLERR) {
+   handlePollerr(Polled.fd);
+   return;
+ }
+ if (Polled.revents & POLLHUP) {
+   handlePollhup(Polled.fd);
+   return;
+ }
 }
+*/
 
 /**
  *	\brief handleServableCondition() handles POLLIN & POLLOUT
@@ -62,19 +103,15 @@ void Server::handleTerminalCondition(struct pollfd &Polled) {
  *
  */
 
+/*
 void Server::handleServableCondition(struct pollfd &Polled) {
 
-  /*
-  if (Polled.revents & POLLRDHUP) {
-    // TODO handling POLLRDHUP is a good argument for changing fd.events
-  // between calls to poll()
-  }
-  */
-  // POLLPRI = high priority data to read.
-  if (Polled.revents & POLLIN || Polled.revents & POLLPRI) {
-    handlePollin(Polled.fd);
-  }
-  if (Polled.revents & POLLOUT) {
-    handlePollout(Polled.fd);
-  }
+ // POLLPRI = high priority data to read.
+ if (Polled.revents & POLLIN || Polled.revents & POLLPRI) {
+   handlePollin(Polled.fd);
+ }
+ if (Polled.revents & POLLOUT) {
+   handlePollout(Polled.fd);
+ }
 }
+*/

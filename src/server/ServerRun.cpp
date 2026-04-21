@@ -22,8 +22,8 @@ void Server::pollLoop(void) {
 
   while (1) {
     const int res =
-        poll(fds.data(), (nfds_t)fds.size(),
-             -1); // without restriction to fds.size this cast is unsafe
+        poll(_fds.data(), (nfds_t)_fds.size(),
+             -1); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
@@ -35,66 +35,102 @@ void Server::pollLoop(void) {
   }
 }
 
+void Server::serveAll(void) {
+  for (std::map<int, Connection>::iterator it = _clientMap.begin();
+       it != _clientMap.end(); it++) {
+    (it->second).serve();
+    (it->second).resetConditions();
+  }
+}
+
 /**
 *
-*	\brief	process() iterates through Server's vector of pollfds
+*	\brief	process() iterates through Server's vector of poll_fds
 *	after poll() has been called. For each:
 *
 *	- Checks each fd's revents field, which was set by poll()
 *	- Calls the relevant handling function, which will either
-    - set conditions in a client connection, or accept new connections
-*	- If the fd belongs to a client
-*		- if Connection is markeid for deletion, close and delete
-*		- otherwise, send to parser for next steps
-*		- reset _conditions
+      - set conditions in a client connection, or accept new connections
+*	- if Connection is markeid for deletion, close and delete
+*	- reset _conditions
 *
 *	After iteration is complete
-*	- adds any newly accepted Connections to fds and clientMap
+*	- calls function to serve all connections
+*	- adds any newly accepted Connections to _fds and _clientMap
 *	- clears list of new Connections to be added
 *
 */
 
 void Server::process(void) {
 
-  for (std::vector<pollfd>::iterator it = fds.begin(); it != fds.end();) {
-    if (reventsAreTerminal(it->revents)) {
-      handleTerminalCondition(*it);
-    } else {
-      handleServableCondition(*it);
-    }
-    if (socketIsClient(it->fd)) {
-      if (clientMap.at(it->fd).getDeleteStatus() == true) {
-        close(it->fd);
-        clientMap.erase(it->fd);
-        it = fds.erase(it);
-        continue;
-      } else {
-        clientMap.at(it->fd).serve();
-        clientMap.at(it->fd).resetConditions();
-      }
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+    handleCondition(*it); // sets conditions in client Connection, or accepts
+                          // new connections
+    if (shouldBeDeleted(it->fd) == true) {
+      closeAndDelete(it->fd);
+      it = _fds.erase(it);
+      continue;
     }
     it->revents = 0;
     it++;
   }
-  fds.insert(fds.end(), newFdBatch.begin(), newFdBatch.end());
-  newFdBatch.clear();
+  serveAll();
+  _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
+  _newFdBatch.clear();
 }
 
-// adds new connection to clientMap -- move to pollhandling??
+void Server::closeAndDelete(int Fd) {
+
+  close(Fd);
+  if (socketIsClient(Fd))
+    _clientMap.erase(Fd);
+  if (socketIsFwd(Fd))
+    _fwdMap.erase(Fd);
+}
+
+bool Server::shouldBeDeleted(int Fd) {
+  if (socketIsClient(Fd) && _clientMap.at(Fd).getDeleteStatus() == true) {
+    return (true);
+  }
+  int clientFd;
+  try {
+    clientFd = _fwdMap.at(Fd)->getSock();
+  } catch (std::out_of_range &e) {
+    logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd,
+                  "not found in _clientMap or _fwdMap"
+                  "This should never happen.");
+    return (false);
+  }
+  try {
+    if (_clientMap.at(clientFd).getDeleteStatus() == true) {
+      return (true);
+    }
+  } catch (std::out_of_range &e) {
+    logging::log3(logging::Error, "shouldBeDeleted(): Fd ", Fd,
+                  " is fwd socket"
+                  "associated with client socket ");
+    logging::log2(logging::Error, clientFd,
+                  ", not found in _clientMap. Should never happen");
+    return (false);
+  }
+  return (false);
+}
+
+// adds new connection to _clientMap -- move to pollhandling??
 
 void Server::addConnectionToMap(int ListenerFd,
                                 const struct ClientAddr &Candidate) {
 
   const Website *website;
   try {
-    website = listenMap.at(ListenerFd);
+    website = _listenMap.at(ListenerFd);
   } catch (std::out_of_range &e) {
     logging::log(
         logging::Error,
         "addConnectionToMap(): Connection could not be created because "
-        "ListenerFd was not found in listenMap. This should never happen.");
+        "ListenerFd was not found in _listenMap. This should never happen.");
   }
   Connection newConnection(Candidate.clientSock, Candidate.addr,
                            Candidate.addrSize, *website);
-  clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
+  _clientMap.insert(std::make_pair(Candidate.clientSock, newConnection));
 }

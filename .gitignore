@@ -9,4 +9,8 @@
 example.ebnf
 docs/*
 sa/*
+tester
+cgi_tester
+unit_tests
+YoupiBanane
 webserv

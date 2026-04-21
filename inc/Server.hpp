@@ -22,26 +22,34 @@ class Server {
 	
 	public:
 	
-	// variables
-	std::vector<pollfd> fds;
-	std::map<int, const Website*> listenMap;
-	std::map<int, Connection> clientMap;
-	std::map<std::string, bool> pairsInUse; // listening <IP:Port>
-	std::vector<pollfd> newFdBatch;
-
 	// Server.cpp
 	explicit Server(const std::list<Website>  &websites);
 	~Server();
 	bool socketIsListener(int Fd);
 	bool socketIsClient(int Fd);
-	
+	bool socketIsFwd(int Fd);
+
 	// ServerRun.cpp
 	void pollLoop(void);
 
 
 	private:
-
+	    enum FdTypePolled {
+        IS_CLIENT,
+        IS_FWD,
+		IS_LISTENER
+    };
+	
+	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
+	std::vector<pollfd> _fds;
+	std::map<int, const Website*> _listenMap;
+	std::map<int, Connection> _clientMap;
+	std::map<int, Connection *const> _fwdMap;
+//	std::map<int, Connection&> _cgiWriteMap;
+//	std::map<int, Connection&> _cgiReadMap;
+	std::vector<pollfd> _newFdBatch;
+	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
 	void initNetworking(const std::list<Website> &Websites);
@@ -60,23 +68,36 @@ class Server {
 	
 	// ServerRun.hpp -- outer loop function PollLoop() is public
 	void process(void);
+	int  getSocketType(int Fd);
+	void serveAll(void);
+	bool shouldBeDeleted(int Fd);
+	void closeAndDelete(int Fd);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
 	// ServerHandlePoll.hpp
-	bool reventsAreTerminal(int revents);
-	void handleTerminalCondition(struct pollfd &polled);
-	void handleServableCondition(struct pollfd &polled);
+	//bool reventsAreTerminal(int revents);
+	void handleCondition(struct pollfd &polled);
+	//void handleTerminalCondition(struct pollfd &polled);
+	//void handleServableCondition(struct pollfd &polled);
 	
 	// ServerHandlePollErrs.hpp
-	void handlePollnval(int Fd);
-	void handlePollerr(int Fd);
-	void handlePollhup(int Fd);
+	void handlePollnval(int Fd, int Type);
+	void handlePollerr(int Fd, int Type);
+	void handlePollhup(int Fd, int Type);
+	void markClientDeletion(int Fd);
+	void markFwdDeletion(int Fd);
 
 	// ServerHandlPollin.hpp
-	void handlePollin(int Fd);
+	void handlePollin(int Fd, int Type);
+	void handleNewConnection(int Fd);
+	void setSockRead(int Fd);
+	void setFSockRead(int Fd);
 
 	// ServerHandlePollout.hpp
-	void handlePollout(int Fd);
+	void handlePollout(int Fd, int Type);
+	void handlePollrdhup(int Fd, int Type);
+	void setSockWrite(int Fd);
+	void setFSockWrite(int Fd);
 
 	// ServerErrorHandling.hpp
 	void handleSocketFailure(const Listen &Interface, const int Error);
