@@ -139,6 +139,9 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+	if (rc < 0){ // when buffer is full
+		return ;
+	}
 	if (rc == 0) {
 		// EOF from forwardSocket transition to SendFile from remaining buffer
 		_fdIn = -1;
@@ -188,7 +191,14 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
 
 bool Reaction::receiveFile(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
-	_buffer.socketToBuf(Socket, Bytes);
+	try {
+		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
+			return ;
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return ;
+	}
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
 	if (toReceive > 0)
