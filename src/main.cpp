@@ -33,12 +33,17 @@ int main(void) {
 
 #elif defined PARSING
 
+#define TEST_PATH "/yolo"
+
 int main(int argc, char **argv) {
   if (argc != 2)
     return 1;
   try {
     const Config conf(argv[1]);
     std::cout << conf;
+
+    if (conf.getWebsites().begin() != conf.getWebsites().end())
+      std::cout << conf.getWebsites().begin()->getPathInfo(TEST_PATH);
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }

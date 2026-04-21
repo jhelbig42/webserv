@@ -13,6 +13,7 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= ConfigGlobals.cpp
 SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
+SRC			+= PathInfo.cpp
 SRC			+= ParseServer.cpp
 SRC			+= Parser.cpp
 SRC			+= UnexpectedToken.cpp

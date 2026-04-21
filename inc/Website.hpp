@@ -48,7 +48,7 @@ public:
   bool isSetAllow(void) const;
   bool isSetMaxReqBody(void) const;
 
-  PathInfo getPathInfo(const std::string &Path);
+  PathInfo getPathInfo(const std::string &Path) const;
 
 private:
   typedef enum {
@@ -102,3 +102,4 @@ private:
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);
 std::ostream &operator<<(std::ostream &Os, const Website &Site);
+std::ostream &operator<<(std::ostream &Os, const PathInfo &Info);

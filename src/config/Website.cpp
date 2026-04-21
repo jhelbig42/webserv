@@ -232,3 +232,7 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site) {
   if (Site.isSetMaxReqBody())
     Os << "max_request_body: " << Site.getMaxReqBody() << '\n';
 }
+
+PathInfo Website::getPathInfo(const std::string &Path) const {
+  return PathInfo(*this, Path);
+}
