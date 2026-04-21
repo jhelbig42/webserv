@@ -33,17 +33,15 @@ int main(void) {
 
 #elif defined PARSING
 
-#define TEST_PATH "/yolo"
-
 int main(int argc, char **argv) {
-  if (argc != 2)
+  if (argc != 3 || argv[2][0] != '/')
     return 1;
   try {
     const Config conf(argv[1]);
     std::cout << conf;
 
     if (conf.getWebsites().begin() != conf.getWebsites().end())
-      std::cout << conf.getWebsites().begin()->getPathInfo(TEST_PATH);
+      std::cout << conf.getWebsites().begin()->getPathInfo(argv[2]);
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }
