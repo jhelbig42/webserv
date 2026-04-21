@@ -14,9 +14,11 @@ public:
 
   class UnexpectedTokenException : public std::exception {
   public:
-    explicit UnexpectedTokenException(const std::list<Token>::const_iterator It);
+    UnexpectedTokenException(const std::list<Token>::const_iterator It,
+                             const std::string &Msg);
     ~UnexpectedTokenException(void) throw();
     const char *what(void) const throw();
+
   private:
     std::string _report;
   };
@@ -60,7 +62,7 @@ private:
   std::string parseAbsPath(void);
   std::string parseWord(void);
 
-  void throwTokenError(void);
+  void throwTokenError(const std::string &Msg);
 
   bool parseOnOff(void);
 

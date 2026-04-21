@@ -87,24 +87,24 @@ bool Parser::noMatch(const TokenType::Type Type) {
   return false;
 }
 
-void Parser::throwTokenError(void) {
-  throw UnexpectedTokenException(_it);
+void Parser::throwTokenError(const std::string &Msg) {
+  throw UnexpectedTokenException(_it, Msg);
 }
 
 const std::string &Parser::matchGetLexeme(TokenType::Type Type) {
   const std::list<Token>::const_iterator itDup = _it;
   if (!match(Type))
-    throwTokenError();
+    throwTokenError("");
   return itDup->getLexeme();
 }
 
 unsigned int Parser::parseUnsignedInt(void) {
   if (!isNextType(TokenType::Number))
-    throwTokenError();
+    throwTokenError("expected a number");
   errno = 0;
   unsigned long code = strtoul(peek().getLexeme().c_str(), NULL, 0);
   if (errno == ERANGE || code > std::numeric_limits<unsigned int>::max())
-    throwTokenError();
+    throwTokenError("number not in valid range");
   eat();
-  return static_cast<unsigned int>(code);
+  return static_cast<unsigned int>(code); // safe becuase of prior check
 }

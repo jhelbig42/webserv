@@ -7,10 +7,10 @@
 
 Website Parser::server(void) {
   if (!match(TokenType::Server))
-    throwTokenError();
+    throwTokenError("expected 'server'");
   skipSep();
   if (!match(TokenType::BracesLeft))
-    throwTokenError();
+    throwTokenError("expected '{'");
   Website newWebsite;
   while (!match(TokenType::BracesRight)) {
     parseEntry(newWebsite);
@@ -35,20 +35,20 @@ void Parser::parseEntry(Website &Site) {
   } else if (match(TokenType::Location)) {
     parseLocation(Site);
   } else
-    throwTokenError();
+    throwTokenError("invalid Entry");
   skipSep();
 }
 
 void Parser::gap(void) {
   if (!sep())
-    throwTokenError();
+    throwTokenError("expected whitespace");
   skipSep();
 }
 
 void Parser::populateInterface(Listen &Interface) {
   addIpv4(Interface);
   if (!match(TokenType::Colon))
-    throwTokenError();
+    throwTokenError("expected ':'");
   addPort(Interface);
 }
 
@@ -57,7 +57,7 @@ void Parser::parseListen(Website &Site) {
   Listen interface;
   populateInterface(interface);
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
   Site.addInterface(interface);
 }
 
@@ -65,7 +65,7 @@ void Parser::parseRoot(Website &Site) {
   gap();
   const std::string root = parseAbsPath();
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
   Site.setRoot(root);
 }
 
@@ -73,7 +73,7 @@ void Parser::parseAutoindex(Website &Site) {
   gap();
   Site.setAutoindex(parseOnOff());
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
 }
 
 void Parser::parseAllow(Website &Site) {
@@ -94,17 +94,17 @@ void Parser::parseAllow(Website &Site) {
     else if (match(TokenType::Delete))
       Site.addAllow(Delete);
     else
-      throwTokenError();
+      throwTokenError("unrecognized HTTP method");
     skipSep();
   }
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
 }
 
 void Parser::parseErrorPage(Website &Site) {
   gap();
   if (!isNextType(TokenType::Number))
-    throwTokenError();
+    throwTokenError("expected a number");
   std::list<std::string> numbers;
   while (nextType() == TokenType::Number) {
     numbers.push_back(matchGetLexeme(TokenType::Number));
@@ -115,13 +115,13 @@ void Parser::parseErrorPage(Website &Site) {
        it != numbers.end(); ++it)
     Site.addErrorPage(parseUnsignedInt(), resource);
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
 }
 
 void Parser::parseLocation(Website &Site) {
   gap();
   if (nextType() != TokenType::Slash)
-    throwTokenError();
+    throwTokenError("ecpected '/'");
   std::string path = "";
   while (!isNextType(TokenType::Newline) &&
          !isNextType(TokenType::Whitespace) &&
@@ -132,7 +132,7 @@ void Parser::parseLocation(Website &Site) {
   skipSep();
   Location newLocation(path);
   if (!match(TokenType::BracesLeft))
-    throwTokenError();
+    throwTokenError("expected '{'");
   while (!match(TokenType::BracesRight)) {
     parseLocationEntry(newLocation);
   }
@@ -142,7 +142,7 @@ void Parser::parseLocation(Website &Site) {
 void Parser::parseLocation(Location &Loc) {
   gap();
   if (nextType() != TokenType::Slash)
-    throwTokenError();
+    throwTokenError("expected '/'");
   std::string path = "";
   while (!isNextType(TokenType::Newline) &&
          !isNextType(TokenType::Whitespace) &&
@@ -153,7 +153,7 @@ void Parser::parseLocation(Location &Loc) {
   skipSep();
   Location newLocation(path);
   if (!match(TokenType::BracesLeft))
-    throwTokenError();
+    throwTokenError("expected '{'");
   while (!match(TokenType::BracesRight)) {
     parseLocationEntry(newLocation);
   }
@@ -173,7 +173,7 @@ void Parser::parseLocationEntry(Location &Loc) {
   } else if (match(TokenType::Location)) {
     parseLocation(Loc);
   } else
-    throwTokenError();
+    throwTokenError("invalid location entry");
   skipSep();
 }
 
@@ -185,7 +185,7 @@ void Parser::parseReturn(Location &Loc) {
   const std::string url = parseWord();
   skipSep();
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
   Loc.setReturn(code, url); 
 }
 
@@ -195,17 +195,17 @@ void Parser::parseMaxReqBody(Website &Site) {
   eat();
   skipSep();
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
 }
 
 void Parser::parseRedirect(Location &Loc) {
   gap();
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
-    throwTokenError();
+    throwTokenError("not a valid redirect path");
   skipSep();
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
   Loc.setRedirect(pathRedirect);
 }
 
@@ -213,10 +213,10 @@ void Parser::parseCgi(Location &Loc) {
   gap();
   std::string pathCgi = parseResource();
   if (pathCgi == "")
-    throwTokenError();
+    throwTokenError("not a valid cgi path");
   skipSep();
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
   Loc.setCgi(pathCgi);
 }
 
@@ -238,11 +238,11 @@ void Parser::parseLocationAllow(Location &Loc) {
     else if (match(TokenType::Delete))
       Loc.addAllow(Delete);
     else
-      throwTokenError();
+      throwTokenError("unrecognized HTTP method");
     skipSep();
   }
   if (!match(TokenType::Semicolon))
-    throwTokenError();
+    throwTokenError("expected ';'");
 }
 
 bool Parser::parseOnOff(void) {
@@ -250,7 +250,7 @@ bool Parser::parseOnOff(void) {
     return true;
   if (match(TokenType::Off))
     return false;
-  throwTokenError();
+  throwTokenError("expected 'on' or 'off'");
   return false;
 }
 
@@ -264,7 +264,7 @@ void Parser::addIpv4(Listen &Interface) {
     Interface.ip += matchGetLexeme(TokenType::Dot);
     Interface.ip += matchGetLexeme(TokenType::Number);
   } catch (...) {
-    throwTokenError();
+    throwTokenError("not a valid IP address");
   }
 }
 
@@ -272,7 +272,7 @@ void Parser::addPort(Listen &Interface) {
   try {
     Interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
-    throwTokenError();
+    throwTokenError("expected a number");
   }
 }
 
@@ -282,7 +282,7 @@ std::string Parser::parseResource(void) {
     return path;
   while (true) {
     if (nextType() == TokenType::Slash)
-      throwTokenError();
+      throwTokenError("expected '/'");
     while (!isNextType(TokenType::Semicolon) &&
            !isNextType(TokenType::Newline) &&
            !isNextType(TokenType::Whitespace) &&
@@ -301,7 +301,7 @@ std::string Parser::parseAbsPath(void) {
     return path;
   while (true) {
     if (nextType() == TokenType::Slash)
-      throwTokenError();
+      throwTokenError("expected '/'");
     while (!isNextType(TokenType::Semicolon) &&
            !isNextType(TokenType::Newline) &&
            !isNextType(TokenType::Whitespace) &&
@@ -310,7 +310,7 @@ std::string Parser::parseAbsPath(void) {
       eat();
     }
     if (!match(TokenType::Slash))
-      throwTokenError();
+      throwTokenError("expected '/'");
     path += "/";
     if (sep() || isNextType(TokenType::Semicolon))
       return path;

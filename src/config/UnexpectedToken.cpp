@@ -6,7 +6,8 @@
 #include <sstream>
 #include <string>
 
-Parser::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token>::const_iterator It) { 
+Parser::UnexpectedTokenException::UnexpectedTokenException(
+    const std::list<Token>::const_iterator It, const std::string &Msg) {
   std::list<Token>::const_iterator it = It;
   while (it->getNum() > 1 && it->getLine() == It->getLine())
     --it;
@@ -19,12 +20,10 @@ Parser::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token
     if (it != It && !reachedPos) {
       lineStr += it->getLexeme();
       linePosition += it->getLexeme().length();
-    }
-    else if (it == It) {
+    } else if (it == It) {
       lineStr += "\x1B[31m" + it->getLexeme() + "\033[0m";
       reachedPos = true;
-    }
-    else
+    } else
       lineStr += it->getLexeme();
     ++it;
   } while (it->getType().type != TokenType::Eof &&
@@ -38,7 +37,8 @@ Parser::UnexpectedTokenException::UnexpectedTokenException(const std::list<Token
   std::ostringstream oss;
   oss << "Unexpected token in line " << It->getLine() << ":\n";
   oss << lineStr << '\n';
-  oss << "\x1B[31m" << showStr << "\033[0m";
+  oss << "\x1B[31m" << showStr << std::string(It->getLexeme().length() - 1, '^');
+  oss << "\x1B[32m " << Msg << "\033[0m";
   _report = oss.str();
 }
 
@@ -46,4 +46,5 @@ const char *Parser::UnexpectedTokenException::what() const throw() {
   return _report.c_str();
 }
 
-Parser::UnexpectedTokenException::~UnexpectedTokenException(void) throw() { }
+Parser::UnexpectedTokenException::~UnexpectedTokenException(void) throw() {
+}
