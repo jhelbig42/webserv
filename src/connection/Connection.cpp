@@ -43,6 +43,10 @@ int Connection::getSock(void) const {
   return (_sock);
 }
 
+int Connection::getSockForward(void) const{
+	return (_sockForward);
+}
+
 bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
@@ -69,10 +73,10 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 			_conditionsWanted = SockRead;
 			break;
 		case Reaction::CgiPost:
-			_conditionsWanted = SockWrite & SockRead & FSockWrite & FSockRead;
+			_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
 			break;
 		case Reaction::CgiNotPost:
-			_conditionsWanted = SockWrite & FSockRead;
+			_conditionsWanted = SockWrite | FSockRead;
 			break;
 		case Reaction::NotInitialized:
 		default:

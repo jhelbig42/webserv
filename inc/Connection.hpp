@@ -30,6 +30,7 @@ public:
 
   // getters
   int getSock(void) const;
+  int getSockForward(void) const;
   bool getDeleteStatus(void) const;
   Conditions getConditions(void) const;
 

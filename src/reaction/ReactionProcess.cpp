@@ -75,11 +75,11 @@ bool Reaction::checkOnChild(void){
   
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
-	logging::log2(logging::Debug, "pid: ", pid);
-	logging::log2(logging::Debug, "result: ", result);
+	//logging::log2(logging::Debug, "pid: ", pid);
+	//logging::log2(logging::Debug, "result: ", result);
 	
   	if (result == -1){
-    _cgi.setPid(-1);
+    	_cgi.setPid(-1);
 		initSendFile(CODE_500, FILE_500);
 		return false; // waitpid failed => internal server error
 	}
@@ -88,14 +88,14 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	
 	if (WIFEXITED(status)) { //child somehow exited
-    if (WEXITSTATUS(status) == 0) {
-      logging::log(logging::Debug, "CGI exited normally with 0");
-      return true;
-    }
-    
-    logging::log(logging::Debug, "CGI exited with error code");
-    
-    } else if (WIFSIGNALED(status)) {
+    	if (WEXITSTATUS(status) == 0) {
+      		logging::log(logging::Debug, "CGI exited normally with 0");
+			_cgi.setPid(-1);
+      		return true;
+    	}
+    	logging::log(logging::Debug, "CGI exited with error code");
+    } 
+	else if (WIFSIGNALED(status)) {
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
@@ -139,6 +139,9 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+	if (rc < 0){ // when buffer is full
+		return ;
+	}
 	if (rc == 0) {
 		// EOF from forwardSocket transition to SendFile from remaining buffer
 		_fdIn = -1;
@@ -148,9 +151,9 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
   if (_processType == ReceiveFile)
-    receiveFile(Socket, Bytes);
+    receiveBodyIntoServerFile(Socket, Bytes);
   else if (_processType == CgiPost && !_cgi.isInputDone())
-    _buffer.socketToBuf(Socket, Bytes);
+    receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
@@ -186,29 +189,55 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
-bool Reaction::receiveFile(const int Socket, const size_t Bytes){
+void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
-	_buffer.socketToBuf(Socket, Bytes);
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for CGI Post Request: ", toReceive);
+	try {
+		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+		if (received == -1) //not possible to read anything into the buffer
+			return ; //means we are just done for this round
+		_receivedContLen += static_cast<size_t>(received);
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
+		if (_receivedContLen == _reqContLen)
+			_cgi.setInputDone(true);
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return ;
+	}
+	return ;
+}
+
+void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	try {
+		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
+			return ; //means we are just done
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return ;
+	}
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
 	if (toReceive > 0)
 	{
 		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
 		if (copied == -1)
-			return (false);
+			return ;
 		_receivedContLen += static_cast<size_t>(copied);
-		//_buffer.deleteFront(static_cast<size_t>(copied));
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
 	}
 
 	if (!(_receivedContLen == _reqContLen))
-		return (false);
+		return ;
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
 	_buffer.reset();
 	initSendFile(CODE_201, NULL);
-	return false;
+	return ;
 }
 
 
