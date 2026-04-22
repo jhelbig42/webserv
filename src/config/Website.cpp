@@ -1,7 +1,14 @@
 #include "Website.hpp"
+
+#include "HttpMethods.hpp"
+#include "Location.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <list>
+#include <map>
 #include <ostream>
+#include <string>
+#include <utility>
 
 static void printLocations(std::ostream &Os, const Website &Site);
 static void printInterfaces(std::ostream &Os, const Website &Site);
@@ -13,7 +20,7 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Website::Website(void)
-    : _setMembers(0), _root(""), _autoindex(false), _allow(0) {
+    : _setMembers(0), _maxReqBody(0), _root(""), _autoindex(true), _allow(0) {
 }
 
 Website::Website(const Website &Other)

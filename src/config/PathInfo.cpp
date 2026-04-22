@@ -1,7 +1,11 @@
 #include "Website.hpp"
 
+#include "HttpMethods.hpp"
 #include "Location.hpp"
 #include "Logging.hpp"
+#include <list>
+#include <ostream>
+#include <string>
 
 static bool isPrefix(const std::string &Prefix, const std::string &Str);
 static bool isFullMatch(const std::string &Compare, const std::string &Str);
@@ -42,6 +46,8 @@ void PathInfo::populateFromLocation(const Location &Loc) {
     _realPath = Loc.getReturn().url;
   } else if (Loc.getType() == Location::Redirect) {
     _realPath = substitutePath(_realPath, Loc.getRedirect());
+    resolveLocations(Loc.getLocations());
+  } else if (Loc.getType() == Location::None) {
     resolveLocations(Loc.getLocations());
   } else {
     logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
@@ -134,3 +140,31 @@ std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
   }
   return Os << "\n}\n";
 }
+//
+// static int	check_pattern(const char *str, const char *mask, const char *pat)
+// {
+// 	int	checkpoint;
+// 	int	i;
+//
+// 	checkpoint = -1;
+// 	i = -1;
+// 	while (1)
+// 	{
+// 		while (pat[i + 1] == '*' && mask[i + 1])
+// 		{
+// 			i++;
+// 			checkpoint = i;
+// 		}
+// 		if (*str == '\0')
+// 			return (pat[i + 1] == '\0');
+// 		if (pat[i + 1] == *str)
+// 			i++;
+// 		else if (checkpoint != -1 && pat[checkpoint + 1] == *str)
+// 			i = checkpoint + 1;
+// 		else if (checkpoint != -1)
+// 			i = checkpoint;
+// 		else
+// 			return (0);
+// 		str++;
+// 	}
+// }

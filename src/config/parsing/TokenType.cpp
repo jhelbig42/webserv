@@ -1,7 +1,6 @@
 #include "TokenType.hpp"
 
 #include <cstring>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -14,6 +13,7 @@ static bool isReserved(const std::string &Word);
 
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
+// NOLINTBEGIN(bugprone-throwing-static-initialization)
 static const TokenType globalTokenTypes[] = {
     {"Name", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_",
      TokenType::Name, TokenType::Charset},
@@ -47,6 +47,7 @@ static const TokenType globalTokenTypes[] = {
     {"Eof", "", TokenType::Eof, TokenType::Special},
     {"Newline", "", TokenType::Newline, TokenType::Special},
     {"Unknown", "", TokenType::Unknown, TokenType::UnknownCat}};
+// NOLINTEND(bugprone-throwing-static-initialization)
 
 static const size_t globalTokenTypesSize =
     sizeof(globalTokenTypes) / sizeof(*globalTokenTypes);
@@ -88,7 +89,6 @@ bool TokenType::matchType(const std::string &Str,
   case Keyword:
     return isKeyword(tokenStr, Str, ItNew);
   case UnknownCat:
-    return false;
   case Special:
     return false;
   }

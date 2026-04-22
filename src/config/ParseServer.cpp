@@ -1,8 +1,10 @@
 #include "Parser.hpp"
 
 #include "HttpMethods.hpp"
+#include "Location.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
+#include <list>
 #include <string>
 
 Website Parser::server(void) {
@@ -204,8 +206,7 @@ void Parser::parseLocationEntry(Location &Loc) {
 
 void Parser::parseReturn(Location &Loc) {
   gap();
-  ReturnData ret;
-  unsigned int code = parseUnsignedInt();
+  const unsigned int code = parseUnsignedInt();
   skipSep();
   const std::string url = parseWord();
   skipSep();
@@ -238,7 +239,7 @@ void Parser::parseRedirect(Location &Loc) {
 
 void Parser::parseCgi(Location &Loc) {
   gap();
-  std::string pathCgi = parseResource();
+  const std::string pathCgi = parseResource();
   if (pathCgi == "")
     throwTokenError("not a valid cgi path");
   skipSep();

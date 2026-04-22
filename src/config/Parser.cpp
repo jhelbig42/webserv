@@ -87,9 +87,12 @@ bool Parser::noMatch(const TokenType::Type Type) {
   return false;
 }
 
+// safe if only called after finished construction of the Parser
+// NOLINTBEGIN(bugprone-exception-copy-constructor-throws)
 void Parser::throwTokenError(const std::string &Msg) {
   throw UnexpectedTokenException(_it, Msg);
 }
+// NOLINTEND(bugprone-exception-copy-constructor-throws)
 
 const std::string &Parser::matchGetLexeme(TokenType::Type Type) {
   const std::list<Token>::const_iterator itDup = _it;
@@ -102,7 +105,7 @@ unsigned int Parser::parseUnsignedInt(void) {
   if (!isNextType(TokenType::Number))
     throwTokenError("expected a number");
   errno = 0;
-  unsigned long code = strtoul(peek().getLexeme().c_str(), NULL, 0);
+  const unsigned long code = strtoul(peek().getLexeme().c_str(), NULL, 0);
   if (errno == ERANGE || code > std::numeric_limits<unsigned int>::max())
     throwTokenError("number not in valid range");
   eat();

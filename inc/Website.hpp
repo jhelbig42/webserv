@@ -10,8 +10,8 @@
 
 struct Listen {
   bool operator==(const Listen &Other) const;
-  std::string ip;
-  std::string port;
+  std::string ip;   // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string port; // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 class PathInfo;

@@ -1,9 +1,12 @@
 #include "Location.hpp"
+
+#include "HttpMethods.hpp"
+#include <list>
 #include <ostream>
 
 static void printLocations(std::ostream &Os, const Location &Loc);
 
-Location::Location() : _type(None), _path(""), _allowSet(false), _allow(0) {
+Location::Location() : _type(None), _path(""), _return(ReturnData()), _allowSet(false), _allow(0), _redirect("") {
 }
 
 Location::Location(const Location &Other)
@@ -29,7 +32,7 @@ Location::~Location() {
 }
 
 Location::Location(const std::string &Path)
-    : _type(None), _path(Path), _allowSet(false), _allow(0) {
+    : _type(None), _path(Path), _return(ReturnData()), _allowSet(false), _allow(0), _redirect("") {
 }
 
 Location::Type Location::getType(void) const {

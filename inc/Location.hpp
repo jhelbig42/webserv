@@ -7,6 +7,7 @@
 struct ReturnData {
   unsigned int code;
   std::string url;
+  ReturnData(void): code(0), url("") {}
 };
 
 class Location {

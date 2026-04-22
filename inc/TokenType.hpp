@@ -56,8 +56,10 @@ struct TokenType {
     explicit UnrecognizedTokenException(const std::string &);
   };
 
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   const std::string identifier;
   const std::string tokenStr;
   const Type type;
   const Category category;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
