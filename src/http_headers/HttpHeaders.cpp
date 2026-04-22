@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstring>
 #include <string>
-#include <sys/types.h>
 
 static const struct {
   std::string extension;
@@ -21,7 +20,9 @@ static const struct {
                   {".png", HttpHeaders::ImagePng},
                   {".pdf", HttpHeaders::ApplicationPdf},
                   {".svg", HttpHeaders::ImageSvgXml},
-                  {".txt", HttpHeaders::TextPlain}};
+                  {".txt", HttpHeaders::TextPlain},
+                  {".sh", HttpHeaders::ApplicationSh},
+                  {".py", HttpHeaders::TextPython}};
 
 static const size_t globalMimeSize = sizeof(globalMime) / sizeof(*globalMime);
 
@@ -53,12 +54,12 @@ void HttpHeaders::unsetAll(void) {
   _headersSet = 0;
 }
 
-void HttpHeaders::setContentLength(const off_t Length) {
+void HttpHeaders::setContentLength(const size_t Length) {
   _headersSet |= ContentLength;
   _contentLength = Length;
 }
 
-off_t HttpHeaders::getContentLength(void) const {
+size_t HttpHeaders::getContentLength(void) const {
   return _contentLength;
 }
 

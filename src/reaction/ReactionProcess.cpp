@@ -1,18 +1,19 @@
 #include "Reaction.hpp"
 
 #include "Buffer.hpp"
+#include "Conditions.hpp"
 #include "Logging.hpp"
+#include "StatusCodes.hpp"
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
-#include <stdexcept>
+#include <stdio.h>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-// TODO: Compare data sent with header Content-Length instead of only relying on
-// read() return values
 
 /// \brief reads data from a file descriptor and writes it to a socket
 ///
@@ -37,14 +38,6 @@
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes);
 
-// Reaction::process(const int Socket, const int SocketForward, const size_t
-// Bytes) {
-//   if (conditions & SockRead)
-//     //call something
-//   if (conditions & SockRead)
-//     //call something
-// }
-
 /// \brief writes the content of an std::string object to a socket
 ///
 /// side effects:
@@ -57,13 +50,136 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Reaction::process(const int Socket, int &ForwardSocket,
-                       const size_t Bytes) {
-  (void)ForwardSocket;
+bool Reaction::process(const int Socket, const size_t Bytes, const int Condition){
+  
+  if (!checkOnChild())
+    return false;
+	// we just polled for what we nee
+  if (Condition & FSockRead)   
+    receiveFromCGI(Bytes);
+  if (Condition & FSockWrite)  
+    sendToCGI(Bytes);
+  if (Condition & SockRead)    
+    recvFromClient(Socket, Bytes);
+  if (Condition & SockWrite)   
+    return sendToClient(Socket, Bytes);
+  return false;
+}
+
+bool Reaction::checkOnChild(void){
+	
+	const pid_t pid = _cgi.getPid();
+	if (pid == -1) // no CGI
+		return true;
+	//logging::log2(logging::Debug, __func__, " called and there is a CGI");
+  
+  	int status;
+	const pid_t result = waitpid(pid, &status, WNOHANG);
+	//logging::log2(logging::Debug, "pid: ", pid);
+	//logging::log2(logging::Debug, "result: ", result);
+	
+  	if (result == -1){
+    	_cgi.setPid(-1);
+		initSendFile(CODE_500, FILE_500);
+		return false; // waitpid failed => internal server error
+	}
+
+	if (result == 0) // child not finished yet
+		return true; //come back later
+	
+	if (WIFEXITED(status)) { //child somehow exited
+    	if (WEXITSTATUS(status) == 0) {
+      		logging::log(logging::Debug, "CGI exited normally with 0");
+			_cgi.setPid(-1);
+      		return true;
+    	}
+    	logging::log(logging::Debug, "CGI exited with error code");
+    } 
+	else if (WIFSIGNALED(status)) {
+        logging::log(logging::Debug, "CGI was killed by signal");
+    }
+    _cgi.setPid(-1);
+    initSendFile(CODE_500, FILE_500);
+    return false;
+}
+
+void Reaction::sendToCGI(const size_t Bytes){
+  if (_processType != CgiPost || _cgi.isInputDone())
+  	return; // should never happen
+
+  logging::log(logging::Debug, "sendToCGI");
+
+  // forward buffered body data to the CGI process, max Bytes bytes 
+  // TO DO: is it necessary to limit it to Bytes bytes? because it is a server internal process
+  // only what is in the buffer can be send. As we just read Bytes bytes into in, it cannot execeed Bytes bytes
+  const size_t toSend = std::min(_reqContLen - _receivedContLen, _buffer.getUsed());
+  if (toSend > 0) {
+    const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+    if (sent > 0) {
+      _receivedContLen += static_cast<size_t>(sent);
+      //_buffer.deleteFront(static_cast<size_t>(sent));
+    }
+  }
+
+  // once the full body is forwarded, mark input as done
+  // the CGI script is expected to use CONTENT_LENGTH to know how many bytes to read
+  if (_receivedContLen >= _reqContLen) {
+    logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
+    _cgi.setInputDone(true);
+    _buffer.reset();
+  }
+}
+
+void Reaction::receiveFromCGI(const size_t Bytes){
+	if ((_processType != CgiPost && _processType != CgiNotPost)
+		|| !_cgi.isInputDone())
+			return;
+	logging::log(logging::Debug, "sendfromCGI");
+
+	// fill buffer from CGI socket — FSockRead guarantees data is available
+	_buffer.optimize(Bytes);
+	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+	if (rc < 0){ // when buffer is full
+		return ;
+	}
+	if (rc == 0) {
+		// EOF from forwardSocket transition to SendFile from remaining buffer
+		_fdIn = -1;
+		_processType = SendFile;
+	}
+}
+
+void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
+  if (_processType == ReceiveFile)
+    receiveBodyIntoServerFile(Socket, Bytes);
+  else if (_processType == CgiPost && !_cgi.isInputDone())
+    receiveBodyIntoServerBuffer(Socket, Bytes);
+}
+
+bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
-  throw std::runtime_error("Unknown process type");
+  if ((_processType == CgiPost || _processType == CgiNotPost) 
+  		&& _cgi.isInputDone()) 
+  {
+    if (!_metadataSent) 
+	{
+      _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+      return false;
+	}
+	const size_t used = _buffer.getUsed();
+    if (used > 0)
+	{
+       const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
+	    if ((rc >= 0) && (size_t)rc == used)
+  			return true;
+		return false;
+	}
+	return false;
+  }
+  return false; // should never be reached
 }
+
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (!_metadataSent) {
@@ -72,6 +188,58 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   }
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
+
+void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for CGI Post Request: ", toReceive);
+	try {
+		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+		if (received == -1) //not possible to read anything into the buffer
+			return ; //means we are just done for this round
+		_receivedContLen += static_cast<size_t>(received);
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
+		if (_receivedContLen == _reqContLen)
+			_cgi.setInputDone(true);
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return ;
+	}
+	return ;
+}
+
+void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
+	// fill buffer with new data from socket
+	try {
+		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
+			return ; //means we are just done
+	}
+	catch (std::runtime_error){
+		initSendFile(CODE_500, FILE_500);
+		return ;
+	}
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
+	if (toReceive > 0)
+	{
+		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
+		if (copied == -1)
+			return ;
+		_receivedContLen += static_cast<size_t>(copied);
+		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
+	}
+
+	if (!(_receivedContLen == _reqContLen))
+		return ;
+	// if we received enough data in comparison to given content length
+	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
+	fclose(_fdOut);
+	_buffer.reset();
+	initSendFile(CODE_201, NULL);
+	return ;
+}
+
 
 // TODO: catching SIGPIPE still missing
 // TODO: handle rc < 0

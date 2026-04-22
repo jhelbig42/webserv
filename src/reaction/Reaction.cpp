@@ -1,8 +1,9 @@
-#include "Reaction.hpp"
 
+#include "CGIProcess.hpp"
 #include "Conditions.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
+#include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include <cerrno>
@@ -13,7 +14,6 @@
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
-#include <unistd.h>
 
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
@@ -22,31 +22,38 @@ static void setMetadata(std::string &Metadata, const int Code,
 
 void Reaction::setDefaults(void) {
   _processType = NotInitialized;
-  //_postType = NotPost;
   _metadataSent = false;
   _fdIn = -1;
-  _fdOut = -1;
-  _headers.unsetAll();
-  _conditions = Unconditional;
+  _headers.unsetAll();  
 }
 
 Reaction::Reaction()
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1), _fdOut(-1) {
+    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1) {
   _headers.unsetAll();
 }
 
-Conditions Reaction::getConditions(void) const {
-  return _conditions;
-}
 
 Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
 }
 
+int Reaction::getForwardSocket(void) const {
+  return _cgi.getForwardSocket();
+}
+
+bool Reaction::isCGI(const Request &Req){
+  if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
+		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
+  {
+    return true;
+  }
+  return false;
+}
+
 void Reaction::init(const Request &Req) {
   setDefaults();
 
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
+  logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
     initSendFile(CODE_400, FILE_400);
     return;
@@ -63,52 +70,23 @@ void Reaction::init(const Request &Req) {
   //
   //check if method is allowed in comparison to config
 
-  initMethod(Req);
-}
-
-void Reaction::initMethod(const Request &Req) {
-  logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-  switch (Req.getMethod()) {
-  case Head:
-  case Get:
-    initHeadGet(Req);
-    return;
-  case Delete:
-    initDelete(Req);
-    return;
-  case Post:
-	  initPost(Req);
+  //check if Resource is a CGI script
+  if(!isCGI(Req)){
+	  logging::log(logging::Debug, "Req is NOT a CGI");
+	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
+		  initSendFile(CODE_400, FILE_400);
+		  return;
+	  }
+	  initMethodNonCGI(Req);
 	  return;
-  case Generic:
-    initSendFile(CODE_501, FILE_501);
+  }
+
+  logging::log(logging::Debug, "Req is a CGI");
+  if (!_cgi.init(Req, _script)) {
+    initSendFile(CODE_500, FILE_500);
     return;
   }
-}
-
-void Reaction::initDelete(const Request &Req) {
-  errno = 0;
-  if (std::remove(Req.getResource().c_str()) != 0) {
-    initError(errno);
-    return;
-  }
-  initSendFile(CODE_202, NULL);
-}
-
-void Reaction::initHeadGet(const Request &Req) {
-  initSendFile(CODE_200, Req.getResource().c_str());
-  if (Req.getMethod() == Get || _fdIn < 0)
-    return;
-  errno = 0;
-  if (close(_fdIn) < 0)
-    logging::log2(logging::Error, "close: ", strerror(errno));
-  _fdIn = -1;
-}
-
-Reaction::Reaction(const Request &Req)
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1),
-    _fdOut(-1) 
-{
-  init(Req);
+  initCGIMethod(Req);
 }
 
 // TODO:
@@ -124,16 +102,15 @@ void Reaction::initSendFile(const int Code, const char *File) {
     return;
 
   if (File != NULL) {
-    _headers.setContentLength(statbuf.st_size);
+    _headers.setContentLength(static_cast<size_t>(statbuf.st_size));
     _headers.setContentType(strrchr(File, '.'));
   }
 
   setMetadata(_metadata, Code, _headers);
   _metadataSent = false;
-  _fdOut = -1;
   _processType = SendFile;
-  _conditions = SockWrite;
 }
+
 
 static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs) {

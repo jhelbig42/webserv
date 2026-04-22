@@ -6,7 +6,7 @@
 /*   By: hallison <hallison@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/23 17:19:03 by hallison          #+#    #+#             */
-/*   Updated: 2026/03/06 15:41:52 by hallison         ###   ########.fr       */
+/*   Updated: 2026/03/24 11:14:01 by hallison         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,16 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include <cerrno> // for errno
-#include <cstddef>
 #include <cstring> // for strerror
-#include <sstream> // for ostreamstring
 #include <stddef.h>
-#include <stdio.h>      // for puts
 #include <string.h>     // for memcpy, memset
 #include <sys/socket.h> // for socklen_t, recv
-#include <sys/types.h>  // for ssize_t
 
 // Construct & Destruct
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
-                       const socklen_t Addr_size)
-    : _sock(Sock), _delete(false), _addrSize(sizeof _addr) {
+                       const socklen_t Addr_size, const Website &website)
+    : _conditionsWanted(SockRead), _sock(Sock), _website(website), _delete(false), _addrSize(sizeof _addr)  {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -47,79 +43,71 @@ int Connection::getSock(void) const {
   return (_sock);
 }
 
+int Connection::getSockForward(void) const{
+	return (_sockForward);
+}
+
 bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
+/*
 Conditions Connection::getConditions(void) const {
   if (_req.getState() == COMPLETE)
     return _react.getConditions();
   return _req.getConditions();
 }
+*/
 
 // Setters
-
 void Connection::scheduleForDemolition(void) {
   _delete = true;
 }
 
-// Send & Receive
-// processData is a smaller type of serve() until conditions are fully
-// implemented
-void Connection::processData(void) {
-  if ((_conditionsFulfilled & _req.getConditions()) &&
-      _req.getState() != COMPLETE && _req.getState() != INVALID)
-    _req.process(_sock);
-  if (_req.getState() == CLIENTHUNGUP) {
-    scheduleForDemolition();
-    return;
-  };
-  // parsing from buffer into Request
-  // when fully parsed init Reaction
-  // Reaction will set its conditions
-  if (_conditionsFulfilled == SockWrite &&
-      (_req.getState() == COMPLETE || _req.getState() == INVALID))
+void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
+	switch (ProcessType){
+		case Reaction::SendFile:
+			_conditionsWanted = SockWrite;
+			break;
+		case Reaction::ReceiveFile:
+			_conditionsWanted = SockRead;
+			break;
+		case Reaction::CgiPost:
+			_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+			break;
+		case Reaction::CgiNotPost:
+			_conditionsWanted = SockWrite | FSockRead;
+			break;
+		case Reaction::NotInitialized:
+		default:
+			_conditionsWanted = SockRead;
 
-    // if Request is complete, reaction can get initialized - NO Socket Access
-    // Required need a not initialized state for Reaction here
-
-    if ((_req.getState() == COMPLETE || _req.getState() == INVALID) &&
-        _react.getProcessType() == Reaction::NotInitialized) {
-      _react.init(_req);
-      _req.reset();
-    }
-  // if reaction does not need more aka is not POST or POST is done, then
-  // process
-  // this needs write access to the socket
-  if (_conditionsFulfilled & _react.getConditions()) {
-    int dummy = -1;
-
-    if (_react.process(_sock, dummy, BYTES_PER_CHUNK) == true) {
-
-      logging::log(logging::Debug, "finished writing to client");
-      scheduleForDemolition();
-      // close after finishing writing greatly simplifies
-      // polling & is consistent with HTTP 1.0
-    }
-
-    // while (!_react.process(_sock, dummy, BYTES_PER_CHUNK)){
-    //	 ;	}
-  }
+	}
 }
 
-bool Connection::serve(const size_t Bytes) {
-  // handle Request until fully parsed
-  if (_req.getState() != COMPLETE) {
-    if (_conditionsFulfilled & _req.getConditions())
-      _req.process(_sock);
-    if (_req.getState() == COMPLETE)
-      _react.init(_req);
-    return false;
-  }
-  // switch to Reaction
-  if (_conditionsFulfilled & _react.getConditions())
-    return _react.process(_sock, _sockForward, Bytes);
-  return false;
+void Connection::serve(void) {
+	//if request is not yet complete, read and parse until it is
+	if( (_conditionsFulfilled & SockRead) 
+		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
+		_req.process(_sock);
+	if (_req.getState() == CLIENTHUNGUP){
+		scheduleForDemolition();
+		return ;
+	};
+	// if Request is complete, reaction can get initialized - NO Socket Access Required
+	// need a not initialized state for Reaction here
+	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
+		&& _react.getProcessType() == Reaction::NotInitialized)
+	{
+		_react.init(_req);
+	}
+	// we have a initialized Reaction - act on it.
+	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
+	if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+		scheduleForDemolition();
+	//update ConditionsWanted here - from Reaction
+	//before process is called in the next round
+	updateConditionsWanted(_react.getProcessType());
 }
 
 // Conditions

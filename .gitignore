@@ -1,7 +1,6 @@
 *.d
 *.o
 *.out
-*.txt
 *.sh
 *.pdf
 *.vim
@@ -12,5 +11,9 @@
 example.ebnf
 docs/*
 sa/*
+tester
+cgi_tester
+unit_tests
+YoupiBanane
 webserv
 TODO.md

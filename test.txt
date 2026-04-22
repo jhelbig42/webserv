@@ -1,0 +1,41 @@
+server{
+  max_request_body 888;
+  listen 127.0.0.1:8080;
+  root /dd$$??/h/ome/    ;
+  autoindex off;
+  allow *   ;
+  error_page 34 404 343434 /asdf ;
+  error_page 500 /qwer ;
+
+  location /asdf/ {
+    cgi    /yo/;
+    allow POST;
+    location /qwer/{
+      return 123   /yo;
+      allow DELETE   ;
+    }
+  }
+  location /*.js {
+    redirect    /yo/;
+    allow POST DELETE;
+  }
+  location /abc/ {
+    cgi    /yo;
+    allow POST;
+  }
+}
+
+server
+{
+  autoindex on;
+  listen 127.0.0.1:880;
+  listen 27.0.0.1:8080;
+  listen 127.0.0.1:8080;
+  root /www/var/ ;
+}
+
+server         {
+  listen 127.0.0.1:8333380;
+  root /;
+  autoindex on;
+}

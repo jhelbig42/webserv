@@ -1,7 +1,8 @@
-#include "Conditions.hpp"
+
 #include "Logging.hpp"
 #include "Request.hpp"
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 #define MAX_REQUEST 1024
@@ -12,8 +13,8 @@ Request::Request() :
 	_resource(""),
 	_majorVersion(0), 
 	_minorVersion(0), 
-	_conditions (SockRead),
-	_state(STATUS_LINE)
+	_state(STATUS_LINE),
+	_queryString("")
 {
 	_headers.unsetAll();
 }  
@@ -28,7 +29,6 @@ void Request::reset() {
 	_majorVersion = 0; 
 	_minorVersion = 0;
 	_state = STATUS_LINE;
-	_conditions = SockRead;
 	_headers.unsetAll();
 }
 
@@ -133,11 +133,30 @@ HttpMethod Request::getMethod() const {
 	return _method;
 }
 
-Conditions Request::getConditions(void) const {
-	return _conditions;
+std::string Request::getMethodString() const{
+	switch(_method)
+	{
+		case Head:
+			return "HEAD";
+			break;
+		case Get:
+			return "GET";
+			break;
+		case Post:
+			return "POST";
+			break;
+		case Delete:
+			return "DELETE";
+			break;
+		default:
+			return "INVALID";
+	}
 }
 
 ParseState Request::getState() const{
 	return _state;
 }
 
+std::string Request::getQueryString(void) const {
+	return _queryString;
+}

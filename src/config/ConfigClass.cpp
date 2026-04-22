@@ -1,5 +1,4 @@
 #include "Config.hpp"
-
 #include "Parser.hpp"
 #include "Website.hpp"
 #include <iostream>

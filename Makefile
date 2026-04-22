@@ -7,6 +7,17 @@ OBJ_DIR		:= obj
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
+vpath %.cpp $(SRC_DIR)/server
+SRC			+= Server.cpp\
+			ServerInit.cpp\
+			ServerRun.cpp\
+			ServerHandlePoll.cpp\
+			ServerHandlePollin.cpp\
+			ServerHandlePollout.cpp\
+			ServerHandlePollErrs.cpp\
+			ServerErrorHandling.cpp\
+			ServerDebug.cpp\
+			ServerWrappers.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
@@ -22,15 +33,11 @@ vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
-vpath %.cpp $(SRC_DIR)/networking
-SRC			+= Networking.cpp\
-			   NetworkingInitSocket.cpp\
-			   NetworkingInitServer.cpp\
-			   NetworkingRun.cpp\
-			   NetworkingPollHandling.cpp
 vpath %.cpp $(SRC_DIR)/reaction
-SRC			+= Post.cpp
+SRC			+= CGIProcess.cpp
 SRC			+= Reaction.cpp
+SRC			+= ReactionMethodCGI.cpp
+SRC			+= ReactionMethodsNonCGI.cpp
 SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
@@ -44,6 +51,8 @@ SRC			+= HttpHeaders.cpp
 SRC			+= HttpHeadersOutput.cpp
 vpath %.cpp $(SRC_DIR)/connection
 SRC			+= Connection.cpp
+vpath %.cpp $(SRC_DIR)/script
+SRC			+= Script.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
@@ -118,7 +127,6 @@ endif
 ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0
 	CXXFLAGS += -g3
-	CXXFLAGS += -fstandalone-debug
 	CPPFLAGS += -O0
 	CPPFLAGS += -g3
 	CPPFLAGS += -fstandalone-debug
