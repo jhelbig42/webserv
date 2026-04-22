@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <string.h>
 #include <unistd.h>
@@ -54,6 +55,19 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 
+void Reaction::setTmpPathName(const std::string resourceName){
+	srand(time(NULL));
+	int nameTag = rand() % 1000;
+	std::stringstream sname;
+	sname << resourceName << nameTag;
+	_tmpPath = sname.str();
+}
+
+//also needs the Post path from config
+static std::string generateFinalPathName(std::string resourceName){
+
+}
+
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
 
@@ -70,8 +84,8 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	const std::string pathname = DEFAULT_PATH + Req.getResource();
-	_fdOut = fopen(pathname.c_str(), "w");
+	setTmpPathName( Req.getResource());
+	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
 	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", pathname);

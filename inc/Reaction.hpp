@@ -66,6 +66,8 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
+  void			setTmpPathName(const std::string);
+  void			setFinalPathName(const std::string);
 
 private:
   // sending files + metadata
