@@ -23,14 +23,18 @@ public:
   Website &operator=(const Website &Other);
   ~Website();
 
+  bool getAutoindex(void) const;
+  const char *getErrorPage(const unsigned int Code);
+  unsigned int getMaxReqBody(void) const;
+  PathInfo getPathInfo(const std::string &Path) const;
+
+  int getAllow(void) const;
   explicit Website(std::list<Token>::const_iterator It);
   void addInterface(Listen &If);
-
   /// \fun addLocation
   /// \brief if a location with the same path already exists it is replaced
   void addLocation(Location &Loc);
   void addErrorPage(const unsigned int Code, const std::string &Path);
-  const char *getErrorPage(const unsigned int Code);
   const std::list<Listen> &getInterfaces(void) const;
   const std::list<Location> &getLocations(void) const;
   const std::map<unsigned int, std::string> &getErrorPages(void) const;
@@ -41,16 +45,12 @@ public:
   void allowAll(void);
   void allowNone(void);
   const std::string &getRoot(void) const;
-  bool getAutoindex(void) const;
-  int getAllow(void) const;
-  unsigned int getMaxReqBody(void) const;
+
   bool isSetAutoindex(void) const;
   bool isSetRoot(void) const;
   bool isSetInterfaces(void) const;
   bool isSetAllow(void) const;
   bool isSetMaxReqBody(void) const;
-
-  PathInfo getPathInfo(const std::string &Path) const;
 
 private:
   typedef enum {
