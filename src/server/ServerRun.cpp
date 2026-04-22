@@ -78,12 +78,26 @@ void Server::process(void) {
       it = _fds.erase(it);
       continue;
     }
+	if (type == IS_CLIENT){
+		checkForNewCGI(it->fd);	
+	}
     it->revents = 0;
     it++;
   }
   serveAll();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   _newFdBatch.clear();
+}
+
+void Server::checkForNewCGI(int Fd) {
+	(void) Fd;
+	Connection *connection  = &_clientMap.at(Fd);
+	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
+	int fwdSock = connection->_sockForward;
+	if (_socketForward != -1 && (_fwdMap.find(Fd) == _fwdMap.end()) {
+		_fwdMap.insert(std::make_pair(fwdSock, connection);
+	}
+	return;
 }
 
 void Server::closeAndDelete(int Fd, int type) {
