@@ -214,7 +214,10 @@ void Parser::parseRedirect(Location &Loc) {
   gap();
   std::string pathRedirect = parseWord();
   if (pathRedirect == "")
-    throwTokenError("not a valid redirect path");
+    throwTokenError("not a valid redirect");
+  if (Loc.getPath()[Loc.getPath().length() - 1] != '/'
+    && pathRedirect[pathRedirect.length() - 1] == '/')
+    throwTokenError("resource can not be redirected to path");
   skipSep();
   if (!match(TokenType::Semicolon))
     throwTokenError("expected ';'");
