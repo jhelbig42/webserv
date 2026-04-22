@@ -1,0 +1,15 @@
+server{
+  location /okok/ {
+    redirect /js/;
+
+    location /js/*.php {
+      allow POST;
+      cgi /bin/asdf;
+      }
+
+    location /js/*.sh {
+      allow GET;
+      cgi /bin/asdf;
+    }
+  }
+}
