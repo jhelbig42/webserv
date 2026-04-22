@@ -36,6 +36,8 @@ int main(void) {
 int main(int argc, char **argv) {
   if (argc != 3 || argv[2][0] != '/')
     return 1;
+  // const Scanner scan(argv[1]);
+  // std::cout << scan;
   try {
     const Config conf(argv[1]);
     std::cout << conf;
@@ -47,8 +49,6 @@ int main(int argc, char **argv) {
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }
-  // const Scanner scan(argv[1]);
-  // std::cout << scan;
   return 0;
 }
 

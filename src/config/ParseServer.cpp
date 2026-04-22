@@ -13,7 +13,11 @@ Website Parser::server(void) {
     throwTokenError("expected '{'");
   Website newWebsite;
   while (!match(TokenType::BracesRight)) {
+    skipSep();
+    if (isNextType(TokenType::Eof))
+      throwTokenError("unexpected end of file");
     parseEntry(newWebsite);
+    skipSep();
   }
   if (!newWebsite.isSetAllow())
     newWebsite.allowAll();
@@ -21,7 +25,6 @@ Website Parser::server(void) {
 }
 
 void Parser::parseEntry(Website &Site) {
-  skipSep();
   if (match(TokenType::Listen)) {
     parseListen(Site);
   } else if (match(TokenType::Root)) {
@@ -38,7 +41,6 @@ void Parser::parseEntry(Website &Site) {
     parseLocation(Site);
   } else
     throwTokenError("invalid Entry");
-  skipSep();
 }
 
 void Parser::gap(void) {
