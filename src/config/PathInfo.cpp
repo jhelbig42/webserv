@@ -8,6 +8,11 @@
 #include <ostream>
 #include <string>
 
+static void printAutoindex(std::ostream &Os, const PathInfo &Info);
+static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
+static void printRoot(std::ostream &Os, const PathInfo &Info);
+static void printRoot(std::ostream &Os, const PathInfo &Info);
+static void printErrorPages(std::ostream &Os, const Website &Info);
 static bool isPrefix(const std::string &Prefix, const std::string &Str);
 static bool isFullMatch(const std::string &Compare, const std::string &Str);
 static bool match(const std::string &Path, const std::string &LocationPath);
@@ -165,8 +170,39 @@ const char *PathInfo::getErrorPage(const unsigned int Code) const {
   return NULL;
 }
 
+static void printErrorPages(std::ostream &Os, const PathInfo &Info) {
+  for (unsigned int i = 0; i != 1000; ++i) {
+    const char *page = Info.getErrorPage(i);
+    if (page == NULL)
+      continue;
+    Os << "  " << i << " -> " << page << '\n';
+  }
+}
+
+static void printAutoindex(std::ostream &Os, const PathInfo &Info) {
+  Os << "  autoindex: ";
+  if (Info.getAutoindex())
+    Os << "on";
+  else
+    Os << "off";
+  Os << '\n';
+}
+
+static void printMaxReqBody(std::ostream &Os, const PathInfo &Info) {
+  Os << "  max_request_body: " << Info.getMaxReqBody() << '\n';
+}
+
+static void printRoot(std::ostream &Os, const PathInfo &Info) {
+  Os << "  root: " << Info.getRoot() << '\n';
+}
+
 std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
   Os << "class PathInfo: {\n";
+  Os << "  error pages:\n";
+  printErrorPages(Os, Info);
+  printRoot(Os, Info);
+  printMaxReqBody(Os, Info);
+  printAutoindex(Os, Info);
   Os << "  allow:";
   if (Info.getAllowed() & Head)
     Os << " HEAD";
@@ -185,7 +221,7 @@ std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
     Os << "  cgi: " << Info.getCgiPath() << ": " << Info.getRealPath();
     break;
   case PathInfo::Default:
-    Os << "  " << Info.getRealPath();
+    Os << "  default: " << Info.getRealPath();
     break;
   }
   return Os << "\n}\n";
