@@ -20,7 +20,7 @@ Website Parser::server(void) {
     skipSep();
   }
   if (!newWebsite.isSetAllow())
-    newWebsite.allowAll();
+    newWebsite.allowNone();
   return newWebsite;
 }
 

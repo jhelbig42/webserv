@@ -39,6 +39,7 @@ public:
   void setMaxReqBody(const unsigned int MaxBody);
   void addAllow(const HttpMethod Method);
   void allowAll(void);
+  void allowNone(void);
   const std::string &getRoot(void) const;
   bool getAutoindex(void) const;
   int getAllow(void) const;

@@ -237,6 +237,11 @@ PathInfo Website::getPathInfo(const std::string &Path) const {
   return PathInfo(*this, Path);
 }
 
+void Website::allowNone(void) {
+  _setMembers |= Allow;
+  _allow = 0;
+}
+
 void Website::allowAll(void) {
   addAllow(Head);
   addAllow(Get);
