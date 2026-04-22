@@ -56,6 +56,7 @@ private:
 
   void parseErrorPage(Website &Site);
   void parseLocationEntry(Location &Loc);
+  void validateLocationEnty(const Location &Loc);
 
   void parseEntry(Website &Website);
   std::string parseResource(void);

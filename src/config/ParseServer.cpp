@@ -164,8 +164,17 @@ void Parser::parseLocation(Location &Loc) {
   Loc.addLocation(newLocation);
 }
 
+void Parser::validateLocationEnty(const Location &Loc) {
+  if (Loc.getType() != Location::None &&
+      (isNextType(TokenType::Return) || isNextType(TokenType::Cgi) || isNextType(TokenType::Redirect)))
+    throwTokenError("location already has a type");
+  if (Loc.getType() != Location::Redirect && isNextType(TokenType::Location))
+    throwTokenError("can only nest locations that define redirects");
+}
+
 void Parser::parseLocationEntry(Location &Loc) {
   skipSep();
+  validateLocationEnty(Loc);
   if (match(TokenType::Return)) {
     parseReturn(Loc);
   } else if (match(TokenType::Redirect)) {
@@ -285,7 +294,7 @@ std::string Parser::parseResource(void) {
     return path;
   while (true) {
     if (nextType() == TokenType::Slash)
-      throwTokenError("expected '/'");
+      throwTokenError("expected a resource not a path");
     while (!isNextType(TokenType::Semicolon) &&
            !isNextType(TokenType::Newline) &&
            !isNextType(TokenType::Whitespace) &&
