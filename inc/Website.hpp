@@ -24,7 +24,7 @@ public:
   ~Website();
 
   bool getAutoindex(void) const;
-  const char *getErrorPage(const unsigned int Code);
+  const char *getErrorPage(const unsigned int Code) const;
   unsigned int getMaxReqBody(void) const;
   PathInfo getPathInfo(const std::string &Path) const;
 
@@ -86,11 +86,15 @@ public:
 
   PathInfo(const Website &Site, const std::string &Path);
 
+  unsigned int getMaxReqBody(void) const;
+  const std::string &getRoot(void) const;
+  bool getAutoindex(void) const;
   const std::string &getCgiPath(void) const;
   const std::string &getRealPath(void) const;
   int getAllowed(void) const;
   Action getAction(void) const;
   unsigned int getCode(void) const;
+  const char *getErrorPage(const unsigned int Code) const;
 
 private:
   void resolveLocations(const std::list<Location> &Locations);
@@ -100,6 +104,12 @@ private:
   Action _action;
   unsigned int _code;
   int _allow;
+
+  unsigned int _maxReqBody;
+  std::string _root;
+  const std::map<unsigned int, std::string> *_errorPagesWebsite;
+  const std::map<unsigned int, std::string> *_errorPagesLocation;
+  bool _autoindex;
 };
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If);
