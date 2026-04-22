@@ -65,7 +65,8 @@ PathInfo::PathInfo(const Website &Site, const std::string &Path)
   resolveLocations(Site.getLocations());
 
   if (_action != Return)
-    _realPath = Site.getRoot() + _realPath.substr(1);
+    _realPath =
+        Site.getRoot().substr(0, Site.getRoot().length() - 1) + _realPath;
 }
 
 const std::string &PathInfo::getCgiPath(void) const {
