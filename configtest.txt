@@ -1,0 +1,6 @@
+server{
+  root /dd/h/ome/    ;
+  location /asdf/ {
+    redirect    /yo/;
+  }
+}

@@ -1,14 +1,16 @@
-//#define _GNU_SOURCE 
 #include "Config.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "Scanner.hpp"
+#include <iostream>
+//#define _GNU_SOURCE 
+#include "Config.hpp"
 #include "Server.hpp"
 #include <iostream>
 #include <unistd.h>
 
 //#define OFFLINE
-//#define PARSING
+#define PARSING
 
 #define CHUNK_SIZE 1024
 
@@ -34,16 +36,21 @@ int main(void) {
 #elif defined PARSING
 
 int main(int argc, char **argv) {
-  if (argc != 2)
+  if (argc != 3 || argv[2][0] != '/')
     return 1;
+  // const Scanner scan(argv[1]);
+  // std::cout << scan;
   try {
     const Config conf(argv[1]);
     std::cout << conf;
+
+    if (conf.getWebsites().begin() != conf.getWebsites().end()) {
+      PathInfo info = conf.getWebsites().begin()->getPathInfo(argv[2]);
+      std::cout << info;
+    }
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }
-  // const Scanner scan(argv[1]);
-  // std::cout << scan;
   return 0;
 }
 

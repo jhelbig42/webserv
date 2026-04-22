@@ -14,9 +14,11 @@ public:
 
   class UnexpectedTokenException : public std::exception {
   public:
-    explicit UnexpectedTokenException(const std::list<Token>::const_iterator It);
+    UnexpectedTokenException(const std::list<Token>::const_iterator It,
+                             const std::string &Msg);
     ~UnexpectedTokenException(void) throw();
     const char *what(void) const throw();
+
   private:
     std::string _report;
   };
@@ -27,27 +29,41 @@ private:
   bool match(const TokenType::Type Type);
   bool noMatch(const TokenType::Type Type);
   TokenType::Type nextType(void) const;
+  bool isNextType(const TokenType::Type Type) const;
   const std::string &matchGetLexeme(TokenType::Type Type);
 
   Website expression(void);
 
   Website server(void);
 
+  unsigned int parseUnsignedInt(void);
   void gap(void);
   void populateInterface(Listen &Interface);
-  void parseListen(Website &site);
-  void parseRoot(Website &site);
-  void parseAutoindex(Website &site);
-
-  void addEntry(Website &site);
+  void parseListen(Website &Site);
+  void parseRoot(Website &Site);
+  void parseAutoindex(Website &Site);
+  void parseAllow(Website &Site);
+  void parseLocation(Website &Site);
+  void parseLocation(Location &Loc);
+  void parseRedirect(Location &Loc);
+  void parseCgi(Location &Loc);
+  void parseReturn(Location &Loc);
+  void parseLocationAllow(Location &Loc);
+  void parseMaxReqBody(Website &Site);
 
   void addIpv4(Listen &Interface);
   void addPort(Listen &Interface);
 
-  void parseEntry(Website &Website);
-  std::string parseAbsPath(void);
+  void parseErrorPage(Website &Site);
+  void parseLocationEntry(Location &Loc);
+  void validateLocationEnty(const Location &Loc);
 
-  void throwTokenError(void);
+  void parseEntry(Website &Website);
+  std::string parseResource(void);
+  std::string parseAbsPath(void);
+  std::string parseWord(void);
+
+  void throwTokenError(const std::string &Msg);
 
   bool parseOnOff(void);
 

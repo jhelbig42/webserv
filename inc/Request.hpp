@@ -3,6 +3,7 @@
 #include "Buffer.hpp"
 #include "Conditions.hpp"
 #include "HttpHeaders.hpp"
+#include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include <iostream>
 #include <sstream>
@@ -12,21 +13,12 @@
 #include <vector>
 
 typedef enum {
-  Generic,
-	Head,
-	Get,
-	Post,
-	Delete
-} HttpMethod;
-
-typedef enum  {
-    STATUS_LINE,
-    HEADERS,
-    COMPLETE,
-	INVALID,
-	CLIENTHUNGUP
+  STATUS_LINE,
+  HEADERS,
+  COMPLETE,
+  INVALID,
+  CLIENTHUNGUP
 } ParseState;
-
 
 class Request {
 	public:
@@ -88,4 +80,5 @@ class Request {
 		std::string	_queryString;	
 };
 
-std::vector<std::string> split(const std::string& s, const std::string& delimiter);
+std::vector<std::string> split(const std::string &s,
+                               const std::string &delimiter);

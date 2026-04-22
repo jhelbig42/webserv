@@ -43,6 +43,12 @@ void Server::handlePollout(int Fd, int Type) {
     setFSockWrite(Fd);
     return;
   }
+  else {
+    	logging::log3(logging::Error, "handleCondition(): fd ", Fd,
+                  "is not found in _clientMap or _fwdMap.");
+    	exit (1);
+  	}
+  
 }
 
 void Server::handlePollrdhup(int Fd, int Type) {

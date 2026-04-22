@@ -24,9 +24,11 @@ vpath %.cpp $(SRC_DIR)/config
 SRC			+= ConfigGlobals.cpp
 SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
-SRC			+= Parser.cpp
+SRC			+= PathInfo.cpp
 SRC			+= ParseServer.cpp
+SRC			+= Parser.cpp
 SRC			+= UnexpectedToken.cpp
+SRC			+= Location.cpp
 vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
@@ -127,7 +129,9 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -g3
 	CPPFLAGS += -O0
 	CPPFLAGS += -g3
-
+	CPPFLAGS += -fstandalone-debug
+	CXXFLAGS	+= -Wno-unused-parameter
+	CXXFLAGS	+= -Wno-unused-function
 endif
 
 ifeq ($(ASAN), 1)
