@@ -12,6 +12,7 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>       /* time */
 
 #define DEFAULT_PATH "./post"
 
@@ -56,16 +57,16 @@ void Reaction::initHeadGet(const Request &Req) {
 
 
 void Reaction::setTmpPathName(const std::string resourceName){
-	srand(time(NULL));
+	srand((unsigned int)(time(NULL)));
 	int nameTag = rand() % 1000;
 	std::stringstream sname;
-	sname << resourceName << nameTag;
+	sname << DEFAULT_PATH << resourceName << nameTag;
 	_tmpPath = sname.str();
 }
 
 //also needs the Post path from config
-static std::string generateFinalPathName(std::string resourceName){
-
+void Reaction::setFinalPathName(const std::string resourceName){
+	_finalPath = DEFAULT_PATH + resourceName;
 }
 
 void Reaction::initPost(const Request &Req){
@@ -84,11 +85,12 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	setTmpPathName( Req.getResource());
+	setFinalPathName(Req.getResource());
+	setTmpPathName(Req.getResource());
 	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
-	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", pathname);
+	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", _tmpPath);
 	_processType = ReceiveFile;
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
 }
