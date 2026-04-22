@@ -32,10 +32,11 @@ SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/reaction
-SRC			+= ReactionMethodsNonCGI.cpp
-SRC			+= Reaction.cpp
-SRC			+= ReactionProcess.cpp
 SRC			+= CGIProcess.cpp
+SRC			+= Reaction.cpp
+SRC			+= ReactionMethodCGI.cpp
+SRC			+= ReactionMethodsNonCGI.cpp
+SRC			+= ReactionProcess.cpp
 vpath %.cpp $(SRC_DIR)/request
 SRC			+= Request.cpp
 SRC			+= ParseHeaders.cpp

@@ -171,15 +171,18 @@ bool CGIProcess::resolvePath(){
 //setting up the ForwardSocket, create the child process handling the script
 bool CGIProcess::initForwardSocket() {
     int sv[2];
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) return false;
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) 
+		return false;
 
     _pid = fork();
     if (_pid == -1) {
-        close(sv[0]); close(sv[1]);
+        close(sv[0]);
+		close(sv[1]);
         return false;
     }
 
-    if (_pid == 0) { // Child
+    if (_pid == 0) { 
+		// Child
         close(sv[0]);
         dup2(sv[1], STDIN_FILENO);
         dup2(sv[1], STDOUT_FILENO);
