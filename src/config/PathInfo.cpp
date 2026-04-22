@@ -10,7 +10,7 @@
 static bool isPrefix(const std::string &Prefix, const std::string &Str);
 static bool isFullMatch(const std::string &Compare, const std::string &Str);
 static bool match(const std::string &Path, const std::string &LocationPath);
-static std::string substitutePath(const std::string &Path, const std::string &Substitute);
+static std::string substitutePath(const std::string &Path, const std::string &Substitute, const std::string &LocationPath);
 
 PathInfo::PathInfo(void)
     : _cgiPath(""), _realPath(""), _action(Default), _code(0), _allow(0) {
@@ -42,10 +42,12 @@ void PathInfo::populateFromLocation(const Location &Loc) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
   } else if (Loc.getType() == Location::Return) {
+    _action = Return;
     _code = Loc.getReturn().code;
     _realPath = Loc.getReturn().url;
   } else if (Loc.getType() == Location::Redirect) {
-    _realPath = substitutePath(_realPath, Loc.getRedirect());
+    _action = Default;
+    _realPath = substitutePath(_realPath, Loc.getRedirect(), Loc.getPath());
     resolveLocations(Loc.getLocations());
   } else if (Loc.getType() == Location::None) {
     resolveLocations(Loc.getLocations());
@@ -109,9 +111,9 @@ static bool match(const std::string &Path, const std::string &LocationPath) {
   return isFullMatch(LocationPath, Path);
 }
 
-static std::string substitutePath(const std::string &Path, const std::string &Substitute) {
+static std::string substitutePath(const std::string &Path, const std::string &Substitute, const std::string &LocationPath) {
   if (Substitute[Substitute.length() - 1] == '/')
-    return Substitute + Path.substr(Substitute.length());
+    return Substitute + Path.substr(LocationPath.length());
   return Substitute;
 }
 
