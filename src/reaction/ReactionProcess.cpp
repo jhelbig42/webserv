@@ -71,12 +71,9 @@ bool Reaction::checkOnChild(void){
 	const pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
-	//logging::log2(logging::Debug, __func__, " called and there is a CGI");
   
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
-	//logging::log2(logging::Debug, "pid: ", pid);
-	//logging::log2(logging::Debug, "result: ", result);
 	
   	if (result == -1){
     	_cgi.setPid(-1);
@@ -88,6 +85,7 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	
 	if (WIFEXITED(status)) { //child somehow exited
+		// find out how
     	if (WEXITSTATUS(status) == 0) {
       		logging::log(logging::Debug, "CGI exited normally with 0");
 			_cgi.setPid(-1);
@@ -239,6 +237,18 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
+	if (!unlink(_finalPath.c_str())){ //unlink in case it exists already
+		logging::log(logging::Debug, "Reaction: Unlinking failed");
+		initSendFile(CODE_500, FILE_500);
+		return; 
+	}
+	logging::log(logging::Debug, "Reaction: Unlinking successfull");
+	if (!rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
+		logging::log(logging::Debug, "Reaction: Renaming failed");
+		initSendFile(CODE_500, FILE_500);
+		return;
+	}
+	logging::log(logging::Debug, "Reaction: Renaming successfull");
 	_buffer.reset();
 	initSendFile(CODE_201, NULL);
 	return ;
