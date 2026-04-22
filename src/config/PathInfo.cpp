@@ -105,7 +105,7 @@ static bool match(const std::string &Path, const std::string &LocationPath) {
 
 static std::string substitutePath(const std::string &Path, const std::string &Substitute) {
   if (Substitute[Substitute.length() - 1] == '/')
-    return Substitute + Path.substr(Substitute.length() + 1);
+    return Substitute + Path.substr(Substitute.length());
   return Substitute;
 }
 
