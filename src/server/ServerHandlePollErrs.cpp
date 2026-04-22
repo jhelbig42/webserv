@@ -89,6 +89,12 @@ void Server::handlePollnval(int Fd, int Type) {
     // markFwdDeletion(Fd);
     return;
   }
+  if (Type == IS_LISTENER) {
+    logging::log2(logging::Error, Fd, " is listening socket");
+    // TODO how to handle this
+	// TODO this whole debug print sequence could be done with a helper
+    return;
+  }
 }
 
 // handlePollrdhup() handles POLLRDHUP:
@@ -114,6 +120,13 @@ void Server::handlePollhup(int Fd, int Type) {
                   "of the fwd sock at this point.");
     // TODO downgraed this print before submission
     // TODO remove socket from fwdMap? // use markFwdDeletion?
+  	return;
+  }
+  if (Type == IS_LISTENER) {
+    logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");
+    // TODO how to handle this
+	// TODO this whole debug print sequence could be done with a helper
+    return;
   }
 }
 
@@ -137,6 +150,12 @@ void Server::handlePollerr(int Fd, int Type) {
   if (Type == IS_FWD) {
     logging::log2(logging::Error, Fd, " is forward socket");
     // a series of returns
+    return;
+  }
+  if (Type == IS_LISTENER) {
+    logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");
+    // TODO how to handle this
+	// TODO this whole debug print sequence could be done with a helper
     return;
   }
 }

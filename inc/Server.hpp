@@ -71,6 +71,7 @@ class Server {
 	int  getSocketType(int Fd);
 	void serveAll(void);
 	bool shouldBeDeleted(int Fd, int Type);
+	void checkForNewCGI(int Fd);
 	void closeAndDelete(int Fd, int Type);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 
