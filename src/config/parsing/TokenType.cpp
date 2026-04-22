@@ -1,7 +1,6 @@
 #include "TokenType.hpp"
 
 #include <cstring>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -10,15 +9,17 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It);
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
                       std::string::const_iterator &It);
-static bool isReserved(const std::string &word);
+static bool isReserved(const std::string &Word);
 
 // highest priority classification should always come first
 // i.e. usually TokenTypes of category TokenType::Charset
+// NOLINTBEGIN(bugprone-throwing-static-initialization)
 static const TokenType globalTokenTypes[] = {
-    {"Name", "abcdefghijklmnopqrstuvwxyz", TokenType::Name,
-     TokenType::Charset},
+    {"Name", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_",
+     TokenType::Name, TokenType::Charset},
     {"Number", "0123456789", TokenType::Number, TokenType::Charset},
     {"Semicolon", ";", TokenType::Semicolon, TokenType::SingleChar},
+    {"Asterisk", "*", TokenType::Asterisk, TokenType::SingleChar},
     {"Dot", ".", TokenType::Dot, TokenType::SingleChar},
     {"BracesLeft", "{", TokenType::BracesLeft, TokenType::SingleChar},
     {"BracesRight", "}", TokenType::BracesRight, TokenType::SingleChar},
@@ -28,11 +29,25 @@ static const TokenType globalTokenTypes[] = {
     {"Listen", "listen", TokenType::Listen, TokenType::Keyword},
     {"On", "on", TokenType::On, TokenType::Keyword},
     {"Off", "off", TokenType::Off, TokenType::Keyword},
+    {"ErrorPage", "error_page", TokenType::ErrorPage, TokenType::Keyword},
+    {"Location", "location", TokenType::Location, TokenType::Keyword},
+    {"Return", "return", TokenType::Return, TokenType::Keyword},
+    {"Redirect", "redirect", TokenType::Redirect, TokenType::Keyword},
+    {"Cgi", "cgi", TokenType::Cgi, TokenType::Keyword},
     {"Root", "root", TokenType::Root, TokenType::Keyword},
+    {"MaxRequestBody", "max_request_body", TokenType::MaxRequestBody,
+     TokenType::Keyword},
     {"Autoindex", "autoindex", TokenType::Autoindex, TokenType::Keyword},
+    {"Allow", "allow", TokenType::Allow, TokenType::Keyword},
+    {"Head", "HEAD", TokenType::Head, TokenType::Keyword},
+    {"Post", "POST", TokenType::Post, TokenType::Keyword},
+    {"Get", "GET", TokenType::Get, TokenType::Keyword},
+    {"Delete", "DELETE", TokenType::Delete, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
-    {"Newline", "", TokenType::Newline, TokenType::Special}};
+    {"Newline", "", TokenType::Newline, TokenType::Special},
+    {"Unknown", "", TokenType::Unknown, TokenType::UnknownCat}};
+// NOLINTEND(bugprone-throwing-static-initialization)
 
 static const size_t globalTokenTypesSize =
     sizeof(globalTokenTypes) / sizeof(*globalTokenTypes);
@@ -58,9 +73,8 @@ const TokenType &TokenType::getTokenType(const std::string &Str,
       return globalTokenTypes[i];
     ++i;
   }
-  std::ostringstream oss;
-  oss << "Unrecognized token: `" << *It << '\'';
-  throw UnrecognizedTokenException(oss.str());
+  ++ItNew;
+  return globalTokenTypes[globalTokenTypesSize - 1];
 }
 
 bool TokenType::matchType(const std::string &Str,
@@ -74,6 +88,7 @@ bool TokenType::matchType(const std::string &Str,
     return isCharset(tokenStr, Str, ItNew);
   case Keyword:
     return isKeyword(tokenStr, Str, ItNew);
+  case UnknownCat:
   case Special:
     return false;
   }
@@ -100,9 +115,9 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
   return true;
 }
 
-static bool isReserved(const std::string &word) {
+static bool isReserved(const std::string &Word) {
   for (size_t i = 0; i != globalTokenTypesSize; ++i) {
-    if (globalTokenTypes[i].category == TokenType::Keyword && word == globalTokenTypes[i].tokenStr)
+    if (globalTokenTypes[i].category == TokenType::Keyword && Word == globalTokenTypes[i].tokenStr)
       return true;
   }
   return false;
@@ -129,7 +144,7 @@ const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
   throw std::runtime_error("unrecognized token");
 }
 
-TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &str)
-    : std::runtime_error(str) {
+TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &Str)
+    : std::runtime_error(Str) {
 }
 

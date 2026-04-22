@@ -1,0 +1,12 @@
+server{
+  location /js/ {
+    location /js/asdf/ {
+      allow POST;
+      cgi /bin/asdf;
+    }
+    location /js/qwer/ {
+      allow GET;
+      cgi /bin/asdf;
+    }
+  }
+}

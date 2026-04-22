@@ -5,11 +5,13 @@
 
 struct TokenType {
   typedef enum {
+    Unknown,
     Eof,
     Newline,
     Semicolon,
     BracesLeft,
     BracesRight,
+    MaxRequestBody,
     Dot,
     Slash,
     Asterisk,
@@ -17,15 +19,25 @@ struct TokenType {
     Server,
     Whitespace,
     Autoindex,
+    Allow,
+    Head,
+    Post,
+    Get,
+    Delete,
     On,
     Off,
+    ErrorPage,
+    Location,
+    Redirect,
+    Cgi,
+    Return,
     Listen,
     Number,
     Root,
     Name
   } Type;
 
-  typedef enum { Special, SingleChar, Charset, Keyword } Category;
+  typedef enum { Special, SingleChar, Charset, Keyword, UnknownCat } Category;
 
   bool matchType(const std::string &Str, const std::string::const_iterator It,
                  std::string::const_iterator &ItNew) const;
@@ -44,8 +56,10 @@ struct TokenType {
     explicit UnrecognizedTokenException(const std::string &);
   };
 
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   const std::string identifier;
   const std::string tokenStr;
   const Type type;
   const Category category;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
 };

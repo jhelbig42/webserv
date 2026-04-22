@@ -23,7 +23,7 @@ Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
     scanLine(line);
     addNewline();
   }
-  if (inf.fail() && !inf.eof())
+  if (!inf.eof())
     throw std::runtime_error("Scanner: file I/O error");
   addEof();
 }

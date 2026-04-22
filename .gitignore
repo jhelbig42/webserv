@@ -6,6 +6,8 @@
 *.vim
 *.swp
 *.orig
+*.json
+.clangd
 example.ebnf
 docs/*
 sa/*
@@ -14,3 +16,4 @@ cgi_tester
 unit_tests
 YoupiBanane
 webserv
+TODO.md

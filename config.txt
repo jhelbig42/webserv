@@ -1,0 +1,32 @@
+backlog
+
+server {
+	root: /var/www/website1/
+	methods: GET HEAD DELETE POST
+	default: {/, index.html}, {/pictures/, index.html}
+	directory_listing: FALSE
+	max_body: 1024
+	defaults {
+		prefix=/var/www/defaults/
+		404=404.html
+	}
+  source {
+    10.0.0.7:1234
+    10.0.1.7:1236
+  }
+}
+
+server {
+	IF:	10.0.0.8
+	PORT: 1235
+	root: /var/www/website1/
+	methods: GET HEAD
+	default: 
+	directory_listing: TRUE
+	UPLOAD: /pictures/ /uploaded/ 
+	redirects {
+		/pictures/picture1: www.google.com/pictures/picture2
+		/pictures/picture2: www.google.com/pictures/picture2
+		/pictures/picture3: www.google.com/pictures/picture2
+	}
+}
