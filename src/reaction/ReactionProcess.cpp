@@ -237,14 +237,9 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
-	if (!unlink(_finalPath.c_str())){ //unlink in case it exists already
-		logging::log(logging::Debug, "Reaction: Unlinking failed");
-		initSendFile(CODE_500, FILE_500);
-		return; 
-	}
-	logging::log(logging::Debug, "Reaction: Unlinking successfull");
-	if (!rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
-		logging::log(logging::Debug, "Reaction: Renaming failed");
+	unlink(_finalPath.c_str()); // fails if file does not exist, but we do not care
+	if (rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
+		logging::log(logging::Debug, "Reaction: Renaming failed - should never happen");
 		initSendFile(CODE_500, FILE_500);
 		return;
 	}
