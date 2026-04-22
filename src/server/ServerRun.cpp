@@ -66,14 +66,9 @@ void Server::process(void) {
 
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
   	int type = getSocketType(it->fd);
-  	if (type != IS_CLIENT && type != IS_FWD) {
-    	logging::log3(logging::Error, "handleCondition(): fd ", it->fd,
-                  "is not found in _clientMap or _fwdMap.");
-    	exit (1);
-  	}
     handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
-    if (shouldBeDeleted(it->fd, type) == true) {
+    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       closeAndDelete(it->fd, type);
       it = _fds.erase(it);
       continue;
@@ -93,9 +88,9 @@ void Server::checkForNewCGI(int Fd) {
 	(void) Fd;
 	Connection *connection  = &_clientMap.at(Fd);
 	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
-	int fwdSock = connection->_sockForward;
-	if (_socketForward != -1 && (_fwdMap.find(Fd) == _fwdMap.end()) {
-		_fwdMap.insert(std::make_pair(fwdSock, connection);
+	int fwdSock = connection->getSockForward();
+	if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
+		_fwdMap.insert(std::make_pair(fwdSock, connection));
 	}
 	return;
 }

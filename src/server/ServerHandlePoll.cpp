@@ -18,7 +18,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 void Server::handleCondition(struct pollfd &polled, int Type) {
-  
+  	
   if (polled.revents & POLLNVAL) {
     handlePollnval(polled.fd, Type);
     return;
