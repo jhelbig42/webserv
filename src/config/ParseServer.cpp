@@ -166,10 +166,22 @@ void Parser::parseLocation(Location &Loc) {
 
 void Parser::validateLocationEnty(const Location &Loc) {
   if (Loc.getType() != Location::None &&
-      (isNextType(TokenType::Return) || isNextType(TokenType::Cgi) || isNextType(TokenType::Redirect)))
+      (isNextType(TokenType::Return) || isNextType(TokenType::Cgi) ||
+       isNextType(TokenType::Redirect)))
     throwTokenError("location already has a type");
-  if (Loc.getType() != Location::Redirect && isNextType(TokenType::Location))
-    throwTokenError("can only nest locations that define redirects");
+  if (Loc.getLocations().size() != 0) {
+    if (isNextType(TokenType::Return))
+      throwTokenError("locations that nest locations can not define return");
+    if (isNextType(TokenType::Cgi))
+      throwTokenError("locations that nest locations can not define cgi");
+  }
+  if (isNextType(TokenType::Location)) {
+    if (Loc.getType() == Location::Return)
+      throwTokenError(
+          "locations that define return can not nest other locations");
+    if (Loc.getType() == Location::Cgi)
+      throwTokenError("locations that define cgi can not nest other locations");
+  }
 }
 
 void Parser::parseLocationEntry(Location &Loc) {
@@ -295,19 +307,18 @@ std::string Parser::parseResource(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
   if (sep() || nextType() == TokenType::Semicolon)
     return path;
-  while (true) {
-    if (nextType() == TokenType::Slash)
-      throwTokenError("expected a resource not a path");
-    while (!isNextType(TokenType::Semicolon) &&
-           !isNextType(TokenType::Newline) &&
-           !isNextType(TokenType::Whitespace) &&
-           !isNextType(TokenType::Slash)) {
-      path += peek().getLexeme();
-      eat();
-    }
-    if (sep() || nextType() == TokenType::Semicolon)
-      return path;
+  while (!isNextType(TokenType::Semicolon) &&
+         !isNextType(TokenType::Newline) &&
+         !isNextType(TokenType::Whitespace)) {
+    path += peek().getLexeme();
+    eat();
   }
+  if (path[path.length() - 1] == '/')
+    throwTokenError("expected a resource not a path");
+  skipSep();
+  if (nextType() != TokenType::Semicolon)
+    throwTokenError("expected ';'");
+  return path;
 }
 
 std::string Parser::parseAbsPath(void) {
