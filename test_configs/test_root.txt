@@ -1,0 +1,22 @@
+server {
+
+  root /fdfdf/dfjdkfj/;
+  listen 127.0.0.1:880;
+  listen 27.0.0.1:8080;
+  listen 127.0.0.1:8080;
+  autoindex off;
+  allow POST DELETE   ;
+
+  error_page 34 404 343434 /asdf ;
+  error_page 500 /qwer ;
+
+  location /asdf/ {
+    redirect    /yo/;
+    allow POST DELETE;
+  }
+
+  location /abc/ {
+    cgi    /yo;
+    allow POST;
+  }
+}
