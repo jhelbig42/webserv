@@ -54,8 +54,6 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 
-// think about body is coming in chunks
-// maybe Reaction also needs state
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
 

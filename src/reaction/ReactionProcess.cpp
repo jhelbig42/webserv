@@ -211,19 +211,23 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 
 void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
+	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
 	try {
-		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
+		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+		logging::log2(logging::Debug, "Reaction: read from Client into ServerBuffer: ", received);
+		if (received == -1) //not possible to read anything into the buffer
 			return ; //means we are just done
 	}
 	catch (std::runtime_error &err){
 		initSendFile(CODE_500, FILE_500);
 		return ;
 	}
-	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
-	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
+	
 	if (toReceive > 0)
 	{
 		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
+		logging::log2(logging::Debug, "Reaction: copied from Server Buffer into File: ", copied);
 		if (copied == -1)
 			return ;
 		_receivedContLen += static_cast<size_t>(copied);
