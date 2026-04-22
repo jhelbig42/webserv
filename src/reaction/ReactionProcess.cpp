@@ -54,14 +54,14 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
-	// we just polled for what we nee
+ // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
-  if (Condition & FSockWrite)  
+  else if (Condition & FSockWrite)  
     sendToCGI(Bytes);
-  if (Condition & SockRead)    
+  else if (Condition & SockRead)    
     recvFromClient(Socket, Bytes);
-  if (Condition & SockWrite)   
+  else if (Condition & SockWrite)   
     return sendToClient(Socket, Bytes);
   return false;
 }
