@@ -9,8 +9,13 @@ Handling CGI execution, file uploads, and various HTTP methods (GET, POST, DELET
 
 ### Config Parsing
 
+#### comments
+- every line where the first non whitespace charater is `#` is considered to be a comment and ignored during parsing
+
 #### server
 - when no allowed methods are specified no methods are allowed
+- `autoindex` default to `on`
+- `max_request_body` default to `1024`
 
 #### Locations
 - locations allow more finegrained configuration for different resources
