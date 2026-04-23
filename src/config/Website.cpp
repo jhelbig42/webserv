@@ -1,5 +1,6 @@
 #include "Website.hpp"
 
+#include "CompileTimeConstants.hpp"
 #include "HttpMethods.hpp"
 #include "Location.hpp"
 #include <algorithm>
@@ -20,7 +21,7 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Website::Website(void)
-    : _setMembers(0), _maxReqBody(0), _root("/"), _autoindex(true), _allow(0) {
+    : _setMembers(0), _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"), _autoindex(AUTOINDEX_DEFAULT), _allow(0) {
 }
 
 Website::Website(const Website &Other)
