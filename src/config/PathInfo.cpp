@@ -20,12 +20,6 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &Substitute,
                                   const std::string &LocationPath);
 
-// PathInfo::PathInfo(void)
-//     : _cgiPath("/"), _realPath("/"), _action(Default), _code(0), _allow(0),
-//       _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"),
-//       _autoindex(AUTOINDEX_DEFAULT) {
-// }
-
 PathInfo::PathInfo(const PathInfo &Other)
     : _cgiPath(Other._cgiPath), _realPath(Other._realPath),
       _action(Other._action), _code(Other._code), _allow(Other._allow),
@@ -103,7 +97,7 @@ PathInfo::PathInfo(const Website &Site, const std::string &Path)
 
   if (_action != Return)
     _realPath =
-        Site.getRoot().substr(0, Site.getRoot().length() - 1) + _realPath;
+        _root.substr(0, _root.length() - 1) + _realPath;
 }
 const std::string &PathInfo::getCgiPath(void) const {
   return _cgiPath;
