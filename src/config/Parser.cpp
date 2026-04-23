@@ -63,6 +63,12 @@ void Parser::skipSep(void) {
     ;
 }
 
+void Parser::gap(void) {
+  if (!sep())
+    throwTokenError("expected whitespace");
+  skipSep();
+}
+
 TokenType::Type Parser::nextType(void) const {
   return peek().getType().type;
 }
@@ -110,4 +116,44 @@ unsigned int Parser::parseUnsignedInt(void) {
     throwTokenError("number not in valid range");
   eat();
   return static_cast<unsigned int>(code); // safe becuase of prior check
+}
+
+std::string Parser::parseResource(void) {
+  std::string path = matchGetLexeme(TokenType::Slash);
+  if (sep() || nextType() == TokenType::Semicolon)
+    return path;
+  while (!isNextType(TokenType::Semicolon) &&
+         !isNextType(TokenType::Newline) &&
+         !isNextType(TokenType::Whitespace)) {
+    path += peek().getLexeme();
+    eat();
+  }
+  if (path[path.length() - 1] == '/')
+    throwTokenError("expected a resource not a path");
+  skipSep();
+  if (nextType() != TokenType::Semicolon)
+    throwTokenError("expected ';'");
+  return path;
+}
+
+std::string Parser::parseAbsPath(void) {
+  std::string path = matchGetLexeme(TokenType::Slash);
+  if (sep() || isNextType(TokenType::Semicolon))
+    return path;
+  while (true) {
+    if (nextType() == TokenType::Slash)
+      throwTokenError("expected '/'");
+    while (!isNextType(TokenType::Semicolon) &&
+           !isNextType(TokenType::Newline) &&
+           !isNextType(TokenType::Whitespace) &&
+           !isNextType(TokenType::Slash)) {
+      path += peek().getLexeme();
+      eat();
+    }
+    if (!match(TokenType::Slash))
+      throwTokenError("expected '/'");
+    path += "/";
+    if (sep() || isNextType(TokenType::Semicolon))
+      return path;
+  }
 }

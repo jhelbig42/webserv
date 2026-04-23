@@ -45,12 +45,6 @@ void Parser::parseEntry(Website &Site) {
     throwTokenError("invalid Entry");
 }
 
-void Parser::gap(void) {
-  if (!sep())
-    throwTokenError("expected whitespace");
-  skipSep();
-}
-
 void Parser::populateInterface(Listen &Interface) {
   addIpv4(Interface);
   if (!match(TokenType::Colon))
@@ -140,135 +134,15 @@ void Parser::parseLocation(Website &Site) {
   if (!match(TokenType::BracesLeft))
     throwTokenError("expected '{'");
   while (!match(TokenType::BracesRight)) {
-    parseLocationEntry(newLocation);
+    parseEntry(newLocation);
   }
   Site.addLocation(newLocation);
-}
-
-void Parser::parseLocation(Location &Loc) {
-  gap();
-  if (nextType() != TokenType::Slash)
-    throwTokenError("expected '/'");
-  std::string path = "";
-  while (!isNextType(TokenType::Newline) &&
-         !isNextType(TokenType::Whitespace) &&
-         !isNextType(TokenType::BracesLeft)) {
-    path += peek().getLexeme();
-    eat();
-  }
-  skipSep();
-  Location newLocation(path);
-  if (!match(TokenType::BracesLeft))
-    throwTokenError("expected '{'");
-  while (!match(TokenType::BracesRight)) {
-    parseLocationEntry(newLocation);
-  }
-  Loc.addLocation(newLocation);
-}
-
-void Parser::validateLocationEnty(const Location &Loc) {
-  if (Loc.getType() != Location::None &&
-      (isNextType(TokenType::Return) || isNextType(TokenType::Cgi) ||
-       isNextType(TokenType::Redirect)))
-    throwTokenError("location already has a type");
-  if (Loc.getLocations().size() != 0) {
-    if (isNextType(TokenType::Return))
-      throwTokenError("locations that nest locations can not define return");
-    if (isNextType(TokenType::Cgi))
-      throwTokenError("locations that nest locations can not define cgi");
-  }
-  if (isNextType(TokenType::Location)) {
-    if (Loc.getType() == Location::Return)
-      throwTokenError(
-          "locations that define return can not nest other locations");
-    if (Loc.getType() == Location::Cgi)
-      throwTokenError("locations that define cgi can not nest other locations");
-  }
-}
-
-void Parser::parseLocationEntry(Location &Loc) {
-  skipSep();
-  validateLocationEnty(Loc);
-  if (match(TokenType::Return)) {
-    parseReturn(Loc);
-  } else if (match(TokenType::Redirect)) {
-    parseRedirect(Loc);
-  } else if (match(TokenType::Allow)) {
-    parseLocationAllow(Loc);
-  } else if (match(TokenType::Cgi)) {
-    parseCgi(Loc);
-  } else if (match(TokenType::Location)) {
-    parseLocation(Loc);
-  } else
-    throwTokenError("invalid location entry");
-  skipSep();
-}
-
-void Parser::parseReturn(Location &Loc) {
-  gap();
-  const unsigned int code = parseUnsignedInt();
-  skipSep();
-  const std::string url = parseWord();
-  skipSep();
-  if (!match(TokenType::Semicolon))
-    throwTokenError("expected ';'");
-  Loc.setReturn(code, url); 
 }
 
 void Parser::parseMaxReqBody(Website &Site) {
   gap();
   Site.setMaxReqBody(parseUnsignedInt());
   skipSep();
-  if (!match(TokenType::Semicolon))
-    throwTokenError("expected ';'");
-}
-
-void Parser::parseRedirect(Location &Loc) {
-  gap();
-  std::string pathRedirect = parseWord();
-  if (pathRedirect == "")
-    throwTokenError("not a valid redirect");
-  if (Loc.getPath()[Loc.getPath().length() - 1] != '/'
-    && pathRedirect[pathRedirect.length() - 1] == '/')
-    throwTokenError("resource can not be redirected to path");
-  skipSep();
-  if (!match(TokenType::Semicolon))
-    throwTokenError("expected ';'");
-  Loc.setRedirect(pathRedirect);
-}
-
-void Parser::parseCgi(Location &Loc) {
-  gap();
-  const std::string pathCgi = parseResource();
-  if (pathCgi == "")
-    throwTokenError("not a valid cgi path");
-  skipSep();
-  if (!match(TokenType::Semicolon))
-    throwTokenError("expected ';'");
-  Loc.setCgi(pathCgi);
-}
-
-void Parser::parseLocationAllow(Location &Loc) {
-  gap();
-  while (!isNextType(TokenType::Semicolon)) {
-    if (match(TokenType::Asterisk)) {
-      Loc.addAllow(Head);
-      Loc.addAllow(Get);
-      Loc.addAllow(Post);
-      Loc.addAllow(Delete);
-    }
-    else if (match(TokenType::Head))
-      Loc.addAllow(Head);
-    else if (match(TokenType::Get))
-      Loc.addAllow(Get);
-    else if (match(TokenType::Post))
-      Loc.addAllow(Post);
-    else if (match(TokenType::Delete))
-      Loc.addAllow(Delete);
-    else
-      throwTokenError("unrecognized HTTP method");
-    skipSep();
-  }
   if (!match(TokenType::Semicolon))
     throwTokenError("expected ';'");
 }
@@ -301,45 +175,5 @@ void Parser::addPort(Listen &Interface) {
     Interface.port = matchGetLexeme(TokenType::Number);
   } catch (...) {
     throwTokenError("expected a number");
-  }
-}
-
-std::string Parser::parseResource(void) {
-  std::string path = matchGetLexeme(TokenType::Slash);
-  if (sep() || nextType() == TokenType::Semicolon)
-    return path;
-  while (!isNextType(TokenType::Semicolon) &&
-         !isNextType(TokenType::Newline) &&
-         !isNextType(TokenType::Whitespace)) {
-    path += peek().getLexeme();
-    eat();
-  }
-  if (path[path.length() - 1] == '/')
-    throwTokenError("expected a resource not a path");
-  skipSep();
-  if (nextType() != TokenType::Semicolon)
-    throwTokenError("expected ';'");
-  return path;
-}
-
-std::string Parser::parseAbsPath(void) {
-  std::string path = matchGetLexeme(TokenType::Slash);
-  if (sep() || isNextType(TokenType::Semicolon))
-    return path;
-  while (true) {
-    if (nextType() == TokenType::Slash)
-      throwTokenError("expected '/'");
-    while (!isNextType(TokenType::Semicolon) &&
-           !isNextType(TokenType::Newline) &&
-           !isNextType(TokenType::Whitespace) &&
-           !isNextType(TokenType::Slash)) {
-      path += peek().getLexeme();
-      eat();
-    }
-    if (!match(TokenType::Slash))
-      throwTokenError("expected '/'");
-    path += "/";
-    if (sep() || isNextType(TokenType::Semicolon))
-      return path;
   }
 }

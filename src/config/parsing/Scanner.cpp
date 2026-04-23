@@ -2,6 +2,7 @@
 
 #include "Token.hpp"
 #include "TokenType.hpp"
+#include <cctype>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
@@ -9,7 +10,21 @@
 #include <stdexcept>
 #include <string>
 
+static bool isComment(const std::string &Line);
+
 Scanner::~Scanner() { }
+
+static bool isComment(const std::string &Line) {
+  std::string::const_iterator it = Line.begin();
+  while (it != Line.end()) {
+    if (!isspace(*it))
+      break;
+    ++it;
+  }
+  if (it == Line.end() || *it == '#')
+    return true;
+  return false;
+}
 
 Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
   std::ifstream inf(File);
@@ -20,7 +35,8 @@ Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
     std::getline(inf, line);
     if (!inf.good())
       break;
-    scanLine(line);
+    if (!isComment(line))
+      scanLine(line);
     addNewline();
   }
   if (!inf.eof())

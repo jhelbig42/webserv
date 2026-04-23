@@ -1,5 +1,6 @@
 #include "Website.hpp"
 
+#include "CompileTimeConstants.hpp"
 #include "HttpMethods.hpp"
 #include "Location.hpp"
 #include <algorithm>
@@ -20,7 +21,7 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Website::Website(void)
-    : _setMembers(0), _maxReqBody(0), _root(""), _autoindex(true), _allow(0) {
+    : _setMembers(0), _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"), _autoindex(AUTOINDEX_DEFAULT), _allow(0) {
 }
 
 Website::Website(const Website &Other)
@@ -211,7 +212,7 @@ void Website::addErrorPage(const unsigned int Code, const std::string &Path) {
   _errorPages.insert(std::pair<unsigned int, std::string>(Code, Path));
 }
 
-const char *Website::getErrorPage(const unsigned int Code) {
+const char *Website::getErrorPage(const unsigned int Code) const {
   const std::map<unsigned int, std::string>::const_iterator it =
       _errorPages.find(Code);
   if (it == _errorPages.end())
@@ -236,8 +237,7 @@ const std::map<unsigned int, std::string> &Website::getErrorPages(void) const {
 }
 
 static void printMaxReqBody(std::ostream &Os, const Website &Site) {
-  if (Site.isSetMaxReqBody())
-    Os << "max_request_body: " << Site.getMaxReqBody() << '\n';
+  Os << "max_request_body: " << Site.getMaxReqBody() << '\n';
 }
 
 PathInfo Website::getPathInfo(const std::string &Path) const {

@@ -26,6 +26,7 @@ SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
 SRC			+= PathInfo.cpp
 SRC			+= ParseServer.cpp
+SRC			+= ParseLocation.cpp
 SRC			+= Parser.cpp
 SRC			+= UnexpectedToken.cpp
 SRC			+= Location.cpp
