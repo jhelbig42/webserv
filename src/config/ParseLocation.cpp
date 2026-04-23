@@ -12,6 +12,8 @@ void Parser::parseEntry(Location &Loc) {
     parseAutoindex(Loc);
   } else if (match(TokenType::Redirect)) {
     parseRedirect(Loc);
+  } else if (match(TokenType::ErrorPage)) {
+    parseErrorPage(Loc);
   } else if (match(TokenType::MaxRequestBody)) {
     parseMaxReqBody(Loc);
   } else if (match(TokenType::Allow)) {

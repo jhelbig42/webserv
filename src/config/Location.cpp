@@ -8,19 +8,18 @@
 static void printLocations(std::ostream &Os, const Location &Loc);
 
 Location::Location()
-    : _type(None), _setMembers(0), _path(""),
-      _return(ReturnData()), _allow(0), _redirect(""),
-      _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"),
+    : _type(None), _setMembers(0), _path(""), _return(ReturnData()), _allow(0),
+      _redirect(""), _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"),
       _autoindex(AUTOINDEX_DEFAULT) {
 }
 
 Location::Location(const Location &Other)
     : _type(Other._type), _setMembers(Other._setMembers), _path(Other._path),
-      _return(Other._return), _allow(Other._allow), _redirect(Other._redirect), _locations(Other._locations),
-      _maxReqBody(Other._maxReqBody),
-      _root(Other._root), _autoindex(Other._autoindex) {
+      _return(Other._return), _allow(Other._allow), _redirect(Other._redirect),
+      _locations(Other._locations), _maxReqBody(Other._maxReqBody),
+      _root(Other._root), _errorPages(Other._errorPages),
+      _autoindex(Other._autoindex) {
 }
-
 Location &Location::operator=(const Location &Other) {
   if (this != &Other) {
     _type = Other._type;
@@ -30,6 +29,7 @@ Location &Location::operator=(const Location &Other) {
     _redirect = Other._redirect;
     _locations = Other._locations;
     _maxReqBody = Other._maxReqBody;
+    _errorPages = Other._errorPages;
     _root = Other._root;
     _autoindex = Other._autoindex;
   }
@@ -40,10 +40,9 @@ Location::~Location() {
 }
 
 Location::Location(const std::string &Path)
-    : _type(None), _setMembers(0), _path(Path),
-      _return(ReturnData()), _allow(0), _redirect(""),
-      _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"),
-      _autoindex(AUTOINDEX_DEFAULT) {
+    : _type(None), _setMembers(0), _path(Path), _return(ReturnData()),
+      _allow(0), _redirect(""), _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
+      _root("/"), _autoindex(AUTOINDEX_DEFAULT) {
 }
 
 Location::Type Location::getType(void) const {
