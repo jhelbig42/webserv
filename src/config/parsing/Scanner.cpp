@@ -2,6 +2,7 @@
 
 #include "Token.hpp"
 #include "TokenType.hpp"
+#include <cctype>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
@@ -9,18 +10,18 @@
 #include <stdexcept>
 #include <string>
 
-static bool isComment(const std::string &line);
+static bool isComment(const std::string &Line);
 
 Scanner::~Scanner() { }
 
-static bool isComment(const std::string &line) {
-  std::string::const_iterator it = line.begin();
-  while (it != line.end()) {
+static bool isComment(const std::string &Line) {
+  std::string::const_iterator it = Line.begin();
+  while (it != Line.end()) {
     if (!isspace(*it))
       break;
     ++it;
   }
-  if (it == line.end() || *it == '#')
+  if (it == Line.end() || *it == '#')
     return true;
   return false;
 }

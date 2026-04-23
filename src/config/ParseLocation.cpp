@@ -1,7 +1,11 @@
 #include "Parser.hpp"
-#include "Location.hpp"
 
-void Parser::parseEntry(Location &Loc) {
+#include "HttpMethods.hpp"
+#include "Location.hpp"
+#include "TokenType.hpp"
+#include <list>
+
+void Parser::parseEntry(Location &Loc) { //NOLINT(misc-no-recursion)
   skipSep();
   validateLocationEnty(Loc);
   if (match(TokenType::Return)) {
@@ -87,7 +91,7 @@ void Parser::parseErrorPage(Location &Loc) {
     throwTokenError("expected ';'");
 }
 
-void Parser::parseLocation(Location &Loc) {
+void Parser::parseLocation(Location &Loc) { //NOLINT(misc-no-recursion)
   gap();
   if (nextType() != TokenType::Slash)
     throwTokenError("expected '/'");
@@ -110,7 +114,7 @@ void Parser::parseLocation(Location &Loc) {
 
 void Parser::parseRedirect(Location &Loc) {
   gap();
-  std::string pathRedirect = parseWord();
+  const std::string pathRedirect = parseWord();
   if (pathRedirect == "")
     throwTokenError("not a valid redirect");
   skipSep();

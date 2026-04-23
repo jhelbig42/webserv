@@ -6,8 +6,10 @@
 #include <string>
 
 struct ReturnData {
+  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
   unsigned int code;
   std::string url;
+  // NOLINTEND(misc-non-private-member-variables-in-classes)
   ReturnData(void): code(0), url("") {}
 };
 

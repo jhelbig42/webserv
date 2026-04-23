@@ -1,12 +1,15 @@
 #include "Website.hpp"
 
-#include "CompileTimeConstants.hpp"
 #include "HttpMethods.hpp"
 #include "Location.hpp"
 #include "Logging.hpp"
+#include <cstddef>
 #include <list>
+#include <map>
 #include <ostream>
 #include <string>
+
+#define MAX_ERROR_CODE_PRINT 1000
 
 static void printAutoindex(std::ostream &Os, const PathInfo &Info);
 static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
@@ -48,7 +51,7 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
 PathInfo::~PathInfo(void) {
 }
 
-void PathInfo::populateFromLocation(const Location &Loc) {
+void PathInfo::populateFromLocation(const Location &Loc) { //NOLINT(misc-no-recursion)
   if (Loc.isSetAllow())
     _allow = Loc.getAllow();
   if (Loc.isSetMaxReqBody())
@@ -56,7 +59,7 @@ void PathInfo::populateFromLocation(const Location &Loc) {
   if (Loc.isSetRoot())
     _root = Loc.getRoot();
   if (Loc.isSetAutoindex())
-    _root = Loc.getAutoindex();
+    _autoindex = Loc.getAutoindex();
   _errorPagesLocation = &Loc.getErrorPages();
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
@@ -76,7 +79,7 @@ void PathInfo::populateFromLocation(const Location &Loc) {
   }
 }
 
-void PathInfo::resolveLocations(const std::list<Location> &Locations) {
+void PathInfo::resolveLocations(const std::list<Location> &Locations) { //NOLINT(misc-no-recursion)
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
     if (match(_realPath, it->getPath())) {
@@ -161,7 +164,7 @@ const char *PathInfo::getErrorPage(const unsigned int Code) const {
 }
 
 static void printErrorPages(std::ostream &Os, const PathInfo &Info) {
-  for (unsigned int i = 0; i != 1000; ++i) {
+  for (unsigned int i = 0; i != MAX_ERROR_CODE_PRINT; ++i) {
     const char *page = Info.getErrorPage(i);
     if (page == NULL)
       continue;

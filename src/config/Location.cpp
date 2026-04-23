@@ -2,8 +2,11 @@
 
 #include "CompileTimeConstants.hpp"
 #include "HttpMethods.hpp"
+#include <cstddef>
 #include <list>
+#include <map>
 #include <ostream>
+#include <utility>
 
 static void printLocations(std::ostream &Os, const Location &Loc);
 
@@ -13,16 +16,17 @@ Location::Location()
       _autoindex(AUTOINDEX_DEFAULT) {
 }
 
-Location::Location(const Location &Other)
+Location::Location(const Location &Other) //NOLINT(misc-no-recursion)
     : _type(Other._type), _setMembers(Other._setMembers), _path(Other._path),
       _return(Other._return), _allow(Other._allow), _redirect(Other._redirect),
       _locations(Other._locations), _maxReqBody(Other._maxReqBody),
       _root(Other._root), _errorPages(Other._errorPages),
       _autoindex(Other._autoindex) {
 }
-Location &Location::operator=(const Location &Other) {
+Location &Location::operator=(const Location &Other) { //NOLINT(misc-no-recursion)
   if (this != &Other) {
     _type = Other._type;
+    _setMembers = Other._setMembers;
     _path = Other._path;
     _return = Other._return;
     _allow = Other._allow;
@@ -81,8 +85,8 @@ void Location::setRoot(const std::string &RootDir) {
   _setMembers |= Root;
 }
 
-void Location::setAutoindex(const bool isOn) {
-  _autoindex = isOn;
+void Location::setAutoindex(const bool IsOn) {
+  _autoindex = IsOn;
   _setMembers |= Autoindex;
 }
 
@@ -137,7 +141,7 @@ bool Location::isAllowed(const HttpMethod Method) const {
   return _allow & Method;
 }
 
-std::ostream &operator<<(std::ostream &Os, const Location &Loc) {
+std::ostream &operator<<(std::ostream &Os, const Location &Loc) { //NOLINT(misc-no-recursion)
   Os << "location " << Loc.getPath() << " {\n";
   if (Loc.isSetAllow()) {
     Os << "  allow:";
@@ -178,7 +182,7 @@ const std::list<Location> &Location::getLocations(void) const {
   return _locations;
 }
 
-static void printLocations(std::ostream &Os, const Location &Loc) {
+static void printLocations(std::ostream &Os, const Location &Loc) { //NOLINT(misc-no-recursion)
   std::list<Location>::const_iterator it = Loc.getLocations().begin();
   while (it != Loc.getLocations().end()) {
     Os << *it << '\n';
