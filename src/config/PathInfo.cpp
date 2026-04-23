@@ -135,10 +135,6 @@ static bool isPrefix(const std::string &Prefix, const std::string &Str) {
   return Str.substr(0, Prefix.size()) == Prefix;
 }
 
-static bool isFullMatch(const std::string &Compare, const std::string &Str) {
-  return Compare == Str;
-}
-
 static bool match(const std::string &Path, const std::string &LocationPath) {
   if (LocationPath[LocationPath.length() - 1] == '/')
     return isPrefix(LocationPath, Path);
@@ -220,31 +216,28 @@ std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
   }
   return Os << "\n}\n";
 }
-//
-// static int	check_pattern(const char *str, const char *mask, const char *pat)
-// {
-// 	int	checkpoint;
-// 	int	i;
-//
-// 	checkpoint = -1;
-// 	i = -1;
-// 	while (1)
-// 	{
-// 		while (pat[i + 1] == '*' && mask[i + 1])
-// 		{
-// 			i++;
-// 			checkpoint = i;
-// 		}
-// 		if (*str == '\0')
-// 			return (pat[i + 1] == '\0');
-// 		if (pat[i + 1] == *str)
-// 			i++;
-// 		else if (checkpoint != -1 && pat[checkpoint + 1] == *str)
-// 			i = checkpoint + 1;
-// 		else if (checkpoint != -1)
-// 			i = checkpoint;
-// 		else
-// 			return (0);
-// 		str++;
-// 	}
-// }
+
+static bool isFullMatch(const std::string &Pat, const std::string &Str) {
+
+  std::string::const_iterator checkpoint = Pat.end();
+  std::string::const_iterator itPat = Pat.begin();
+  std::string::const_iterator itStr = Str.begin();
+
+  while (true) {
+    while (*itPat == '*') {
+      checkpoint = itPat;
+      ++itPat;
+    }
+    if (itStr == Str.end())
+      return itPat == Pat.end();
+    if (*itPat == *itStr)
+      ++itPat;
+    else if (checkpoint != Pat.end() && *(checkpoint + 1) == *itStr)
+      itPat = checkpoint + 2;
+    else if (checkpoint != Pat.end())
+      itPat = checkpoint;
+    else
+      return false;
+    ++itStr;
+  }
+}
