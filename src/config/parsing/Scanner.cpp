@@ -9,7 +9,21 @@
 #include <stdexcept>
 #include <string>
 
+static bool isComment(const std::string &line);
+
 Scanner::~Scanner() { }
+
+static bool isComment(const std::string &line) {
+  std::string::const_iterator it = line.begin();
+  while (it != line.end()) {
+    if (!isspace(*it))
+      break;
+    ++it;
+  }
+  if (it == line.end() || *it == '#')
+    return true;
+  return false;
+}
 
 Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
   std::ifstream inf(File);
@@ -20,7 +34,8 @@ Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
     std::getline(inf, line);
     if (!inf.good())
       break;
-    scanLine(line);
+    if (!isComment(line))
+      scanLine(line);
     addNewline();
   }
   if (!inf.eof())
