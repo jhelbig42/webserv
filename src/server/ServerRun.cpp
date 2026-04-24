@@ -80,6 +80,7 @@ void Server::process(void) {
     it++;
   }
   serveAll();
+  updateEvents();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   _newFdBatch.clear();
 }
@@ -93,6 +94,32 @@ void Server::checkForNewCGI(int Fd) {
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
 	}
 	return;
+}
+
+void Server::updateEvents(void){
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+  	int type = getSocketType(it->fd);
+	int conditionsWanted;
+	if (type == IS_CLIENT) {
+  		const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
+		conditionsWanted = _clientMap.at(it->fd)._conditionsWanted;
+
+	}
+
+
+    handleCondition(*it, type); // sets conditions in client Connection, or accepts
+                          // new connections
+    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+      closeAndDelete(it->fd, type);
+      it = _fds.erase(it);
+      continue;
+    }
+	if (type == IS_CLIENT){
+		checkForNewCGI(it->fd);	
+	}
+    it->revents = 0;
+    it++;
+  }
 }
 
 void Server::closeAndDelete(int Fd, int type) {

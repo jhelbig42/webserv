@@ -70,6 +70,7 @@ class Server {
 	void process(void);
 	int  getSocketType(int Fd);
 	void serveAll(void);
+	void updateEvents(void);
 	bool shouldBeDeleted(int Fd, int Type);
 	void checkForNewCGI(int Fd);
 	void closeAndDelete(int Fd, int Type);

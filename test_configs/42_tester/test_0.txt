@@ -1,0 +1,18 @@
+server{
+  listen 127.0.0.1:8080;
+  allow GET;
+  location /*.bla {
+      allow POST;
+      cgi /home/hallison/webserv/cgi_tester;
+  }
+  location /post_body {
+      allow POST;
+  	  max_request_body 100;
+  }
+  location /directory/ {
+      allow GET;
+      root /home/hallison/webserv/YoupiBanane/;
+	  error_page 42 /youpi.bad_extension;
+  }
+}
+
