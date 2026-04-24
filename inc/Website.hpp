@@ -107,8 +107,7 @@ private:
 
   unsigned int _maxReqBody;
   std::string _root;
-  const std::map<unsigned int, std::string> *_errorPagesWebsite;
-  const std::map<unsigned int, std::string> *_errorPagesLocation;
+  std::list<const std::map<unsigned int, std::string> *> _errorPages;
   bool _autoindex;
 };
 

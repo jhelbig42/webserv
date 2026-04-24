@@ -27,9 +27,7 @@ PathInfo::PathInfo(const PathInfo &Other)
     : _cgiPath(Other._cgiPath), _realPath(Other._realPath),
       _action(Other._action), _code(Other._code), _allow(Other._allow),
       _maxReqBody(Other._maxReqBody), _root(Other._root),
-      _errorPagesWebsite(Other._errorPagesWebsite),
-      _errorPagesLocation(Other._errorPagesLocation),
-      _autoindex(Other._autoindex) {
+      _errorPages(Other._errorPages), _autoindex(Other._autoindex) {
 }
 
 PathInfo &PathInfo::operator=(const PathInfo &Other) {
@@ -41,8 +39,7 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
     _allow = Other._allow;
     _maxReqBody = Other._maxReqBody;
     _root = Other._root;
-    _errorPagesWebsite = Other._errorPagesWebsite;
-    _errorPagesLocation = Other._errorPagesLocation;
+    _errorPages = Other._errorPages;
     _autoindex = Other._autoindex;
   }
   return *this;
@@ -51,7 +48,8 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
 PathInfo::~PathInfo(void) {
 }
 
-void PathInfo::populateFromLocation(const Location &Loc) { //NOLINT(misc-no-recursion)
+void PathInfo::populateFromLocation(
+    const Location &Loc) { // NOLINT(misc-no-recursion)
   if (Loc.isSetAllow())
     _allow = Loc.getAllow();
   if (Loc.isSetMaxReqBody())
@@ -60,7 +58,7 @@ void PathInfo::populateFromLocation(const Location &Loc) { //NOLINT(misc-no-recu
     _root = Loc.getRoot();
   if (Loc.isSetAutoindex())
     _autoindex = Loc.getAutoindex();
-  _errorPagesLocation = &Loc.getErrorPages();
+  _errorPages.push_front(&Loc.getErrorPages());
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
@@ -79,7 +77,8 @@ void PathInfo::populateFromLocation(const Location &Loc) { //NOLINT(misc-no-recu
   }
 }
 
-void PathInfo::resolveLocations(const std::list<Location> &Locations) { //NOLINT(misc-no-recursion)
+void PathInfo::resolveLocations(
+    const std::list<Location> &Locations) { // NOLINT(misc-no-recursion)
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
     if (match(_realPath, it->getPath())) {
@@ -92,15 +91,14 @@ void PathInfo::resolveLocations(const std::list<Location> &Locations) { //NOLINT
 PathInfo::PathInfo(const Website &Site, const std::string &Path)
     : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
       _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
-      _root(Site.getRoot()), _errorPagesWebsite(&Site.getErrorPages()),
-      _errorPagesLocation(&Site.getErrorPages()),
-      _autoindex(Site.getAutoindex()) {
+      _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {
+
+  _errorPages.push_front(&Site.getErrorPages());
 
   resolveLocations(Site.getLocations());
 
   if (_action != Return)
-    _realPath =
-        _root.substr(0, _root.length() - 1) + _realPath;
+    _realPath = _root.substr(0, _root.length() - 1) + _realPath;
 }
 const std::string &PathInfo::getCgiPath(void) const {
   return _cgiPath;
@@ -153,13 +151,15 @@ static std::string substitutePath(const std::string &Path,
 }
 
 const char *PathInfo::getErrorPage(const unsigned int Code) const {
-  std::map<unsigned int, std::string>::const_iterator it =
-      _errorPagesLocation->find(Code);
-  if (it != _errorPagesLocation->end())
-    return it->second.c_str();
-  it = _errorPagesWebsite->find(Code);
-  if (it != _errorPagesWebsite->end())
-    return it->second.c_str();
+  std::list<const std::map<unsigned int, std::string> *>::const_iterator itLst =
+      _errorPages.begin();
+  std::map<unsigned int, std::string>::const_iterator itMap;
+  while (itLst != _errorPages.end()) {
+    itMap = (*itLst)->find(Code);
+    if (itMap != (*itLst)->end())
+      return itMap->second.c_str();
+    ++itLst;
+  }
   return NULL;
 }
 
