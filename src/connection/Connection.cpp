@@ -59,6 +59,10 @@ Conditions Connection::getConditions(void) const {
 }
 */
 
+int Connection::getConditionsWanted(void) const {
+  return _conditionsWanted;
+}
+
 // Setters
 void Connection::scheduleForDemolition(void) {
   _delete = true;
@@ -84,6 +88,8 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 
 	}
 }
+
+// double check this logic below
 
 void Connection::serve(void) {
 	//if request is not yet complete, read and parse until it is

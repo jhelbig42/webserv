@@ -100,26 +100,46 @@ void Server::updateEvents(void){
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
   	int type = getSocketType(it->fd);
 	int conditionsWanted;
+	if (type == IS_LISTENER) {
+		return;
+	}
 	if (type == IS_CLIENT) {
-  		const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
-		conditionsWanted = _clientMap.at(it->fd)._conditionsWanted;
-
+		conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
+		it->events = determineEventsClient(conditionsWanted);
 	}
-
-
-    handleCondition(*it, type); // sets conditions in client Connection, or accepts
-                          // new connections
-    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
-      closeAndDelete(it->fd, type);
-      it = _fds.erase(it);
-      continue;
-    }
-	if (type == IS_CLIENT){
-		checkForNewCGI(it->fd);	
+	if (type == IS_FWD) {
+		Connection *clientConnection =_fwdMap.at(it->fd);
+		conditionsWanted = clientConnection->getConditionsWanted();
+		it->events = determineEventsFwd(conditionsWanted);
 	}
-    it->revents = 0;
     it++;
   }
+}
+
+int Server::determineEventsClient(int conditionsWanted){
+
+	short events = POLLERR | POLLHUP;
+	if (conditionsWanted & SockWrite == SockWrite) {
+		events = events | POLLOUT | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	if (conditionsWanted & SockRead == SockRead) {
+		events = events | POLLIN | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+}
+
+int Server::determineEventsFwd(int conditionsWanted){
+
+	short events = POLLERR | POLLHUP;
+	if (conditionsWanted & FSockWrite == SockWrite) {
+		events = events | POLLOUT | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	if (conditionsWanted & FSockRead == SockRead) {
+		events = events | POLLIN | POLLRDHUP;
+		// TODO rdhup good here?
+	}
 }
 
 void Server::closeAndDelete(int Fd, int type) {
