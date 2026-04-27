@@ -52,3 +52,7 @@ void Server::printFcntlFlags(const int Sock) {
   }
 }
 */
+
+void	Server::printFds(void) {
+	
+}

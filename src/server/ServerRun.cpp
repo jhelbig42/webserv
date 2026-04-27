@@ -102,6 +102,7 @@ void Server::updateEvents(void){
 	int conditionsWanted;
 	if (type == IS_LISTENER) {
 		it++;
+		continue;
 	}
 	if (type == IS_CLIENT) {
 		conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
