@@ -132,11 +132,11 @@ int Server::determineEventsClient(int conditionsWanted){
 int Server::determineEventsFwd(int conditionsWanted){
 
 	short events = POLLERR | POLLHUP;
-	if (conditionsWanted & FSockWrite == SockWrite) {
+	if (conditionsWanted & FSockWrite) {
 		events = events | POLLOUT | POLLRDHUP;
 		// TODO rdhup good here?
 	}
-	if (conditionsWanted & FSockRead == SockRead) {
+	if (conditionsWanted & FSockRead) {
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
