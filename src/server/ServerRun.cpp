@@ -101,7 +101,7 @@ void Server::updateEvents(void){
   	int type = getSocketType(it->fd);
 	int conditionsWanted;
 	if (type == IS_LISTENER) {
-		return;
+		it++;
 	}
 	if (type == IS_CLIENT) {
 		conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
