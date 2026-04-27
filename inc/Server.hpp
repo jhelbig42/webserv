@@ -71,8 +71,8 @@ class Server {
 	int  getSocketType(int Fd);
 	void serveAll(void);
 	void updateEvents(void);
-	int	 determineEventsClient(int Fd);
-	int  determineEventsFwd(int Fd);
+	short	 determineEventsClient(int Fd);
+	short  determineEventsFwd(int Fd);
 	bool shouldBeDeleted(int Fd, int Type);
 	void checkForNewCGI(int Fd);
 	void closeAndDelete(int Fd, int Type);

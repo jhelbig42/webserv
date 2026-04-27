@@ -116,7 +116,7 @@ void Server::updateEvents(void){
   }
 }
 
-int Server::determineEventsClient(int conditionsWanted){
+short Server::determineEventsClient(int conditionsWanted){
 
 	short events = POLLERR | POLLHUP;
 	if (conditionsWanted & SockWrite == SockWrite) {
@@ -127,9 +127,10 @@ int Server::determineEventsClient(int conditionsWanted){
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
+	return (events);
 }
 
-int Server::determineEventsFwd(int conditionsWanted){
+short Server::determineEventsFwd(int conditionsWanted){
 
 	short events = POLLERR | POLLHUP;
 	if (conditionsWanted & FSockWrite) {
@@ -140,6 +141,7 @@ int Server::determineEventsFwd(int conditionsWanted){
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
+	return (events);
 }
 
 void Server::closeAndDelete(int Fd, int type) {
