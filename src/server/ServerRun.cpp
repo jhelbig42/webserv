@@ -119,11 +119,11 @@ void Server::updateEvents(void){
 short Server::determineEventsClient(int conditionsWanted){
 
 	short events = POLLERR | POLLHUP;
-	if (conditionsWanted & SockWrite == SockWrite) {
+	if (conditionsWanted & SockWrite) {
 		events = events | POLLOUT | POLLRDHUP;
 		// TODO rdhup good here?
 	}
-	if (conditionsWanted & SockRead == SockRead) {
+	if (conditionsWanted & SockRead) {
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
