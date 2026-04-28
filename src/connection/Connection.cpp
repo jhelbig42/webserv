@@ -99,7 +99,7 @@ void Connection::serve(void) {
 	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
 		&& _react.getProcessType() == Reaction::NotInitialized)
 	{
-		_react.init(_req);
+		_react.init(_req, _sock);
 	}
 	// we have a initialized Reaction - act on it.
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
