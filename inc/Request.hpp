@@ -24,8 +24,8 @@ class Request {
 	public:
 		Request();
 		
-		explicit Request(std::string &input); //just used in test main
-		void init(const std::string &input); // to be removed
+		explicit Request(std::string &Input); //just used in test main
+		void init(const std::string &Input); // to be removed
 
 	/// \brief Resets to default values to be ready for new Request
 	/// Just neccessarry if Connection is kept alive
@@ -55,7 +55,7 @@ class Request {
 		void parseHttp(const std::string &Token);
 
 		bool parseHeadersFromBuffer();
-		void parseHeader(const std::string &headerLine);
+		void parseHeader(const std::string &HeaderLine);
 		
 	
 		Buffer		getBuffer() const;
@@ -80,5 +80,5 @@ class Request {
 		std::string	_queryString;	
 };
 
-std::vector<std::string> split(const std::string &s,
-                               const std::string &delimiter);
+std::vector<std::string> split(const std::string &S,
+                               const std::string &Delimiter);

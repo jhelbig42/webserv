@@ -67,10 +67,10 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
-  void			setTmpPathName(const std::string);
-  void			setFinalPathName(const std::string);
+  void			setTmpPathName(void);
+  void			setFinalPathName(void);
 
-  void setPathInfo(PathInfo PathInfo);
+  void setPathInfo(const PathInfo &PathInfo);
 
 private:
   // sending files + metadata
@@ -86,7 +86,7 @@ private:
 
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
-  void initDelete(const Request &Req);
+  void initDelete(void);
   void initPost(const Request &Req);
   
   void initCGIMethod(const Request &Req);

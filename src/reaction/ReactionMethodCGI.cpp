@@ -1,5 +1,6 @@
+#include "HttpMethods.hpp"
 #include "Reaction.hpp"
-#include "StatusCodes.hpp"
+#include "Request.hpp"
 
 void Reaction::initCGIMethod(const Request &Req){
 	if (Req.getMethod() == Post) {

@@ -50,8 +50,8 @@
 class Buffer {
 public:
   Buffer(void);
-  Buffer(const Buffer &other);
-  Buffer &operator=(const Buffer &other);
+  Buffer(const Buffer &Other);
+  Buffer &operator=(const Buffer &Other);
   ~Buffer(void);
 
   typedef char *iterator;
@@ -61,8 +61,8 @@ public:
   ///
   /// unchecked runtime errors:
   /// index >= getUsed()
-  char &operator[](size_t i);
-  const char &operator[](size_t i) const;
+  char &operator[](size_t I);
+  const char &operator[](size_t I) const;
 
   iterator begin(void);
   const_iterator begin(void) const;

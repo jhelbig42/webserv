@@ -1,5 +1,4 @@
-#include "Conditions.hpp"
-#include "HttpHeaders.hpp"
+#include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
@@ -7,6 +6,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -24,7 +24,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
     	initHeadGet(Req);
     	return;
   	case Delete:
-    	initDelete(Req);
+    	initDelete();
     	return;
   	case Post:
 	  	initPost(Req);
@@ -35,7 +35,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
   }
 }
 
-void Reaction::initDelete(const Request &Req) {
+void Reaction::initDelete(void) {
   errno = 0;
   if (std::remove(_pathInfo.getRealPath().c_str()) != 0) {
     initError(errno);
@@ -55,14 +55,14 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 
-void Reaction::setTmpPathName(const std::string resourceName){
+void Reaction::setTmpPathName(void){
 	std::stringstream sname;
 	sname << _finalPath << _sock;
 	_tmpPath = sname.str();
 }
 
 //also needs the Post path from config
-void Reaction::setFinalPathName(const std::string resourceName){
+void Reaction::setFinalPathName(void){
 	_finalPath = _pathInfo.getRealPath();
 }
 
@@ -72,8 +72,8 @@ void Reaction::initPost(const Request &Req){
 		return;
 
 	//create requested file with write access
-	setFinalPathName(_pathInfo.getRealPath());
-	setTmpPathName(_finalPath);
+	setFinalPathName();
+	setTmpPathName();
 	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);

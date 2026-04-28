@@ -57,15 +57,15 @@ int CGIProcess::getPid() const {
 }
 
 
-void CGIProcess::setPid(pid_t pid){
-	_pid = pid;
+void CGIProcess::setPid(pid_t Pid){
+	_pid = Pid;
 }
 
-void CGIProcess::setInputDone(bool done){
-	_inputDone = done;
+void CGIProcess::setInputDone(bool Done){
+	_inputDone = Done;
 }
 
-void CGIProcess::setCGIPath(std::string Path){
+void CGIProcess::setCGIPath(std::string const &Path){
 	_path = strdup(Path.c_str());
 }
 
@@ -81,18 +81,18 @@ void CGIProcess::clearEnv() {
 }
 
 // Maps the Enum to the actual String Key
-std::string CGIProcess::getEnvKey(EnvMembers member) const {
+std::string CGIProcess::getEnvKey(EnvMembers Member) const {
     static const char* keys[] = {
         "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL", 
         "SERVER_SOFTWARE", "SERVER_INTERFACE", "REQUEST_METHOD", 
         "SCRIPT_NAME", "QUERY_STRING"
     };
-    return keys[member];
+    return keys[Member];
 }
 
 // Maps the Enum to the value retrieved from Request/Script
-std::string CGIProcess::getEnvValue(EnvMembers member, Request& Req, Script& Script) const {
-    switch (member) {
+std::string CGIProcess::getEnvValue(EnvMembers Member, Request& Req, Script& Script) const {
+    switch (Member) {
         case SERVER_NAME:      
 			return Script.getServerName();
         case SERVER_PORT:      
@@ -114,10 +114,10 @@ std::string CGIProcess::getEnvValue(EnvMembers member, Request& Req, Script& Scr
     }
 }
 
-bool CGIProcess::envMember(EnvMembers index, const std::string& key, const std::string& value) {
-    const std::string entry = key + "=" + value;
-    _env[index] = strdup(entry.c_str());
-    return (_env[index] != NULL);
+bool CGIProcess::envMember(EnvMembers Index, const std::string& Key, const std::string& Value) {
+    const std::string entry = Key + "=" + Value;
+    _env[Index] = strdup(entry.c_str());
+    return (_env[Index] != NULL);
 }
 
 bool CGIProcess::createEnv(Request& Req, Script& Script) {
@@ -142,7 +142,7 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
 
 //handling more ScriptTypes?
 
-bool CGIProcess::createArgs(Request &Req, std::string const Path){ 
+bool CGIProcess::createArgs(Request &Req, std::string const &Path){ 
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return false;// error handling
@@ -158,7 +158,7 @@ bool CGIProcess::createArgs(Request &Req, std::string const Path){
 			_args[0] = NULL;
 			break;
 	} 
-	_args[1] = strdup(Req.getResource().c_str());
+	_args[1] = strdup(Path.c_str());
 	_args[2] = NULL;
 	if (!_args[0] || !_args[1])
 		return false;
@@ -197,7 +197,7 @@ bool CGIProcess::initForwardSocket() {
 }
 
 
-bool CGIProcess::init(Request Req, Script Script, std::string Path){
+bool CGIProcess::init(Request Req, Script Script, std::string const &Path){
 	logging::log(logging::Debug, "CGI Process init called");
 
 	// create env:

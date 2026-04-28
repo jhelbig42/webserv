@@ -1,6 +1,5 @@
 
 #include "CGIProcess.hpp"
-#include "Conditions.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Reaction.hpp"
@@ -42,7 +41,7 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
-void Reaction::setPathInfo(PathInfo PathInfo){
+void Reaction::setPathInfo(const PathInfo &PathInfo){
 	_pathInfo = PathInfo;
 }
 
@@ -64,7 +63,6 @@ void Reaction::init(const Request &Req, const int Socket) {
     initSendFile(CODE_400, FILE_400);
     return;
   }
-  std::cout << _pathInfo;
   if (!(_pathInfo.getAllowed() & Req.getMethod())){
 	logging::log(logging::Debug, "Requested method not allowed");
   	initSendFile(CODE_403, NULL);
