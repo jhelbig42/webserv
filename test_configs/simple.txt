@@ -1,6 +1,6 @@
 server{
   listen 127.0.0.1:8080;
-  root /home/    ;
+  root /home/jhelbig/Desktop/webserv_test/    ;
   autoindex off;
-  allow POST;
+  allow POST GET;
 }

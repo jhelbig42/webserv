@@ -83,7 +83,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
-  if(!isCGI(Req)){
+  if(_pathInfo.getCgiPath() == ""){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
 	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
 		  initSendFile(CODE_400, FILE_400);

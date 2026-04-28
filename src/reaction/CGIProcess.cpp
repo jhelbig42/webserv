@@ -201,11 +201,7 @@ bool CGIProcess::initForwardSocket() {
 
 bool CGIProcess::init(Request Req, Script Script){
 	logging::log(logging::Debug, "CGI Process init called");
-	// allowed methods are: Head/Get, Post
-	//still needs to be compared to allowed methods according to config
-	// allowed methods will be handled before Reaction init, along with resolve path
-	// is we are here, the method is allowed
-    
+
 	// create env:
 	if (!createEnv(Req, Script))
 		return false; // error handling in Reaction

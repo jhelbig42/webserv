@@ -24,7 +24,7 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &LocationPath);
 
 
-PathInfo::PathInfo(void){
+PathInfo::PathInfo(void) : _cgiPath("") {
 
 }
 

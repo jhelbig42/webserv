@@ -37,7 +37,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
 
 void Reaction::initDelete(const Request &Req) {
   errno = 0;
-  if (std::remove(Req.getResource().c_str()) != 0) {
+  if (std::remove(_pathInfo.getRealPath().c_str()) != 0) {
     initError(errno);
     return;
   }
@@ -45,7 +45,7 @@ void Reaction::initDelete(const Request &Req) {
 }
 
 void Reaction::initHeadGet(const Request &Req) {
-  initSendFile(CODE_200, Req.getResource().c_str());
+  initSendFile(CODE_200, _pathInfo.getRealPath().c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;
   errno = 0;
@@ -57,13 +57,13 @@ void Reaction::initHeadGet(const Request &Req) {
 
 void Reaction::setTmpPathName(const std::string resourceName){
 	std::stringstream sname;
-	sname << DEFAULT_PATH << resourceName << _sock;
+	sname << _finalPath << _sock;
 	_tmpPath = sname.str();
 }
 
 //also needs the Post path from config
 void Reaction::setFinalPathName(const std::string resourceName){
-	_finalPath = DEFAULT_PATH + resourceName;
+	_finalPath = _pathInfo.getRealPath();
 }
 
 void Reaction::initPost(const Request &Req){
@@ -88,8 +88,8 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	setFinalPathName(Req.getResource());
-	setTmpPathName(Req.getResource());
+	setFinalPathName(_pathInfo.getRealPath());
+	setTmpPathName(_finalPath);
 	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
