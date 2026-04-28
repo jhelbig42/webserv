@@ -68,24 +68,8 @@ void Reaction::setFinalPathName(const std::string resourceName){
 
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-
-	if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)){
-		logging::log(logging::Debug, "Reaction: Content Length Header is not Present");
-		initSendFile(CODE_400, FILE_400);
+	if (!initPostBody(Req))
 		return;
-	}
-	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
-	_reqContLen = Req.getHeaders().getContentLength();
-	if (_reqContLen > _pathInfo.getMaxReqBody()){
-		logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
-		initSendFile(CODE_403, NULL);
-		return;
-	}
-
-	_receivedContLen = 0;
-
-	//copy buffer if still in buffer
-	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
 	setFinalPathName(_pathInfo.getRealPath());

@@ -133,13 +133,7 @@ static void setMetadata(std::string &Metadata, const int Code,
   Metadata = oss.str();
 }
 
-bool Reaction::statbufPopulate(const int Code, const char *File,
-                               struct stat &StatBuf) {
-  if (File == NULL)
-    return true;
-  errno = 0;
-  if (stat(File, &StatBuf) == 0)
-    return true;
+bool Reaction::fallbackOrError(const int Code) {
   if (hasDefaultFile(Code)) {
     logging::log3(logging::Warning, "Code ", Code,
                   ": Default file not accessible. Only sending status line.");
@@ -149,6 +143,16 @@ bool Reaction::statbufPopulate(const int Code, const char *File,
   return initError(errno);
 }
 
+bool Reaction::statbufPopulate(const int Code, const char *File,
+                               struct stat &StatBuf) {
+  if (File == NULL)
+    return true;
+  errno = 0;
+  if (stat(File, &StatBuf) == 0)
+    return true;
+  return fallbackOrError(Code);
+}
+
 bool Reaction::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
@@ -156,13 +160,24 @@ bool Reaction::setFdIn(const int Code, const char *File) {
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
-  if (hasDefaultFile(Code)) {
-    logging::log3(logging::Warning, "Code ", Code,
-                  ": Default file not accessible. Only sending status line.");
-    initSendFile(Code, NULL);
+  return fallbackOrError(Code);
+}
+
+bool Reaction::initPostBody(const Request &Req) {
+  if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
+    logging::log(logging::Debug, "POST: Content-Length header missing");
+    initSendFile(CODE_400, FILE_400);
     return false;
   }
-  return initError(errno);
+  _reqContLen = Req.getHeaders().getContentLength();
+  if (_reqContLen > _pathInfo.getMaxReqBody()) {
+    logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
+    initSendFile(CODE_403, NULL);
+    return false;
+  }
+  _receivedContLen = 0;
+  _buffer = Req.getBuffer();
+  return true;
 }
 
 static bool hasDefaultFile(const int Code) {

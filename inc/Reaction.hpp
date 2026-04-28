@@ -75,11 +75,14 @@ public:
 private:
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
+  bool sendMetadataIfPending(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
   bool statbufPopulate(const int Code, const char *File, struct stat &StatBuf);
   bool setFdIn(const int Code, const char *File);
+  bool fallbackOrError(const int Code);
   bool initError(const int Errno);
   void setDefaults(void);
+  bool initPostBody(const Request &Req);
 
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
