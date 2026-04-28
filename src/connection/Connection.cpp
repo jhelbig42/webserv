@@ -89,8 +89,6 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 	}
 }
 
-// double check this logic below
-
 void Connection::serve(void) {
 	//if request is not yet complete, read and parse until it is
 	if( (_conditionsFulfilled & SockRead) 
