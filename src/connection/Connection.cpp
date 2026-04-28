@@ -59,6 +59,10 @@ Conditions Connection::getConditions(void) const {
 }
 */
 
+int Connection::getConditionsWanted(void) const {
+  return _conditionsWanted;
+}
+
 // Setters
 void Connection::scheduleForDemolition(void) {
   _delete = true;
