@@ -202,7 +202,7 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 		if (_receivedContLen == _reqContLen)
 			_cgi.setInputDone(true);
 	}
-	catch (std::runtime_error){
+	catch (std::runtime_error &err){
 		initSendFile(CODE_500, FILE_500);
 		return ;
 	}
@@ -215,7 +215,7 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
 			return ; //means we are just done
 	}
-	catch (std::runtime_error){
+	catch (std::runtime_error &err){
 		initSendFile(CODE_500, FILE_500);
 		return ;
 	}
