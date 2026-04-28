@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	exit (1);
   }
   
-  // try {
+  try {
     const Config conf(argv[1]);
 	const std::list<Website> &websites = conf.getWebsites();
 	if (websites.empty()){
@@ -72,10 +72,10 @@ int main(int argc, char **argv) {
 	}
 	Server server(websites);
 	server.pollLoop();
-  //} catch (const std::exception &e) {
-  //  logging::log(logging::Error, e.what());
-	// exit (1);
-  // }
+  } catch (const std::exception &e) {
+  	logging::log(logging::Error, e.what());
+	exit (1);
+  	}
 }
 
 #endif // OFLINE
