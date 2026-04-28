@@ -94,7 +94,8 @@ void Reaction::init(const Request &Req, const int Socket) {
   }
 
   logging::log(logging::Debug, "Req is a CGI");
-  if (!_cgi.init(Req, _script)) {
+  _cgi.setCGIPath(_pathInfo.getCgiPath());
+  if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
     initSendFile(CODE_500, FILE_500);
     return;
   }

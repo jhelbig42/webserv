@@ -65,6 +65,10 @@ void CGIProcess::setInputDone(bool done){
 	_inputDone = done;
 }
 
+void CGIProcess::setCGIPath(std::string Path){
+	_path = strdup(Path.c_str());
+}
+
 void CGIProcess::clearEnv() {
     if (_env) {
         for (int i = 0; _env[i] != NULL; ++i) {
@@ -136,7 +140,9 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
     return true;
 }
 
-bool CGIProcess::createArgs(Request &Req){ 
+//handling more ScriptTypes?
+
+bool CGIProcess::createArgs(Request &Req, std::string const Path){ 
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return false;// error handling
@@ -157,14 +163,6 @@ bool CGIProcess::createArgs(Request &Req){
 	if (!_args[0] || !_args[1])
 		return false;
 	logging::log3(logging::Debug, _args[0], " ",_args[1]);
-	return true;
-}
-
-//likely to be replaced be the general resolvePath function, that will be executed before Reaction init
-bool CGIProcess::resolvePath(){
-	_path = strdup(PY_DEFAULT_PATH);
-	if (!_path)
-		return false;
 	return true;
 }
 
@@ -199,7 +197,7 @@ bool CGIProcess::initForwardSocket() {
 }
 
 
-bool CGIProcess::init(Request Req, Script Script){
+bool CGIProcess::init(Request Req, Script Script, std::string Path){
 	logging::log(logging::Debug, "CGI Process init called");
 
 	// create env:
@@ -207,13 +205,7 @@ bool CGIProcess::init(Request Req, Script Script){
 		return false; // error handling in Reaction
 						//errors here will all be 500
 	//create args
-	if (!createArgs(Req))
-		return false;
-	
-	//create path
-		//resolve paths function - information from config file
-		//for now: handling py only
-	if (!resolvePath())
+	if (!createArgs(Req, Path))
 		return false;
 	
 	if (!initForwardSocket())
