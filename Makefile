@@ -66,7 +66,7 @@ CXXFLAGS	+= -std=c++98
 CXXFLAGS	+= -Wall
 CXXFLAGS	+= -Wextra
 CXXFLAGS	+= -Werror
-	
+CPPFLAGS += -fstandalone-debug
 CPPFLAGS	:=
 CPPFLAGS	+= -MMD
 CPPFLAGS	+= -MP
