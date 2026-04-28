@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <string.h>
 #include <unistd.h>
@@ -54,8 +55,17 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 
-// think about body is coming in chunks
-// maybe Reaction also needs state
+void Reaction::setTmpPathName(const std::string resourceName){
+	std::stringstream sname;
+	sname << DEFAULT_PATH << resourceName << _sock;
+	_tmpPath = sname.str();
+}
+
+//also needs the Post path from config
+void Reaction::setFinalPathName(const std::string resourceName){
+	_finalPath = DEFAULT_PATH + resourceName;
+}
+
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
 
@@ -78,11 +88,12 @@ void Reaction::initPost(const Request &Req){
 	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	const std::string pathname = DEFAULT_PATH + Req.getResource();
-	_fdOut = fopen(pathname.c_str(), "w");
+	setFinalPathName(Req.getResource());
+	setTmpPathName(Req.getResource());
+	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);
-	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", pathname);
+	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", _tmpPath);
 	_processType = ReceiveFile;
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
 }

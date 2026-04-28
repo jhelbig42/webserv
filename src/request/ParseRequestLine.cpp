@@ -45,8 +45,6 @@ void Request::parseResource(const std::string &Token)
 		logging::log2(logging::Debug, "QueryString is: ", _queryString);
 		logging::log2(logging::Debug, "extension of resource is: ", extension);
 		free(extension);
-		logging::log(logging::Debug, "parse status_line: Content header set");
-
 	}
 }
 

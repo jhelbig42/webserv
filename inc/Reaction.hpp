@@ -33,7 +33,7 @@ public:
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req);
+	void init(const Request &Req, const int Socket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
   /// \brief continues processing a Reaction object
@@ -67,6 +67,8 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
+  void			setTmpPathName(const std::string);
+  void			setFinalPathName(const std::string);
 
   void setPathInfo(PathInfo PathInfo);
 
@@ -116,6 +118,7 @@ private:
   std::string 	_metadata;
 
   int     		_fdIn;
+  int     		_sock;
   FILE    		*_fdOut;
   Buffer  		_buffer;
 

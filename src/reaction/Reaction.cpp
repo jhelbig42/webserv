@@ -55,8 +55,9 @@ bool Reaction::isCGI(const Request &Req){
   return false;
 }
 
-void Reaction::init(const Request &Req) {
+void Reaction::init(const Request &Req, const int Socket) {
   setDefaults();
+  _sock = Socket;
 
   logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
