@@ -41,27 +41,20 @@ private:
   void populateInterface(Listen &Interface);
   void parseListen(Website &Site);
   void parseRoot(Website &Site);
-  void parseRoot(Location &Loc);
   void parseAutoindex(Website &Site);
-  void parseAutoindex(Location &Loc);
   void parseAllow(Website &Site);
-  void parseAllow(Location &Loc);
 
   void parseLocation(Website &Site);
-  void parseLocation(Location &Loc);
-  void parseRedirect(Location &Loc);
-  void parseCgi(Location &Loc);
-  void parseReturn(Location &Loc);
+  void parseRedirect(Website &Site);
+  void parseCgi(Website &Site);
+  void parseReturn(Website &Site);
   void parseMaxReqBody(Website &Site);
-  void parseMaxReqBody(Location &Loc);
 
   void addIpv4(Listen &Interface);
   void addPort(Listen &Interface);
 
   void parseErrorPage(Website &Site);
-  void parseErrorPage(Location &Loc);
-  void parseEntry(Location &Loc);
-  void validateLocationEnty(const Location &Loc);
+  void validateEntry(const Website &Site);
 
   void parseEntry(Website &Website);
   std::string parseResource(void);

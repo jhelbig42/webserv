@@ -21,14 +21,30 @@ static void printMaxReqBody(std::ostream &Os, const Website &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Website::Website(void)
-    : _setMembers(0), _maxReqBody(MAX_REQUEST_BODY_DEFAULT), _root("/"), _autoindex(AUTOINDEX_DEFAULT), _allow(0) {
+    : _setMembers(0),
+      _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
+      _root("/"),
+      _path("/"),
+      _autoindex(AUTOINDEX_DEFAULT),
+      _allow(0),
+      _type(None),
+      _return(ReturnData()),
+      _redirect("") {
 }
 
 Website::Website(const Website &Other)
-    : _setMembers(Other._setMembers), _maxReqBody(Other._maxReqBody),
-      _interfaces(Other._interfaces), _locations(Other._locations),
-      _root(Other._root), _errorPages(Other._errorPages),
-      _autoindex(Other._autoindex), _allow(Other._allow) {
+    : _setMembers(Other._setMembers),
+      _maxReqBody(Other._maxReqBody),
+      _interfaces(Other._interfaces),
+      _locations(Other._locations),
+      _root(Other._root),
+      _errorPages(Other._errorPages),
+      _autoindex(Other._autoindex),
+      _allow(Other._allow),
+      _type(Other._type),
+      _path(Other._path),
+      _return(Other._return),
+      _redirect(Other._redirect) {
 }
 
 Website &Website::operator=(const Website &Other) {
@@ -41,8 +57,24 @@ Website &Website::operator=(const Website &Other) {
     _errorPages = Other._errorPages;
     _autoindex = Other._autoindex;
     _allow = Other._allow;
+    _type = Other._type;
+    _path = Other._path;
+    _return = Other._return;
+    _redirect = Other._redirect;
   }
   return *this;
+}
+
+Website::Website(const std::string &Path)
+    : _setMembers(0),
+      _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
+      _root("/"),
+      _path(Path),
+      _autoindex(AUTOINDEX_DEFAULT),
+      _allow(0),
+      _type(None),
+      _return(ReturnData()),
+      _redirect("") {
 }
 
 Website::~Website(void) {
@@ -80,6 +112,7 @@ std::ostream &operator<<(std::ostream &Os, const Listen &If) {
   return Os << If.ip << ':' << If.port;
 }
 
+void printWebsite(std::ostream &Os, const Website &Site)
 std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printInterfaces(Os, Site);
   printMaxReqBody(Os, Site);
@@ -88,6 +121,19 @@ std::ostream &operator<<(std::ostream &Os, const Website &Site) {
   printAllow(Os, Site);
   printLocations(Os, Site);
   printErrorPages(Os, Site);
+  switch (Site.getType()) {
+  case Location::Cgi:
+    Os << "    cgi: " << Loc.getCgi() << '\n';
+    break;
+  case Location::Return:
+    Os << "    return: " << Loc.getReturn() << '\n';
+    break;
+  case Location::Redirect:
+    Os << "    redirect: " << Loc.getRedirect() << '\n';
+    break;
+  case Location::None:
+    break;
+  }
   return Os;
 }
 
@@ -254,4 +300,44 @@ void Website::allowAll(void) {
   addAllow(Get);
   addAllow(Post);
   addAllow(Delete);
+}
+
+void ReturnData::printReturnData(std::ostream &Os) const {
+  Os << Ret.code << ' ' << Ret.url;
+}
+
+Website::Type Website::getType(void) const {
+  return _type;
+}
+
+void Website::setReturn(const unsigned int Code, const std::string &Url) {
+  _return.code = Code;
+  _return.url = Url;
+  _type = Return;
+}
+
+void Website::setRedirect(const std::string &RedirectPath) {
+  _redirect = RedirectPath;
+  _type = Redirect;
+}
+
+void Website::setCgi(const std::string &CgiPath) {
+  _redirect = CgiPath;
+  _type = Cgi;
+}
+
+const ReturnData &Website::getReturn(void) const {
+  return _return;
+}
+
+const std::string &Website::getPath(void) const {
+  return _path;
+}
+
+const std::string &Website::getRedirect(void) const {
+  return _redirect;
+}
+
+const std::string &Website::getCgi(void) const {
+  return _redirect;
 }

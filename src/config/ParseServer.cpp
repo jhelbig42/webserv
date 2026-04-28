@@ -1,7 +1,6 @@
 #include "Parser.hpp"
 
 #include "HttpMethods.hpp"
-#include "Location.hpp"
 #include "TokenType.hpp"
 #include "Website.hpp"
 #include <list>
@@ -27,8 +26,15 @@ Website Parser::server(void) {
 }
 
 void Parser::parseEntry(Website &Site) {
-  if (match(TokenType::Listen)) {
+  validateEntry(Site);
+  if (match(TokenType::Return)) {
+    parseReturn(Site);
+  } else if (Site.isRoot() && match(TokenType::Listen)) {
     parseListen(Site);
+  } else if (match(TokenType::Cgi)) {
+    parseCgi(Site);
+  } else if (match(TokenType::Redirect)) {
+    parseRedirect(Site);
   } else if (match(TokenType::Root)) {
     parseRoot(Site);
   } else if (match(TokenType::Autoindex)) {
@@ -118,27 +124,6 @@ void Parser::parseErrorPage(Website &Site) {
     throwTokenError("expected ';'");
 }
 
-void Parser::parseLocation(Website &Site) {
-  gap();
-  if (nextType() != TokenType::Slash)
-    throwTokenError("ecpected '/'");
-  std::string path = "";
-  while (!isNextType(TokenType::Newline) &&
-         !isNextType(TokenType::Whitespace) &&
-         !isNextType(TokenType::BracesLeft)) {
-    path += peek().getLexeme();
-    eat();
-  }
-  skipSep();
-  Location newLocation(path);
-  if (!match(TokenType::BracesLeft))
-    throwTokenError("expected '{'");
-  while (!match(TokenType::BracesRight)) {
-    parseEntry(newLocation);
-  }
-  Site.addLocation(newLocation);
-}
-
 void Parser::parseMaxReqBody(Website &Site) {
   gap();
   Site.setMaxReqBody(parseUnsignedInt());
@@ -176,4 +161,78 @@ void Parser::addPort(Listen &Interface) {
   } catch (...) {
     throwTokenError("expected a number");
   }
+}
+
+void Parser::validateEntry(const Website &Site) {
+  if (Site.getType() != Website::None &&
+      (isNextType(TokenType::Return) || isNextType(TokenType::Cgi) ||
+       isNextType(TokenType::Redirect)))
+    throwTokenError("location already has a type");
+  if (Site.getLocations().size() != 0) {
+    if (isNextType(TokenType::Return))
+      throwTokenError("locations that nest locations can not define return");
+    if (isNextType(TokenType::Cgi))
+      throwTokenError("locations that nest locations can not define cgi");
+  }
+  if (isNextType(TokenType::Location)) {
+    if (Site.getType() == Website::Return)
+      throwTokenError(
+          "locations that define return can not nest other locations");
+    if (Site.getType() == Website::Cgi)
+      throwTokenError("locations that define cgi can not nest other locations");
+  }
+}
+
+void Parser::parseLocation(Website &Site) { //NOLINT(misc-no-recursion)
+  gap();
+  if (nextType() != TokenType::Slash)
+    throwTokenError("expected '/'");
+  std::string path = "";
+  while (!isNextType(TokenType::Newline) &&
+         !isNextType(TokenType::Whitespace) &&
+         !isNextType(TokenType::BracesLeft)) {
+    path += peek().getLexeme();
+    eat();
+  }
+  skipSep();
+  Website newLocation(path);
+  if (!match(TokenType::BracesLeft))
+    throwTokenError("expected '{'");
+  while (!match(TokenType::BracesRight)) {
+    parseEntry(newLocation);
+  }
+  Site.addLocation(newLocation);
+}
+
+void Parser::parseRedirect(Website &Site) {
+  gap();
+  const std::string pathRedirect = parseWord();
+  if (pathRedirect == "")
+    throwTokenError("not a valid redirect");
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError("expected ';'");
+  Site.setRedirect(pathRedirect);
+}
+
+void Parser::parseCgi(Website &Site) {
+  gap();
+  const std::string pathCgi = parseResource();
+  if (pathCgi == "")
+    throwTokenError("not a valid cgi path");
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError("expected ';'");
+  Site.setCgi(pathCgi);
+}
+
+void Parser::parseReturn(Website &Site) {
+  gap();
+  const unsigned int code = parseUnsignedInt();
+  skipSep();
+  const std::string url = parseWord();
+  skipSep();
+  if (!match(TokenType::Semicolon))
+    throwTokenError("expected ';'");
+  Site.setReturn(code, url); 
 }

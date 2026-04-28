@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HttpMethods.hpp"
+#include "Website.hpp"
 #include <list>
 #include <map>
 #include <string>
@@ -13,7 +14,7 @@ struct ReturnData {
   ReturnData(void): code(0), url("") {}
 };
 
-class Location {
+class Location: public Website {
 public:
   typedef enum {
     None,
