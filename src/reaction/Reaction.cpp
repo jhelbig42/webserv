@@ -6,6 +6,7 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
+#include "Website.hpp"
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -41,6 +42,10 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
+void Reaction::setPathInfo(PathInfo PathInfo){
+	_pathInfo = PathInfo;
+}
+
 bool Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
@@ -58,7 +63,12 @@ void Reaction::init(const Request &Req) {
     initSendFile(CODE_400, FILE_400);
     return;
   }
-
+  std::cout << _pathInfo;
+  if (!(_pathInfo.getAllowed() & Req.getMethod())){
+	logging::log(logging::Debug, "Requested method not allowed");
+  	initSendFile(CODE_403, NULL);
+	return ;
+  }
   // TODO: make more generic
   /*
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {

@@ -99,6 +99,7 @@ void Connection::serve(void) {
 	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
 		&& _react.getProcessType() == Reaction::NotInitialized)
 	{
+		_react.setPathInfo(_website.getPathInfo(_req.getResource())); // setting config details into Reaction
 		_react.init(_req);
 	}
 	// we have a initialized Reaction - act on it.

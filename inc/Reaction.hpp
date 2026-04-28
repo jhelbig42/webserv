@@ -6,6 +6,7 @@
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
 #include "Script.hpp"
+#include "Website.hpp"
 #include <string>
 #include <sys/types.h>
 
@@ -67,6 +68,8 @@ public:
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
 
+  void setPathInfo(PathInfo PathInfo);
+
 private:
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
@@ -86,9 +89,8 @@ private:
   //for Post request
   void receiveBodyIntoServerFile(const int Socket, const size_t Bytes);
   void receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
-  std::string _finalPath;
-  std::string _tmpPath;
 
+  
   // called by process()
   /// \fn checkOnChild(void)
   /// \brief checks if the child process belonging to a CGI is finished.
@@ -117,6 +119,11 @@ private:
   FILE    		*_fdOut;
   Buffer  		_buffer;
 
+  std::string _finalPath;
+  std::string _tmpPath;
+
   Script  		_script;
   CGIProcess 	_cgi; 
+
+  PathInfo		_pathInfo;
 };

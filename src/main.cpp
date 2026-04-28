@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 //#define OFFLINE
-#define PARSING
+//#define PARSING
 
 #define CHUNK_SIZE 1024
 

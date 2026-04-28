@@ -23,6 +23,11 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &Substitute,
                                   const std::string &LocationPath);
 
+
+PathInfo::PathInfo(void){
+
+}
+
 PathInfo::PathInfo(const PathInfo &Other)
     : _cgiPath(Other._cgiPath), _realPath(Other._realPath),
       _action(Other._action), _code(Other._code), _allow(Other._allow),
