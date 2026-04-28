@@ -99,8 +99,6 @@ public:
   /// throws exception on error
   ssize_t bufToFile(const int Fd, const size_t Bytes);
 
-  ssize_t bufToFILE(FILE* file, const size_t Bytes);
-
   /// \brief reads up to Bytes bytes from Socket into buffer in non-blocking
   /// mode
   ///

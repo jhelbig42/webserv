@@ -12,7 +12,6 @@
 #include <string>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>       /* time */
 
 #define DEFAULT_PATH "./post"
 
@@ -57,10 +56,8 @@ void Reaction::initHeadGet(const Request &Req) {
 
 
 void Reaction::setTmpPathName(const std::string resourceName){
-	srand((unsigned int)(time(NULL)));
-	int nameTag = rand() % 1000;
 	std::stringstream sname;
-	sname << DEFAULT_PATH << resourceName << nameTag;
+	sname << DEFAULT_PATH << resourceName << _sock;
 	_tmpPath = sname.str();
 }
 
