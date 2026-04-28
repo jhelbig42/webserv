@@ -66,6 +66,12 @@ void Reaction::initPost(const Request &Req){
 	}
 	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
 	_reqContLen = Req.getHeaders().getContentLength();
+	if (_reqContLen > _pathInfo.getMaxReqBody()){
+		logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
+		initSendFile(CODE_403, NULL);
+		return;
+	}
+
 	_receivedContLen = 0;
 
 	//copy buffer if still in buffer

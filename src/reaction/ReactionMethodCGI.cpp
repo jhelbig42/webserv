@@ -9,6 +9,11 @@ void Reaction::initCGIMethod(const Request &Req){
       		return;
     	}
     	_reqContLen = Req.getHeaders().getContentLength();
+		if (_reqContLen > _pathInfo.getMaxReqBody()){
+		logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
+		initSendFile(CODE_403, NULL);
+		return;
+		}
     	_receivedContLen = 0;
     	_buffer = Req.getBuffer();
 		_processType = CgiPost;

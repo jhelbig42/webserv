@@ -69,6 +69,7 @@ void Reaction::init(const Request &Req) {
   	initSendFile(CODE_403, NULL);
 	return ;
   }
+  
   // TODO: make more generic
   /*
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
