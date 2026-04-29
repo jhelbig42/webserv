@@ -15,6 +15,7 @@
 #include <string>
 #include <sys/stat.h>
 
+static const char *defaultErrorFile(int Code);
 static std::string getReasonPhrase(const int Code);
 static bool hasDefaultFile(const int Code);
 static void setMetadata(std::string &Metadata, const int Code,
@@ -60,12 +61,12 @@ void Reaction::init(const Request &Req, const int Socket) {
 
   logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
-    initSendFile(CODE_400, FILE_400);
+    initSendFile(CODE_400, getErrorFile(CODE_400).c_str());
     return;
   }
   if (!(_pathInfo.getAllowed() & Req.getMethod())){
 	logging::log(logging::Debug, "Requested method not allowed");
-  	initSendFile(CODE_403, NULL);
+  	initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
 	return ;
   }
   
@@ -84,7 +85,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   if(_pathInfo.getCgiPath() == ""){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
 	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
-		  initSendFile(CODE_400, FILE_400);
+		  initSendFile(CODE_400, getErrorFile(CODE_400).c_str());
 		  return;
 	  }
 	  initMethodNonCGI(Req);
@@ -94,7 +95,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   logging::log(logging::Debug, "Req is a CGI");
   _cgi.setCGIPath(_pathInfo.getCgiPath());
   if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
-    initSendFile(CODE_500, FILE_500);
+    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return;
   }
   initCGIMethod(Req);
@@ -170,7 +171,7 @@ bool Reaction::initPostBody(const Request &Req) {
   _reqContLen = Req.getHeaders().getContentLength();
   if (_reqContLen > _pathInfo.getMaxReqBody()) {
     logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
-    initSendFile(CODE_403, NULL);
+    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
     return false;
   }
   _receivedContLen = 0;
@@ -185,15 +186,48 @@ static bool hasDefaultFile(const int Code) {
 bool Reaction::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
-    initSendFile(CODE_403, FILE_403);
+    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
     return false;
   case ENOENT:
-    initSendFile(CODE_404, FILE_404);
+    initSendFile(CODE_404, getErrorFile(CODE_404).c_str());
     return false;
   default:
-    initSendFile(CODE_500, FILE_500);
+    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return false;
   }
+}
+
+static const char *defaultErrorFile(int Code) {
+  switch (Code) {
+  case CODE_400: 
+    return FILE_400;
+  case CODE_401: 
+    return FILE_401;
+  case CODE_403: 
+    return FILE_403;
+  case CODE_404: 
+    return FILE_404;
+  case CODE_500: 
+    return FILE_500;
+  case CODE_501: 
+    return FILE_501;
+  case CODE_502: 
+    return FILE_502;
+  case CODE_503: 
+    return FILE_503;
+  default:       
+    return NULL;
+  }
+}
+
+std::string Reaction::getErrorFile(int Code) const {
+  const char *configFile = _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
+  if (configFile != NULL) {
+    if (configFile[0] == '/')
+      return (_pathInfo.getRoot() + (configFile + 1)); // jump over '/'
+    return configFile;
+  }
+  return defaultErrorFile(Code); // just if no specific file was found in config
 }
 
 static std::string getReasonPhrase(const int Code) {

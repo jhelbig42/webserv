@@ -77,7 +77,7 @@ bool Reaction::checkOnChild(void){
 	
   	if (result == -1){
     	_cgi.setPid(-1);
-		initSendFile(CODE_500, FILE_500);
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return false; // waitpid failed => internal server error
 	}
 
@@ -97,7 +97,7 @@ bool Reaction::checkOnChild(void){
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
-    initSendFile(CODE_500, FILE_500);
+    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return false;
 }
 
@@ -203,7 +203,7 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 			_cgi.setInputDone(true);
 	}
 	catch (std::runtime_error &){
-		initSendFile(CODE_500, FILE_500);
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return ;
 	}
 	return ;
@@ -222,7 +222,7 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	catch (std::runtime_error &){
 		fclose(_fdOut);
 		unlink(_tmpPath.c_str());
-		initSendFile(CODE_500, FILE_500);
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return ;
 	}
 
@@ -244,7 +244,7 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	unlink(_finalPath.c_str()); // fails if file does not exist, but we do not care
 	if (rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
 		logging::log(logging::Debug, "Reaction: Renaming failed - should never happen");
-		initSendFile(CODE_500, FILE_500);
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return;
 	}
 	logging::log(logging::Debug, "Reaction: Renaming successfull");
