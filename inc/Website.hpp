@@ -61,17 +61,20 @@ public:
   void addAllow(const HttpMethod Method);
   void allowAll(void);
   void allowNone(void);
+  void setAsRoot(void);
   const std::string &getRoot(void) const;
 
-  const ReturnData getReturn(void) const;
-  const std::string getPath(void) const;
-  const std::string getRedirect(void) const;
-  const std::string getCgi(void) const;
+  unsigned int getReturnCode(void) const;
+  const std::string &getReturnPath(void) const;
+
+  const std::string &getPath(void) const;
+  const std::string &getRedirect(void) const;
+  const std::string &getCgi(void) const;
   Type getType(void) const;
 
-  void setReturn(const unsigned int code, const::string &Url);
-  void setCgi(const::string &Path);
-  void setRedirect(const::string &Path);
+  void setReturn(const unsigned int code, const::std::string &Url);
+  void setCgi(const::std::string &Path);
+  void setRedirect(const::std::string &Path);
 
   bool isSetAutoindex(void) const;
   bool isSetRoot(void) const;
@@ -102,6 +105,8 @@ private:
   std::string _path;
   ReturnData _return;
   std::string _redirect;
+  unsigned int _returnCode;
+  std::string _returnPath;
 };
 
 class PathInfo {
@@ -130,8 +135,8 @@ public:
   const char *getErrorPage(const unsigned int Code) const;
 
 private:
-  void resolveLocations(const std::list<Location> &Locations);
-  void populateFromLocation(const Location &Loc);
+  void resolveLocations(const std::list<Website> &Locations);
+  void populateFromLocation(const Website &Loc);
   std::string _cgiPath;
   std::string _realPath;
   Action _action;

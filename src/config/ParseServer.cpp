@@ -22,6 +22,7 @@ Website Parser::server(void) {
   }
   if (!newWebsite.isSetAllow())
     newWebsite.allowNone();
+  newWebsite.setAsRoot();
   return newWebsite;
 }
 
