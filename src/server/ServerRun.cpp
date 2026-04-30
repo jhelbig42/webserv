@@ -68,7 +68,7 @@ void Server::process(void) {
   	int type = getSocketType(it->fd);
     handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
-    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       closeAndDelete(it->fd, type);
       it = _fds.erase(it);
       continue;

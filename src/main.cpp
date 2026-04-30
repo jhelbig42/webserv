@@ -73,9 +73,9 @@ int main(int argc, char **argv) {
 	Server server(websites);
 	server.pollLoop();
   } catch (const std::exception &e) {
-    logging::log(logging::Error, e.what());
+  	logging::log(logging::Error, e.what());
 	exit (1);
-  }
+  	}
 }
 
 #endif // OFLINE
