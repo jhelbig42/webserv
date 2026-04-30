@@ -1,4 +1,4 @@
-
+#include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include "Request.hpp"
 #include <string>
@@ -19,8 +19,8 @@ Request::Request() :
 	_headers.unsetAll();
 }  
 
-void Request::init(const std::string &input) {
-	this->parseRequestLine(input);
+void Request::init(const std::string &Input) {
+	this->parseRequestLine(Input);
 }
 
 void Request::reset() {
@@ -33,10 +33,10 @@ void Request::reset() {
 }
 
 
-Request::Request(std::string &input)
+Request::Request(std::string &Input)
 	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0)
 {
-	this->parseRequestLine(input);
+	this->parseRequestLine(Input);
 }  
 
 void Request::process(int Socket)

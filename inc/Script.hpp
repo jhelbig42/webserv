@@ -35,7 +35,5 @@ private:
     //from Request
     std::string _requestMethod;
     std::string _scriptName;
-    //std::string _queryString;
-
 };
 

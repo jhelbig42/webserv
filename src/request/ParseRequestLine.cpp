@@ -1,5 +1,6 @@
-#include "Request.hpp"
+#include "HttpMethods.hpp"
 #include "Logging.hpp"
+#include "Request.hpp"
 #include <exception>
 #include <iostream>
 #include <sstream>

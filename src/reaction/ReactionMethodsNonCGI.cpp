@@ -1,5 +1,4 @@
-#include "Conditions.hpp"
-#include "HttpHeaders.hpp"
+#include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
@@ -7,6 +6,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -24,7 +24,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
     	initHeadGet(Req);
     	return;
   	case Delete:
-    	initDelete(Req);
+    	initDelete();
     	return;
   	case Post:
 	  	initPost(Req);
@@ -35,9 +35,9 @@ void Reaction::initMethodNonCGI(const Request &Req) {
   }
 }
 
-void Reaction::initDelete(const Request &Req) {
+void Reaction::initDelete(void) {
   errno = 0;
-  if (std::remove(Req.getResource().c_str()) != 0) {
+  if (std::remove(_pathInfo.getRealPath().c_str()) != 0) {
     initError(errno);
     return;
   }
@@ -45,7 +45,7 @@ void Reaction::initDelete(const Request &Req) {
 }
 
 void Reaction::initHeadGet(const Request &Req) {
-  initSendFile(CODE_200, Req.getResource().c_str());
+  initSendFile(CODE_200, _pathInfo.getRealPath().c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;
   errno = 0;
@@ -55,35 +55,25 @@ void Reaction::initHeadGet(const Request &Req) {
 }
 
 
-void Reaction::setTmpPathName(const std::string resourceName){
+void Reaction::setTmpPathName(void){
 	std::stringstream sname;
-	sname << DEFAULT_PATH << resourceName << _sock;
+	sname << _finalPath << _sock;
 	_tmpPath = sname.str();
 }
 
 //also needs the Post path from config
-void Reaction::setFinalPathName(const std::string resourceName){
-	_finalPath = DEFAULT_PATH + resourceName;
+void Reaction::setFinalPathName(void){
+	_finalPath = _pathInfo.getRealPath();
 }
 
 void Reaction::initPost(const Request &Req){
 	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-
-	if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)){
-		logging::log(logging::Debug, "Reaction: Content Length Header is not Present");
-		initSendFile(CODE_400, FILE_400);
+	if (!initPostBody(Req))
 		return;
-	}
-	logging::log(logging::Debug, "Reaction: Content Length Header is Present");
-	_reqContLen = Req.getHeaders().getContentLength();
-	_receivedContLen = 0;
-
-	//copy buffer if still in buffer
-	_buffer	= Req.getBuffer();
 
 	//create requested file with write access
-	setFinalPathName(Req.getResource());
-	setTmpPathName(Req.getResource());
+	setFinalPathName();
+	setTmpPathName();
 	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
 		initSendFile(CODE_500, NULL);

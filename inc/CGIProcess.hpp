@@ -33,10 +33,9 @@ public:
 	/// The filedescriptor leading of the created socket is saved a member of 
 	/// the CGIProcess Class. The coresponding instance of Connection will 
 	/// check for it an include it in the poll() map.
-    bool init(Request Req, Script Script);
+    bool init(Request Req, Script Script, const std::string &Path);
     bool createEnv(Request& Req, Script& Script);
-    bool createArgs(Request &Req);
-    bool resolvePath();
+    bool createArgs(Request &Req, const std::string &Path);
 	bool initForwardSocket();
     
     //Getters
@@ -45,17 +44,18 @@ public:
     int getForwardSocket() const;
 
     //setters
-    void setPid(pid_t pid);
-    void setInputDone(bool done);
+    void setPid(pid_t Pid);
+    void setInputDone(bool Done);
+	void setCGIPath(std::string const &Path);
     
 private:
    
-    bool envMember(EnvMembers index, const std::string& key, const std::string& value);
+    bool envMember(EnvMembers Index, const std::string& Key, const std::string& Value);
     
 	void clearEnv();
 
-    std::string getEnvKey(EnvMembers member) const;
-    std::string getEnvValue(EnvMembers member, Request& Req, Script& Script) const;
+    std::string getEnvKey(EnvMembers Member) const;
+    std::string getEnvValue(EnvMembers Member, Request& Req, Script& Script) const;
 
     char**      _env;
     char**      _args;

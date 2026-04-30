@@ -160,11 +160,8 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if ((_processType == CgiPost || _processType == CgiNotPost) 
   		&& _cgi.isInputDone()) 
   {
-    if (!_metadataSent) 
-	{
-      _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+    if (sendMetadataIfPending(Socket, Bytes))
       return false;
-	}
 	const size_t used = _buffer.getUsed();
     if (used > 0)
 	{
@@ -179,11 +176,16 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
 }
 
 
-bool Reaction::sendFile(const int Socket, const size_t Bytes) {
-  if (!_metadataSent) {
-    _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
+  if (_metadataSent)
     return false;
-  }
+  _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+  return true;
+}
+
+bool Reaction::sendFile(const int Socket, const size_t Bytes) {
+  if (sendMetadataIfPending(Socket, Bytes))
+    return false;
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
