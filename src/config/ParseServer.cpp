@@ -18,7 +18,6 @@ Website Parser::server(void) {
     if (isNextType(TokenType::Eof))
       throwTokenError("unexpected end of file");
     parseEntry(newWebsite);
-    skipSep();
   }
   if (!newWebsite.isSetAllow())
     newWebsite.allowNone();
@@ -27,6 +26,7 @@ Website Parser::server(void) {
 }
 
 void Parser::parseEntry(Website &Site) {
+  skipSep();
   validateEntry(Site);
   if (match(TokenType::Return)) {
     parseReturn(Site);
@@ -50,6 +50,7 @@ void Parser::parseEntry(Website &Site) {
     parseLocation(Site);
   } else
     throwTokenError("invalid Entry");
+  skipSep();
 }
 
 void Parser::populateInterface(Listen &Interface) {
