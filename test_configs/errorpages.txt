@@ -1,0 +1,7 @@
+server{
+  listen 127.0.0.1:8080;
+  root /home/julia/projects/webserv/    ;
+  error_page 403 /error_pages/code_403.html;
+  autoindex off;
+  allow POST GET;
+}
