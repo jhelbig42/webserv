@@ -30,7 +30,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
 	  	initPost(Req);
 	  	return;
   	case Generic:
-    	initSendFile(CODE_501, FILE_501);
+    	initSendFile(CODE_501, getErrorFile(CODE_501).c_str());
     	return;
   }
 }
