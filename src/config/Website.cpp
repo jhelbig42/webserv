@@ -29,8 +29,9 @@ Website::Website(void)
       _allow(0),
       _type(None),
       _path("/"),
-      _return(ReturnData()),
-      _redirect("") {
+      _redirect(""),
+      _returnCode(0),
+      _returnPath("") {
 }
 
 Website::Website(const Website &Other)
@@ -45,8 +46,9 @@ Website::Website(const Website &Other)
       _allow(Other._allow),
       _type(Other._type),
       _path(Other._path),
-      _return(Other._return),
-      _redirect(Other._redirect) {
+      _redirect(Other._redirect),
+      _returnCode(Other._returnCode),
+      _returnPath(Other._returnPath) {
 }
 
 Website &Website::operator=(const Website &Other) {
@@ -62,8 +64,9 @@ Website &Website::operator=(const Website &Other) {
     _allow = Other._allow;
     _type = Other._type;
     _path = Other._path;
-    _return = Other._return;
     _redirect = Other._redirect;
+    _returnCode = Other._returnCode;
+    _returnPath = Other._returnPath;
   }
   return *this;
 }
@@ -77,8 +80,9 @@ Website::Website(const std::string &Path)
       _allow(0),
       _type(None),
       _path(Path),
-      _return(ReturnData()),
-      _redirect("") {
+      _redirect(""),
+      _returnCode(0),
+      _returnPath("") {
 }
 
 Website::~Website(void) {
@@ -113,31 +117,40 @@ const std::list<Listen> &Website::getInterfaces(void) const {
 }
 
 std::ostream &operator<<(std::ostream &Os, const Listen &If) {
-  return Os << If.ip << ':' << If.port;
+  If.print(Os);
+  return Os;
+}
+
+void Listen::print(std::ostream &Os) const {
+  Os << this->ip << ':' << this->port;
 }
 
 std::ostream &operator<<(std::ostream &Os, const Website &Site) {
-  printInterfaces(Os, Site);
-  printMaxReqBody(Os, Site);
-  printRoot(Os, Site);
-  printAutoindex(Os, Site);
-  printAllow(Os, Site);
-  printLocations(Os, Site);
-  printErrorPages(Os, Site);
-  switch (Site.getType()) {
+  Site.print(Os);
+  return Os;
+}
+
+void Website::print(std::ostream &Os) const {
+  printInterfaces(Os, *this);
+  printMaxReqBody(Os, *this);
+  printRoot(Os, *this);
+  printAutoindex(Os, *this);
+  printAllow(Os, *this);
+  printLocations(Os, *this);
+  printErrorPages(Os, *this);
+  switch (this->getType()) {
   case Website::Cgi:
-    Os << "    cgi: " << Site.getCgi() << '\n';
+    Os << "    cgi: " << this->getCgi() << '\n';
     break;
   case Website::Return:
-    Os << "    return: " << Site.getReturnCode() << " -> " << Site.getReturnPath() << '\n';
+    Os << "    return: " << this->getReturnCode() << " -> " << this->getReturnPath() << '\n';
     break;
   case Website::Redirect:
-    Os << "    redirect: " << Site.getRedirect() << '\n';
+    Os << "    redirect: " << this->getRedirect() << '\n';
     break;
   case Website::None:
     break;
   }
-  return Os;
 }
 
 unsigned int Website::getReturnCode(void) const {
@@ -318,8 +331,8 @@ Website::Type Website::getType(void) const {
 }
 
 void Website::setReturn(const unsigned int Code, const std::string &Url) {
-  _return.code = Code;
-  _return.url = Url;
+  _returnCode = Code;
+  _returnPath = Url;
   _type = Return;
 }
 

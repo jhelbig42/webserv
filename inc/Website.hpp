@@ -7,18 +7,11 @@
 #include <ostream>
 #include <string>
 
-struct ReturnData {
-  // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-  unsigned int code;
-  std::string url;
-  // NOLINTEND(misc-non-private-member-variables-in-classes)
-  ReturnData(void): code(0), url("") {}
-};
-
 struct Listen {
   bool operator==(const Listen &Other) const;
   std::string ip;   // NOLINT(misc-non-private-member-variables-in-classes)
   std::string port; // NOLINT(misc-non-private-member-variables-in-classes)
+  void print(std::ostream &Os) const;
 };
 
 class PathInfo;
@@ -72,9 +65,11 @@ public:
   const std::string &getCgi(void) const;
   Type getType(void) const;
 
-  void setReturn(const unsigned int code, const::std::string &Url);
+  void setReturn(const unsigned int Code, const::std::string &Url);
   void setCgi(const::std::string &Path);
   void setRedirect(const::std::string &Path);
+
+  void print(std::ostream &Os) const;
 
   bool isSetAutoindex(void) const;
   bool isSetRoot(void) const;
@@ -103,7 +98,6 @@ private:
   int _allow;
   Type _type;
   std::string _path;
-  ReturnData _return;
   std::string _redirect;
   unsigned int _returnCode;
   std::string _returnPath;
@@ -133,6 +127,7 @@ public:
   Action getAction(void) const;
   unsigned int getCode(void) const;
   const char *getErrorPage(const unsigned int Code) const;
+  void print(std::ostream &Os) const;
 
 private:
   void resolveLocations(const std::list<Website> &Locations);

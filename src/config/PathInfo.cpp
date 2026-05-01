@@ -190,34 +190,39 @@ static void printRoot(std::ostream &Os, const PathInfo &Info) {
 }
 
 std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
+  Info.print(Os);
+  return Os;
+}
+
+void PathInfo::print(std::ostream &Os) const {
   Os << "class PathInfo: {\n";
   Os << "  error pages:\n";
-  printErrorPages(Os, Info);
-  printRoot(Os, Info);
-  printMaxReqBody(Os, Info);
-  printAutoindex(Os, Info);
+  printErrorPages(Os, *this);
+  printRoot(Os, *this);
+  printMaxReqBody(Os, *this);
+  printAutoindex(Os, *this);
   Os << "  allow:";
-  if (Info.getAllowed() & Head)
+  if (this->getAllowed() & Head)
     Os << " HEAD";
-  if (Info.getAllowed() & Get)
+  if (this->getAllowed() & Get)
     Os << " GET";
-  if (Info.getAllowed() & Post)
+  if (this->getAllowed() & Post)
     Os << " POST";
-  if (Info.getAllowed() & Delete)
+  if (this->getAllowed() & Delete)
     Os << " DELETE";
   Os << '\n';
-  switch (Info.getAction()) {
+  switch (this->getAction()) {
   case PathInfo::Return:
-    Os << "  return: " << Info.getCode() << ": " << Info.getRealPath();
+    Os << "  return: " << this->getCode() << ": " << this->getRealPath();
     break;
   case PathInfo::Cgi:
-    Os << "  cgi: " << Info.getCgiPath() << ": " << Info.getRealPath();
+    Os << "  cgi: " << this->getCgiPath() << ": " << this->getRealPath();
     break;
   case PathInfo::Default:
-    Os << "  default: " << Info.getRealPath();
+    Os << "  default: " << this->getRealPath();
     break;
   }
-  return Os << "\n}\n";
+  Os << "\n}\n";
 }
 
 static bool isFullMatch(const std::string &Pat, const std::string &Str) {
