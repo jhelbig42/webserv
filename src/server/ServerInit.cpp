@@ -31,12 +31,16 @@ void Server::initNetworking(const std::list<Website> &Websites) {
   for (std::list<Website>::const_iterator itW = Websites.begin();
        itW != Websites.end(); itW++) {
     const std::list<Listen> interfaces = itW->getInterfaces();
-
+    std::list<Listen>::const_iterator itI = interfaces.begin();
+    if(itI == interfaces.end()) {
+      throw std::runtime_error("Bad config file: missing \"listen: <IP:Port>\"");
+    }
     // iterate through each IP:port pair of a given website,
     // contained within the Website's Listen struct
-    for (std::list<Listen>::const_iterator itI = interfaces.begin();
-         itI != interfaces.end(); itI++) {
+    while (itI != interfaces.end()) {
+      logging::log2(logging::Debug, "interface = ", itI->ip + ":" + itI->port);
       initListeningSocket(*itI, *itW);
+      itI++;
     }
   }
 }

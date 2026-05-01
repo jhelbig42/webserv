@@ -13,7 +13,8 @@ docs/*
 sa/*
 tester
 cgi_tester
-unit_tests
+webserv_tester
+webserv_tester/*
 YoupiBanane
 webserv
 TODO.md
