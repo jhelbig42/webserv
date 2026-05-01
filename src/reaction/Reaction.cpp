@@ -1,11 +1,11 @@
 
 #include "CGIProcess.hpp"
-#include "Conditions.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
+#include "Website.hpp"
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -41,6 +41,10 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
+void Reaction::setPathInfo(const PathInfo &PathInfo){
+	_pathInfo = PathInfo;
+}
+
 bool Reaction::isCGI(const Request &Req){
   if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
 		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
@@ -59,7 +63,12 @@ void Reaction::init(const Request &Req, const int Socket) {
     initSendFile(CODE_400, FILE_400);
     return;
   }
-
+  if (!(_pathInfo.getAllowed() & Req.getMethod())){
+	logging::log(logging::Debug, "Requested method not allowed");
+  	initSendFile(CODE_403, NULL);
+	return ;
+  }
+  
   // TODO: make more generic
   /*
   if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
@@ -72,7 +81,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
-  if(!isCGI(Req)){
+  if(_pathInfo.getCgiPath() == ""){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
 	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
 		  initSendFile(CODE_400, FILE_400);
@@ -83,7 +92,8 @@ void Reaction::init(const Request &Req, const int Socket) {
   }
 
   logging::log(logging::Debug, "Req is a CGI");
-  if (!_cgi.init(Req, _script)) {
+  _cgi.setCGIPath(_pathInfo.getCgiPath());
+  if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
     initSendFile(CODE_500, FILE_500);
     return;
   }
@@ -121,13 +131,7 @@ static void setMetadata(std::string &Metadata, const int Code,
   Metadata = oss.str();
 }
 
-bool Reaction::statbufPopulate(const int Code, const char *File,
-                               struct stat &StatBuf) {
-  if (File == NULL)
-    return true;
-  errno = 0;
-  if (stat(File, &StatBuf) == 0)
-    return true;
+bool Reaction::fallbackOrError(const int Code) {
   if (hasDefaultFile(Code)) {
     logging::log3(logging::Warning, "Code ", Code,
                   ": Default file not accessible. Only sending status line.");
@@ -137,6 +141,16 @@ bool Reaction::statbufPopulate(const int Code, const char *File,
   return initError(errno);
 }
 
+bool Reaction::statbufPopulate(const int Code, const char *File,
+                               struct stat &StatBuf) {
+  if (File == NULL)
+    return true;
+  errno = 0;
+  if (stat(File, &StatBuf) == 0)
+    return true;
+  return fallbackOrError(Code);
+}
+
 bool Reaction::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
@@ -144,13 +158,24 @@ bool Reaction::setFdIn(const int Code, const char *File) {
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
-  if (hasDefaultFile(Code)) {
-    logging::log3(logging::Warning, "Code ", Code,
-                  ": Default file not accessible. Only sending status line.");
-    initSendFile(Code, NULL);
+  return fallbackOrError(Code);
+}
+
+bool Reaction::initPostBody(const Request &Req) {
+  if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
+    logging::log(logging::Debug, "POST: Content-Length header missing");
+    initSendFile(CODE_400, FILE_400);
     return false;
   }
-  return initError(errno);
+  _reqContLen = Req.getHeaders().getContentLength();
+  if (_reqContLen > _pathInfo.getMaxReqBody()) {
+    logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
+    initSendFile(CODE_403, NULL);
+    return false;
+  }
+  _receivedContLen = 0;
+  _buffer = Req.getBuffer();
+  return true;
 }
 
 static bool hasDefaultFile(const int Code) {

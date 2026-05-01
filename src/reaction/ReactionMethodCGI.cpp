@@ -1,18 +1,13 @@
+#include "HttpMethods.hpp"
 #include "Reaction.hpp"
-#include "StatusCodes.hpp"
+#include "Request.hpp"
 
 void Reaction::initCGIMethod(const Request &Req){
 	if (Req.getMethod() == Post) {
-    	if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
-      		logging::log(logging::Debug, "CGI POST: Content-Length header missing");
-      		initSendFile(CODE_400, FILE_400);
-      		return;
-    	}
-    	_reqContLen = Req.getHeaders().getContentLength();
-    	_receivedContLen = 0;
-    	_buffer = Req.getBuffer();
+		if (!initPostBody(Req))
+			return;
 		_processType = CgiPost;
-		return ;
+		return;
   	}
 	// is CGI but not POST
 	// POST has a body to forward; all other methods are immediately done inputwise
