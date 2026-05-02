@@ -1,4 +1,4 @@
-#include "Website.hpp"
+#include "Location.hpp"
 
 #include "HttpMethods.hpp"
 #include "Location.hpp"
@@ -15,7 +15,7 @@ static void printAutoindex(std::ostream &Os, const PathInfo &Info);
 static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
-static void printErrorPages(std::ostream &Os, const Website &Info);
+static void printErrorPages(std::ostream &Os, const Location &Info);
 static bool isPrefix(const std::string &Prefix, const std::string &Str);
 static bool isFullMatch(const std::string &Compare, const std::string &Str);
 static bool match(const std::string &Path, const std::string &LocationPath);
@@ -49,7 +49,7 @@ PathInfo::~PathInfo(void) {
 }
 
 void PathInfo::populateFromLocation(
-    const Website &Loc) { // NOLINT(misc-no-recursion)
+    const Location &Loc) { // NOLINT(misc-no-recursion)
   if (Loc.isSetAllow())
     _allow = Loc.getAllow();
   if (Loc.isSetMaxReqBody())
@@ -59,18 +59,18 @@ void PathInfo::populateFromLocation(
   if (Loc.isSetAutoindex())
     _autoindex = Loc.getAutoindex();
   _errorPages.push_front(&Loc.getErrorPages());
-  if (Loc.getType() == Website::Cgi) {
+  if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
-  } else if (Loc.getType() == Website::Return) {
+  } else if (Loc.getType() == Location::Return) {
     _action = Return;
     _code = Loc.getReturnCode();
     _realPath = Loc.getReturnPath();
-  } else if (Loc.getType() == Website::Redirect) {
+  } else if (Loc.getType() == Location::Redirect) {
     _action = Default;
     _realPath = substitutePath(_realPath, Loc.getRedirect(), Loc.getPath());
     resolveLocations(Loc.getLocations());
-  } else if (Loc.getType() == Website::None) {
+  } else if (Loc.getType() == Location::None) {
     resolveLocations(Loc.getLocations());
   } else {
     logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
@@ -78,8 +78,8 @@ void PathInfo::populateFromLocation(
 }
 
 void PathInfo::resolveLocations(
-    const std::list<Website> &Locations) { // NOLINT(misc-no-recursion)
-  for (std::list<Website>::const_iterator it = Locations.begin();
+    const std::list<Location> &Locations) { // NOLINT(misc-no-recursion)
+  for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
     if (match(_realPath, it->getPath())) {
       populateFromLocation(*it);
@@ -88,7 +88,7 @@ void PathInfo::resolveLocations(
   }
 }
 
-PathInfo::PathInfo(const Website &Site, const std::string &Path)
+PathInfo::PathInfo(const Location &Site, const std::string &Path)
     : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
       _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
       _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {

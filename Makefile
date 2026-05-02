@@ -28,7 +28,7 @@ SRC			+= PathInfo.cpp
 SRC			+= ParseServer.cpp
 SRC			+= Parser.cpp
 SRC			+= UnexpectedToken.cpp
-vpath %.cpp $(SRC_DIR)/config/parsing
+SRC			+= Location.cpp
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp

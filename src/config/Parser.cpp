@@ -1,6 +1,7 @@
 #include "Parser.hpp"
 
 #include "Config.hpp"
+#include "Location.hpp"
 #include "Token.hpp"
 #include "TokenType.hpp"
 #include <cerrno>

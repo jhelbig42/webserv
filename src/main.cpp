@@ -1,7 +1,6 @@
 #include "Config.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include "Scanner.hpp"
 #include <iostream>
 //#define _GNU_SOURCE 
 #include "Config.hpp"
@@ -38,8 +37,6 @@ int main(void) {
 int main(int argc, char **argv) {
   if (argc != 3 || argv[2][0] != '/')
     return 1;
-  // const Scanner scan(argv[1]);
-  // std::cout << scan;
   try {
     const Config conf(argv[1]);
     std::cout << conf;
