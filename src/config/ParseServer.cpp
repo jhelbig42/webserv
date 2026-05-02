@@ -13,6 +13,7 @@ Website Parser::server(void) {
   if (!match(TokenType::BracesLeft))
     throwTokenError("expected '{'");
   Location newLocation;
+  newLocation.setAsRoot();
   while (!match(TokenType::BracesRight)) {
     skipSep();
     if (isNextType(TokenType::Eof))

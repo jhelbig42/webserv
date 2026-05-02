@@ -18,14 +18,17 @@ class Token;
 
 class Website {
 public:
+  Website(void);
+  Website(const Website &Other);
   explicit Website(const Location &Loc);
+  Website &operator=(const Website &Other);
   ~Website(void);
   PathInfo getPathInfo(const std::string &Path) const;
   const std::list<Listen> &getInterfaces(void) const;
   std::ostream &print(std::ostream &Os) const; 
 
 private:
-  const Location &_website;
+  const Location *_website;
 };
 
 class PathInfo {
