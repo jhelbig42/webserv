@@ -8,16 +8,16 @@ SRC			:=
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/server
-SRC			+= Server.cpp\
-			ServerInit.cpp\
-			ServerRun.cpp\
-			ServerHandlePoll.cpp\
-			ServerHandlePollin.cpp\
-			ServerHandlePollout.cpp\
-			ServerHandlePollErrs.cpp\
-			ServerErrorHandling.cpp\
-			ServerDebug.cpp\
-			ServerWrappers.cpp
+SRC			+= Server.cpp
+SRC			+= ServerInit.cpp
+SRC			+= ServerRun.cpp
+SRC			+= ServerHandlePoll.cpp
+SRC			+= ServerHandlePollin.cpp
+SRC			+= ServerHandlePollout.cpp
+SRC			+= ServerHandlePollErrs.cpp
+SRC			+= ServerErrorHandling.cpp
+SRC			+= ServerDebug.cpp
+SRC			+= ServerWrappers.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
