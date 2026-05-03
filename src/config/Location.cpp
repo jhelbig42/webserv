@@ -188,8 +188,10 @@ static void printIndex(std::ostream &Os, const Location &Site) {
   if (!Site.isSetIndex())
     return;
   std::list<std::string>::const_iterator it = Site.getIndex().begin();
+  Os << "index:";
   while (it != Site.getIndex().end())
-    Os << "index: " << *it++ << '\n';
+    Os << " " << *it++;
+  Os << '\n';
 }
 
 static void printInterfaces(std::ostream &Os, const Location &Site) {
