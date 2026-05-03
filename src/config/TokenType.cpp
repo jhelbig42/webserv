@@ -4,7 +4,8 @@
 #include <stdexcept>
 #include <string>
 
-static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It);
+static bool isSingleChar(const std::string &Ch,
+                         std::string::const_iterator &It);
 static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It);
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
@@ -96,7 +97,8 @@ bool TokenType::matchType(const std::string &Str,
   return false;
 }
 
-static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It) {
+static bool isSingleChar(const std::string &Ch,
+                         std::string::const_iterator &It) {
   if (*It != Ch[0])
     return false;
   ++It;
@@ -118,7 +120,8 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
 
 static bool isReserved(const std::string &Word) {
   for (size_t i = 0; i != globalTokenTypesSize; ++i) {
-    if (globalTokenTypes[i].category == TokenType::Keyword && Word == globalTokenTypes[i].tokenStr)
+    if (globalTokenTypes[i].category == TokenType::Keyword &&
+        Word == globalTokenTypes[i].tokenStr)
       return true;
   }
   return false;
@@ -145,7 +148,7 @@ const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
   throw std::runtime_error("unrecognized token");
 }
 
-TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &Str)
+TokenType::UnrecognizedTokenException::UnrecognizedTokenException(
+    const std::string &Str)
     : std::runtime_error(Str) {
 }
-

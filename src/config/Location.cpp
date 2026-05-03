@@ -3,6 +3,7 @@
 #include "CompileTimeConstants.hpp"
 #include "HttpMethods.hpp"
 #include "Location.hpp"
+#include "Website.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <list>
@@ -22,34 +23,18 @@ static void printIndex(std::ostream &Os, const Location &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Location::Location(void)
-    : _isRoot(false),
-      _setMembers(0),
-      _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
-      _root("/"),
-      _autoindex(AUTOINDEX_DEFAULT),
-      _allow(0),
-      _type(None),
-      _path("/"),
-      _redirect(""),
-      _returnCode(0),
-      _returnPath("") {
+    : _isRoot(false), _setMembers(0), _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
+      _root("/"), _autoindex(AUTOINDEX_DEFAULT), _allow(0), _type(None),
+      _path("/"), _redirect(""), _returnCode(0), _returnPath("") {
 }
 
 Location::Location(const Location &Other)
-    : _isRoot(Other._isRoot),
-      _setMembers(Other._setMembers),
-      _maxReqBody(Other._maxReqBody),
-      _interfaces(Other._interfaces),
-      _locations(Other._locations),
-      _index(Other._index),
-      _root(Other._root),
-      _errorPages(Other._errorPages),
-      _autoindex(Other._autoindex),
-      _allow(Other._allow),
-      _type(Other._type),
-      _path(Other._path),
-      _redirect(Other._redirect),
-      _returnCode(Other._returnCode),
+    : _isRoot(Other._isRoot), _setMembers(Other._setMembers),
+      _maxReqBody(Other._maxReqBody), _interfaces(Other._interfaces),
+      _locations(Other._locations), _index(Other._index), _root(Other._root),
+      _errorPages(Other._errorPages), _autoindex(Other._autoindex),
+      _allow(Other._allow), _type(Other._type), _path(Other._path),
+      _redirect(Other._redirect), _returnCode(Other._returnCode),
       _returnPath(Other._returnPath) {
 }
 
@@ -75,17 +60,9 @@ Location &Location::operator=(const Location &Other) {
 }
 
 Location::Location(const std::string &Path)
-    : _isRoot(false),
-      _setMembers(0),
-      _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
-      _root("/"),
-      _autoindex(AUTOINDEX_DEFAULT),
-      _allow(0),
-      _type(None),
-      _path(Path),
-      _redirect(""),
-      _returnCode(0),
-      _returnPath("") {
+    : _isRoot(false), _setMembers(0), _maxReqBody(MAX_REQUEST_BODY_DEFAULT),
+      _root("/"), _autoindex(AUTOINDEX_DEFAULT), _allow(0), _type(None),
+      _path(Path), _redirect(""), _returnCode(0), _returnPath("") {
 }
 
 Location::~Location(void) {
@@ -137,11 +114,6 @@ void Listen::print(std::ostream &Os) const {
   Os << this->ip << ':' << this->port;
 }
 
-std::ostream &operator<<(std::ostream &Os, const Location &Site) {
-  Site.print(Os);
-  return Os;
-}
-
 std::ostream &Location::print(std::ostream &Os) const {
   if (_isRoot)
     Os << "server {\n";
@@ -159,7 +131,8 @@ std::ostream &Location::print(std::ostream &Os) const {
     Os << "    cgi: " << this->getCgi() << '\n';
     break;
   case Location::Return:
-    Os << "    return: " << this->getReturnCode() << " -> " << this->getReturnPath() << '\n';
+    Os << "    return: " << this->getReturnCode() << " -> "
+       << this->getReturnPath() << '\n';
     break;
   case Location::Redirect:
     Os << "    redirect: " << this->getRedirect() << '\n';
@@ -205,7 +178,8 @@ static void printInterfaces(std::ostream &Os, const Location &Site) {
 static void printLocations(std::ostream &Os, const Location &Site) {
   std::list<Location>::const_iterator it = Site.getLocations().begin();
   while (it != Site.getLocations().end()) {
-    Os << *it++ << '\n';
+    it->print(Os);
+    ++it;
   }
 }
 

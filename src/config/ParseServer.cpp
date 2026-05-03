@@ -1,8 +1,9 @@
 #include "Parser.hpp"
 
 #include "HttpMethods.hpp"
-#include "TokenType.hpp"
 #include "Location.hpp"
+#include "TokenType.hpp"
+#include "Website.hpp"
 #include <list>
 #include <string>
 
@@ -30,7 +31,8 @@ void Parser::parseEntry(Location &Site) {
   skipSep();
   validateEntry(Site);
   if (!Site.isRoot() && isNextType(TokenType::Listen))
-    throwTokenError("listen directive can not be specified at location context");
+    throwTokenError(
+        "listen directive can not be specified at location context");
   else if (match(TokenType::Return)) {
     parseReturn(Site);
   } else if (match(TokenType::Listen)) {
@@ -97,8 +99,7 @@ void Parser::parseAllow(Location &Site) {
       Site.addAllow(Get);
       Site.addAllow(Post);
       Site.addAllow(Delete);
-    }
-    else if (match(TokenType::HeadToken))
+    } else if (match(TokenType::HeadToken))
       Site.addAllow(Head);
     else if (match(TokenType::GetToken))
       Site.addAllow(Get);
@@ -190,7 +191,7 @@ void Parser::validateEntry(const Location &Site) {
   }
 }
 
-void Parser::parseLocation(Location &Site) { //NOLINT(misc-no-recursion)
+void Parser::parseLocation(Location &Site) { // NOLINT(misc-no-recursion)
   gap();
   if (nextType() != TokenType::Slash)
     throwTokenError("expected '/'");
@@ -256,5 +257,5 @@ void Parser::parseReturn(Location &Site) {
   skipSep();
   if (!match(TokenType::Semicolon))
     throwTokenError("expected ';'");
-  Site.setReturn(code, url); 
+  Site.setReturn(code, url);
 }

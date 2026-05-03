@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config.hpp"
+#include "Location.hpp"
 #include "Scanner.hpp"
 #include "Token.hpp"
 #include "Website.hpp"

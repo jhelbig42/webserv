@@ -7,12 +7,7 @@
 
 class Location {
 public:
-  typedef enum {
-    None,
-    Cgi,
-    Return,
-    Redirect
-  } Type;
+  typedef enum { None, Cgi, Return, Redirect } Type;
 
   Location();
   Location(const Location &Other);
@@ -55,9 +50,9 @@ public:
   const std::string &getCgi(void) const;
   Type getType(void) const;
 
-  void setReturn(const unsigned int Code, const::std::string &Url);
-  void setCgi(const::std::string &Path);
-  void setRedirect(const::std::string &Path);
+  void setReturn(const unsigned int Code, const ::std::string &Url);
+  void setCgi(const ::std::string &Path);
+  void setRedirect(const ::std::string &Path);
 
   std::ostream &print(std::ostream &Os) const;
 
@@ -82,9 +77,9 @@ private:
   bool _isRoot;
   int _setMembers;
   unsigned int _maxReqBody;
-  std::list<Listen> _interfaces; 
-  std::list<Location> _locations; 
-  std::list<std::string> _index; 
+  std::list<Listen> _interfaces;
+  std::list<Location> _locations;
+  std::list<std::string> _index;
   std::string _root;
   std::map<unsigned int, std::string> _errorPages;
   bool _autoindex;

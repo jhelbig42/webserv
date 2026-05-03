@@ -1,11 +1,16 @@
 #include "Website.hpp"
+
 #include "Location.hpp"
+#include <cstddef>
+#include <list>
+#include <ostream>
 #include <string>
 
-Website::Website(void): _website(NULL) {
+Website::Website(void) : _website(NULL) {
 }
 
-Website::Website(const Website &Other): _website(new Location(*Other._website)) {
+Website::Website(const Website &Other)
+    : _website(new Location(*Other._website)) {
 }
 
 Website &Website::operator=(const Website &Other) {
@@ -14,7 +19,7 @@ Website &Website::operator=(const Website &Other) {
       delete _website;
       _website = NULL;
     }
-    if (Other._website != NULL) 
+    if (Other._website != NULL)
       _website = new Location(*Other._website);
   }
   return *this;

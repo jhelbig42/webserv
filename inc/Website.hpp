@@ -25,7 +25,7 @@ public:
   ~Website(void);
   PathInfo getPathInfo(const std::string &Path) const;
   const std::list<Listen> &getInterfaces(void) const;
-  std::ostream &print(std::ostream &Os) const; 
+  std::ostream &print(std::ostream &Os) const;
 
 private:
   const Location *_website;
@@ -33,11 +33,7 @@ private:
 
 class PathInfo {
 public:
-  typedef enum {
-    Default,
-    Return,
-    Cgi
-  } Action;
+  typedef enum { Default, Return, Cgi } Action;
 
   PathInfo(void);
   PathInfo(const PathInfo &Other);
