@@ -29,9 +29,11 @@ Website Parser::server(void) {
 void Parser::parseEntry(Location &Site) {
   skipSep();
   validateEntry(Site);
-  if (match(TokenType::Return)) {
+  if (!Site.isRoot() && isNextType(TokenType::Listen))
+    throwTokenError("listen directive can not be specified at location context");
+  else if (match(TokenType::Return)) {
     parseReturn(Site);
-  } else if (Site.isRoot() && match(TokenType::Listen)) {
+  } else if (match(TokenType::Listen)) {
     parseListen(Site);
   } else if (match(TokenType::Cgi)) {
     parseCgi(Site);
