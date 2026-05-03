@@ -94,13 +94,13 @@ void Parser::parseAllow(Location &Site) {
       Site.addAllow(Post);
       Site.addAllow(Delete);
     }
-    else if (match(TokenType::Head))
+    else if (match(TokenType::HeadToken))
       Site.addAllow(Head);
-    else if (match(TokenType::Get))
+    else if (match(TokenType::GetToken))
       Site.addAllow(Get);
-    else if (match(TokenType::Post))
+    else if (match(TokenType::PostToken))
       Site.addAllow(Post);
-    else if (match(TokenType::Delete))
+    else if (match(TokenType::DeleteToken))
       Site.addAllow(Delete);
     else
       throwTokenError("unrecognized HTTP method");
