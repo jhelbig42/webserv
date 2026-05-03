@@ -35,11 +35,13 @@ public:
   void addErrorPage(const unsigned int Code, const std::string &Path);
   const std::list<Listen> &getInterfaces(void) const;
   const std::list<Location> &getLocations(void) const;
+  const std::list<std::string> &getIndex(void) const;
   const std::map<unsigned int, std::string> &getErrorPages(void) const;
   void setRoot(const std::string &RootDir);
   void setAutoindex(const bool IsOn);
   void setMaxReqBody(const unsigned int MaxBody);
   void addAllow(const HttpMethod Method);
+  void addIndex(const std::string &Resource);
   void allowAll(void);
   void allowNone(void);
   void setAsRoot(void);
@@ -65,6 +67,7 @@ public:
   bool isSetAllow(void) const;
   bool isSetMaxReqBody(void) const;
   bool isRoot(void) const;
+  bool isSetIndex(void) const;
 
 private:
   typedef enum {
@@ -72,7 +75,8 @@ private:
     Root = (1u << 1),
     Autoindex = (1u << 2),
     Allow = (1u << 3),
-    MaxReqBody = (1u << 4)
+    MaxReqBody = (1u << 4),
+    Index = (1u << 5)
   } SetMembers;
 
   bool _isRoot;
@@ -80,6 +84,7 @@ private:
   unsigned int _maxReqBody;
   std::list<Listen> _interfaces; 
   std::list<Location> _locations; 
+  std::list<std::string> _index; 
   std::string _root;
   std::map<unsigned int, std::string> _errorPages;
   bool _autoindex;

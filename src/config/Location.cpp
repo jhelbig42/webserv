@@ -18,6 +18,7 @@ static void printAutoindex(std::ostream &Os, const Location &Site);
 static void printAllow(std::ostream &Os, const Location &Site);
 static void printErrorPages(std::ostream &Os, const Location &Site);
 static void printMaxReqBody(std::ostream &Os, const Location &Site);
+static void printIndex(std::ostream &Os, const Location &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Location::Location(void)
@@ -40,6 +41,7 @@ Location::Location(const Location &Other)
       _maxReqBody(Other._maxReqBody),
       _interfaces(Other._interfaces),
       _locations(Other._locations),
+      _index(Other._index),
       _root(Other._root),
       _errorPages(Other._errorPages),
       _autoindex(Other._autoindex),
@@ -58,6 +60,7 @@ Location &Location::operator=(const Location &Other) {
     _maxReqBody = Other._maxReqBody;
     _interfaces = Other._interfaces;
     _locations = Other._locations;
+    _index = Other._index;
     _root = Other._root;
     _errorPages = Other._errorPages;
     _autoindex = Other._autoindex;
@@ -86,6 +89,15 @@ Location::Location(const std::string &Path)
 }
 
 Location::~Location(void) {
+}
+
+void Location::addIndex(const std::string &Resource) {
+  _index.push_back(Resource);
+  _setMembers |= Index;
+}
+
+const std::list<std::string> &Location::getIndex(void) const {
+  return _index;
 }
 
 void Location::addInterface(Listen &If) {
@@ -139,6 +151,7 @@ std::ostream &Location::print(std::ostream &Os) const {
   printMaxReqBody(Os, *this);
   printRoot(Os, *this);
   printAutoindex(Os, *this);
+  printIndex(Os, *this);
   printAllow(Os, *this);
   printErrorPages(Os, *this);
   switch (this->getType()) {
@@ -165,6 +178,18 @@ unsigned int Location::getReturnCode(void) const {
 
 const std::string &Location::getReturnPath(void) const {
   return _returnPath;
+}
+
+bool Location::isSetIndex(void) const {
+  return _setMembers & Index;
+}
+
+static void printIndex(std::ostream &Os, const Location &Site) {
+  if (!Site.isSetIndex())
+    return;
+  std::list<std::string>::const_iterator it = Site.getIndex().begin();
+  while (it != Site.getIndex().end())
+    Os << "index: " << *it++ << '\n';
 }
 
 static void printInterfaces(std::ostream &Os, const Location &Site) {

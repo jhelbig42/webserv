@@ -46,6 +46,7 @@ private:
   void parseRoot(Location &Site);
   void parseAutoindex(Location &Site);
   void parseAllow(Location &Site);
+  void parseIndex(Location &Site);
 
   void parseLocation(Location &Site);
   void parseRedirect(Location &Site);

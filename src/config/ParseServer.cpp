@@ -49,6 +49,8 @@ void Parser::parseEntry(Location &Site) {
     parseMaxReqBody(Site);
   } else if (match(TokenType::Location)) {
     parseLocation(Site);
+  } else if (match(TokenType::Index)) {
+    parseIndex(Site);
   } else
     throwTokenError("invalid Entry");
   skipSep();
@@ -205,6 +207,21 @@ void Parser::parseLocation(Location &Site) { //NOLINT(misc-no-recursion)
     parseEntry(newLocation);
   }
   Site.addLocation(newLocation);
+}
+
+void Parser::parseIndex(Location &Site) {
+  gap();
+  std::string index = parseWord();
+  if (index == "")
+    throwTokenError("not a valid index");
+  Site.addIndex(index);
+  skipSep();
+  while (!isNextType(TokenType::Semicolon)) {
+    index = parseWord();
+    Site.addIndex(index);
+    skipSep();
+  }
+  eat();
 }
 
 void Parser::parseRedirect(Location &Site) {

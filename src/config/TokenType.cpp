@@ -30,6 +30,7 @@ static const TokenType globalTokenTypes[] = {
     {"On", "on", TokenType::On, TokenType::Keyword},
     {"Off", "off", TokenType::Off, TokenType::Keyword},
     {"ErrorPage", "error_page", TokenType::ErrorPage, TokenType::Keyword},
+    {"Index", "index", TokenType::Index, TokenType::Keyword},
     {"Location", "location", TokenType::Location, TokenType::Keyword},
     {"Return", "return", TokenType::Return, TokenType::Keyword},
     {"Redirect", "redirect", TokenType::Redirect, TokenType::Keyword},

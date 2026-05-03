@@ -27,6 +27,7 @@ struct TokenType {
     On,
     Off,
     ErrorPage,
+    Index,
     Location,
     Redirect,
     Cgi,
