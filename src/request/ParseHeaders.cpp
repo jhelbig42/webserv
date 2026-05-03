@@ -1,9 +1,8 @@
 
 #include "Logging.hpp"
 #include "Request.hpp"
-#include <string>
 #include <sstream>
-#include <sys/types.h>
+#include <string>
 #include <vector>
 
 #define MAX_REQUEST 1024

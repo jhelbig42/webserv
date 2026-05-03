@@ -7,8 +7,8 @@
 class HttpHeaders {
 public:
   HttpHeaders();
-  HttpHeaders(const HttpHeaders &);
-  HttpHeaders &operator=(const HttpHeaders &);
+  HttpHeaders(const HttpHeaders &Other);
+  HttpHeaders &operator=(const HttpHeaders &Other);
   ~HttpHeaders();
 
   typedef enum {
@@ -40,7 +40,7 @@ public:
   void setContentLength(const size_t Length);
   size_t getContentLength(void) const;
 
-  void setContentType(const char *extension);
+  void setContentType(const char *Extension);
   MediaType getContentType(void) const;
 
 

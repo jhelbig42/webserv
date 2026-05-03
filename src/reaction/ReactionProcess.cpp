@@ -54,14 +54,14 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
-	// we just polled for what we nee
+ // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
-  if (Condition & FSockWrite)  
+  else if (Condition & FSockWrite)  
     sendToCGI(Bytes);
-  if (Condition & SockRead)    
+  else if (Condition & SockRead)    
     recvFromClient(Socket, Bytes);
-  if (Condition & SockWrite)   
+  else if (Condition & SockWrite)   
     return sendToClient(Socket, Bytes);
   return false;
 }
@@ -71,16 +71,13 @@ bool Reaction::checkOnChild(void){
 	const pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
-	//logging::log2(logging::Debug, __func__, " called and there is a CGI");
   
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
-	//logging::log2(logging::Debug, "pid: ", pid);
-	//logging::log2(logging::Debug, "result: ", result);
 	
   	if (result == -1){
     	_cgi.setPid(-1);
-		initSendFile(CODE_500, FILE_500);
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return false; // waitpid failed => internal server error
 	}
 
@@ -88,6 +85,7 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	
 	if (WIFEXITED(status)) { //child somehow exited
+		// find out how
     	if (WEXITSTATUS(status) == 0) {
       		logging::log(logging::Debug, "CGI exited normally with 0");
 			_cgi.setPid(-1);
@@ -99,7 +97,7 @@ bool Reaction::checkOnChild(void){
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
-    initSendFile(CODE_500, FILE_500);
+    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return false;
 }
 
@@ -162,11 +160,8 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if ((_processType == CgiPost || _processType == CgiNotPost) 
   		&& _cgi.isInputDone()) 
   {
-    if (!_metadataSent) 
-	{
-      _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+    if (sendMetadataIfPending(Socket, Bytes))
       return false;
-	}
 	const size_t used = _buffer.getUsed();
     if (used > 0)
 	{
@@ -181,11 +176,16 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
 }
 
 
-bool Reaction::sendFile(const int Socket, const size_t Bytes) {
-  if (!_metadataSent) {
-    _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
+  if (_metadataSent)
     return false;
-  }
+  _metadataSent = stringToSocket(Socket, _metadata, Bytes);
+  return true;
+}
+
+bool Reaction::sendFile(const int Socket, const size_t Bytes) {
+  if (sendMetadataIfPending(Socket, Bytes))
+    return false;
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
@@ -202,8 +202,8 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 		if (_receivedContLen == _reqContLen)
 			_cgi.setInputDone(true);
 	}
-	catch (std::runtime_error){
-		initSendFile(CODE_500, FILE_500);
+	catch (std::runtime_error &){
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
 		return ;
 	}
 	return ;
@@ -211,19 +211,25 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 
 void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// fill buffer with new data from socket
-	try {
-		if (_buffer.socketToBuf(Socket, Bytes) == -1) //not possible to read anything into the buffer
-			return ; //means we are just done
-	}
-	catch (std::runtime_error){
-		initSendFile(CODE_500, FILE_500);
-		return ;
-	}
 	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
 	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
+	try {
+		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+		logging::log2(logging::Debug, "Reaction: read from Client into ServerBuffer: ", received);
+		if (received == -1) //not possible to read anything into the buffer
+			return ; //means we are just done
+	}
+	catch (std::runtime_error &){
+		fclose(_fdOut);
+		unlink(_tmpPath.c_str());
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
+		return ;
+	}
+
 	if (toReceive > 0)
 	{
-		const ssize_t copied = _buffer.bufToFILE(_fdOut, toReceive);
+		const ssize_t copied = _buffer.bufToFile(fileno(_fdOut), toReceive);
+		logging::log2(logging::Debug, "Reaction: copied from Server Buffer into File: ", copied);
 		if (copied == -1)
 			return ;
 		_receivedContLen += static_cast<size_t>(copied);
@@ -235,6 +241,13 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 	// if we received enough data in comparison to given content length
 	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
 	fclose(_fdOut);
+	unlink(_finalPath.c_str()); // fails if file does not exist, but we do not care
+	if (rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
+		logging::log(logging::Debug, "Reaction: Renaming failed - should never happen");
+		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
+		return;
+	}
+	logging::log(logging::Debug, "Reaction: Renaming successfull");
 	_buffer.reset();
 	initSendFile(CODE_201, NULL);
 	return ;

@@ -34,7 +34,7 @@ void Server::handleNewConnection(int Fd) {
   if (acceptConnection(Fd, &candidate) != -1) {
     addConnectionToMap(Fd, candidate);
     const short events =
-        POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP | POLLOUT;
+        POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
     const pollfd newFd = {candidate.clientSock, events, 0};
     _newFdBatch.push_back(newFd);
   }

@@ -68,7 +68,7 @@ void Server::process(void) {
   	int type = getSocketType(it->fd);
     handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
-    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       closeAndDelete(it->fd, type);
       it = _fds.erase(it);
       continue;
@@ -80,6 +80,7 @@ void Server::process(void) {
     it++;
   }
   serveAll();
+  updateEvents();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   _newFdBatch.clear();
 }
@@ -93,6 +94,55 @@ void Server::checkForNewCGI(int Fd) {
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
 	}
 	return;
+}
+
+void Server::updateEvents(void){
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+  	int type = getSocketType(it->fd);
+	int conditionsWanted;
+	if (type == IS_LISTENER) {
+		it++;
+		continue;
+	}
+	if (type == IS_CLIENT) {
+		conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
+		it->events = determineEventsClient(conditionsWanted);
+	}
+	if (type == IS_FWD) {
+		Connection *clientConnection =_fwdMap.at(it->fd);
+		conditionsWanted = clientConnection->getConditionsWanted();
+		it->events = determineEventsFwd(conditionsWanted);
+	}
+    it++;
+  }
+}
+
+short Server::determineEventsClient(int conditionsWanted){
+
+	short events = POLLERR | POLLHUP;
+	if (conditionsWanted & SockWrite) {
+		events = events | POLLOUT | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	if (conditionsWanted & SockRead) {
+		events = events | POLLIN | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	return (events);
+}
+
+short Server::determineEventsFwd(int conditionsWanted){
+
+	short events = POLLERR | POLLHUP;
+	if (conditionsWanted & FSockWrite) {
+		events = events | POLLOUT | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	if (conditionsWanted & FSockRead) {
+		events = events | POLLIN | POLLRDHUP;
+		// TODO rdhup good here?
+	}
+	return (events);
 }
 
 void Server::closeAndDelete(int Fd, int type) {

@@ -16,7 +16,6 @@
 #include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-
 #include "Website.hpp"
 #include <netdb.h>
 #include <sys/socket.h>
@@ -33,6 +32,7 @@ public:
   int getSockForward(void) const;
   bool getDeleteStatus(void) const;
   Conditions getConditions(void) const;
+  int getConditionsWanted(void) const;
 
   // setters
   void scheduleForDemolition(void);

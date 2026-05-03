@@ -6,6 +6,7 @@
 #include "HttpHeaders.hpp"
 #include "Request.hpp"
 #include "Script.hpp"
+#include "Website.hpp"
 #include <string>
 #include <sys/types.h>
 
@@ -32,7 +33,7 @@ public:
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req);
+	void init(const Request &Req, const int Socket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
   /// \brief continues processing a Reaction object
@@ -66,19 +67,27 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
+  void			setTmpPathName(void);
+  void			setFinalPathName(void);
+
+  void setPathInfo(const PathInfo &PathInfo);
 
 private:
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);
+  bool sendMetadataIfPending(const int Socket, const size_t Bytes);
   void initSendFile(const int Code, const char *File);
   bool statbufPopulate(const int Code, const char *File, struct stat &StatBuf);
   bool setFdIn(const int Code, const char *File);
+  bool fallbackOrError(const int Code);
   bool initError(const int Errno);
+  std::string getErrorFile(int Code) const;
   void setDefaults(void);
+  bool initPostBody(const Request &Req);
 
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
-  void initDelete(const Request &Req);
+  void initDelete(void);
   void initPost(const Request &Req);
   
   void initCGIMethod(const Request &Req);
@@ -86,9 +95,8 @@ private:
   //for Post request
   void receiveBodyIntoServerFile(const int Socket, const size_t Bytes);
   void receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
-  std::string _finalPath;
-  std::string _tmpPath;
 
+  
   // called by process()
   /// \fn checkOnChild(void)
   /// \brief checks if the child process belonging to a CGI is finished.
@@ -114,9 +122,15 @@ private:
   std::string 	_metadata;
 
   int     		_fdIn;
+  int     		_sock;
   FILE    		*_fdOut;
   Buffer  		_buffer;
 
+  std::string _finalPath;
+  std::string _tmpPath;
+
   Script  		_script;
   CGIProcess 	_cgi; 
+
+  PathInfo		_pathInfo;
 };
