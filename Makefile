@@ -111,6 +111,7 @@ ifneq ($(DEV), 0)
 	DEBUG		:= 1
 	CXXFLAGS	+= -pedantic
 	CXXFLAGS	+= -Wconversion
+	CXXFLAGS	+= -Wshadow
 	CXXFLAGS	+= -Wno-unused-parameter
 	CXXFLAGS	+= -Wno-unused-function
 endif
