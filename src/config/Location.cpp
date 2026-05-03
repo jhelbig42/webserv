@@ -131,12 +131,15 @@ std::ostream &operator<<(std::ostream &Os, const Location &Site) {
 }
 
 std::ostream &Location::print(std::ostream &Os) const {
+  if (_isRoot)
+    Os << "server {\n";
+  else
+    Os << "location " << _path << " {\n";
   printInterfaces(Os, *this);
   printMaxReqBody(Os, *this);
   printRoot(Os, *this);
   printAutoindex(Os, *this);
   printAllow(Os, *this);
-  printLocations(Os, *this);
   printErrorPages(Os, *this);
   switch (this->getType()) {
   case Location::Cgi:
@@ -151,6 +154,8 @@ std::ostream &Location::print(std::ostream &Os) const {
   case Location::None:
     break;
   }
+  printLocations(Os, *this);
+  Os << "}\n";
   return Os;
 }
 
@@ -173,8 +178,7 @@ static void printInterfaces(std::ostream &Os, const Location &Site) {
 static void printLocations(std::ostream &Os, const Location &Site) {
   std::list<Location>::const_iterator it = Site.getLocations().begin();
   while (it != Site.getLocations().end()) {
-    Os << *it << '\n';
-    ++it;
+    Os << *it++ << '\n';
   }
 }
 
@@ -316,7 +320,7 @@ PathInfo Location::getPathInfo(const std::string &Path) const {
 }
 
 void Location::allowNone(void) {
-  _setMembers |= Allow;
+  _setMembers &= ~Allow;
   _allow = 0;
 }
 
