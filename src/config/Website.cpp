@@ -37,7 +37,7 @@ const std::list<Listen> &Website::getInterfaces(void) const {
 }
 
 std::ostream &Website::print(std::ostream &Os) const {
-  return Os << this->_website->print(Os);
+  return this->_website->print(Os);
 }
 
 std::ostream &operator<<(std::ostream &Os, const Website &Site) {
