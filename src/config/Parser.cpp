@@ -10,7 +10,8 @@
 #include <string>
 
 // class Config
-Parser::Parser(Config &Conf, const char *File) : _config(Conf), _scan(File), _line(1) {
+Parser::Parser(Config &Conf, const char *File)
+    : _config(Conf), _scan(File), _line(1) {
 }
 
 void Parser::parse(void) {
@@ -29,7 +30,8 @@ void Parser::parse(void) {
   }
 }
 
-Parser::~Parser() { }
+Parser::~Parser() {
+}
 
 bool Parser::isNextType(const TokenType::Type Type) const {
   return nextType() == Type;
@@ -122,8 +124,7 @@ std::string Parser::parseResource(void) {
   std::string path = matchGetLexeme(TokenType::Slash);
   if (sep() || nextType() == TokenType::Semicolon)
     return path;
-  while (!isNextType(TokenType::Semicolon) &&
-         !isNextType(TokenType::Newline) &&
+  while (!isNextType(TokenType::Semicolon) && !isNextType(TokenType::Newline) &&
          !isNextType(TokenType::Whitespace)) {
     path += peek().getLexeme();
     eat();
@@ -143,10 +144,9 @@ std::string Parser::parseAbsPath(void) {
   while (true) {
     if (nextType() == TokenType::Slash)
       throwTokenError("expected '/'");
-    while (!isNextType(TokenType::Semicolon) &&
-           !isNextType(TokenType::Newline) &&
-           !isNextType(TokenType::Whitespace) &&
-           !isNextType(TokenType::Slash)) {
+    while (
+        !isNextType(TokenType::Semicolon) && !isNextType(TokenType::Newline) &&
+        !isNextType(TokenType::Whitespace) && !isNextType(TokenType::Slash)) {
       path += peek().getLexeme();
       eat();
     }

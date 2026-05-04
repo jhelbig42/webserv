@@ -1,11 +1,7 @@
 #pragma once
 
 #include "Logging.hpp"
-#include "Scanner.hpp"
-#include "TokenType.hpp"
 #include "Website.hpp"
-#include <stdexcept>
-#include <string>
 
 namespace config {
 

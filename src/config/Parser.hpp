@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Config.hpp"
+#include "Location.hpp"
+#include "Scanner.hpp"
+#include "Token.hpp"
+#include "Website.hpp"
 
 class Parser {
 public:
@@ -32,38 +36,32 @@ private:
   bool isNextType(const TokenType::Type Type) const;
   const std::string &matchGetLexeme(TokenType::Type Type);
 
-  Website expression(void);
+  Location expression(void);
 
   Website server(void);
 
   unsigned int parseUnsignedInt(void);
   void gap(void);
   void populateInterface(Listen &Interface);
-  void parseListen(Website &Site);
-  void parseRoot(Website &Site);
-  void parseRoot(Location &Loc);
-  void parseAutoindex(Website &Site);
-  void parseAutoindex(Location &Loc);
-  void parseAllow(Website &Site);
-  void parseAllow(Location &Loc);
+  void parseListen(Location &Site);
+  void parseRoot(Location &Site);
+  void parseAutoindex(Location &Site);
+  void parseAllow(Location &Site);
+  void parseIndex(Location &Site);
 
-  void parseLocation(Website &Site);
-  void parseLocation(Location &Loc);
-  void parseRedirect(Location &Loc);
-  void parseCgi(Location &Loc);
-  void parseReturn(Location &Loc);
-  void parseMaxReqBody(Website &Site);
-  void parseMaxReqBody(Location &Loc);
+  void parseLocation(Location &Site);
+  void parseRedirect(Location &Site);
+  void parseCgi(Location &Site);
+  void parseReturn(Location &Site);
+  void parseMaxReqBody(Location &Site);
 
   void addIpv4(Listen &Interface);
   void addPort(Listen &Interface);
 
-  void parseErrorPage(Website &Site);
-  void parseErrorPage(Location &Loc);
-  void parseEntry(Location &Loc);
-  void validateLocationEnty(const Location &Loc);
+  void parseErrorPage(Location &Site);
+  void validateEntry(const Location &Site);
 
-  void parseEntry(Website &Website);
+  void parseEntry(Location &Website);
   std::string parseResource(void);
   std::string parseAbsPath(void);
   std::string parseWord(void);

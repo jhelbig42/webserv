@@ -4,7 +4,8 @@
 #include <stdexcept>
 #include <string>
 
-static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It);
+static bool isSingleChar(const std::string &Ch,
+                         std::string::const_iterator &It);
 static bool isCharset(const std::string &Charset, const std::string &Str,
                       std::string::const_iterator &It);
 static bool isKeyword(const std::string &Keyword, const std::string &Str,
@@ -30,6 +31,7 @@ static const TokenType globalTokenTypes[] = {
     {"On", "on", TokenType::On, TokenType::Keyword},
     {"Off", "off", TokenType::Off, TokenType::Keyword},
     {"ErrorPage", "error_page", TokenType::ErrorPage, TokenType::Keyword},
+    {"Index", "index", TokenType::Index, TokenType::Keyword},
     {"Location", "location", TokenType::Location, TokenType::Keyword},
     {"Return", "return", TokenType::Return, TokenType::Keyword},
     {"Redirect", "redirect", TokenType::Redirect, TokenType::Keyword},
@@ -39,10 +41,10 @@ static const TokenType globalTokenTypes[] = {
      TokenType::Keyword},
     {"Autoindex", "autoindex", TokenType::Autoindex, TokenType::Keyword},
     {"Allow", "allow", TokenType::Allow, TokenType::Keyword},
-    {"Head", "HEAD", TokenType::Head, TokenType::Keyword},
-    {"Post", "POST", TokenType::Post, TokenType::Keyword},
-    {"Get", "GET", TokenType::Get, TokenType::Keyword},
-    {"Delete", "DELETE", TokenType::Delete, TokenType::Keyword},
+    {"Head", "HEAD", TokenType::HeadToken, TokenType::Keyword},
+    {"Post", "POST", TokenType::PostToken, TokenType::Keyword},
+    {"Get", "GET", TokenType::GetToken, TokenType::Keyword},
+    {"Delete", "DELETE", TokenType::DeleteToken, TokenType::Keyword},
     {"Whitespace", " \t", TokenType::Whitespace, TokenType::Charset},
     {"Eof", "", TokenType::Eof, TokenType::Special},
     {"Newline", "", TokenType::Newline, TokenType::Special},
@@ -95,7 +97,8 @@ bool TokenType::matchType(const std::string &Str,
   return false;
 }
 
-static bool isSingleChar(const std::string &Ch, std::string::const_iterator &It) {
+static bool isSingleChar(const std::string &Ch,
+                         std::string::const_iterator &It) {
   if (*It != Ch[0])
     return false;
   ++It;
@@ -117,7 +120,8 @@ static bool isCharset(const std::string &Charset, const std::string &Str,
 
 static bool isReserved(const std::string &Word) {
   for (size_t i = 0; i != globalTokenTypesSize; ++i) {
-    if (globalTokenTypes[i].category == TokenType::Keyword && Word == globalTokenTypes[i].tokenStr)
+    if (globalTokenTypes[i].category == TokenType::Keyword &&
+        Word == globalTokenTypes[i].tokenStr)
       return true;
   }
   return false;
@@ -144,7 +148,7 @@ const TokenType &TokenType::getTokenTypeId(const TokenType::Type Id) {
   throw std::runtime_error("unrecognized token");
 }
 
-TokenType::UnrecognizedTokenException::UnrecognizedTokenException(const std::string &Str)
+TokenType::UnrecognizedTokenException::UnrecognizedTokenException(
+    const std::string &Str)
     : std::runtime_error(Str) {
 }
-
