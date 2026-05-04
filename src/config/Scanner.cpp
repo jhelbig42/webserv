@@ -12,7 +12,8 @@
 
 static bool isComment(const std::string &Line);
 
-Scanner::~Scanner() { }
+Scanner::~Scanner() {
+}
 
 static bool isComment(const std::string &Line) {
   std::string::const_iterator it = Line.begin();
@@ -26,7 +27,7 @@ static bool isComment(const std::string &Line) {
   return false;
 }
 
-Scanner::Scanner(const char *File): _numLines(1), _numTokens(0) {
+Scanner::Scanner(const char *File) : _numLines(1), _numTokens(0) {
   std::ifstream inf(File);
   if (!inf.is_open())
     throw std::runtime_error("Scanner: can not open file");

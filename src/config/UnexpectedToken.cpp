@@ -19,7 +19,7 @@ Parser::UnexpectedTokenException::UnexpectedTokenException(
   size_t linePosition = 0;
   bool reachedPos = false;
   while (it->getType().type != TokenType::Eof &&
-           it->getLine() == It->getLine()) {
+         it->getLine() == It->getLine()) {
     if (it != It && !reachedPos) {
       lineStr += it->getLexeme();
       linePosition += it->getLexeme().length();

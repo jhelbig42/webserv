@@ -8,16 +8,16 @@ SRC			:=
 vpath %.cpp $(SRC_DIR)
 SRC			+= main.cpp
 vpath %.cpp $(SRC_DIR)/server
-SRC			+= Server.cpp\
-			ServerInit.cpp\
-			ServerRun.cpp\
-			ServerHandlePoll.cpp\
-			ServerHandlePollin.cpp\
-			ServerHandlePollout.cpp\
-			ServerHandlePollErrs.cpp\
-			ServerErrorHandling.cpp\
-			ServerDebug.cpp\
-			ServerWrappers.cpp
+SRC			+= Server.cpp
+SRC			+= ServerInit.cpp
+SRC			+= ServerRun.cpp
+SRC			+= ServerHandlePoll.cpp
+SRC			+= ServerHandlePollin.cpp
+SRC			+= ServerHandlePollout.cpp
+SRC			+= ServerHandlePollErrs.cpp
+SRC			+= ServerErrorHandling.cpp
+SRC			+= ServerDebug.cpp
+SRC			+= ServerWrappers.cpp
 vpath %.cpp $(SRC_DIR)/logging
 SRC			+= Logging.cpp
 vpath %.cpp $(SRC_DIR)/config
@@ -26,11 +26,9 @@ SRC			+= ConfigClass.cpp
 SRC			+= Website.cpp
 SRC			+= PathInfo.cpp
 SRC			+= ParseServer.cpp
-SRC			+= ParseLocation.cpp
 SRC			+= Parser.cpp
 SRC			+= UnexpectedToken.cpp
 SRC			+= Location.cpp
-vpath %.cpp $(SRC_DIR)/config/parsing
 SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
@@ -113,6 +111,7 @@ ifneq ($(DEV), 0)
 	DEBUG		:= 1
 	CXXFLAGS	+= -pedantic
 	CXXFLAGS	+= -Wconversion
+	CXXFLAGS	+= -Wshadow
 	CXXFLAGS	+= -Wno-unused-parameter
 	CXXFLAGS	+= -Wno-unused-function
 endif

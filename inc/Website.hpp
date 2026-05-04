@@ -1,8 +1,5 @@
 #pragma once
 
-#include "HttpMethods.hpp"
-#include "Location.hpp"
-#include "Token.hpp"
 #include <list>
 #include <map>
 #include <ostream>
@@ -12,79 +9,38 @@ struct Listen {
   bool operator==(const Listen &Other) const;
   std::string ip;   // NOLINT(misc-non-private-member-variables-in-classes)
   std::string port; // NOLINT(misc-non-private-member-variables-in-classes)
+  void print(std::ostream &Os) const;
 };
 
 class PathInfo;
+class Location;
+class Token;
 
 class Website {
 public:
-  Website();
+  Website(void);
   Website(const Website &Other);
+  explicit Website(const Location &Loc);
   Website &operator=(const Website &Other);
-  ~Website();
-
-  bool getAutoindex(void) const;
-  const char *getErrorPage(const unsigned int Code) const;
-  unsigned int getMaxReqBody(void) const;
+  ~Website(void);
   PathInfo getPathInfo(const std::string &Path) const;
-
-  int getAllow(void) const;
-  explicit Website(std::list<Token>::const_iterator It);
-  void addInterface(Listen &If);
-  /// \fun addLocation
-  /// \brief if a location with the same path already exists it is replaced
-  void addLocation(Location &Loc);
-  void addErrorPage(const unsigned int Code, const std::string &Path);
   const std::list<Listen> &getInterfaces(void) const;
-  const std::list<Location> &getLocations(void) const;
-  const std::map<unsigned int, std::string> &getErrorPages(void) const;
-  void setRoot(const std::string &RootDir);
-  void setAutoindex(const bool IsOn);
-  void setMaxReqBody(const unsigned int MaxBody);
-  void addAllow(const HttpMethod Method);
-  void allowAll(void);
-  void allowNone(void);
-  const std::string &getRoot(void) const;
-
-  bool isSetAutoindex(void) const;
-  bool isSetRoot(void) const;
-  bool isSetInterfaces(void) const;
-  bool isSetAllow(void) const;
-  bool isSetMaxReqBody(void) const;
+  std::ostream &print(std::ostream &Os) const;
 
 private:
-  typedef enum {
-    Interfaces = (1u << 0),
-    Root = (1u << 1),
-    Autoindex = (1u << 2),
-    Allow = (1u << 3),
-    MaxReqBody = (1u << 4)
-  } SetMembers;
-
-  int _setMembers;
-  unsigned int _maxReqBody;
-  std::list<Listen> _interfaces; 
-  std::list<Location> _locations; 
-  std::string _root;
-  std::map<unsigned int, std::string> _errorPages;
-  bool _autoindex;
-  int _allow;
+  const Location *_website;
 };
 
 class PathInfo {
 public:
-  typedef enum {
-    Default,
-    Return,
-    Cgi
-  } Action;
+  typedef enum { Default, Return, Cgi } Action;
 
   PathInfo(void);
   PathInfo(const PathInfo &Other);
   PathInfo &operator=(const PathInfo &Other);
   ~PathInfo(void);
 
-  PathInfo(const Website &Site, const std::string &Path);
+  PathInfo(const Location &Site, const std::string &Path);
 
   unsigned int getMaxReqBody(void) const;
   const std::string &getRoot(void) const;
@@ -95,6 +51,7 @@ public:
   Action getAction(void) const;
   unsigned int getCode(void) const;
   const char *getErrorPage(const unsigned int Code) const;
+  void print(std::ostream &Os) const;
 
 private:
   void resolveLocations(const std::list<Location> &Locations);
@@ -107,8 +64,7 @@ private:
 
   unsigned int _maxReqBody;
   std::string _root;
-  const std::map<unsigned int, std::string> *_errorPagesWebsite;
-  const std::map<unsigned int, std::string> *_errorPagesLocation;
+  std::list<const std::map<unsigned int, std::string> *> _errorPages;
   bool _autoindex;
 };
 
