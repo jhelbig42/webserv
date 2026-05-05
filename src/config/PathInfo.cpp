@@ -25,10 +25,8 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &LocationPath);
 
 PathInfo::PathInfo(void)
-    : _cgiPath(""), _realPath(""),
-      _action(Default), _code(0), _allow(0),
-      _maxReqBody(0), _root(""),
-      _autoindex(false) {
+    : _cgiPath(""), _realPath(""), _action(Default), _code(0), _allow(0),
+      _maxReqBody(0), _root(""), _autoindex(false) {
 }
 
 PathInfo::PathInfo(const PathInfo &Other)
@@ -69,11 +67,10 @@ PathInfo::PathInfo(const Location &Site, const std::string &Path)
 
   if (_action != Return)
     _realPath = _root.substr(0, _root.length() - 1) + _realPath;
-  
+
   if (_realPath[_realPath.length() - 1] != '/')
     return;
-  for (std::list<std::string>::iterator it = _index.begin();
-       it != _index.end();
+  for (std::list<std::string>::iterator it = _index.begin(); it != _index.end();
        ++it) {
     if ((*it)[0] == '/')
       *it = Site.getRoot() + it->substr(1);
