@@ -11,6 +11,7 @@
 
 #define MAX_ERROR_CODE_PRINT 1000
 
+static void printIndex(std::ostream &Os, const PathInfo &Info);
 static void printAutoindex(std::ostream &Os, const PathInfo &Info);
 static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
@@ -23,16 +24,17 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &Substitute,
                                   const std::string &LocationPath);
 
-
-PathInfo::PathInfo(void) : _cgiPath("") {
-
+PathInfo::PathInfo(void)
+    : _cgiPath(""), _realPath(""), _action(Default), _code(0), _allow(0),
+      _maxReqBody(0), _root(""), _autoindex(false) {
 }
 
 PathInfo::PathInfo(const PathInfo &Other)
     : _cgiPath(Other._cgiPath), _realPath(Other._realPath),
       _action(Other._action), _code(Other._code), _allow(Other._allow),
       _maxReqBody(Other._maxReqBody), _root(Other._root),
-      _errorPages(Other._errorPages), _autoindex(Other._autoindex) {
+      _errorPages(Other._errorPages), _index(Other._index),
+      _autoindex(Other._autoindex) {
 }
 
 PathInfo &PathInfo::operator=(const PathInfo &Other) {
@@ -45,6 +47,7 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
     _maxReqBody = Other._maxReqBody;
     _root = Other._root;
     _errorPages = Other._errorPages;
+    _index = Other._index;
     _autoindex = Other._autoindex;
   }
   return *this;
@@ -53,8 +56,32 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
 PathInfo::~PathInfo(void) {
 }
 
+PathInfo::PathInfo(const Location &Site, const std::string &Path)
+    : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
+      _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
+      _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {
+
+  _errorPages.push_front(&Site.getErrorPages());
+
+  populateFromLocation(Site);
+
+  if (_action != Return)
+    _realPath = _root.substr(0, _root.length() - 1) + _realPath;
+
+  if (_realPath[_realPath.length() - 1] != '/')
+    return;
+  for (std::list<std::string>::iterator it = _index.begin(); it != _index.end();
+       ++it) {
+    if ((*it)[0] == '/')
+      *it = Site.getRoot() + it->substr(1);
+    else
+      *it = _realPath + *it;
+  }
+}
+
 void PathInfo::populateFromLocation(
     const Location &Loc) { // NOLINT(misc-no-recursion)
+  bool isLeaf = true;
   if (Loc.isSetAllow())
     _allow = Loc.getAllow();
   if (Loc.isSetMaxReqBody())
@@ -74,37 +101,30 @@ void PathInfo::populateFromLocation(
   } else if (Loc.getType() == Location::Redirect) {
     _action = Default;
     _realPath = substitutePath(_realPath, Loc.getRedirect(), Loc.getPath());
-    resolveLocations(Loc.getLocations());
+    isLeaf = !resolveLocations(Loc.getLocations());
   } else if (Loc.getType() == Location::None) {
-    resolveLocations(Loc.getLocations());
+    isLeaf = !resolveLocations(Loc.getLocations());
   } else {
     logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
   }
+  if (isLeaf && Loc.isSetIndex())
+    _index = Loc.getIndex();
 }
 
-void PathInfo::resolveLocations(
+bool PathInfo::resolveLocations(
     const std::list<Location> &Locations) { // NOLINT(misc-no-recursion)
+  bool matched = false;
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
     if (match(_realPath, it->getPath())) {
+      matched = true;
       populateFromLocation(*it);
       break;
     }
   }
+  return matched;
 }
 
-PathInfo::PathInfo(const Location &Site, const std::string &Path)
-    : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
-      _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
-      _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {
-
-  _errorPages.push_front(&Site.getErrorPages());
-
-  resolveLocations(Site.getLocations());
-
-  if (_action != Return)
-    _realPath = _root.substr(0, _root.length() - 1) + _realPath;
-}
 const std::string &PathInfo::getCgiPath(void) const {
   return _cgiPath;
 }
@@ -194,6 +214,18 @@ static void printRoot(std::ostream &Os, const PathInfo &Info) {
   Os << "  root: " << Info.getRoot() << '\n';
 }
 
+static void printIndex(std::ostream &Os, const PathInfo &Info) {
+  Os << "  index:";
+  for (std::list<std::string>::const_iterator it = Info.getIndex().begin();
+       it != Info.getIndex().end(); ++it)
+    Os << ' ' << *it;
+  Os << '\n';
+}
+
+const std::list<std::string> &PathInfo::getIndex(void) const {
+  return _index;
+}
+
 std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
   Info.print(Os);
   return Os;
@@ -206,6 +238,7 @@ void PathInfo::print(std::ostream &Os) const {
   printRoot(Os, *this);
   printMaxReqBody(Os, *this);
   printAutoindex(Os, *this);
+  printIndex(Os, *this);
   Os << "  allow:";
   if (this->getAllowed() & Head)
     Os << " HEAD";
