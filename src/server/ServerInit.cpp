@@ -103,18 +103,18 @@ void Server::checkPair(const Listen &Pair) {
 // This is necessary because using values outside of this type
 // could result in undefined behavior.
 
-void Server::checkPort(const std::string &str) {
+void Server::checkPort(const std::string &Str) {
 
   const int maxPortDigits = 5;
   const int maxPortValue = 65535;
-  if (str.length() < 1 || str.length() > maxPortDigits) {
-    const std::string msg(str + " is not a valid port number");
+  if (Str.length() < 1 || Str.length() > maxPortDigits) {
+    const std::string msg(Str + " is not a valid port number");
     logging::log(logging::Error, msg);
     exit(1);
   }
-  int port = std::atoi(str.c_str());
+  int port = std::atoi(Str.c_str());
   if (port < 0 || port > maxPortValue) {
-    const std::string msg(str + " is not a valid port number");
+    const std::string msg(Str + " is not a valid port number");
     logging::log(logging::Error, msg);
     exit(1);
   }
