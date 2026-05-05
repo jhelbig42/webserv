@@ -52,6 +52,7 @@ public:
   unsigned int getCode(void) const;
   const char *getErrorPage(const unsigned int Code) const;
   void print(std::ostream &Os) const;
+  const std::list<std::string> &getIndex(void) const;
 
 private:
   void resolveLocations(const std::list<Location> &Locations);
@@ -61,10 +62,10 @@ private:
   Action _action;
   unsigned int _code;
   int _allow;
-
   unsigned int _maxReqBody;
   std::string _root;
   std::list<const std::map<unsigned int, std::string> *> _errorPages;
+  const std::list<std::string> *_index;
   bool _autoindex;
 };
 

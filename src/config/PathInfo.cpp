@@ -23,16 +23,20 @@ static std::string substitutePath(const std::string &Path,
                                   const std::string &Substitute,
                                   const std::string &LocationPath);
 
-
-PathInfo::PathInfo(void) : _cgiPath("") {
-
+PathInfo::PathInfo(void)
+    : _cgiPath(""), _realPath(""),
+      _action(Default), _code(0), _allow(0),
+      _maxReqBody(0), _root(""),
+      _index(NULL),
+      _autoindex(false) {
 }
 
 PathInfo::PathInfo(const PathInfo &Other)
     : _cgiPath(Other._cgiPath), _realPath(Other._realPath),
       _action(Other._action), _code(Other._code), _allow(Other._allow),
       _maxReqBody(Other._maxReqBody), _root(Other._root),
-      _errorPages(Other._errorPages), _autoindex(Other._autoindex) {
+      _errorPages(Other._errorPages), _index(Other._index),
+      _autoindex(Other._autoindex) {
 }
 
 PathInfo &PathInfo::operator=(const PathInfo &Other) {
@@ -45,6 +49,7 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
     _maxReqBody = Other._maxReqBody;
     _root = Other._root;
     _errorPages = Other._errorPages;
+    _index = Other._index;
     _autoindex = Other._autoindex;
   }
   return *this;
@@ -64,6 +69,8 @@ void PathInfo::populateFromLocation(
   if (Loc.isSetAutoindex())
     _autoindex = Loc.getAutoindex();
   _errorPages.push_front(&Loc.getErrorPages());
+  if (Loc.isSetIndex())
+    _index = &Loc.getIndex();
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
