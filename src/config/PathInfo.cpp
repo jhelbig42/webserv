@@ -11,6 +11,7 @@
 
 #define MAX_ERROR_CODE_PRINT 1000
 
+static void printIndex(std::ostream &Os, const PathInfo &Info);
 static void printAutoindex(std::ostream &Os, const PathInfo &Info);
 static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
@@ -212,6 +213,17 @@ static void printRoot(std::ostream &Os, const PathInfo &Info) {
   Os << "  root: " << Info.getRoot() << '\n';
 }
 
+static void printIndex(std::ostream &Os, const PathInfo &Info) {
+  Os << "  index:";
+  for (std::list<std::string>::const_iterator it = Info.getIndex().begin();
+       it != Info.getIndex().end(); ++it)
+    Os << ' ' << *it;
+}
+
+const std::list<std::string> &PathInfo::getIndex(void) const {
+  return _index;
+}
+
 std::ostream &operator<<(std::ostream &Os, const PathInfo &Info) {
   Info.print(Os);
   return Os;
@@ -224,6 +236,7 @@ void PathInfo::print(std::ostream &Os) const {
   printRoot(Os, *this);
   printMaxReqBody(Os, *this);
   printAutoindex(Os, *this);
+  printIndex(Os, *this);
   Os << "  allow:";
   if (this->getAllowed() & Head)
     Os << " HEAD";
