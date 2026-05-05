@@ -1,9 +1,14 @@
 #include "Autoindex.hpp"
+#include "Time.hpp"
 #include "Logging.hpp"
 #include "StatusCodes.hpp"
+#include <algorithm>
 #include <errno.h>
 #include <iostream>
 #include <sstream>
+ #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 Autoindex::Autoindex()
 	:  _errCode(CODE_200){
@@ -46,11 +51,22 @@ std::string Autoindex::AutoindexStream(std::string DirectoryName){
 	}
 	// put entries into stringstream
 	std::stringstream sAutoindex;
+	struct stat entryStat;
 	sAutoindex << "listing of the files" << std::endl;
 	for (std::vector<dirent *>::iterator it = _entries.begin(); it != _entries.end(); ++it){
-		sAutoindex << "file name: " << (*it)->d_name 
-			<< " size in Bytes: " << (*it)->d_reclen << std::endl;
+		sAutoindex << "file name: " << (*it)->d_name;
+		std::string pathname = DirectoryName + (*it)->d_name;
+		if (stat(pathname.c_str(), &entryStat)){
+			_errCode = CODE_500;
+			return "";
+		}
+		if (entryStat.st_mode & S_IFDIR)
+			sAutoindex << " - this is a directory ";
+		else
+			sAutoindex << " size: " << entryStat.st_size << " bytes " ;
+		sAutoindex << "last modified: " << getTimeStringFromTimespec(entryStat.st_mtim) << std::endl;
 	}
+
 	sAutoindex << "end of test" << std::endl;
 	closedir(dirp);
 	return sAutoindex.str();
