@@ -84,6 +84,7 @@ PathInfo::PathInfo(const Location &Site, const std::string &Path)
 
 void PathInfo::populateFromLocation(
     const Location &Loc) { // NOLINT(misc-no-recursion)
+  bool isLeaf = true;
   if (Loc.isSetAllow())
     _allow = Loc.getAllow();
   if (Loc.isSetMaxReqBody())
@@ -93,8 +94,6 @@ void PathInfo::populateFromLocation(
   if (Loc.isSetAutoindex())
     _autoindex = Loc.getAutoindex();
   _errorPages.push_front(&Loc.getErrorPages());
-  if (Loc.isSetIndex())
-    _index = Loc.getIndex();
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
@@ -105,23 +104,28 @@ void PathInfo::populateFromLocation(
   } else if (Loc.getType() == Location::Redirect) {
     _action = Default;
     _realPath = substitutePath(_realPath, Loc.getRedirect(), Loc.getPath());
-    resolveLocations(Loc.getLocations());
+    isLeaf = !resolveLocations(Loc.getLocations());
   } else if (Loc.getType() == Location::None) {
-    resolveLocations(Loc.getLocations());
+    isLeaf = !resolveLocations(Loc.getLocations());
   } else {
     logging::log2(logging::Warning, __func__, ": Unreachable code reached!");
   }
+  if (isLeaf && Loc.isSetIndex())
+    _index = Loc.getIndex();
 }
 
-void PathInfo::resolveLocations(
+bool PathInfo::resolveLocations(
     const std::list<Location> &Locations) { // NOLINT(misc-no-recursion)
+  bool matched = false;
   for (std::list<Location>::const_iterator it = Locations.begin();
        it != Locations.end(); ++it) {
     if (match(_realPath, it->getPath())) {
+      matched = true;
       populateFromLocation(*it);
       break;
     }
   }
+  return matched;
 }
 
 const std::string &PathInfo::getCgiPath(void) const {

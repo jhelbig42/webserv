@@ -55,7 +55,7 @@ public:
   const std::list<std::string> &getIndex(void) const;
 
 private:
-  void resolveLocations(const std::list<Location> &Locations);
+  bool resolveLocations(const std::list<Location> &Locations);
   void populateFromLocation(const Location &Loc);
   std::string _cgiPath;
   std::string _realPath;
