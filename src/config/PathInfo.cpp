@@ -65,7 +65,7 @@ PathInfo::PathInfo(const Location &Site, const std::string &Path)
 
   _errorPages.push_front(&Site.getErrorPages());
 
-  resolveLocations(Site.getLocations());
+  populateFromLocation(Site);
 
   if (_action != Return)
     _realPath = _root.substr(0, _root.length() - 1) + _realPath;
@@ -218,6 +218,7 @@ static void printIndex(std::ostream &Os, const PathInfo &Info) {
   for (std::list<std::string>::const_iterator it = Info.getIndex().begin();
        it != Info.getIndex().end(); ++it)
     Os << ' ' << *it;
+  Os << '\n';
 }
 
 const std::list<std::string> &PathInfo::getIndex(void) const {
