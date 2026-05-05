@@ -27,7 +27,6 @@ PathInfo::PathInfo(void)
     : _cgiPath(""), _realPath(""),
       _action(Default), _code(0), _allow(0),
       _maxReqBody(0), _root(""),
-      _index(NULL),
       _autoindex(false) {
 }
 
@@ -58,6 +57,30 @@ PathInfo &PathInfo::operator=(const PathInfo &Other) {
 PathInfo::~PathInfo(void) {
 }
 
+PathInfo::PathInfo(const Location &Site, const std::string &Path)
+    : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
+      _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
+      _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {
+
+  _errorPages.push_front(&Site.getErrorPages());
+
+  resolveLocations(Site.getLocations());
+
+  if (_action != Return)
+    _realPath = _root.substr(0, _root.length() - 1) + _realPath;
+  
+  if (_realPath[_realPath.length() - 1] != '/')
+    return;
+  for (std::list<std::string>::iterator it = _index.begin();
+       it != _index.end();
+       ++it) {
+    if ((*it)[0] == '/')
+      *it = Site.getRoot() + it->substr(1);
+    else
+      *it = _realPath + *it;
+  }
+}
+
 void PathInfo::populateFromLocation(
     const Location &Loc) { // NOLINT(misc-no-recursion)
   if (Loc.isSetAllow())
@@ -70,7 +93,7 @@ void PathInfo::populateFromLocation(
     _autoindex = Loc.getAutoindex();
   _errorPages.push_front(&Loc.getErrorPages());
   if (Loc.isSetIndex())
-    _index = &Loc.getIndex();
+    _index = Loc.getIndex();
   if (Loc.getType() == Location::Cgi) {
     _action = Cgi;
     _cgiPath = Loc.getCgi();
@@ -100,18 +123,6 @@ void PathInfo::resolveLocations(
   }
 }
 
-PathInfo::PathInfo(const Location &Site, const std::string &Path)
-    : _cgiPath(""), _realPath(Path), _action(Default), _code(0),
-      _allow(Site.getAllow()), _maxReqBody(Site.getMaxReqBody()),
-      _root(Site.getRoot()), _autoindex(Site.getAutoindex()) {
-
-  _errorPages.push_front(&Site.getErrorPages());
-
-  resolveLocations(Site.getLocations());
-
-  if (_action != Return)
-    _realPath = _root.substr(0, _root.length() - 1) + _realPath;
-}
 const std::string &PathInfo::getCgiPath(void) const {
   return _cgiPath;
 }

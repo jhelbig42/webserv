@@ -65,7 +65,7 @@ private:
   unsigned int _maxReqBody;
   std::string _root;
   std::list<const std::map<unsigned int, std::string> *> _errorPages;
-  const std::list<std::string> *_index;
+  std::list<std::string> _index;
   bool _autoindex;
 };
 
