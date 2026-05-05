@@ -33,6 +33,7 @@ SRC			+= Scanner.cpp
 SRC			+= Token.cpp
 SRC			+= TokenType.cpp
 vpath %.cpp $(SRC_DIR)/reaction
+SRC			+= Autoindex.cpp
 SRC			+= CGIProcess.cpp
 SRC			+= Reaction.cpp
 SRC			+= ReactionMethodCGI.cpp

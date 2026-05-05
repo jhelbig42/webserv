@@ -1,3 +1,4 @@
+#include "Autoindex.hpp"
 #include "Config.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
@@ -10,6 +11,7 @@
 
 //#define OFFLINE
 //#define PARSING
+#define AUTOINDEX
 
 #define CHUNK_SIZE 1024
 
@@ -49,6 +51,15 @@ int main(int argc, char **argv) {
     std::cerr << e.what() << '\n';
   }
   return 0;
+}
+
+#elif defined AUTOINDEX
+int main(int argc, char **argv){
+	std::cout << "Autoindex test" << std::endl;
+	if (argc != 2)
+		return 1;
+	Autoindex a;
+	std::cout << a.AutoindexStream(argv[1]);
 }
 
 #else
