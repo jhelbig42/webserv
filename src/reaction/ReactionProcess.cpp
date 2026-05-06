@@ -186,6 +186,8 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (sendMetadataIfPending(Socket, Bytes))
     return false;
+  if (!_body.empty())
+    return stringToSocket(Socket, _body, Bytes);
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 

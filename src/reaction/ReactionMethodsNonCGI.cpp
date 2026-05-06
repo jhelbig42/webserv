@@ -1,3 +1,4 @@
+#include "Autoindex.hpp"
 #include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include "Reaction.hpp"
@@ -11,6 +12,7 @@
 #include <stdlib.h>
 #include <string>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #define DEFAULT_PATH "./post"
@@ -45,6 +47,27 @@ void Reaction::initDelete(void) {
 }
 
 void Reaction::initHeadGet(const Request &Req) {
+  struct stat statbuf;
+  if (stat(_pathInfo.getRealPath().c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+    if (_pathInfo.getAutoindex()) {
+      std::string dir = _pathInfo.getRealPath();
+      if (dir.empty() || dir[dir.size() - 1] != '/')
+        dir += '/';
+      Autoindex ai;
+      std::string html = ai.AutoindexStream(dir);
+      if (ai.getErrCode() != CODE_200) {
+        initSendFile(ai.getErrCode(), getErrorFile(ai.getErrCode()).c_str());
+        return;
+      }
+      initSendString(CODE_200, html);
+      if (Req.getMethod() == Head)
+        _body.clear();
+      return;
+    }
+    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+    return;
+  }
+
   initSendFile(CODE_200, _pathInfo.getRealPath().c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;

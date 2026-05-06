@@ -25,7 +25,8 @@ void Reaction::setDefaults(void) {
   _processType = NotInitialized;
   _metadataSent = false;
   _fdIn = -1;
-  _headers.unsetAll();  
+  _body.clear();
+  _headers.unsetAll();
 }
 
 Reaction::Reaction()
@@ -99,6 +100,16 @@ void Reaction::init(const Request &Req, const int Socket) {
     return;
   }
   initCGIMethod(Req);
+}
+
+void Reaction::initSendString(const int Code, const std::string &Body) {
+  _headers.setContentLength(Body.size());
+  _headers.setContentType(".html");
+  setMetadata(_metadata, Code, _headers);
+  _body = Body;
+  _fdIn = -1;
+  _metadataSent = false;
+  _processType = SendFile;
 }
 
 // TODO:

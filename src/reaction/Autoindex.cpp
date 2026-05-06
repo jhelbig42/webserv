@@ -1,73 +1,105 @@
 #include "Autoindex.hpp"
-#include "Time.hpp"
 #include "Logging.hpp"
 #include "StatusCodes.hpp"
+#include "Time.hpp"
 #include <algorithm>
+#include <dirent.h>
 #include <errno.h>
-#include <iostream>
+#include <iomanip>
 #include <sstream>
- #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <vector>
 
-Autoindex::Autoindex()
-	:  _errCode(CODE_200){
-}
+Autoindex::Autoindex() : _errCode(CODE_200) {}
 
-Autoindex::~Autoindex(){
-	_entries.clear();
-}
+Autoindex::~Autoindex() {}
 
-Autoindex::Autoindex(const Autoindex &Other)
-	:_entries(Other._entries), _errCode(Other._errCode){
-}
+Autoindex::Autoindex(const Autoindex &Other) : _errCode(Other._errCode) {}
 
-Autoindex &Autoindex::operator=(const Autoindex &Other){
-	_entries = Other._entries;
+Autoindex &Autoindex::operator=(const Autoindex &Other) {
 	_errCode = Other._errCode;
 	return *this;
 }
 
-std::string Autoindex::AutoindexStream(std::string DirectoryName){
+int Autoindex::getErrCode() const {
+	return _errCode;
+}
+
+std::vector<std::string> Autoindex::createListing(const std::string &DirectoryName){
 	DIR *dirp = opendir(DirectoryName.c_str());
-	if (dirp == NULL){
-		_errCode = CODE_500; // internal server error
-		return "";
-	}
-	// fill vector with entries
-	errno = 0;
-	dirent *entry = readdir(dirp);
-
-	while (entry){
-		logging::log(logging::Debug, "directory entry found");
-		if (entry->d_name[0] != '.')
-			_entries.push_back(entry);
-		entry = readdir(dirp);
-	}
-	// if end of dirstream is reached entry == NULL, but errno remains unchanged
-	if (errno){
+	if (dirp == NULL) {
 		_errCode = CODE_500;
-		return "";
-	}
-	// put entries into stringstream
-	std::stringstream sAutoindex;
-	struct stat entryStat;
-	sAutoindex << "listing of the files" << std::endl;
-	for (std::vector<dirent *>::iterator it = _entries.begin(); it != _entries.end(); ++it){
-		sAutoindex << "file name: " << (*it)->d_name;
-		std::string pathname = DirectoryName + (*it)->d_name;
-		if (stat(pathname.c_str(), &entryStat)){
-			_errCode = CODE_500;
-			return "";
-		}
-		if (entryStat.st_mode & S_IFDIR)
-			sAutoindex << " - this is a directory ";
-		else
-			sAutoindex << " size: " << entryStat.st_size << " bytes " ;
-		sAutoindex << "last modified: " << getTimeStringFromTimespec(entryStat.st_mtim) << std::endl;
 	}
 
-	sAutoindex << "end of test" << std::endl;
+	std::vector<std::string> names;
+	errno = 0;
+	dirent *entry;
+	while ((entry = readdir(dirp)) != NULL) {
+		if (entry->d_name[0] != '.')
+			names.push_back(entry->d_name);
+	}
 	closedir(dirp);
-	return sAutoindex.str();
+
+	if (errno) {
+		_errCode = CODE_500;
+	}
+	std::sort(names.begin(), names.end());
+
+	return(names);
+}
+
+std::string Autoindex::createHTML(const std::string &DirectoryName, const std::vector<std::string> &names){
+	std::stringstream stream;
+
+	stream << "<html><head><title>Index of " << DirectoryName << "</title></head>\n"
+	   << "<body><h1>Index of " << DirectoryName << "</h1><hr><pre>"
+	   << "<a href=\"../\">../</a>\n";
+
+	struct stat entryStat;
+	for (size_t i = 0; i < names.size(); ++i) {
+		std::string pathname = DirectoryName + names[i];
+		if (stat(pathname.c_str(), &entryStat)) {
+			_errCode = CODE_500;
+			return stream.str();
+		}
+
+		std::string displayName;
+		bool isDir = S_ISDIR(entryStat.st_mode);
+		if (isDir)
+			displayName = names[i] + "/";
+		else
+			displayName = names[i];
+
+		stream << "<a href=\"" << displayName << "\">" << displayName << "</a>";
+
+		int pad = 50 - static_cast<int>(displayName.size());
+		if (pad < 1)
+			pad = 1;
+		stream << std::string(pad, ' ');
+
+		stream << getTimeStringFromTimespec(entryStat.st_mtim, "%d-%b-%Y %H:%M");
+
+		if (isDir)
+			stream << std::setw(20) << "-";
+		else
+			stream << std::setw(20) << entryStat.st_size;
+		stream << "\n";
+	}
+	stream << "</pre><hr></body>\n</html>\n";
+	return stream.str();
+}
+
+std::string Autoindex::AutoindexStream(const std::string &DirectoryName) {
+
+	std::vector<std::string> names = createListing(DirectoryName);
+
+	if (_errCode != CODE_200)
+		return "";
+
+	std::string html = createHTML(DirectoryName, names);
+
+	if (_errCode != CODE_200)
+		return "";
+
+	return html;
 }

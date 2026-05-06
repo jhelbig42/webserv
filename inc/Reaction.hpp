@@ -85,6 +85,7 @@ private:
   void setDefaults(void);
   bool initPostBody(const Request &Req);
 
+  void initSendString(int Code, const std::string &Body);
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(void);
@@ -120,6 +121,7 @@ private:
   // consider abstraction for metaData
   bool			_metadataSent;
   std::string 	_metadata;
+  std::string	_body;
 
   int     		_fdIn;
   int     		_sock;
