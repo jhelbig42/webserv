@@ -17,8 +17,8 @@ std::string getCurrentTimeString()
     return (std::string)buffer;
 }
 
-std::string getTimeStringFromTimespec(const struct timespec Time, const char *fmt){
+std::string getTimeStringFromTimespec(const struct timespec Time){
 	char buffer[DATE_LENGTH];
-	strftime(buffer, sizeof(buffer), fmt, gmtime(&Time.tv_sec));
+	strftime(buffer, sizeof(buffer), "%d-%b-%Y %H:%M", gmtime(&Time.tv_sec));
 	return (std::string)buffer;
 }

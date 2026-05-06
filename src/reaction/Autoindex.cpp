@@ -48,11 +48,11 @@ std::vector<std::string> Autoindex::createListing(const std::string &DirectoryNa
 	return(names);
 }
 
-std::string Autoindex::createHTML(const std::string &DirectoryName, const std::vector<std::string> &names){
+std::string Autoindex::createHTML(const std::string &DirectoryName, const std::string &RequestedPath, const std::vector<std::string> &names){
 	std::stringstream stream;
 
-	stream << "<html><head><title>Index of " << DirectoryName << "</title></head>\n"
-	   << "<body><h1>Index of " << DirectoryName << "</h1><hr><pre>"
+	stream << "<html><head><title>Index of " << RequestedPath << "</title></head>\n"
+	   << "<body><h1>Index of " << RequestedPath << "</h1><hr><pre>"
 	   << "<a href=\"../\">../</a>\n";
 
 	struct stat entryStat;
@@ -77,7 +77,7 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::v
 			pad = 1;
 		stream << std::string(pad, ' ');
 
-		stream << getTimeStringFromTimespec(entryStat.st_mtim, "%d-%b-%Y %H:%M");
+		stream << getTimeStringFromTimespec(entryStat.st_mtim);
 
 		if (isDir)
 			stream << std::setw(20) << "-";
@@ -89,14 +89,14 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::v
 	return stream.str();
 }
 
-std::string Autoindex::AutoindexStream(const std::string &DirectoryName) {
+std::string Autoindex::AutoindexStream(const std::string &DirectoryName, const std::string &RequestedPath) {
 
 	std::vector<std::string> names = createListing(DirectoryName);
 
 	if (_errCode != CODE_200)
 		return "";
 
-	std::string html = createHTML(DirectoryName, names);
+	std::string html = createHTML(DirectoryName, RequestedPath, names);
 
 	if (_errCode != CODE_200)
 		return "";

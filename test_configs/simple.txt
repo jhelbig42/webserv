@@ -1,6 +1,6 @@
 server{
   listen 127.0.0.1:8080;
-  root /home/jhelbig/Desktop/webserv_test/    ;
-  autoindex off;
+  root /home/julia/projects/server/    ;
+  autoindex on;
   allow POST GET;
 }

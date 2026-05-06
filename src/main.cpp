@@ -11,7 +11,7 @@
 
 //#define OFFLINE
 //#define PARSING
-#define AUTOINDEX
+//#define AUTOINDEX
 
 #define CHUNK_SIZE 1024
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 	if (argc != 2)
 		return 1;
 	Autoindex a;
-	std::cout << a.AutoindexStream(argv[1]);
+	std::cout << a.AutoindexStream(argv[1], argv[1]);
 }
 
 #else

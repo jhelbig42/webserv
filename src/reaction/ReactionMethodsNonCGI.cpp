@@ -54,7 +54,7 @@ void Reaction::initHeadGet(const Request &Req) {
       if (dir.empty() || dir[dir.size() - 1] != '/')
         dir += '/';
       Autoindex ai;
-      std::string html = ai.AutoindexStream(dir);
+      std::string html = ai.AutoindexStream(dir, Req.getResource());
       if (ai.getErrCode() != CODE_200) {
         initSendFile(ai.getErrCode(), getErrorFile(ai.getErrCode()).c_str());
         return;
