@@ -117,28 +117,28 @@ void Server::updateEvents(void){
   }
 }
 
-short Server::determineEventsClient(int conditionsWanted){
+short Server::determineEventsClient(int ConditionsWanted){
 
 	short events = POLLERR | POLLHUP;
-	if (conditionsWanted & SockWrite) {
+	if (ConditionsWanted & SockWrite) {
 		events = events | POLLOUT | POLLRDHUP;
 		// TODO rdhup good here?
 	}
-	if (conditionsWanted & SockRead) {
+	if (ConditionsWanted & SockRead) {
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
 	return (events);
 }
 
-short Server::determineEventsFwd(int conditionsWanted){
+short Server::determineEventsFwd(int ConditionsWanted){
 
 	short events = POLLERR | POLLHUP;
-	if (conditionsWanted & FSockWrite) {
+	if (ConditionsWanted & FSockWrite) {
 		events = events | POLLOUT | POLLRDHUP;
 		// TODO rdhup good here?
 	}
-	if (conditionsWanted & FSockRead) {
+	if (ConditionsWanted & FSockRead) {
 		events = events | POLLIN | POLLRDHUP;
 		// TODO rdhup good here?
 	}
@@ -147,6 +147,7 @@ short Server::determineEventsFwd(int conditionsWanted){
 
 void Server::closeAndDelete(int Fd, int type) {
 
+  // TODO replace helper functions with type check
   close(Fd);
   if (socketIsClient(Fd))
     _clientMap.erase(Fd);

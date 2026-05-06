@@ -1,0 +1,7 @@
+server {
+
+  autoindex on;
+  root /home/hallison/webserv/www/demo/ ;
+  listen 127.0.0.1:8080;
+  allow GET   ;
+}
