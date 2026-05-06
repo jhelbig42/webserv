@@ -7,7 +7,7 @@ server {
   autoindex off;
   allow POST DELETE   ;
 
-  error_page 34 404 343434 /asdf ;
+  error_page 404 /asfdg/404.html ;
   error_page 500 /qwer ;
 
   location /asdf/ {

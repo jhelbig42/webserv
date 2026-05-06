@@ -1,4 +1,4 @@
-#include "Date.hpp"
+#include "Time.hpp"
 
 #include "HttpHeaders.hpp"
 #include "HttpHeadersDefines.hpp"
@@ -14,7 +14,7 @@ std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs) {
     writeMediaType(Os, Hdrs.getContentType());
     Os << "\r\n";
   }
-  Os << NAME_DATE << ": " << getDate() << "\r\n";
+  Os << NAME_DATE << ": " << getCurrentTimeString() << "\r\n";
   Os << NAME_SERVER << ": " << "FamilyRoomWebserv" << "\r\n"; // get the name from Config File
   // other headers
   return Os;
