@@ -46,13 +46,14 @@ SRC			+= ParseRequestLine.cpp
 vpath %.cpp $(SRC_DIR)/dsa
 SRC			+= Buffer.cpp
 vpath %.cpp $(SRC_DIR)/http_headers
-SRC			+= Time.cpp
 SRC			+= HttpHeaders.cpp
 SRC			+= HttpHeadersOutput.cpp
 vpath %.cpp $(SRC_DIR)/connection
 SRC			+= Connection.cpp
 vpath %.cpp $(SRC_DIR)/script
 SRC			+= Script.cpp
+vpath %.cpp $(SRC_DIR)/time
+SRC			+= Time.cpp
 
 OBJ			:= $(SRC:%.cpp=%.o)
 OBJ			:= $(addprefix $(OBJ_DIR)/, $(OBJ))
