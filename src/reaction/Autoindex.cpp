@@ -1,5 +1,4 @@
 #include "Autoindex.hpp"
-#include "Logging.hpp"
 #include "StatusCodes.hpp"
 #include "Time.hpp"
 #include <algorithm>
@@ -7,6 +6,7 @@
 #include <errno.h>
 #include <iomanip>
 #include <sstream>
+#include <string>
 #include <sys/stat.h>
 #include <vector>
 
@@ -27,7 +27,7 @@ int Autoindex::getErrCode() const {
 
 std::vector<std::string> Autoindex::createListing(const std::string &DirectoryName){
 	DIR *dirp = opendir(DirectoryName.c_str());
-	if (dirp == NULL) {
+	if (!dirp) {
 		_errCode = CODE_500;
 	}
 
@@ -48,7 +48,7 @@ std::vector<std::string> Autoindex::createListing(const std::string &DirectoryNa
 	return(names);
 }
 
-std::string Autoindex::createHTML(const std::string &DirectoryName, const std::string &RequestedPath, const std::vector<std::string> &names){
+std::string Autoindex::createHTML(const std::string &DirectoryName, const std::string &RequestedPath, const std::vector<std::string> &Names){
 	std::stringstream stream;
 
 	stream << "<html><head><title>Index of " << RequestedPath << "</title></head>\n"
@@ -56,19 +56,19 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::s
 	   << "<a href=\"../\">../</a>\n";
 
 	struct stat entryStat;
-	for (size_t i = 0; i < names.size(); ++i) {
-		std::string pathname = DirectoryName + names[i];
+	for (size_t i = 0; i < Names.size(); ++i) {
+		std::string const pathname = DirectoryName + Names[i];
 		if (stat(pathname.c_str(), &entryStat)) {
 			_errCode = CODE_500;
 			return stream.str();
 		}
 
 		std::string displayName;
-		bool isDir = S_ISDIR(entryStat.st_mode);
+		bool const isDir = S_ISDIR(entryStat.st_mode);
 		if (isDir)
-			displayName = names[i] + "/";
+			displayName = Names[i] + "/";
 		else
-			displayName = names[i];
+			displayName = Names[i];
 
 		stream << "<a href=\"" << displayName << "\">" << displayName << "</a>";
 
@@ -89,14 +89,14 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::s
 	return stream.str();
 }
 
-std::string Autoindex::AutoindexStream(const std::string &DirectoryName, const std::string &RequestedPath) {
+std::string Autoindex::autoindexStream(const std::string &DirectoryName, const std::string &RequestedPath) {
 
-	std::vector<std::string> names = createListing(DirectoryName);
+	std::vector<std::string> const names = createListing(DirectoryName);
 
 	if (_errCode != CODE_200)
 		return "";
 
-	std::string html = createHTML(DirectoryName, RequestedPath, names);
+	std::string const html = createHTML(DirectoryName, RequestedPath, names);
 
 	if (_errCode != CODE_200)
 		return "";
