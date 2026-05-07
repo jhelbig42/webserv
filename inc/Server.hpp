@@ -80,7 +80,7 @@ class Server {
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);
-	void handleCondition(struct pollfd &Polled, int Type);
+	void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);
 	//void handleTerminalCondition(struct pollfd &polled);
 	//void handleServableCondition(struct pollfd &polled);
 	

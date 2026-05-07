@@ -33,11 +33,13 @@ public:
   bool getDeleteStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
+  time_t getTimeLastActive(void) const;
 
   // setters
   void scheduleForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
+  void setTimeLastActive(time_t Time);
 
   // send & receive
   //void readData(void);
@@ -50,6 +52,8 @@ private:
   Connection(); // should not be possible
 
   void updateConditionsWanted(Reaction::ProcessType ProcessType);
+
+  time_t _timeLastActive;
 
   // serve reads from
   int _conditionsFulfilled;

@@ -23,8 +23,7 @@ void Server::pollLoop(void) {
 
   while (1) {
     const int res =
-        poll(_fds.data(), (nfds_t)_fds.size(),
-             -1); // without restriction to _fds.size this cast is unsafe
+        poll(_fds.data(), (nfds_t)_fds.size(), TIMEOUT * 1000); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
@@ -66,15 +65,22 @@ void Server::process(void) {
 
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
   	int type = getSocketType(it->fd);
-    handleCondition(*it, type); // sets conditions in client Connection, or accepts
+    time_t timeNow = time(NULL);
+    handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
                           // new connections
+  if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
+    logging::log3(logging::Debug, "Connection timeout. Fd, seconds:", it->fd, TIMEOUT);
+    closeAndDelete(it->fd, type);
+    it = _fds.erase(it);
+    continue;
+  }
 	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       closeAndDelete(it->fd, type);
       it = _fds.erase(it);
       continue;
     }
 	if (type == IS_CLIENT){
-		checkForNewCGI(it->fd);	
+    checkForNewCGI(it->fd);	
 	}
     it->revents = 0;
     it++;

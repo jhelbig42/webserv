@@ -31,6 +31,7 @@ Connection::Connection(const int Sock, const sockaddr_storage &Addr,
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
   memset(&_readBuf, 0, MAX_REQUEST);
+  _timeLastActive = time(NULL);
   logging::log(logging::Debug, "Connection created");
 }
 
@@ -51,6 +52,10 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
+time_t Connection::getTimeLastActive(void) const {
+  return (_timeLastActive);
+}
+
 /*
 Conditions Connection::getConditions(void) const {
   if (_req.getState() == COMPLETE)
@@ -66,6 +71,10 @@ int Connection::getConditionsWanted(void) const {
 // Setters
 void Connection::scheduleForDemolition(void) {
   _delete = true;
+}
+
+void Connection::setTimeLastActive(time_t Time) {
+  _timeLastActive = Time;
 }
 
 void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
