@@ -63,9 +63,9 @@ void Server::serveAll(void) {
 
 void Server::process(void) {
 
+  time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
   	int type = getSocketType(it->fd);
-    time_t timeNow = time(NULL);
     handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
                           // new connections
   if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
