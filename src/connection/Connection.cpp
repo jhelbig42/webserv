@@ -16,7 +16,7 @@
 #include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include <cerrno> // for errno
+
 #include <cstring> // for strerror
 #include <stddef.h>
 #include <string.h>     // for memcpy, memset

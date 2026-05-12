@@ -6,7 +6,6 @@
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include "Website.hpp"
-#include <cerrno>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -144,7 +143,6 @@ bool Reaction::statbufPopulate(const int Code, const char *File,
                                struct stat &StatBuf) {
   if (File == NULL)
     return true;
-  errno = 0;
   if (stat(File, &StatBuf) == 0)
     return true;
   return fallbackOrError(Code);
@@ -153,7 +151,6 @@ bool Reaction::statbufPopulate(const int Code, const char *File,
 bool Reaction::setFdIn(const int Code, const char *File) {
   if (File == NULL)
     return true;
-  errno = 0;
   _fdIn = open(File, O_RDONLY);
   if (_fdIn >= 0)
     return true;
