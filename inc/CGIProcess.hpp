@@ -36,7 +36,7 @@ public:
 	/// check for it an include it in the poll() map.
     bool init(Request Req, Script Script, const std::string &Path);
     bool createEnv(Request& Req, Script& Script);
-    bool createArgs(Request &Req, const std::string &Path);
+    bool createArgs(const std::string &Path);
 	bool initForwardSocket();
     
     //Getters

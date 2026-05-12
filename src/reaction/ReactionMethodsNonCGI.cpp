@@ -30,7 +30,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
 	  	initPost(Req);
 	  	return;
   	case Generic:
-    	initSendFile(CODE_501, getErrorFile(CODE_501).c_str());
+    	initErrorPage(CODE_501);
     	return;
   }
 }
@@ -54,7 +54,7 @@ void Reaction::initHeadGet(const Request &Req) {
       Autoindex ai;
       std::string html = ai.autoindexStream(dir, Req.getResource());
       if (ai.getErrCode() != CODE_200) {
-        initSendFile(ai.getErrCode(), getErrorFile(ai.getErrCode()).c_str());
+        initErrorPage(ai.getErrCode());
         return;
       }
       initSendString(CODE_200, html);
@@ -62,7 +62,7 @@ void Reaction::initHeadGet(const Request &Req) {
         _body.clear();
       return;
     }
-    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+    initErrorPage(CODE_403);
     return;
   }
 
@@ -97,7 +97,7 @@ void Reaction::initPost(const Request &Req){
 	setTmpPathName();
 	_fdOut = fopen(_tmpPath.c_str(), "w");
 	if (!_fdOut)
-		initSendFile(CODE_500, NULL);
+		initErrorPage(CODE_500);
 	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", _tmpPath);
 	_processType = ReceiveFile;
 	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");

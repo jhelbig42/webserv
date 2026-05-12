@@ -24,6 +24,8 @@
 // GET /home/jhelbig/Desktop/webserv/scripts/test_query.py?user=max&type=dog HTTP/1.0
 //home/jhelbig/Desktop/webserv
 
+#define PARSING
+
 // Content_Length: 100
 #ifdef OFFLINE
 

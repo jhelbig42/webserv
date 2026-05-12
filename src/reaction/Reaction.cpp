@@ -15,9 +15,8 @@
 #include <string>
 #include <sys/stat.h>
 
-static const char *defaultErrorFile(int Code);
+static std::string defaultErrorBody(int Code);
 static std::string getReasonPhrase(const int Code);
-static bool hasDefaultFile(const int Code);
 static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs);
 
@@ -53,12 +52,12 @@ void Reaction::init(const Request &Req, const int Socket) {
 
   logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
-    initSendFile(CODE_400, getErrorFile(CODE_400).c_str());
+    initErrorPage(CODE_400);
     return;
   }
   if (!(_pathInfo.getAllowed() & Req.getMethod())){
 	logging::log(logging::Debug, "Requested method not allowed");
-  	initSendFile(CODE_405, getErrorFile(CODE_405).c_str());
+  	initErrorPage(CODE_405);
 	return ;
   }
   
@@ -77,7 +76,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   if(_pathInfo.getCgiPath() == ""){
 	  logging::log(logging::Debug, "Req is NOT a CGI");
 	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
-		  initSendFile(CODE_400, getErrorFile(CODE_400).c_str());
+		  initErrorPage(CODE_400);
 		  return;
 	  }
 	  initMethodNonCGI(Req);
@@ -87,7 +86,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   logging::log(logging::Debug, "Req is a CGI");
   _cgi.setCGIPath(_pathInfo.getCgiPath());
   if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
-    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
+    initErrorPage(CODE_500);
     return;
   }
   initCGIMethod(Req);
@@ -135,13 +134,10 @@ static void setMetadata(std::string &Metadata, const int Code,
 }
 
 bool Reaction::fallbackOrError(const int Code) {
-  if (hasDefaultFile(Code)) {
-    logging::log3(logging::Warning, "Code ", Code,
-                  ": Default file not accessible. Only sending status line.");
-    initSendFile(Code, NULL);
-    return false;
-  }
-  return initError(errno);
+  logging::log3(logging::Warning, "Code ", Code,
+                ": Config error page not accessible. Using inline default.");
+  initSendString(Code, defaultErrorBody(Code));
+  return false;
 }
 
 bool Reaction::statbufPopulate(const int Code, const char *File,
@@ -167,13 +163,13 @@ bool Reaction::setFdIn(const int Code, const char *File) {
 bool Reaction::initPostBody(const Request &Req) {
   if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
     logging::log(logging::Debug, "POST: Content-Length header missing");
-    initSendFile(CODE_411, getErrorFile(CODE_411).c_str());
+    initErrorPage(CODE_411);
     return false;
   }
   _reqContLen = Req.getHeaders().getContentLength();
   if (_reqContLen > _pathInfo.getMaxReqBody()) {
     logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
-    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+    initErrorPage(CODE_403);
     return false;
   }
   _receivedContLen = 0;
@@ -181,59 +177,48 @@ bool Reaction::initPostBody(const Request &Req) {
   return true;
 }
 
-static bool hasDefaultFile(const int Code) {
-  return Code != CODE_200;
-}
-
 bool Reaction::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
-    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+    initErrorPage(CODE_403);
     return false;
   case ENOENT:
-    initSendFile(CODE_404, getErrorFile(CODE_404).c_str());
+    initErrorPage(CODE_404);
     return false;
   default:
-    initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
+    initErrorPage(CODE_500);
     return false;
   }
 }
 
-static const char *defaultErrorFile(int Code) {
-  switch (Code) {
-  case CODE_400: 
-    return FILE_400;
-  case CODE_401: 
-    return FILE_401;
-  case CODE_403: 
-    return FILE_403;
-  case CODE_404:
-    return FILE_404;
-  case CODE_405:
-    return FILE_405;
-  case CODE_411:
-    return FILE_411;
-  case CODE_500:
-    return FILE_500;
-  case CODE_501: 
-    return FILE_501;
-  case CODE_502: 
-    return FILE_502;
-  case CODE_503: 
-    return FILE_503;
-  default:       
-    return NULL;
-  }
+static std::string defaultErrorBody(int Code) {
+  const std::string reason = getReasonPhrase(Code);
+  std::ostringstream oss;
+  oss << "<html>\r\n"
+      << "<head><title>" << Code << " " << reason << "</title></head>\r\n"
+      << "<body>\r\n"
+      << "<center><h1>" << Code << " " << reason << "</h1></center>\r\n"
+      << "<hr><center>webserv</center>\r\n"
+      << "</body>\r\n"
+      << "</html>\r\n";
+  return oss.str();
 }
 
 std::string Reaction::getErrorFile(int Code) const {
   const char *configFile = _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
-  if (configFile != NULL) {
-    if (configFile[0] == '/')
-      return (_pathInfo.getRoot() + (configFile + 1)); // jump over '/'
-    return configFile;
-  }
-  return defaultErrorFile(Code); // just if no specific file was found in config
+  if (configFile == NULL)
+    return "";
+  if (configFile[0] == '/')
+    return (_pathInfo.getRoot() + (configFile + 1));
+  return configFile;
+}
+
+void Reaction::initErrorPage(int Code) {
+  const std::string errFile = getErrorFile(Code);
+  if (errFile.empty())
+    initSendString(Code, defaultErrorBody(Code));
+  else
+    initSendFile(Code, errFile.c_str());
 }
 
 static std::string getReasonPhrase(const int Code) {

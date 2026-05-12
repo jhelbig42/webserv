@@ -86,6 +86,7 @@ private:
   bool initPostBody(const Request &Req);
 
   void initSendString(int Code, const std::string &Body);
+  void initErrorPage(int Code);
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(void);

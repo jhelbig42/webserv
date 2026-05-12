@@ -1,32 +1,29 @@
-backlog
-
 server {
-	root: /var/www/website1/
-	methods: GET HEAD DELETE POST
-	default: {/, index.html}, {/pictures/, index.html}
-	directory_listing: FALSE
-	max_body: 1024
-	defaults {
-		prefix=/var/www/defaults/
-		404=404.html
-	}
-  source {
-    10.0.0.7:1234
-    10.0.1.7:1236
-  }
-}
+    listen 127.0.0.1:8080;
+    root /home/julia/projects/webserv/;
+    allow GET HEAD;
+    autoindex on;
+    max_request_body 1048576;
+    error_page 400 /error_pages/code_400.html;
+    error_page 401 /error_pages/code_401.html;
+    error_page 403 /error_pages/code_403.html;
+    error_page 500 /error_pages/code_500.html;
+    error_page 501 /error_pages/code_501.html;
+    error_page 502 /error_pages/code_502.html;
+    error_page 503 /error_pages/code_503.html;
 
-server {
-	IF:	10.0.0.8
-	PORT: 1235
-	root: /var/www/website1/
-	methods: GET HEAD
-	default: 
-	directory_listing: TRUE
-	UPLOAD: /pictures/ /uploaded/ 
-	redirects {
-		/pictures/picture1: www.google.com/pictures/picture2
-		/pictures/picture2: www.google.com/pictures/picture2
-		/pictures/picture3: www.google.com/pictures/picture2
-	}
+    location /upload/ {
+        allow POST DELETE;
+        max_request_body 10485760;
+    }
+
+    location /scripts/*.py {
+        allow GET POST;
+        cgi /usr/bin/python3;
+    }
+
+    location /scripts/*.sh {
+        allow GET POST;
+        cgi /bin/sh;
+    }
 }

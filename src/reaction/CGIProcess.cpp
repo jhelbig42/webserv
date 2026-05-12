@@ -148,29 +148,17 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
     return true;
 }
 
-//handling more ScriptTypes?
-
-bool CGIProcess::createArgs(Request &Req, std::string const &Path){ 
+bool CGIProcess::createArgs(std::string const &Path){
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
-		return false;// error handling
-	const HttpHeaders::MediaType type = Req.getHeaders().getContentType();
-	switch (type){
-		case HttpHeaders::ApplicationSh:
-			_args[0] = strdup("bash");
-			break;
-		case HttpHeaders::TextPython:
-			_args[0] = strdup("python3");
-			break;
-		default: // should never be reached
-			_args[0] = NULL;
-			break;
-	} 
+		return false;
+	const char *slash = strrchr(_path, '/');
+	_args[0] = strdup(slash ? slash + 1 : _path);
 	_args[1] = strdup(Path.c_str());
 	_args[2] = NULL;
 	if (!_args[0] || !_args[1])
 		return false;
-	logging::log3(logging::Debug, _args[0], " ",_args[1]);
+	logging::log3(logging::Debug, _args[0], " ", _args[1]);
 	return true;
 }
 
@@ -213,7 +201,7 @@ bool CGIProcess::init(Request Req, Script Script, std::string const &Path){
 		return false; // error handling in Reaction
 						//errors here will all be 500
 	//create args
-	if (!createArgs(Req, Path))
+	if (!createArgs(Path))
 		return false;
 	
 	if (!initForwardSocket())
