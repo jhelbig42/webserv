@@ -43,7 +43,6 @@ public:
   void setContentType(const char *Extension);
   MediaType getContentType(void) const;
 
-
 private:
   int _headersSet;
   size_t _contentLength;

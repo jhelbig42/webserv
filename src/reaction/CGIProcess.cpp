@@ -4,6 +4,7 @@
 #include "Request.hpp"
 #include "Script.hpp"
 
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -83,9 +84,9 @@ void CGIProcess::clearEnv() {
 // Maps the Enum to the actual String Key
 std::string CGIProcess::getEnvKey(EnvMembers Member) const {
     static const char* keys[] = {
-        "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL", 
-        "SERVER_SOFTWARE", "SERVER_INTERFACE", "REQUEST_METHOD", 
-        "SCRIPT_NAME", "QUERY_STRING"
+        "SERVER_NAME", "SERVER_PORT", "SERVER_PROTOCOL",
+        "SERVER_SOFTWARE", "GATEWAY_INTERFACE", "REQUEST_METHOD",
+        "SCRIPT_NAME", "QUERY_STRING", "CONTENT_LENGTH"
     };
     return keys[Member];
 }
@@ -101,15 +102,22 @@ std::string CGIProcess::getEnvValue(EnvMembers Member, Request& Req, Script& Scr
 			return Script.getServerProtocol();
         case SERVER_SOFTWARE:  
 			return Script.getServerSoftware();
-        case SERVER_INTERFACE: 
+        case GATEWAY_INTERFACE:
 			return Script.getServerInterface();
-        case REQUEST_METHOD:   
+        case REQUEST_METHOD:
 			return Req.getMethodString();
         case SCRIPT_NAME:      
 			return Req.getResource().substr(1); // Remove leading '/' from Resource
-        case QUERY_STRING:     
+        case QUERY_STRING:
 			return Req.getQueryString();
-        default:               
+        case CONTENT_LENGTH: {
+            if (!Req.getHeaders().isSet(HttpHeaders::ContentLength))
+                return "";
+            std::ostringstream oss;
+            oss << Req.getHeaders().getContentLength();
+            return oss.str();
+        }
+        default:
 			return "";
     }
 }

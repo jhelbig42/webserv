@@ -12,6 +12,8 @@
 #define CODE_400 400
 #define CODE_401 401
 #define CODE_403 403
+#define CODE_405 405
+#define CODE_411 411
 #define CODE_404 404
 #define CODE_500 500
 #define CODE_501 501
@@ -29,6 +31,8 @@
 #define REASON_401 "Unauthorized"
 #define REASON_403 "Forbidden"
 #define REASON_404 "Not Found"
+#define REASON_405 "Method not Allowed"
+#define REASON_411 "Length Required"
 #define REASON_500 "Internal Server Error"
 #define REASON_501 "Not Implemented"
 #define REASON_502 "Bad Gateway"
@@ -45,6 +49,8 @@
 #define FILE_NAME_401 "code_401.html"
 #define FILE_NAME_403 "code_403.html"
 #define FILE_NAME_404 "code_404.html"
+#define FILE_NAME_405 "code_405.html"
+#define FILE_NAME_411 "code_411.html"
 #define FILE_NAME_500 "code_500.html"
 #define FILE_NAME_501 "code_501.html"
 #define FILE_NAME_502 "code_502.html"
@@ -61,6 +67,8 @@
 #define FILE_401 DEFAULT_ERR_PATH FILE_NAME_401
 #define FILE_403 DEFAULT_ERR_PATH FILE_NAME_403
 #define FILE_404 DEFAULT_ERR_PATH FILE_NAME_404
+#define FILE_405 DEFAULT_ERR_PATH FILE_NAME_405
+#define FILE_411 DEFAULT_ERR_PATH FILE_NAME_411
 #define FILE_500 DEFAULT_ERR_PATH FILE_NAME_500
 #define FILE_501 DEFAULT_ERR_PATH FILE_NAME_501
 #define FILE_502 DEFAULT_ERR_PATH FILE_NAME_502

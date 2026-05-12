@@ -78,3 +78,4 @@ void HttpHeaders::setContentType(const char *Extension) {
 HttpHeaders::MediaType HttpHeaders::getContentType(void) const {
   return _contentType;
 }
+

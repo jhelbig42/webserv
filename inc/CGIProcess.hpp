@@ -11,11 +11,12 @@ public:
         SERVER_PORT,
         SERVER_PROTOCOL,
         SERVER_SOFTWARE,
-        SERVER_INTERFACE,
+        GATEWAY_INTERFACE,
         REQUEST_METHOD,
         SCRIPT_NAME,
         QUERY_STRING,
-        NB_OF_ENV 
+        CONTENT_LENGTH,
+        NB_OF_ENV
     };
 
     CGIProcess();
