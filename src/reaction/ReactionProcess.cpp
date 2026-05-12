@@ -57,11 +57,11 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
  // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
-  else if (Condition & FSockWrite)  
+  if (Condition & FSockWrite)  
     sendToCGI(Bytes);
-  else if (Condition & SockRead)    
+  if (Condition & SockRead)    
     recvFromClient(Socket, Bytes);
-  else if (Condition & SockWrite)   
+  if (Condition & SockWrite)   
     return sendToClient(Socket, Bytes);
   return false;
 }

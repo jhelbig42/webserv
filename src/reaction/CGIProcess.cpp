@@ -181,7 +181,18 @@ bool CGIProcess::initForwardSocket() {
         dup2(sv[1], STDIN_FILENO);
         dup2(sv[1], STDOUT_FILENO);
         close(sv[1]);
-        
+        //subject: "The CGI should be run in the correct directory for relative path file access."
+        char *tmp = strdup(_args[1]); //contains the 
+        if (!tmp) 
+            _exit(EXECVE_ERR);
+        char *lastSlash = strrchr(tmp, '/'); // cut scriptname
+        if (lastSlash) {
+            *lastSlash = '\0';
+            if (chdir(tmp) != 0)
+                _exit(EXECVE_ERR);
+        }
+        free(tmp);
+
         execve(_path, _args, _env);
         _exit(EXECVE_ERR);
     }

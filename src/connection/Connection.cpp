@@ -51,14 +51,6 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
-/*
-Conditions Connection::getConditions(void) const {
-  if (_req.getState() == COMPLETE)
-    return _react.getConditions();
-  return _req.getConditions();
-}
-*/
-
 int Connection::getConditionsWanted(void) const {
   return _conditionsWanted;
 }
@@ -85,7 +77,6 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 		case Reaction::NotInitialized:
 		default:
 			_conditionsWanted = SockRead;
-
 	}
 }
 
