@@ -3,30 +3,13 @@
 #include "Reaction.hpp"
 #include "Request.hpp"
 #include <iostream>
-//#define _GNU_SOURCE 
 #include "Config.hpp"
 #include "Server.hpp"
 #include <iostream>
 #include <unistd.h>
 
-//#define OFFLINE
-//#define PARSING
-//#define AUTOINDEX
+#define DEFAULT_CONFIG "test_config/config.txt"
 
-#define CHUNK_SIZE 1024
-
-#define METHOD "GET"
-#define PATH "/home/julia/projects/webserv/hello.txt"
-#define VERSION "HTTP/1.0"
-
-// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/scripts/test_query.py?user=max&type=dog HTTP/1.0
-//home/jhelbig/Desktop/webserv
-
-#define PARSING
-
-// Content_Length: 100
 #ifdef OFFLINE
 
 int main(void) {
@@ -68,24 +51,29 @@ int main(int argc, char **argv){
 
 int main(int argc, char **argv) {
 
+  std::string input;
   // argument check
-  if (argc != 2){
+  if (argc == 1)
+      input = DEFAULT_CONFIG;
+  else if (argc == 2)
+      input = argv[1];
+  else{
   	std::cerr << "Usage: <config file>\n";
-	exit (1);
+	  exit (1);
   }
   
   try {
-    const Config conf(argv[1]);
-	const std::list<Website> &websites = conf.getWebsites();
-	if (websites.empty()){
-    throw std::runtime_error("config file contains 0 websites");
+    const Config conf(input.c_str());
+	  const std::list<Website> &websites = conf.getWebsites();
+	  if (websites.empty()){
+      throw std::runtime_error("config file contains 0 websites");
 	}
 	Server server(websites);
 	server.pollLoop();
   } catch (const std::exception &e) {
   	logging::log(logging::Error, e.what());
 	exit (1);
-  	}
+  }
 }
 
-#endif // OFLINE
+#endif
