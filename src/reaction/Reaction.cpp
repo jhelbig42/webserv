@@ -47,15 +47,6 @@ void Reaction::setPathInfo(const PathInfo &PathInfo){
 	_pathInfo = PathInfo;
 }
 
-bool Reaction::isCGI(const Request &Req){
-  if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
-		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
-  {
-    return true;
-  }
-  return false;
-}
-
 void Reaction::init(const Request &Req, const int Socket) {
   setDefaults();
   _sock = Socket;

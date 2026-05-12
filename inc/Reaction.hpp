@@ -110,9 +110,6 @@ private:
   void recvFromClient(const int Socket, const size_t Bytes);
   bool sendToClient(const int Socket, const size_t Bytes);
 
-  //called within init()
-  bool isCGI(const Request &Req);
-
   HttpHeaders _headers;
   ProcessType _processType;
   size_t      _reqContLen;

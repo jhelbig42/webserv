@@ -15,8 +15,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define DEFAULT_PATH "./post"
-
 void Reaction::initMethodNonCGI(const Request &Req) {
   logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   switch (Req.getMethod()) 
