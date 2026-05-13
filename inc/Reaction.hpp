@@ -33,7 +33,7 @@ public:
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req, const int Socket);
+	void init(const Request &Req, const int Socket, int &ForwardSocket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
   /// \brief continues processing a Reaction object

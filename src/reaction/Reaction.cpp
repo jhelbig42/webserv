@@ -47,7 +47,7 @@ void Reaction::setPathInfo(const PathInfo &PathInfo){
 	_pathInfo = PathInfo;
 }
 
-void Reaction::init(const Request &Req, const int Socket) {
+void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
   setDefaults();
   _sock = Socket;
 
@@ -86,7 +86,7 @@ void Reaction::init(const Request &Req, const int Socket) {
 
   logging::log(logging::Debug, "Req is a CGI");
   _cgi.setCGIPath(_pathInfo.getCgiPath());
-  if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
+  if (!_cgi.init(Req, _script, _pathInfo.getRealPath(), ForwardSocket)) {
     initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return;
   }

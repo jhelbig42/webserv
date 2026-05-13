@@ -175,7 +175,7 @@ bool CGIProcess::createArgs(Request &Req, std::string const &Path){
 }
 
 //setting up the ForwardSocket, create the child process handling the script
-bool CGIProcess::initForwardSocket() {
+bool CGIProcess::initForwardSocket(int & ForwardSocket) {
     int sv[2];
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) 
 		return false;
@@ -200,12 +200,13 @@ bool CGIProcess::initForwardSocket() {
 
     // Parent
     close(sv[1]);
-    _forwardSocket = sv[0];
+    ForwardSocket = sv[0];
+
     return true;
 }
 
 
-bool CGIProcess::init(Request Req, Script Script, std::string const &Path){
+bool CGIProcess::init(Request Req, Script Script, std::string const &Path, int &ForwardSocket){
 	logging::log(logging::Debug, "CGI Process init called");
 
 	// create env:
@@ -216,7 +217,7 @@ bool CGIProcess::init(Request Req, Script Script, std::string const &Path){
 	if (!createArgs(Req, Path))
 		return false;
 	
-	if (!initForwardSocket())
+	if (!initForwardSocket(ForwardSocket))
 		return (false);
 	
     return true;
