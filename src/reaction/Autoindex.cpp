@@ -72,7 +72,7 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::s
 
 		stream << "<a href=\"" << displayName << "\">" << displayName << "</a>";
 
-		int pad = 50 - static_cast<int>(displayName.size());
+		size_t pad = 50 - (displayName.size());
 		if (pad < 1)
 			pad = 1;
 		stream << std::string(pad, ' ');

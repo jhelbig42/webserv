@@ -13,9 +13,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
-#define PY_DEFAULT_PATH "/usr/bin/python3"
-
 #define EXECVE_ERR 127
 
 CGIProcess::CGIProcess() : _env(NULL),

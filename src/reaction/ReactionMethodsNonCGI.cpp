@@ -45,6 +45,8 @@ void Reaction::initDelete(void) {
 }
 
 void Reaction::initHeadGet(const Request &Req) {
+	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
+  //is it a directory?
   struct stat statbuf;
   if (stat(_pathInfo.getRealPath().c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
     if (_pathInfo.getAutoindex()) {
@@ -65,7 +67,9 @@ void Reaction::initHeadGet(const Request &Req) {
     initErrorPage(CODE_403);
     return;
   }
-
+  // it is not a directory
+  logging::log(logging::Debug, "Callin InitSendFile");
+  if (access(_pathInfo.getRealPath().c_str(), R_OK))
   initSendFile(CODE_200, _pathInfo.getRealPath().c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;

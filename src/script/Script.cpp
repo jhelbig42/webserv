@@ -30,11 +30,6 @@ void Script::setScriptName(std::string &ScriptName){
     _serverPort = ScriptName;
 }
 
-//void Script::setQueryString(std::string QueryString){
-//    _serverPort = QueryString;
-//    //read from Requestbody until finished
-//}
-
 std::string Script::getServerName(){
     return _serverName;
 }

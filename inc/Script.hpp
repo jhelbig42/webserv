@@ -7,8 +7,6 @@ public:
     Script( void );
     ~Script( void );
 
-    //do these function directly return the argv for env?
-    //would need to return cstrings
     std::string getServerName();
     std::string getServerPort();
     std::string getServerProtocol();
@@ -22,7 +20,6 @@ public:
     void setServerPort(std::string &Port);
     void setRequestMethod(std::string &Method);
     void setScriptName(std::string &ScriptName);
-    //void setQueryString(std::string QueryString);
 
 private:
     //from Server configs

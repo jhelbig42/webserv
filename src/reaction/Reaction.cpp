@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <errno.h>
 #include <fcntl.h>
 #include <sstream>
 #include <string>
@@ -106,6 +107,7 @@ void Reaction::initSendString(const int Code, const std::string &Body) {
 // potentially disable clang-tidy for this part.
 // think about splitting up
 void Reaction::initSendFile(const int Code, const char *File) {
+	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
   struct stat statbuf;
   if (!statbufPopulate(Code, File, statbuf))
     return;

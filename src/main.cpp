@@ -8,7 +8,9 @@
 #include <iostream>
 #include <unistd.h>
 
-#define DEFAULT_CONFIG "test_config/config.txt"
+#define DEFAULT_CONFIG "test_configs/config.txt"
+
+//#define PARSING
 
 #ifdef OFFLINE
 
