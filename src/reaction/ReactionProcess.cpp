@@ -107,24 +107,16 @@ void Reaction::sendToCGI(const size_t Bytes){
 
   logging::log(logging::Debug, "sendToCGI");
 
-  // forward buffered body data to the CGI process, max Bytes bytes 
-  // TO DO: is it necessary to limit it to Bytes bytes? because it is a server internal process
-  // only what is in the buffer can be send. As we just read Bytes bytes into in, it cannot execeed Bytes bytes
-  const size_t toSend = std::min(_reqContLen - _receivedContLen, _buffer.getUsed());
-  if (toSend > 0) {
-    const ssize_t sent = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-    if (sent > 0) {
-      _receivedContLen += static_cast<size_t>(sent);
-      //_buffer.deleteFront(static_cast<size_t>(sent));
-    }
-  }
+  // forward whatever is buffered — _buffer only holds data received but not yet forwarded
+  const size_t toSend = _buffer.getUsed();
+  if (toSend > 0)
+    _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
 
-  // once the full body is forwarded, mark input as done
-  // the CGI script is expected to use CONTENT_LENGTH to know how many bytes to read
-  if (_receivedContLen >= _reqContLen) {
+  // mark input done only once the full body is both received from the client
+  // and drained from the buffer to CGI
+  if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
     logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
     _cgi.setInputDone(true);
-    _buffer.reset();
   }
 }
 
@@ -201,8 +193,6 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 			return ; //means we are just done for this round
 		_receivedContLen += static_cast<size_t>(received);
 		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
-		if (_receivedContLen == _reqContLen)
-			_cgi.setInputDone(true);
 	}
 	catch (std::runtime_error &){
 		initSendFile(CODE_500, getErrorFile(CODE_500).c_str());

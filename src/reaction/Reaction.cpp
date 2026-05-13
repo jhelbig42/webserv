@@ -85,12 +85,14 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
   }
 
   logging::log(logging::Debug, "Req is a CGI");
+  initCGIMethod(Req);
+  if (_processType != CgiPost && _processType != CgiNotPost)
+    return;
   _cgi.setCGIPath(_pathInfo.getCgiPath());
   if (!_cgi.init(Req, _script, _pathInfo.getRealPath(), ForwardSocket)) {
     initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return;
   }
-  initCGIMethod(Req);
 }
 
 void Reaction::initSendString(const int Code, const std::string &Body) {

@@ -86,16 +86,14 @@ void Server::process(void) {
 }
 
 void Server::checkForNewCGI(int Fd) {
-	//logging::log(logging::Debug, "checking for new CGI");
 	Connection *connection  = &_clientMap.at(Fd);
-	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
 	int fwdSock = connection->getSockForward();
-	//logging::log2(logging::Debug, "fwdSock = : ", fwdSock);
 	if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
 		logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
+		const pollfd newFd = {fwdSock, POLLIN | POLLERR | POLLHUP | POLLRDHUP, 0};
+		_newFdBatch.push_back(newFd);
 	}
-	return;
 }
 
 void Server::updateEvents(void){
