@@ -23,7 +23,7 @@ class Server {
 	public:
 	
 	// Server.cpp
-	explicit Server(const std::list<Website>  &websites);
+	explicit Server(const std::list<Website>  &Websites);
 	~Server();
 	bool socketIsListener(int Fd);
 	bool socketIsClient(int Fd);
@@ -54,7 +54,7 @@ class Server {
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
 	void initNetworking(const std::list<Website> &Websites);
 	void checkPair(const Listen &Pair);
-	void checkPort(const std::string &str);
+	void checkPort(const std::string &Str);
 	void initListeningSocket(const Listen &Pair, const Website &Web);
 	int getListeningSocket(struct addrinfo *Info, const Listen &Pair);
 
@@ -62,7 +62,7 @@ class Server {
 	struct addrinfo *getAddrInfo(const Listen &Pair); // getaddrinfo()
 	int createSocket(const struct addrinfo *P); // socket()
 	int clearSocket(const int Sock); // setsockopt()
-	int bindToIP(const int Sock, const struct addrinfo *p); //bind()
+	int bindToIP(const int Sock, const struct addrinfo *P); //bind()
 	void setToListen(const int Sock); // listen()
 	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
 	
@@ -80,7 +80,7 @@ class Server {
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);
-	void handleCondition(struct pollfd &polled, int Type);
+	void handleCondition(struct pollfd &Polled, int Type);
 	//void handleTerminalCondition(struct pollfd &polled);
 	//void handleServableCondition(struct pollfd &polled);
 	
