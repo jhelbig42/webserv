@@ -154,18 +154,11 @@ bool CGIProcess::createArgs(Request &Req, std::string const &Path){
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
 		return false;// error handling
-	const HttpHeaders::MediaType type = Req.getHeaders().getContentType();
-	switch (type){
-		case HttpHeaders::ApplicationSh:
-			_args[0] = strdup("bash");
-			break;
-		case HttpHeaders::TextPython:
-			_args[0] = strdup("python3");
-			break;
-		default: // should never be reached
-			_args[0] = NULL;
-			break;
-	} 
+	const char *slash = strrchr(_path, '/');
+	if (slash)
+		_args[0] = strdup(slash + 1);
+	else
+		_args[0] = strdup(_path);
 	_args[1] = strdup(Path.c_str());
 	_args[2] = NULL;
 	if (!_args[0] || !_args[1])
@@ -189,15 +182,27 @@ bool CGIProcess::initForwardSocket(int & ForwardSocket) {
 
     if (_pid == 0) { 
 		// Child
+
         close(sv[0]);
         dup2(sv[1], STDIN_FILENO);
         dup2(sv[1], STDOUT_FILENO);
         close(sv[1]);
         
-        execve(_path, _args, _env);
-        _exit(EXECVE_ERR);
-    }
+		//subject: "The CGI should be run in the correct directory for relative path file access."
+		char *tmp = strdup(_args[1]); //contains the directory
+        if (!tmp) 
+            _exit(EXECVE_ERR);
+        char *lastSlash = strrchr(tmp, '/'); 
+        if (lastSlash) {
+            *lastSlash = '\0'; // cut scriptname
+            if (chdir(tmp) != 0){
+                _exit(EXECVE_ERR);
+			}
 
+        	execve(_path, _args, _env);
+        	_exit(EXECVE_ERR);
+    	}
+	}
     // Parent
     close(sv[1]);
     ForwardSocket = sv[0];
