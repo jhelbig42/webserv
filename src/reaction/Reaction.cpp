@@ -71,16 +71,11 @@ void Reaction::init(const Request &Req, const int Socket) {
 	return ;
   }
   
-  // TODO: make more generic
-  /*
-  if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
+  // accept HTTP/1.0 and HTTP/1.1
+  if (Req.getMajorV() != 1 || (Req.getMinorV() != 0 && Req.getMinorV() != 1)) {
     initSendFile(CODE_501, FILE_501);
     return;
   }
-  */ // commenting out because we need to allow 1.1 requests
-  // and can response with 1.0
-  //
-  //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
   if(_pathInfo.getCgiPath() == ""){
