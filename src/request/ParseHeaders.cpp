@@ -52,7 +52,7 @@ void Request::parseHeader(const std::string &HeaderLine)
             _state = INVALID;
             return;
         }
-        _headers.setContentLength(length);   
+        _headers.setContentLength(length);
     }
     // headers that are syntactically correct, are just skipped over
 }

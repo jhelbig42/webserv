@@ -72,11 +72,9 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::s
 
 		stream << "<a href=\"" << displayName << "\">" << displayName << "</a>";
 
-		std::size_t pad = 1;
-
-		if (displayName.size() < 50)
-    	pad = 50 - displayName.size();
-
+		size_t pad = 50 - (displayName.size());
+		if (pad < 1)
+			pad = 1;
 		stream << std::string(pad, ' ');
 
 		stream << getTimeStringFromTimespec(entryStat.st_mtim);

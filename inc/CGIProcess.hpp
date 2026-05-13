@@ -11,11 +11,12 @@ public:
         SERVER_PORT,
         SERVER_PROTOCOL,
         SERVER_SOFTWARE,
-        SERVER_INTERFACE,
+        GATEWAY_INTERFACE,
         REQUEST_METHOD,
         SCRIPT_NAME,
         QUERY_STRING,
-        NB_OF_ENV 
+        CONTENT_LENGTH,
+        NB_OF_ENV
     };
 
     CGIProcess();
@@ -33,10 +34,10 @@ public:
 	/// The filedescriptor leading of the created socket is saved a member of 
 	/// the CGIProcess Class. The coresponding instance of Connection will 
 	/// check for it an include it in the poll() map.
-    bool init(Request Req, Script Script, const std::string &Path);
+    bool init(Request Req, Script Script, const std::string &Path, int &ForwardSocket);
     bool createEnv(Request& Req, Script& Script);
     bool createArgs(Request &Req, const std::string &Path);
-	bool initForwardSocket();
+	bool initForwardSocket(int &ForwardSocket);
     
     //Getters
     bool isInputDone() const;

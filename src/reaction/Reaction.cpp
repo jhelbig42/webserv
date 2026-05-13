@@ -47,16 +47,7 @@ void Reaction::setPathInfo(const PathInfo &PathInfo){
 	_pathInfo = PathInfo;
 }
 
-bool Reaction::isCGI(const Request &Req){
-  if (Req.getHeaders().getContentType() == HttpHeaders::ApplicationSh ||
-		Req.getHeaders().getContentType() == HttpHeaders::TextPython)
-  {
-    return true;
-  }
-  return false;
-}
-
-void Reaction::init(const Request &Req, const int Socket) {
+void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
   setDefaults();
   _sock = Socket;
 
@@ -67,7 +58,7 @@ void Reaction::init(const Request &Req, const int Socket) {
   }
   if (!(_pathInfo.getAllowed() & Req.getMethod())){
 	logging::log(logging::Debug, "Requested method not allowed");
-  	initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+  	initSendFile(CODE_405, getErrorFile(CODE_405).c_str());
 	return ;
   }
   
@@ -95,7 +86,7 @@ void Reaction::init(const Request &Req, const int Socket) {
 
   logging::log(logging::Debug, "Req is a CGI");
   _cgi.setCGIPath(_pathInfo.getCgiPath());
-  if (!_cgi.init(Req, _script, _pathInfo.getRealPath())) {
+  if (!_cgi.init(Req, _script, _pathInfo.getRealPath(), ForwardSocket)) {
     initSendFile(CODE_500, getErrorFile(CODE_500).c_str());
     return;
   }
@@ -176,7 +167,7 @@ bool Reaction::setFdIn(const int Code, const char *File) {
 bool Reaction::initPostBody(const Request &Req) {
   if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
     logging::log(logging::Debug, "POST: Content-Length header missing");
-    initSendFile(CODE_400, FILE_400);
+    initSendFile(CODE_411, getErrorFile(CODE_411).c_str());
     return false;
   }
   _reqContLen = Req.getHeaders().getContentLength();
@@ -216,9 +207,13 @@ static const char *defaultErrorFile(int Code) {
     return FILE_401;
   case CODE_403: 
     return FILE_403;
-  case CODE_404: 
+  case CODE_404:
     return FILE_404;
-  case CODE_500: 
+  case CODE_405:
+    return FILE_405;
+  case CODE_411:
+    return FILE_411;
+  case CODE_500:
     return FILE_500;
   case CODE_501: 
     return FILE_501;
@@ -265,6 +260,10 @@ static std::string getReasonPhrase(const int Code) {
     return REASON_403;
   case CODE_404:
     return REASON_404;
+  case CODE_405:
+    return REASON_405;
+  case CODE_411:
+    return REASON_411;
   case CODE_500:
     return REASON_500;
   case CODE_501:

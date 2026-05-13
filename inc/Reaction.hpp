@@ -33,7 +33,7 @@ public:
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req, const int Socket);
+	void init(const Request &Req, const int Socket, int &ForwardSocket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
   /// \brief continues processing a Reaction object
@@ -109,9 +109,6 @@ private:
   void sendToCGI(const size_t Bytes);
   void recvFromClient(const int Socket, const size_t Bytes);
   bool sendToClient(const int Socket, const size_t Bytes);
-
-  //called within init()
-  bool isCGI(const Request &Req);
 
   HttpHeaders _headers;
   ProcessType _processType;
