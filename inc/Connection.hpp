@@ -31,7 +31,7 @@ public:
   int getSock(void) const;
   int getSockForward(void) const;
   bool getDeleteStatus(void) const;
-  bool getDeleteFwdStatus(void) const;
+  bool getCgiFinishedStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
 

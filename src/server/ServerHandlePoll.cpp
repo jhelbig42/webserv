@@ -27,10 +27,6 @@ void Server::handleCondition(struct pollfd &polled, int Type) {
     handlePollerr(polled.fd, Type);
     return;
   }
-  if (polled.revents & POLLHUP) {
-    handlePollhup(polled.fd, Type);
-    return;
-  }
   if ((polled.revents & POLLIN) || polled.revents & POLLPRI) {
     handlePollin(polled.fd, Type);
   }
@@ -39,6 +35,10 @@ void Server::handleCondition(struct pollfd &polled, int Type) {
   }
   if (polled.revents & POLLRDHUP) {
     handlePollrdhup(polled.fd, Type);
+  }
+  if (polled.revents & POLLHUP) {
+    handlePollhup(polled.fd, Type);
+    return;
   }
 }
 

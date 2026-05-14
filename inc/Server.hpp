@@ -77,6 +77,7 @@ class Server {
 	void checkForNewCGI(int Fd);
 	void closeAndDelete(int Fd, int Type);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+	short getForwardEvents(int ConditionsWanted);
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);

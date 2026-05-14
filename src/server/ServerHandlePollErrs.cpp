@@ -116,7 +116,7 @@ void Server::handlePollhup(int Fd, int Type) {
     logging::log3(logging::Debug,
                   "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
                   ". Indicates CGI process has exited and socket closed. Marking fo deletion.");
-    _fwdMap.at(Fd)->scheduleFwdForDemolition();
+   // _fwdMap.at(Fd)->scheduleFwdForDemolition();
     return;
   }
   if (Type == IS_LISTENER) {

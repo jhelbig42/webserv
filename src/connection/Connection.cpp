@@ -52,7 +52,7 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
-bool Connection::getDeleteFwdStatus(void) const {
+bool Connection::getCgiFinishedStatus(void) const {
   return (_cgiFinished);
 }
 
