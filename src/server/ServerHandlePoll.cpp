@@ -17,7 +17,7 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-void Server::handleCondition(struct pollfd &polled, int Type) {
+void Server::handleCondition(struct pollfd &polled, int Type, time_t TimeNow) {
   	
   if (polled.revents & POLLNVAL) {
     handlePollnval(polled.fd, Type);
@@ -33,9 +33,15 @@ void Server::handleCondition(struct pollfd &polled, int Type) {
   }
   if ((polled.revents & POLLIN) || polled.revents & POLLPRI) {
     handlePollin(polled.fd, Type);
+    if (Type == IS_CLIENT) {
+      _clientMap.at(polled.fd).setTimeLastActive(TimeNow);
+    }
   }
   if (polled.revents & POLLOUT) {
     handlePollout(polled.fd, Type);
+    if (Type == IS_CLIENT) {
+      _clientMap.at(polled.fd).setTimeLastActive(TimeNow);
+    }
   }
   if (polled.revents & POLLRDHUP) {
     handlePollrdhup(polled.fd, Type);
