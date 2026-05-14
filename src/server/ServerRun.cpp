@@ -98,7 +98,6 @@ void Server::checkForNewCGI(int Fd) {
 		logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
     const pollfd newFd = {fwdSock, 0, 0};
-    exit(1);
     _newFdBatch.push_back(newFd);
 	}
 	return;
