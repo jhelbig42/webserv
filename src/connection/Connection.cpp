@@ -27,7 +27,7 @@
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size, const Website &website)
     : _conditionsWanted(SockRead), _sock(Sock), _sockForward(-1), _website(website), 
-	_delete(false), _deleteFwd(false), _addrSize(sizeof _addr)  {
+	_delete(false), _cgiFinished(false), _addrSize(sizeof _addr)  {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -53,7 +53,7 @@ bool Connection::getDeleteStatus(void) const {
 }
 
 bool Connection::getDeleteFwdStatus(void) const {
-  return (_deleteFwd);
+  return (_cgiFinished);
 }
 
 /*
@@ -74,7 +74,7 @@ void Connection::scheduleForDemolition(void) {
 }
 
 void Connection::scheduleFwdForDemolition(void) {
-  _deleteFwd = true;
+  _cgiFinished = true;
 }
 
 void Connection::resetSockFwd(void) {

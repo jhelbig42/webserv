@@ -64,7 +64,9 @@ private:
 
   // networking
   bool _delete; // set by scheduleForDemolition
-  bool _deleteFwd;
+  bool _cgiFinished;
+  // _cgiFinished, aka "_deleteFwd"
+  // renamed because it is still used after the forward socket has already been deleted
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;
