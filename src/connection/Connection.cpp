@@ -77,6 +77,10 @@ void Connection::scheduleFwdForDemolition(void) {
   _deleteFwd = true;
 }
 
+void Connection::resetSockFwd(void) {
+  _sockForward = -1;
+}
+
 void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 	switch (ProcessType){
 		case Reaction::SendFile:

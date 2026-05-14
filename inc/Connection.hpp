@@ -40,6 +40,7 @@ public:
   void scheduleFwdForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
+  void resetSockFwd(void);
 
   // send & receive
   //void readData(void);
