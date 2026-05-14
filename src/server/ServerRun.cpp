@@ -80,8 +80,8 @@ void Server::process(void) {
     it++;
   }
   serveAll();
-  updateEvents();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
+  updateEvents();
   _newFdBatch.clear();
 }
 
@@ -94,6 +94,8 @@ void Server::checkForNewCGI(int Fd) {
 	if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
 		logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
+    const pollfd newFd = {fwdSock, 0, 0};
+    _newFdBatch.push_back(newFd);
 	}
 	return;
 }
