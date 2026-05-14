@@ -95,6 +95,7 @@ void Server::checkForNewCGI(int Fd) {
 		logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
     const pollfd newFd = {fwdSock, 0, 0};
+    exit(1);
     _newFdBatch.push_back(newFd);
 	}
 	return;
@@ -168,6 +169,11 @@ bool Server::shouldBeDeleted(int Fd, int Type) {
   }
   else if (Type == IS_FWD) {
   	int clientFd = _fwdMap.at(Fd)->getSock();
+    // There are 2 instances where a forward socket should be deleted:
+    // 1. if the forward socket itself is marked for deletion (CGI)
+    if (_clientMap.at(clientFd).getDeleteFwdStatus() == true)
+      return true;
+    // 2. if the forward socket's client is marked for deletion
   	return (_clientMap.at(clientFd).getDeleteStatus());
   }
   else {

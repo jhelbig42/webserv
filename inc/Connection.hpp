@@ -31,11 +31,13 @@ public:
   int getSock(void) const;
   int getSockForward(void) const;
   bool getDeleteStatus(void) const;
+  bool getDeleteFwdStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
 
   // setters
   void scheduleForDemolition(void);
+  void scheduleFwdForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
 
@@ -61,6 +63,7 @@ private:
 
   // networking
   bool _delete; // set by scheduleForDemolition
+  bool _deleteFwd;
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;

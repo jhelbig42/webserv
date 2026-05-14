@@ -89,7 +89,6 @@ class Server {
 	void handlePollerr(int Fd, int Type);
 	void handlePollhup(int Fd, int Type);
 	void markClientDeletion(int Fd);
-	void markFwdDeletion(int Fd);
 
 	// ServerHandlPollin.hpp
 	void handlePollin(int Fd, int Type);
