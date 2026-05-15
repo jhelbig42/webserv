@@ -136,6 +136,7 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 
 	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
+	logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
 	if (rc < 0){ // when buffer is full
 		return ;

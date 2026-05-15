@@ -64,8 +64,16 @@ void Server::serveAll(void) {
 
 void Server::process(void) {
 
+  static int increment;
+  increment++;
+  if (increment >= 8){
+    exit(0);
+  }
+  logging::log(logging::Warning, "Process");
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+    
   	int type = getSocketType(it->fd);
+    std::cout << getFdInfoString(*it, it->fd, type);
     handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
 	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {

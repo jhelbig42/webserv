@@ -111,5 +111,9 @@ class Server {
 	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 	std::string interfaceInfoToStr(const Listen &Interface);
 	void printFcntlFlags(const int Sock);
-
+	std::string getFdInfoString(pollfd &it, int Fd, int Type); 
+	std::string getTypeString(int Type);
+	std::string getConditionsWantedString(int CWanted);
+	std::string getEventsString(short Events);
+	std::string getReventsString(short Revents);
 };

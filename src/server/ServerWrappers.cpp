@@ -28,7 +28,7 @@
 struct addrinfo *Server::getAddrInfo(const Listen &Pair) {
 
   struct addrinfo *info;
-  logging::log2(logging::Debug, "getInfo() called with ip: ", Pair.ip);
+  //logging::log2(logging::Debug, "getInfo() called with ip: ", Pair.ip);
   const int ret =
       getaddrinfo(Pair.ip.c_str(), Pair.port.c_str(), &_hints, &info);
   if (ret != 0) {
