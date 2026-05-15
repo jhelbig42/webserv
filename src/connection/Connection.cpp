@@ -68,6 +68,10 @@ int Connection::getConditionsWanted(void) const {
   return _conditionsWanted;
 }
 
+int Connection::getConditionsFulfilled(void) const {
+  return _conditionsFulfilled;
+}
+
 // Setters
 void Connection::scheduleForDemolition(void) {
   _delete = true;

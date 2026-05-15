@@ -66,16 +66,17 @@ void Server::process(void) {
 
   static int increment;
   increment++;
-  if (increment >= 8){
+  sleep(1);
+  if (increment >= 50){
     exit(0);
   }
   logging::log(logging::Warning, "Process");
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     
   	int type = getSocketType(it->fd);
-    std::cout << getFdInfoString(*it, it->fd, type);
     handleCondition(*it, type); // sets conditions in client Connection, or accepts
                           // new connections
+    std::cout << getFdInfoString(*it, it->fd, type);
 	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       closeAndDelete(it->fd, type);
       it = _fds.erase(it);
@@ -161,7 +162,6 @@ short Server::determineEventsFwd(int ConditionsWanted){
 }
 
 void Server::closeAndDelete(int Fd, int type) {
-
   // TODO replace helper functions with type check
   close(Fd);
   if (socketIsClient(Fd))

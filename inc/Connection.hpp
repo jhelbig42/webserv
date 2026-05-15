@@ -34,6 +34,7 @@ public:
   bool getCgiFinishedStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
+  int getConditionsFulfilled(void) const;
 
   // setters
   void scheduleForDemolition(void);
