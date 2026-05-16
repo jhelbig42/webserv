@@ -39,6 +39,8 @@ class Server {
         IS_FWD,
 		IS_LISTENER
     };
+
+
 	
 	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
@@ -49,6 +51,7 @@ class Server {
 //	std::map<int, Connection&> _cgiWriteMap;
 //	std::map<int, Connection&> _cgiReadMap;
 	std::vector<pollfd> _newFdBatch;
+	std::map<int, int> _deleteFdBatch;
 	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
@@ -78,6 +81,7 @@ class Server {
 	void closeAndDelete(int Fd, int Type);
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 	short getForwardEvents(int ConditionsWanted);
+	void closeAndDeleteBatch(void);
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);

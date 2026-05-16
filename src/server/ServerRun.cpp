@@ -64,12 +64,7 @@ void Server::serveAll(void) {
 
 void Server::process(void) {
 
-  static int increment;
-  increment++;
-  sleep(1);
-  if (increment >= 50){
-    exit(0);
-  }
+  // sleep(1); // can be used to slow down loop for debugging
   logging::log(logging::Warning, "Process");
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     
@@ -78,16 +73,15 @@ void Server::process(void) {
                           // new connections
     std::cout << getFdInfoString(*it, it->fd, type);
 	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
-      closeAndDelete(it->fd, type);
-      it = _fds.erase(it);
-      continue;
-    }
-	if (type == IS_CLIENT){
+    _deleteFdBatch.insert(std::make_pair(it->fd, type));
+  }
+	else if (type == IS_CLIENT){
 		checkForNewCGI(it->fd);	
 	}
     it->revents = 0;
     it++;
   }
+  closeAndDeleteBatch();
   serveAll();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   updateEvents();
@@ -163,6 +157,7 @@ short Server::determineEventsFwd(int ConditionsWanted){
 
 void Server::closeAndDelete(int Fd, int type) {
   // TODO replace helper functions with type check
+  logging::log2(logging::Debug, "closing & deleting Fd: " , Fd);
   close(Fd);
   if (socketIsClient(Fd))
     _clientMap.erase(Fd);
@@ -179,11 +174,14 @@ bool Server::shouldBeDeleted(int Fd, int Type) {
   }
   else if (Type == IS_FWD) {
   	int clientFd = _fwdMap.at(Fd)->getSock();
-    // There are 2 instances where a forward socket should be deleted:
-    // 1. if the forward socket itself is marked for deletion (CGI)
+    // There are 3 instances where a forward socket should be deleted:
+    // 1. if the client has already been deleted (not currently possible)
+    if (_clientMap.find(clientFd) == _clientMap.end())
+      return true;
+    // 2. if the forward socket itself is marked for deletion (CGI)
     if (_clientMap.at(clientFd).getCgiFinishedStatus() == true)
       return true;
-    // 2. if the forward socket's client is marked for deletion
+    // 3. if the forward socket's client is marked for deletion
   	return (_clientMap.at(clientFd).getDeleteStatus());
   }
   else {
@@ -192,6 +190,34 @@ bool Server::shouldBeDeleted(int Fd, int Type) {
 		exit (1);
 	}
 }
+
+void Server::closeAndDeleteBatch(void) {
+  for (std::map<int, int>::iterator it = _deleteFdBatch.begin(); it != _deleteFdBatch.end(); it++) {
+    logging::log3(logging::Debug, it->first, " will be closed and deleted from map of type ", getTypeString(it->second));
+    if (it->second == IS_FWD) {
+      _fwdMap.erase(it->first);
+    }
+    else if (it->second == IS_CLIENT){
+      _clientMap.erase(it->first);
+    }
+    else {
+      logging::log(logging::Error, "Server::closeAndDeleteBatch "
+          "expected IS_CLIENT or IS_FWD");
+        exit (1);
+    }
+    close(it->first);
+  }
+  for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+    if (_deleteFdBatch.find(it->fd) != _deleteFdBatch.end()) {
+      logging::log2(logging::Debug, it->fd, " will be removed from pollfd vector");
+      it = _fds.erase(it);
+    }
+    else {
+      it++;
+    }
+  }
+  _deleteFdBatch.clear();
+}  
 
 // adds new connection to _clientMap -- move to pollhandling??
 
