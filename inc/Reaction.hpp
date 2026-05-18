@@ -81,7 +81,7 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool fallbackOrError(const int Code);
   bool initError(const int Errno);
-  std::string getErrorFile(int Code) const;
+  void initSendError(int Code);
   void setDefaults(void);
   bool initPostBody(const Request &Req);
 
