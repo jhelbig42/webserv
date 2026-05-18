@@ -30,7 +30,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
 	  	initPost(Req);
 	  	return;
   	case Generic:
-    	initSendFile(CODE_501, getErrorFile(CODE_501).c_str());
+    	initSendError(CODE_501);
     	return;
   }
 }
@@ -45,16 +45,18 @@ void Reaction::initDelete(void) {
 }
 
 void Reaction::initHeadGet(const Request &Req) {
+  const std::string &path = _pathInfo.getRealPath();
   struct stat statbuf;
-  if (stat(_pathInfo.getRealPath().c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+
+  if (stat(path.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
     if (_pathInfo.getAutoindex()) {
-      std::string dir = _pathInfo.getRealPath();
+      std::string dir = path;
       if (dir.empty() || dir[dir.size() - 1] != '/')
         dir += '/';
       Autoindex ai;
       std::string html = ai.autoindexStream(dir, Req.getResource());
       if (ai.getErrCode() != CODE_200) {
-        initSendFile(ai.getErrCode(), getErrorFile(ai.getErrCode()).c_str());
+        initSendError(ai.getErrCode());
         return;
       }
       initSendString(CODE_200, html);
@@ -62,11 +64,20 @@ void Reaction::initHeadGet(const Request &Req) {
         _body.clear();
       return;
     }
-    initSendFile(CODE_403, getErrorFile(CODE_403).c_str());
+    initSendError(CODE_403);
     return;
   }
 
-  initSendFile(CODE_200, _pathInfo.getRealPath().c_str());
+  if (access(path.c_str(), F_OK) != 0) {
+    initSendError(CODE_404);
+    return;
+  }
+  if (access(path.c_str(), R_OK) != 0) {
+    initSendError(CODE_403);
+    return;
+  }
+
+  initSendFile(CODE_200, path.c_str());
   if (Req.getMethod() == Get || _fdIn < 0)
     return;
   errno = 0;
