@@ -14,6 +14,7 @@
 //#define AUTOINDEX
 
 #define CHUNK_SIZE 1024
+#define DEFAULT_CONFIG "test_configs/config.txt"
 
 #define METHOD "GET"
 #define PATH "/home/julia/projects/webserv/hello.txt"
@@ -66,14 +67,12 @@ int main(int argc, char **argv){
 
 int main(int argc, char **argv) {
 
-  // argument check
-  if (argc != 2){
-  	std::cerr << "Usage: <config file>\n";
-	exit (1);
-  }
-  
+  const char *configPath = DEFAULT_CONFIG;
+  if (argc >= 2)
+    configPath = argv[1];
+
   try {
-    const Config conf(argv[1]);
+    const Config conf(configPath);
 	const std::list<Website> &websites = conf.getWebsites();
 	if (websites.empty()){
     throw std::runtime_error("config file contains 0 websites");
