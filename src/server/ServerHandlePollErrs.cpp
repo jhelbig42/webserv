@@ -115,12 +115,9 @@ void Server::handlePollhup(int Fd, int Type) {
   } else if (Type == IS_FWD) {
     logging::log3(logging::Debug,
                   "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
-                  ". This is not necessarily an error but interesting to "
-                  "observe when this happens. We may want to implement removal "
-                  "of the fwd sock at this point.");
-    // TODO downgraed this print before submission
-    // TODO remove socket from fwdMap? // use markFwdDeletion?
-  	return;
+                  ". Indicates at least one of the socket pairs closed?");
+   // _fwdMap.at(Fd)->scheduleFwdForDemolition();
+    return;
   }
   if (Type == IS_LISTENER) {
     logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");

@@ -83,7 +83,7 @@ std::vector<std::string> split(const std::string& S, const std::string& Delimite
 		last = next + Delimiter.length();
     }
     tokens.push_back(S.substr(last)); 
-	logging::log(logging::Debug, "split Successfull");
+	//logging::log(logging::Debug, "split Successfull");
     return tokens;
 }
 

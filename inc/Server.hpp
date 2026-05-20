@@ -39,6 +39,8 @@ class Server {
         IS_FWD,
 		IS_LISTENER
     };
+
+
 	
 	// variables
 	addrinfo _hints; // our specifications for getaddrinfo
@@ -49,6 +51,7 @@ class Server {
 //	std::map<int, Connection&> _cgiWriteMap;
 //	std::map<int, Connection&> _cgiReadMap;
 	std::vector<pollfd> _newFdBatch;
+	std::map<int, int> _deleteFdBatch;
 	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
 	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
@@ -75,8 +78,10 @@ class Server {
 	short  determineEventsFwd(int Fd);
 	bool shouldBeDeleted(int Fd, int Type);
 	void checkForNewCGI(int Fd);
-	void closeAndDelete(int Fd, int Type);
+	//void closeAndDelete(int Fd, int Type); //currently not in use
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+	short getForwardEvents(int ConditionsWanted);
+	void closeAndDeleteBatch(void);
 
 	// ServerHandlePoll.hpp
 	//bool reventsAreTerminal(int revents);
@@ -89,7 +94,6 @@ class Server {
 	void handlePollerr(int Fd, int Type);
 	void handlePollhup(int Fd, int Type);
 	void markClientDeletion(int Fd);
-	void markFwdDeletion(int Fd);
 
 	// ServerHandlPollin.hpp
 	void handlePollin(int Fd, int Type);
@@ -111,5 +115,10 @@ class Server {
 	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
 	std::string interfaceInfoToStr(const Listen &Interface);
 	void printFcntlFlags(const int Sock);
-
+	std::string getFdInfoString(pollfd &It, int Fd, int Type); 
+	std::string getTypeString(int Type);
+	std::string getConditionsWantedString(int CWanted);
+	std::string getConditionsFulfilledString(int CFulfilled);
+	std::string getEventsString(short Events);
+	std::string getReventsString(short Revents);
 };
