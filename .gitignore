@@ -17,6 +17,7 @@ tester
 cgi_tester
 webserv_tester
 webserv_tester/*
+post/*
 YoupiBanane
 webserv
 TODO.md
