@@ -269,10 +269,8 @@ static bool stringToSocket(const int Socket, std::string &Str,
     logging::log3(logging::Error, __func__, ": ", strerror(errno));
     return false;
   }
-  if ((size_t)rc == amount) // cast is safe because rc > 0
-    return true;
   Str.erase(0, (size_t)rc); // cast is safe because rc > 0
-  return false;
+  return Str.empty();
 }
 
 // for ideas about performance improvement check comments to implementations
