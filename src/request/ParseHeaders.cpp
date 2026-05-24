@@ -3,7 +3,6 @@
 #include "Request.hpp"
 #include <sstream>
 #include <string>
-#include <vector>
 
 #define MAX_REQUEST 1024
 

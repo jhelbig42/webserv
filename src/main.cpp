@@ -1,17 +1,13 @@
-#include "Autoindex.hpp"
-#include "Config.hpp"
-#include "Reaction.hpp"
-#include "Request.hpp"
-#include <iostream>
-//#define _GNU_SOURCE 
-#include "Config.hpp"
-#include "Server.hpp"
-#include <iostream>
-#include <unistd.h>
 
-//#define OFFLINE
-//#define PARSING
-//#define AUTOINDEX
+#include "Config.hpp"
+#include "Logging.hpp"
+#include "Reaction.hpp"
+#include "Server.hpp"
+#include "Website.hpp"
+#include <cstdlib>
+#include <exception>
+#include <list>
+
 
 #define CHUNK_SIZE 1024
 #define DEFAULT_CONFIG "test_configs/config.txt"

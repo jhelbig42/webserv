@@ -49,12 +49,24 @@ void Reaction::initHeadGet(const Request &Req) {
   struct stat statbuf;
 
   if (stat(path.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+    const std::list<std::string> &indexFiles = _pathInfo.getIndex();
+    for (std::list<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it) {
+      if (access(it->c_str(), F_OK) == 0) {
+        initSendFile(CODE_200, it->c_str());
+        if (Req.getMethod() == Head && _fdIn >= 0) {
+          if (close(_fdIn) < 0)
+            logging::log2(logging::Error, "close: ", strerror(errno));
+          _fdIn = -1;
+        }
+        return;
+      }
+    }
     if (_pathInfo.getAutoindex()) {
       std::string dir = path;
       if (dir.empty() || dir[dir.size() - 1] != '/')
         dir += '/';
       Autoindex ai;
-      std::string html = ai.autoindexStream(dir, Req.getResource());
+      std::string const html = ai.autoindexStream(dir, Req.getResource());
       if (ai.getErrCode() != CODE_200) {
         initSendError(ai.getErrCode());
         return;

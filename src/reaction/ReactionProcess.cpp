@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
+#include <stddef.h>
 #include <stdio.h>
 #include <string>
 #include <sys/socket.h>

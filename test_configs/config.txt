@@ -12,6 +12,8 @@ server {
     error_page 502 /error_pages/code_502.html;
     error_page 503 /error_pages/code_503.html;
 
+    index /index.html;
+    
     location /upload/ {
         allow POST DELETE;
         max_request_body 10485760;
