@@ -3,7 +3,6 @@
 #include "Request.hpp"
 #include <sstream>
 #include <string>
-#include <vector>
 
 #define MAX_REQUEST 1024
 
@@ -36,23 +35,25 @@ bool Request::parseHeadersFromBuffer()
 void Request::parseHeader(const std::string &HeaderLine)
 {
 	logging::log(logging::Debug, "parseHeaderLine()");
-	std::vector<std::string> token = split(HeaderLine, ": ");
-	if (token.size() != 2) 
+	const size_t colon = HeaderLine.find(':');
+	if (colon == std::string::npos)
 	{
-		_state = INVALID; // request is made invalid on every headerline that is syntactically incorrect
-		return ;
+		_state = INVALID;
+		return;
 	}
-    if (token[0] == "Content-Length")
-    {
-        size_t length;
-        std::stringstream slength(token[1]);
-        if (!(slength >> length) || !slength.eof())
-        {
-            logging::log(logging::Warning, "transform content length into long failed");
-            _state = INVALID;
-            return;
-        }
-        _headers.setContentLength(length);
-    }
-    // headers that are syntactically correct, are just skipped over
+	const std::string name = HeaderLine.substr(0, colon);
+	const std::string value = HeaderLine.substr(colon + 1);
+	if (name == "Content-Length")
+	{
+		size_t length;
+		std::stringstream slength(value);
+		if (!(slength >> length) || !slength.eof())
+		{
+			logging::log(logging::Warning, "transform content length into long failed");
+			_state = INVALID;
+			return;
+		}
+		_headers.setContentLength(length);
+	}
+	// unrecognized headers (including gibberish with a colon) are ignored
 }

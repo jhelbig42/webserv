@@ -33,10 +33,11 @@ std::vector<std::string> Autoindex::createListing(const std::string &DirectoryNa
 
 	std::vector<std::string> names;
 	errno = 0;
-	dirent *entry;
-	while ((entry = readdir(dirp)) != NULL) {
+	dirent *entry = readdir(dirp);
+	while (entry != NULL) {
 		if (entry->d_name[0] != '.')
 			names.push_back(entry->d_name);
+		entry = readdir(dirp);
 	}
 	closedir(dirp);
 
