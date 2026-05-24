@@ -20,51 +20,6 @@
 #define PATH "/home/julia/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
-// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/scripts/test_query.py?user=max&type=dog HTTP/1.0
-//home/jhelbig/Desktop/webserv
-
-// Content_Length: 100
-#ifdef OFFLINE
-
-int main(void) {
-  const Request req(METHOD " " PATH " " VERSION);
-  Reaction res(req);
-  while (!res.process(STDOUT_FILENO, CHUNK_SIZE, Unconditional))
-    ;
-}
-
-#elif defined PARSING
-
-int main(int argc, char **argv) {
-  if (argc != 3 || argv[2][0] != '/')
-    return 1;
-  try {
-    const Config conf(argv[1]);
-    std::cout << conf;
-
-    if (conf.getWebsites().begin() != conf.getWebsites().end()) {
-      PathInfo info = conf.getWebsites().begin()->getPathInfo(argv[2]);
-      std::cout << info;
-    }
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << '\n';
-  }
-  return 0;
-}
-
-#elif defined AUTOINDEX
-int main(int argc, char **argv){
-	std::cout << "Autoindex test" << std::endl;
-	if (argc != 2)
-		return 1;
-	Autoindex a;
-	std::cout << a.autoindexStream(argv[1], argv[1]);
-}
-
-#else
-
 int main(int argc, char **argv) {
 
   const char *configPath = DEFAULT_CONFIG;
@@ -85,4 +40,3 @@ int main(int argc, char **argv) {
   	}
 }
 
-#endif // OFLINE

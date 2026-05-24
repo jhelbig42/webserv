@@ -9,7 +9,7 @@
 *.json
 *.ebnf
 *.pdf
-post/*e
+post/*
 .clangd
 example.ebnf
 docs/*
