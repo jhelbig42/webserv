@@ -1,79 +1,29 @@
-#include "Autoindex.hpp"
-#include "Config.hpp"
-#include "Reaction.hpp"
-#include "Request.hpp"
-#include <iostream>
-//#define _GNU_SOURCE 
-#include "Config.hpp"
-#include "Server.hpp"
-#include <iostream>
-#include <unistd.h>
 
-//#define OFFLINE
-//#define PARSING
-//#define AUTOINDEX
+#include "Config.hpp"
+#include "Logging.hpp"
+#include "Reaction.hpp"
+#include "Server.hpp"
+#include "Website.hpp"
+#include <cstdlib>
+#include <exception>
+#include <list>
+
 
 #define CHUNK_SIZE 1024
+#define DEFAULT_CONFIG "test_configs/config.txt"
 
 #define METHOD "GET"
 #define PATH "/home/julia/projects/webserv/hello.txt"
 #define VERSION "HTTP/1.0"
 
-// GET /home/julia/projects/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/hello.txt HTTP/1.0
-// GET /home/jhelbig/Desktop/webserv/scripts/test_query.py?user=max&type=dog HTTP/1.0
-//home/jhelbig/Desktop/webserv
-
-// Content_Length: 100
-#ifdef OFFLINE
-
-int main(void) {
-  const Request req(METHOD " " PATH " " VERSION);
-  Reaction res(req);
-  while (!res.process(STDOUT_FILENO, CHUNK_SIZE, Unconditional))
-    ;
-}
-
-#elif defined PARSING
-
-int main(int argc, char **argv) {
-  if (argc != 3 || argv[2][0] != '/')
-    return 1;
-  try {
-    const Config conf(argv[1]);
-    std::cout << conf;
-
-    if (conf.getWebsites().begin() != conf.getWebsites().end()) {
-      PathInfo info = conf.getWebsites().begin()->getPathInfo(argv[2]);
-      std::cout << info;
-    }
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << '\n';
-  }
-  return 0;
-}
-
-#elif defined AUTOINDEX
-int main(int argc, char **argv){
-	std::cout << "Autoindex test" << std::endl;
-	if (argc != 2)
-		return 1;
-	Autoindex a;
-	std::cout << a.autoindexStream(argv[1], argv[1]);
-}
-
-#else
-
 int main(int argc, char **argv) {
 
-  // argument check
-  if (argc != 2){
-  	std::cerr << "Usage: <config file>\n";
-	exit (1);
-  }
-  
+  const char *configPath = DEFAULT_CONFIG;
+  if (argc >= 2)
+    configPath = argv[1];
+
   try {
-    const Config conf(argv[1]);
+    const Config conf(configPath);
 	const std::list<Website> &websites = conf.getWebsites();
 	if (websites.empty()){
     throw std::runtime_error("config file contains 0 websites");
@@ -86,4 +36,3 @@ int main(int argc, char **argv) {
   	}
 }
 
-#endif // OFLINE

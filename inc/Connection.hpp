@@ -31,15 +31,25 @@ public:
   int getSock(void) const;
   int getSockForward(void) const;
   bool getDeleteStatus(void) const;
+  bool getCgiFinishedStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
+<<<<<<< HEAD
   time_t getTimeLastActive(void) const;
+=======
+  int getConditionsFulfilled(void) const;
+>>>>>>> main
 
   // setters
   void scheduleForDemolition(void);
+  void scheduleFwdForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
+<<<<<<< HEAD
   void setTimeLastActive(time_t Time);
+=======
+  void resetSockFwd(void);
+>>>>>>> main
 
   // send & receive
   //void readData(void);
@@ -65,6 +75,9 @@ private:
 
   // networking
   bool _delete; // set by scheduleForDemolition
+  bool _cgiFinished;
+  // _cgiFinished, aka "_deleteFwd"
+  // renamed because it is still used after the forward socket has already been deleted
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;

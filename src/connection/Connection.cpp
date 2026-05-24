@@ -26,7 +26,8 @@
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size, const Website &website)
-    : _conditionsWanted(SockRead), _sock(Sock), _website(website), _delete(false), _addrSize(sizeof _addr)  {
+    : _conditionsWanted(SockRead), _sock(Sock), _sockForward(-1), _website(website), 
+	_delete(false), _cgiFinished(false), _addrSize(sizeof _addr)  {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -55,6 +56,9 @@ bool Connection::getDeleteStatus(void) const {
 time_t Connection::getTimeLastActive(void) const {
   return (_timeLastActive);
 }
+bool Connection::getCgiFinishedStatus(void) const {
+  return (_cgiFinished);
+}
 
 /*
 Conditions Connection::getConditions(void) const {
@@ -68,6 +72,10 @@ int Connection::getConditionsWanted(void) const {
   return _conditionsWanted;
 }
 
+int Connection::getConditionsFulfilled(void) const {
+  return _conditionsFulfilled;
+}
+
 // Setters
 void Connection::scheduleForDemolition(void) {
   _delete = true;
@@ -75,6 +83,14 @@ void Connection::scheduleForDemolition(void) {
 
 void Connection::setTimeLastActive(time_t Time) {
   _timeLastActive = Time;
+}
+
+void Connection::scheduleFwdForDemolition(void) {
+  _cgiFinished = true;
+}
+
+void Connection::resetSockFwd(void) {
+  _sockForward = -1;
 }
 
 void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
@@ -86,7 +102,10 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 			_conditionsWanted = SockRead;
 			break;
 		case Reaction::CgiPost:
-			_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+			if (_react.isInputDone())
+				_conditionsWanted = SockWrite | FSockRead;
+			else
+				_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
 			break;
 		case Reaction::CgiNotPost:
 			_conditionsWanted = SockWrite | FSockRead;
@@ -113,11 +132,11 @@ void Connection::serve(void) {
 		&& _react.getProcessType() == Reaction::NotInitialized)
 	{
 		_react.setPathInfo(_website.getPathInfo(_req.getResource())); // setting config details into Reaction
-		_react.init(_req, _sock);
+		_react.init(_req, _sock, _sockForward);
 	}
 	// we have a initialized Reaction - act on it.
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
-	if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
 		scheduleForDemolition();
 	//update ConditionsWanted here - from Reaction
 	//before process is called in the next round

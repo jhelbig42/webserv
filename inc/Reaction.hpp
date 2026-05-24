@@ -33,7 +33,7 @@ public:
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req, const int Socket);
+	void init(const Request &Req, const int Socket, int &ForwardSocket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
   /// \brief continues processing a Reaction object
@@ -67,6 +67,7 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
+  bool			isInputDone(void) const;
   void			setTmpPathName(void);
   void			setFinalPathName(void);
 
@@ -81,7 +82,7 @@ private:
   bool setFdIn(const int Code, const char *File);
   bool fallbackOrError(const int Code);
   bool initError(const int Errno);
-  std::string getErrorFile(int Code) const;
+  void initSendError(int Code);
   void setDefaults(void);
   bool initPostBody(const Request &Req);
 
@@ -109,9 +110,6 @@ private:
   void sendToCGI(const size_t Bytes);
   void recvFromClient(const int Socket, const size_t Bytes);
   bool sendToClient(const int Socket, const size_t Bytes);
-
-  //called within init()
-  bool isCGI(const Request &Req);
 
   HttpHeaders _headers;
   ProcessType _processType;

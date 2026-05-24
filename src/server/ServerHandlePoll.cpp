@@ -17,18 +17,19 @@
 
 /////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 void Server::handleCondition(struct pollfd &polled, int Type, time_t TimeNow) {
   	
+=======
+void Server::handleCondition(struct pollfd &polled, int Type) {
+  
+>>>>>>> main
   if (polled.revents & POLLNVAL) {
     handlePollnval(polled.fd, Type);
     return;
   }
   if (polled.revents & POLLERR) {
     handlePollerr(polled.fd, Type);
-    return;
-  }
-  if (polled.revents & POLLHUP) {
-    handlePollhup(polled.fd, Type);
     return;
   }
   if ((polled.revents & POLLIN) || polled.revents & POLLPRI) {
@@ -45,6 +46,10 @@ void Server::handleCondition(struct pollfd &polled, int Type, time_t TimeNow) {
   }
   if (polled.revents & POLLRDHUP) {
     handlePollrdhup(polled.fd, Type);
+  }
+  if (polled.revents & POLLHUP) {
+    handlePollhup(polled.fd, Type);
+    return;
   }
 }
 

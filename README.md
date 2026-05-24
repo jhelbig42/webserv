@@ -1,11 +1,46 @@
-### The Task
-Developing a fully functional HTTP/1.0 server from scratch, capable of handling multiple non-blocking client connections.
 
-Implementing I/O Multiplexing (using poll(), select(), or kqueue()) to manage concurrent requests efficiently without thread overhead.
+*This project has been created as part of the 42 curriculum by [alneuman](https://github.com/alneuma), [hallison](https://github.com/h-allison) and [jhelbig](https://github.com/jhelbig42)*.
 
-Designing a robust HTTP Request/Reaction parser and a configuration file system, emphasizing OOP principles and clean class architecture.
 
-Handling CGI execution, file uploads, and various HTTP methods (GET, POST, DELETE).
+## Description
+A fully functional HTTP/1.1 server built from scratch in C++98 as part of the 42 curriculum.
+
+The server handles multiple concurrent client connections without threads, using `poll()` for non-blocking I/O multiplexing. It parses HTTP requests and generates responses, supports CGI script execution, file uploads, and the GET, POST, HEAD and DELETE methods. Server behavior is controlled through a nginx-inspired configuration file.
+
+## Instructions
+
+### Requirements
+- A C++ compiler supporting C++98
+
+### Build
+```sh
+make
+```
+
+### Run
+```sh
+./webserv <config_file>
+```
+
+See [test_configs/](test_configs/) for example configuration files.
+
+### Clean
+```sh
+make fclean   # removes binary and object files
+make clean    # removes object files only
+```
+
+## Resources
+- [Hypertext Transfer Protocol -- HTTP/1.0](https://datatracker.ietf.org/doc/html/rfc1945#appendix-D.1.1)
+- [The Common Gateway Interface (CGI) Version 1.1](https://datatracker.ietf.org/doc/html/rfc3875)
+- [nginx Documentation](https://nginx.org/)
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/)
+- [Parsing](https://craftinginterpreters.com/)
+
+
+
+
+## Implementation
 
 ### Config Parsing
 

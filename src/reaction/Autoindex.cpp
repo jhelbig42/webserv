@@ -33,10 +33,11 @@ std::vector<std::string> Autoindex::createListing(const std::string &DirectoryNa
 
 	std::vector<std::string> names;
 	errno = 0;
-	dirent *entry;
-	while ((entry = readdir(dirp)) != NULL) {
+	dirent *entry = readdir(dirp);
+	while (entry != NULL) {
 		if (entry->d_name[0] != '.')
 			names.push_back(entry->d_name);
+		entry = readdir(dirp);
 	}
 	closedir(dirp);
 
@@ -72,7 +73,7 @@ std::string Autoindex::createHTML(const std::string &DirectoryName, const std::s
 
 		stream << "<a href=\"" << displayName << "\">" << displayName << "</a>";
 
-		int pad = 50 - static_cast<int>(displayName.size());
+		size_t pad = 50 - (displayName.size());
 		if (pad < 1)
 			pad = 1;
 		stream << std::string(pad, ' ');

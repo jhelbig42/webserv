@@ -1,13 +1,15 @@
 *.d
 *.o
 *.out
-*.sh
+
 *.pdf
 *.vim
 *.swp
 *.orig
 *.json
 *.ebnf
+*.pdf
+post/*
 .clangd
 example.ebnf
 docs/*
@@ -16,6 +18,7 @@ tester
 cgi_tester
 webserv_tester
 webserv_tester/*
+post/*
 YoupiBanane
 webserv
 TODO.md
