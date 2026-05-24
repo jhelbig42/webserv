@@ -49,6 +49,10 @@ void Reaction::initHeadGet(const Request &Req) {
   struct stat statbuf;
 
   if (stat(path.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+    if (path.empty() || path[path.size() - 1] != '/') {
+      initSendError(CODE_404);
+      return;
+    }
     const std::list<std::string> &indexFiles = _pathInfo.getIndex();
     for (std::list<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it) {
       if (access(it->c_str(), F_OK) == 0) {
