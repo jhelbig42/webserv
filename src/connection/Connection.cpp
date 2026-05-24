@@ -94,7 +94,10 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 			_conditionsWanted = SockRead;
 			break;
 		case Reaction::CgiPost:
-			_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+			if (_react.isInputDone())
+				_conditionsWanted = SockWrite | FSockRead;
+			else
+				_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
 			break;
 		case Reaction::CgiNotPost:
 			_conditionsWanted = SockWrite | FSockRead;

@@ -42,6 +42,10 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
+bool Reaction::isInputDone(void) const {
+  return _cgi.isInputDone();
+}
+
 void Reaction::setPathInfo(const PathInfo &PathInfo){
 	_pathInfo = PathInfo;
 }
@@ -196,8 +200,8 @@ bool Reaction::initPostBody(const Request &Req) {
     initSendError(CODE_403);
     return false;
   }
-  _receivedContLen = 0;
   _buffer = Req.getBuffer();
+  _receivedContLen = _buffer.getUsed();
   return true;
 }
 

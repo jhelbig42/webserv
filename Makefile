@@ -165,6 +165,7 @@ clean:
 	$(RM) $(DEP)
 	$(RM) $(OBJ)
 	$(RM) $(OBJ_DIR)
+	$(RM) post
 
 fclean: clean clean_sa
 	$(RM) $(NAME)
