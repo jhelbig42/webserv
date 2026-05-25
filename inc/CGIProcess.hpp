@@ -43,11 +43,13 @@ public:
     bool isInputDone() const;
 	int getPid() const ;
     int getForwardSocket() const;
+    time_t  getTimeLastActive() const;
 
     //setters
     void setPid(pid_t Pid);
     void setInputDone(bool Done);
 	void setCGIPath(std::string const &Path);
+    void setTimeLastActive(time_t Time);
     
 private:
    
@@ -65,4 +67,5 @@ private:
     int         _forwardSocket;
     std::string _output;
     bool        _inputDone;
+    time_t      _timeLastActive;
 };

@@ -136,8 +136,10 @@ void Connection::serve(void) {
 	}
 	// we have a initialized Reaction - act on it.
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
-	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)){
+		// returns true if the creation and sending of the process is done
 		scheduleForDemolition();
+	}
 	//update ConditionsWanted here - from Reaction
 	//before process is called in the next round
 	updateConditionsWanted(_react.getProcessType());

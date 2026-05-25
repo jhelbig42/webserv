@@ -34,22 +34,16 @@ public:
   bool getCgiFinishedStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
-<<<<<<< HEAD
   time_t getTimeLastActive(void) const;
-=======
   int getConditionsFulfilled(void) const;
->>>>>>> main
 
   // setters
   void scheduleForDemolition(void);
   void scheduleFwdForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
-<<<<<<< HEAD
   void setTimeLastActive(time_t Time);
-=======
   void resetSockFwd(void);
->>>>>>> main
 
   // send & receive
   //void readData(void);

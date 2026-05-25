@@ -57,6 +57,9 @@ int CGIProcess::getPid() const {
 	return _pid;
 }
 
+time_t CGIProcess::getTimeLastActive(void) const {
+  return (_timeLastActive);
+}
 
 void CGIProcess::setPid(pid_t Pid){
 	_pid = Pid;
@@ -64,6 +67,10 @@ void CGIProcess::setPid(pid_t Pid){
 
 void CGIProcess::setInputDone(bool Done){
 	_inputDone = Done;
+}
+
+void CGIProcess::setTimeLastActive(time_t Time) {
+  _timeLastActive = Time;
 }
 
 void CGIProcess::setCGIPath(std::string const &Path){
@@ -222,6 +229,7 @@ bool CGIProcess::init(Request Req, Script Script, std::string const &Path, int &
 	
 	if (!initForwardSocket(ForwardSocket))
 		return (false);
-	
+
+	_timeLastActive = time(NULL);
     return true;
 }

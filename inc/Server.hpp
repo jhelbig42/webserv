@@ -77,7 +77,7 @@ class Server {
 	short	 determineEventsClient(int Fd);
 	short  determineEventsFwd(int Fd);
 	bool shouldBeDeleted(int Fd, int Type);
-	void checkForNewCGI(int Fd);
+	bool newCGISocketAdded(int Fd);
 	//void closeAndDelete(int Fd, int Type); //currently not in use
 	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
 	short getForwardEvents(int ConditionsWanted);
