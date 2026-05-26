@@ -1,6 +1,9 @@
 #!/bin/bash
 
-POST_DIR="/home/julia/projects/webserv/post"
+echo "inside the script"
+
+
+POST_DIR="/home/jhelbig/Desktop/webserv/post"
 
 mkdir -p "$POST_DIR"
 
