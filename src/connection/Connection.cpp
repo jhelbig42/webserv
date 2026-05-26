@@ -32,6 +32,7 @@ Connection::Connection(const int Sock, const sockaddr_storage &Addr,
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
   memset(&_readBuf, 0, MAX_REQUEST);
+  _timeLastActive = time(NULL);
   logging::log(logging::Debug, "Connection created");
 }
 
@@ -52,6 +53,9 @@ bool Connection::getDeleteStatus(void) const {
   return (_delete);
 }
 
+time_t Connection::getTimeLastActive(void) const {
+  return (_timeLastActive);
+}
 bool Connection::getCgiFinishedStatus(void) const {
   return (_cgiFinished);
 }
@@ -76,6 +80,10 @@ int Connection::getConditionsFulfilled(void) const {
 void Connection::scheduleForDemolition(void) {
 	logging::log(logging::Debug, "setting Connection up for Demolition ");
   _delete = true;
+}
+
+void Connection::setTimeLastActive(time_t Time) {
+  _timeLastActive = Time;
 }
 
 void Connection::scheduleFwdForDemolition(void) {
@@ -116,6 +124,7 @@ void Connection::serve(void) {
 		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	if (_req.getState() == CLIENTHUNGUP){
+		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve because CLIENTHUNGUP()");
 		scheduleForDemolition();
 		return ;
 	};
@@ -129,8 +138,11 @@ void Connection::serve(void) {
 	}
 	// we have a initialized Reaction - act on it.
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
-	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) // returns only true if the creation and sending of the process is done
+	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)){
+		// returns true if the creation and sending of the process is done
+		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve()");
 		scheduleForDemolition();
+	}
 	//update ConditionsWanted here - from Reaction
 	//before process is called in the next round
 	updateConditionsWanted(_react.getProcessType());

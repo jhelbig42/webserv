@@ -34,6 +34,7 @@ public:
   bool getCgiFinishedStatus(void) const;
   Conditions getConditions(void) const;
   int getConditionsWanted(void) const;
+  time_t getTimeLastActive(void) const;
   int getConditionsFulfilled(void) const;
 
   // setters
@@ -41,6 +42,7 @@ public:
   void scheduleFwdForDemolition(void);
   void addToConditions(Conditions Condition);
   void resetConditions(void);
+  void setTimeLastActive(time_t Time);
   void resetSockFwd(void);
 
   // send & receive
@@ -54,6 +56,8 @@ private:
   Connection(); // should not be possible
 
   void updateConditionsWanted(Reaction::ProcessType ProcessType);
+
+  time_t _timeLastActive;
 
   // serve reads from
   int _conditionsFulfilled;

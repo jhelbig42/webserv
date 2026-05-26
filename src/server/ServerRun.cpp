@@ -23,8 +23,7 @@ void Server::pollLoop(void) {
 
   while (1) {
     const int res =
-        poll(_fds.data(), (nfds_t)_fds.size(),
-             -1); // without restriction to _fds.size this cast is unsafe
+        poll(_fds.data(), (nfds_t)_fds.size(), TIMEOUT * 1000); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
     if (res == -1) {
       std::ostringstream msg;
@@ -65,19 +64,25 @@ void Server::serveAll(void) {
 void Server::process(void) {
 
   // sleep(1); // can be used to slow down loop for debugging
-  logging::log(logging::Warning, "Process");
+  //logging::log(logging::Debug, "Process");
+  time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     
   	int type = getSocketType(it->fd);
-    handleCondition(*it, type); // sets conditions in client Connection, or accepts
+    handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
                           // new connections
-    std::cout << getFdInfoString(*it, it->fd, type);
+    //std::cout << getFdInfoString(*it, it->fd, type);
+	if (type == IS_CLIENT){
+		if (newCGISocketAdded(it->fd) != true){
+      if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
+		  logging::log2(logging::Debug, it->fd, " scheduleForDemolition() in Server::process()");
+        _clientMap.at(it->fd).scheduleForDemolition();
+      }
+    }
+	}
 	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
     _deleteFdBatch.insert(std::make_pair(it->fd, type));
   }
-	else if (type == IS_CLIENT){
-		checkForNewCGI(it->fd);	
-	}
     it->revents = 0;
     it++;
   }
@@ -88,11 +93,11 @@ void Server::process(void) {
   _newFdBatch.clear();
 }
 
-void Server::checkForNewCGI(int Fd) {
+bool Server::newCGISocketAdded(int Fd) {
 	Connection *connection  = &_clientMap.at(Fd);
 	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
   if (connection->getCgiFinishedStatus() == true) {
-    return;
+    return false;
   }
 	int fwdSock = connection->getSockForward();
 	if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
@@ -100,7 +105,9 @@ void Server::checkForNewCGI(int Fd) {
 		_fwdMap.insert(std::make_pair(fwdSock, connection));
     const pollfd newFd = {fwdSock, determineEventsFwd(connection->getConditionsWanted()), 0};
     _newFdBatch.push_back(newFd);
+    return true;
 	}
+  return false;
 }
 
 void Server::updateEvents(void){
