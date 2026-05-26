@@ -123,6 +123,7 @@ void Connection::serve(void) {
 		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
 		_req.process(_sock);
 	if (_req.getState() == CLIENTHUNGUP){
+		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve because CLIENTHUNGUP()");
 		scheduleForDemolition();
 		return ;
 	};
@@ -138,6 +139,7 @@ void Connection::serve(void) {
 	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
 	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)){
 		// returns true if the creation and sending of the process is done
+		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve()");
 		scheduleForDemolition();
 	}
 	//update ConditionsWanted here - from Reaction

@@ -80,7 +80,8 @@ void Server::handlePollnval(int Fd, int Type) {
   if (Type == IS_CLIENT) {
     logging::log2(logging::Error, Fd, " is a client socket");
     //markClientDeletion(Fd);
-	_fwdMap.at(Fd)->scheduleForDemolition();
+		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollnval()");
+	  _fwdMap.at(Fd)->scheduleForDemolition();
 	return;
   }
   if (Type == IS_FWD) {
@@ -111,6 +112,7 @@ void Server::handlePollhup(int Fd, int Type) {
                 " fd = ",
                 Fd);
   if (Type == IS_CLIENT) {
+		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollhup()");
     _clientMap.at(Fd).scheduleForDemolition();
   } else if (Type == IS_FWD) {
     logging::log3(logging::Debug,
@@ -141,6 +143,7 @@ void Server::handlePollerr(int Fd, int Type) {
   if (Type == IS_CLIENT) {
     logging::log2(logging::Error, Fd, " is a client socket");
     //markClientDeletion(Fd);
+		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollerr()");
     _clientMap.at(Fd).scheduleForDemolition();
     return;
   }

@@ -64,24 +64,25 @@ void Server::serveAll(void) {
 void Server::process(void) {
 
   // sleep(1); // can be used to slow down loop for debugging
-  logging::log(logging::Debug, "Process");
+  //logging::log(logging::Debug, "Process");
   time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     
   	int type = getSocketType(it->fd);
     handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
                           // new connections
-    std::cout << getFdInfoString(*it, it->fd, type);
-	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
-    _deleteFdBatch.insert(std::make_pair(it->fd, type));
-  }
-	else if (type == IS_CLIENT){
+    //std::cout << getFdInfoString(*it, it->fd, type);
+	if (type == IS_CLIENT){
 		if (newCGISocketAdded(it->fd) != true){
       if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
+		  logging::log2(logging::Debug, it->fd, " scheduleForDemolition() in Server::process()");
         _clientMap.at(it->fd).scheduleForDemolition();
       }
     }
 	}
+	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+    _deleteFdBatch.insert(std::make_pair(it->fd, type));
+  }
     it->revents = 0;
     it++;
   }

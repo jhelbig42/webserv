@@ -69,11 +69,14 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
 }
 
 bool Reaction::checkOnChild(void){
-	
+
+	//logging::log(logging::Debug, "checkOnChild()");
 	const pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
-	if (time(NULL) - _cgi.getTimeLastActive() > CGI_TIMEOUT) {
+	time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
+	//logging::log2(logging::Debug, "CGI time elapsed: ", timeElapsed);
+	if (timeElapsed > CGI_TIMEOUT) {
 		logging::log(logging::Debug, "CGI timed out.");
 		kill(pid, SIGKILL);
 		_cgi.setPid(-1);
@@ -140,6 +143,7 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
 	//const ssize_t rc = _buffer.fileToBuf(5, Bytes);
+	logging::log2(logging::Debug, "In receiveFromCGI(), rc = ", rc);
 	if (rc < 0){ // when buffer is full
 		return ;
 	}
