@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "inside the script"
 
 
 POST_DIR="/home/jhelbig/Desktop/webserv/post"
