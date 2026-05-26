@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POST_DIR="/home/julia/projects/webserv/post"
+POST_DIR="/home/jhelbig/Desktop/webserv/post"
 
 mkdir -p "$POST_DIR"
 
