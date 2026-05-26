@@ -27,7 +27,7 @@ void Reaction::initMethodNonCGI(const Request &Req) {
     	initDelete();
     	return;
   	case Post:
-	  	initPost(Req);
+	  	initSendError(CODE_403);
 	  	return;
   	case Generic:
     	initSendError(CODE_501);
