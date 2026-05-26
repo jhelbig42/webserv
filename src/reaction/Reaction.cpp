@@ -42,8 +42,8 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
-bool Reaction::isInputDone(void) const {
-  return _cgi.isInputDone();
+bool Reaction::getInputDone(void) const {
+  return _cgi.getInputDone();
 }
 
 void Reaction::setPathInfo(const PathInfo &PathInfo){
@@ -61,7 +61,7 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
   }
   if (!(_pathInfo.getAllowed() & Req.getMethod())){
 	logging::log(logging::Debug, "Requested method not allowed");
-  	initSendError(CODE_405);
+  	initSendError(CODE_403);
 	return ;
   }
   
