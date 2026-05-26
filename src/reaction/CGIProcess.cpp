@@ -23,7 +23,8 @@ CGIProcess::CGIProcess() : _env(NULL),
 							_path(NULL),
 							_pid(-1),
 							_forwardSocket(-1),
-							_inputDone(false)
+							_inputDone(false),
+							_childProcessDone(false)
 
 {
 }
@@ -45,8 +46,12 @@ CGIProcess::~CGIProcess(){
    	free(_path);
 }
 
-bool CGIProcess::isInputDone() const{
+bool CGIProcess::getInputDone() const{
 	return _inputDone;
+}
+
+bool CGIProcess::getChildProcessDone() const{
+	return _childProcessDone;
 }
 
 int CGIProcess::getForwardSocket() const{
@@ -71,6 +76,8 @@ void CGIProcess::setInputDone(bool Done){
 
 void CGIProcess::setTimeLastActive(time_t Time) {
   _timeLastActive = Time;
+void CGIProcess::setChildProcessDone(bool Done){
+	_childProcessDone = Done;
 }
 
 void CGIProcess::setCGIPath(std::string const &Path){
