@@ -67,7 +67,7 @@ public:
 
   ProcessType	getProcessType(void) const;
   int			getForwardSocket(void) const;
-  bool			isInputDone(void) const;
+  bool			getInputDone(void) const;
   void			setTmpPathName(void);
   void			setFinalPathName(void);
 

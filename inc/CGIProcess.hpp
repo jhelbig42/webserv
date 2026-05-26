@@ -40,14 +40,17 @@ public:
 	bool initForwardSocket(int &ForwardSocket);
     
     //Getters
-    bool isInputDone() const;
+    bool getInputDone() const;
 	int getPid() const ;
     int getForwardSocket() const;
+	bool getChildProcessDone() const;
 
     //setters
     void setPid(pid_t Pid);
     void setInputDone(bool Done);
 	void setCGIPath(std::string const &Path);
+	void setChildProcessDone(bool Done);
+
     
 private:
    
@@ -65,4 +68,5 @@ private:
     int         _forwardSocket;
     std::string _output;
     bool        _inputDone;
+	bool		_childProcessDone;
 };

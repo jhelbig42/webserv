@@ -68,7 +68,7 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
 }
 
 bool Reaction::checkOnChild(void){
-	
+
 	const pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
@@ -86,10 +86,12 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	
 	if (WIFEXITED(status)) { //child somehow exited
+		_cgi.setChildProcessDone(true);
 		// find out how
     	if (WEXITSTATUS(status) == 0) {
       		logging::log(logging::Debug, "CGI exited normally with 0");
 			_cgi.setPid(-1);
+			
       		return true;
     	}
     	logging::log(logging::Debug, "CGI exited with error code");
@@ -103,7 +105,7 @@ bool Reaction::checkOnChild(void){
 }
 
 void Reaction::sendToCGI(const size_t Bytes){
-  if (_processType != CgiPost || _cgi.isInputDone())
+  if (_processType != CgiPost || _cgi.getInputDone())
   	return; // should never happen
 
   logging::log(logging::Debug, "sendToCGI");
@@ -123,7 +125,7 @@ void Reaction::sendToCGI(const size_t Bytes){
 
 void Reaction::receiveFromCGI(const size_t Bytes){
 	if ((_processType != CgiPost && _processType != CgiNotPost)
-		|| !_cgi.isInputDone())
+		|| !_cgi.getInputDone())
 			return;
 	logging::log(logging::Debug, "sendfromCGI");
 
@@ -145,7 +147,7 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
   if (_processType == ReceiveFile)
     receiveBodyIntoServerFile(Socket, Bytes);
-  else if (_processType == CgiPost && !_cgi.isInputDone())
+  else if (_processType == CgiPost && !_cgi.getInputDone())
     receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
@@ -153,7 +155,7 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) 
-  		&& _cgi.isInputDone()) 
+  		&& _cgi.getInputDone()) 
   {
     if (sendMetadataIfPending(Socket, Bytes))
       return false;
@@ -161,8 +163,12 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
     if (used > 0)
 	{
        const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
-	    if ((rc >= 0) && (size_t)rc == used)
+	    if ((rc >= 0) && (size_t)rc == used && 
+				(_processType== ReceiveFile || _cgi.getChildProcessDone()))
+		{
+			logging::log2(logging::Debug,__func__, " returns true");
   			return true;
+		}
 		return false;
 	}
 	return false;

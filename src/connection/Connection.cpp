@@ -74,6 +74,7 @@ int Connection::getConditionsFulfilled(void) const {
 
 // Setters
 void Connection::scheduleForDemolition(void) {
+	logging::log(logging::Debug, "setting Connection up for Demolition ");
   _delete = true;
 }
 
@@ -94,7 +95,7 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
 			_conditionsWanted = SockRead;
 			break;
 		case Reaction::CgiPost:
-			if (_react.isInputDone())
+			if (_react.getInputDone())
 				_conditionsWanted = SockWrite | FSockRead;
 			else
 				_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
