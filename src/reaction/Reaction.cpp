@@ -22,6 +22,7 @@ static void setMetadata(std::string &Metadata, const int Code,
 
 void Reaction::setDefaults(void) {
   _processType = NotInitialized;
+  _http09 = false;
   _metadataSent = false;
   _fdIn = -1;
   _body.clear();
@@ -29,7 +30,7 @@ void Reaction::setDefaults(void) {
 }
 
 Reaction::Reaction()
-    : _processType(NotInitialized), _metadataSent(false), _fdIn(-1) {
+    : _processType(NotInitialized), _http09(false), _metadataSent(false), _fdIn(-1) {
   _headers.unsetAll();
 }
 
@@ -65,16 +66,19 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 	return ;
   }
   
-  // TODO: make more generic
-  /*
-  if (Req.getMajorV() != 1 || Req.getMinorV() != 0) {
+  _http09 = (Req.getMajorV() == 0 && Req.getMinorV() == 9);
+  if (_http09) {
+    if (Req.getMethod() != Get) {
+      initSendError(CODE_400);
+      return;
+    }
+  } else if (!((Req.getMinorV() == 0
+        && (Req.getMajorV() == 1 || Req.getMajorV() == 2 || Req.getMajorV() == 3))
+      || (Req.getMajorV() == 1 && Req.getMinorV() == 1))) {
+    // allow 1.0, 2.0, 3.0 and 1.1
     initSendFile(CODE_501, FILE_501);
     return;
   }
-  */ // commenting out because we need to allow 1.1 requests
-  // and can response with 1.0
-  //
-  //check if method is allowed in comparison to config
 
   //check if Resource is a CGI script
   if(_pathInfo.getCgiPath() == ""){
@@ -120,10 +124,11 @@ void Reaction::initSendError(const int Code) {
 void Reaction::initSendString(const int Code, const std::string &Body) {
   _headers.setContentLength(Body.size());
   _headers.setContentType(".html");
-  setMetadata(_metadata, Code, _headers);
+  if (!_http09)
+    setMetadata(_metadata, Code, _headers);
   _body = Body;
   _fdIn = -1;
-  _metadataSent = false;
+  _metadataSent = _http09;
   _processType = SendFile;
 }
 
@@ -144,8 +149,9 @@ void Reaction::initSendFile(const int Code, const char *File) {
     _headers.setContentType(strrchr(File, '.'));
   }
 
-  setMetadata(_metadata, Code, _headers);
-  _metadataSent = false;
+  if (!_http09)
+    setMetadata(_metadata, Code, _headers);
+  _metadataSent = _http09;
   _processType = SendFile;
 }
 
