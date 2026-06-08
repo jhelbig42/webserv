@@ -113,6 +113,7 @@ private:
 
   HttpHeaders _headers;
   ProcessType _processType;
+  bool        _http09;
   size_t      _reqContLen;
   size_t      _receivedContLen;
 

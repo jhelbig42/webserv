@@ -74,6 +74,23 @@ void Request::parseRequestLine(const std::string &RequestLine)
 {
 	logging::log(logging::Debug, "parseStatusLine()");
 	std::vector<std::string> status = split(RequestLine, " ");
+	if (status.size() == 2) // HTTP/0.9 simple request: "METHOD /resource" — no version
+	{
+		try
+		{
+			parseMethod(status[0]);
+			parseResource(status[1]);
+			_majorVersion = 0;
+			_minorVersion = 9;
+			_state = COMPLETE;
+		}
+		catch (std::exception &e)
+		{
+			std::cerr << e.what() << '\n';
+			_state = INVALID;
+		}
+		return;
+	}
 	if (status.size() != 3)
 	{
         logging::log(logging::Debug, "Request is invalid after split of StatusLine");
@@ -108,7 +125,8 @@ bool Request::parseRequestLineFromBuffer()
     parseRequestLine(line);
     _buf.deleteFront(pos + 2);  // remove line + CRLF
     if (_state == INVALID)
-        return false; 
-    _state = HEADERS;
+        return false;
+    if (_state != COMPLETE)
+        _state = HEADERS;
     return true;
 }
