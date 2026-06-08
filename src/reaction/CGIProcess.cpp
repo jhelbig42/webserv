@@ -76,6 +76,8 @@ void CGIProcess::setInputDone(bool Done){
 
 void CGIProcess::setTimeLastActive(time_t Time) {
   _timeLastActive = Time;
+}
+
 void CGIProcess::setChildProcessDone(bool Done){
 	_childProcessDone = Done;
 }
