@@ -1,6 +1,6 @@
 server {
     listen 127.0.0.1:8080;
-    root /home/jhelbig/Desktop/webserv/;
+    root /home/julia/projects/webserv/;
     allow GET HEAD;
     autoindex on;
     max_request_body 1048576;
