@@ -56,6 +56,7 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
+  logging::log2(logging::Debug, "child finished for socket ", Socket);
  // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
@@ -156,17 +157,39 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
     receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
+std::string getProcessTypeStr(int type){
+	std::string str;
+	if (type == Reaction::NotInitialized)
+		str = "NotInitialized";
+	else if (type == Reaction::SendFile)
+		str = "SendFile";
+	else if	(type == Reaction::ReceiveFile)
+		str = "ReceiveFile";
+	else if (type == Reaction::CgiPost)
+		str = "CgiPost";
+	else if (type == Reaction::CgiNotPost)
+		str = "CgiNotPost";
+	return (str);
+}
+
+
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
+  logging::log(logging::Debug, "Reaction::sendToClient()");
+  logging::log2(logging::Debug, "Process type = ", getProcessTypeStr(_processType));
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) 
   		&& _cgi.getInputDone()) 
   {
-    if (sendMetadataIfPending(Socket, Bytes))
+	logging::log(logging::Debug, "CGI input is done");
+    if (sendMetadataIfPending(Socket, Bytes)){
+	  logging::log(logging::Debug, "sendMetadataIfPending()");
       return false;
+	}
 	const size_t used = _buffer.getUsed();
     if (used > 0)
 	{
+	  	logging::log(logging::Debug, "Now we are calling _buffer.bufToSocket()");
        const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
 	    if ((rc >= 0) && (size_t)rc == used && 
 				(_processType== ReceiveFile || _cgi.getChildProcessDone()))
@@ -190,8 +213,10 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
-  if (sendMetadataIfPending(Socket, Bytes))
-    return false;
+  if (sendMetadataIfPending(Socket, Bytes)){
+	logging::log(logging::Debug, "sendMetadataIfPending() returned true");
+	return false;
+  }
   if (!_body.empty())
     return stringToSocket(Socket, _body, Bytes);
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
@@ -265,6 +290,7 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 // TODO: doublecheck error handling
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes) {
+	logging::log(logging::Debug, "stringToSocket()");
   if (Str.empty())
     return true;
   const size_t amount = std::min(Bytes, Str.size());

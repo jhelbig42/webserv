@@ -1,0 +1,9 @@
+Vague understanding of what's happening:
+
+The post_body.sh script runs, but somehow this is not being seen as finished.
+
+The client fd is entirely silent (or we're not asking it for anything)
+
+Meanwhile the cgi has finished and of course we now get POLLERR on this socket, but it's not deleted yet because it's still attached to an active client.
+
+Why is this happening with THIS particular script, when it didn't with others?
