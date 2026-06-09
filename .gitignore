@@ -1,7 +1,6 @@
 *.d
 *.o
 *.out
-
 *.pdf
 *.vim
 *.swp
