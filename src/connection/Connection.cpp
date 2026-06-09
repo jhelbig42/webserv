@@ -26,7 +26,7 @@
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size, const Website &website)
-    : _conditionsWanted(SockRead), _sock(Sock), _sockForward(-1), _website(website), 
+    : _conditionsFulfilled(0), _conditionsWanted(SockRead), _sock(Sock), _sockForward(-1), _website(website), 
 	_delete(false), _cgiFinished(false), _addrSize(sizeof _addr)  {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
