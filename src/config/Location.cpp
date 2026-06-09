@@ -12,14 +12,6 @@
 #include <string>
 #include <utility>
 
-static void printLocations(std::ostream &Os, const Location &Site);
-static void printInterfaces(std::ostream &Os, const Location &Site);
-static void printRoot(std::ostream &Os, const Location &Site);
-static void printAutoindex(std::ostream &Os, const Location &Site);
-static void printAllow(std::ostream &Os, const Location &Site);
-static void printErrorPages(std::ostream &Os, const Location &Site);
-static void printMaxReqBody(std::ostream &Os, const Location &Site);
-static void printIndex(std::ostream &Os, const Location &Site);
 static int comparePath(const std::string &P1, const std::string &P2);
 
 Location::Location(void)
@@ -114,37 +106,6 @@ void Listen::print(std::ostream &Os) const {
   Os << this->ip << ':' << this->port;
 }
 
-std::ostream &Location::print(std::ostream &Os) const {
-  if (_isRoot)
-    Os << "server {\n";
-  else
-    Os << "location " << _path << " {\n";
-  printInterfaces(Os, *this);
-  printMaxReqBody(Os, *this);
-  printRoot(Os, *this);
-  printAutoindex(Os, *this);
-  printIndex(Os, *this);
-  printAllow(Os, *this);
-  printErrorPages(Os, *this);
-  switch (this->getType()) {
-  case Location::Cgi:
-    Os << "    cgi: " << this->getCgi() << '\n';
-    break;
-  case Location::Return:
-    Os << "    return: " << this->getReturnCode() << " -> "
-       << this->getReturnPath() << '\n';
-    break;
-  case Location::Redirect:
-    Os << "    redirect: " << this->getRedirect() << '\n';
-    break;
-  case Location::None:
-    break;
-  }
-  printLocations(Os, *this);
-  Os << "}\n";
-  return Os;
-}
-
 unsigned int Location::getReturnCode(void) const {
   return _returnCode;
 }
@@ -155,64 +116,6 @@ const std::string &Location::getReturnPath(void) const {
 
 bool Location::isSetIndex(void) const {
   return _setMembers & Index;
-}
-
-static void printIndex(std::ostream &Os, const Location &Site) {
-  if (!Site.isSetIndex())
-    return;
-  std::list<std::string>::const_iterator it = Site.getIndex().begin();
-  Os << "index:";
-  while (it != Site.getIndex().end())
-    Os << " " << *it++;
-  Os << '\n';
-}
-
-static void printInterfaces(std::ostream &Os, const Location &Site) {
-  if (!Site.isSetInterfaces())
-    return;
-  std::list<Listen>::const_iterator it = Site.getInterfaces().begin();
-  while (it != Site.getInterfaces().end())
-    Os << "listen: " << *it++ << '\n';
-}
-
-static void printLocations(std::ostream &Os, const Location &Site) {
-  std::list<Location>::const_iterator it = Site.getLocations().begin();
-  while (it != Site.getLocations().end()) {
-    it->print(Os);
-    ++it;
-  }
-}
-
-static void printRoot(std::ostream &Os, const Location &Site) {
-  if (!Site.isSetRoot())
-    return;
-  Os << "root: " << Site.getRoot() << '\n';
-}
-
-static void printAutoindex(std::ostream &Os, const Location &Site) {
-  if (!Site.isSetAutoindex())
-    return;
-  Os << "autoindex: ";
-  if (Site.getAutoindex())
-    Os << "on";
-  else
-    Os << "off";
-  Os << '\n';
-}
-
-static void printAllow(std::ostream &Os, const Location &Site) {
-  if (!Site.isSetAllow())
-    return;
-  Os << "allow:";
-  if (Site.getAllow() & Head)
-    Os << " HEAD";
-  if (Site.getAllow() & Get)
-    Os << " GET";
-  if (Site.getAllow() & Post)
-    Os << " POST";
-  if (Site.getAllow() & Delete)
-    Os << " DELETE";
-  Os << '\n';
 }
 
 bool Location::getAutoindex(void) const {
@@ -300,20 +203,8 @@ const std::list<Location> &Location::getLocations(void) const {
   return _locations;
 }
 
-static void printErrorPages(std::ostream &Os, const Location &Site) {
-  for (std::map<unsigned int, std::string>::const_iterator it =
-           Site.getErrorPages().begin();
-       it != Site.getErrorPages().end(); ++it) {
-    Os << it->first << " -> " << it->second << '\n';
-  }
-}
-
 const std::map<unsigned int, std::string> &Location::getErrorPages(void) const {
   return _errorPages;
-}
-
-static void printMaxReqBody(std::ostream &Os, const Location &Site) {
-  Os << "max_request_body: " << Site.getMaxReqBody() << '\n';
 }
 
 PathInfo Location::getPathInfo(const std::string &Path) const {

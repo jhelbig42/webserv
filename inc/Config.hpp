@@ -20,5 +20,3 @@ public:
 private:
   std::list<Website> _websites;
 };
-
-std::ostream &operator<<(std::ostream &Os, const Config &Conf);

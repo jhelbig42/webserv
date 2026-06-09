@@ -40,11 +40,3 @@ PathInfo Website::getPathInfo(const std::string &Path) const {
 const std::list<Listen> &Website::getInterfaces(void) const {
   return _website->getInterfaces();
 }
-
-std::ostream &Website::print(std::ostream &Os) const {
-  return this->_website->print(Os);
-}
-
-std::ostream &operator<<(std::ostream &Os, const Website &Site) {
-  return Site.print(Os);
-}

@@ -3,7 +3,7 @@
 
 
 ## Description
-A fully functional HTTP/1.0 server built from scratch in C++98 as part of the 42 curriculum.
+A functional HTTP/1.0 server built from scratch in C++98 as part of the 42 curriculum.
 
 The server handles multiple concurrent client connections without threads, using `poll()` for non-blocking I/O multiplexing. It parses HTTP requests and generates responses, supports CGI script execution, file uploads, and the GET, POST, HEAD and DELETE methods. Server behavior is controlled through a nginx-inspired configuration file.
 
@@ -37,12 +37,12 @@ make clean    # removes object files only
 - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/)
 - [Parsing](https://craftinginterpreters.com/)
 
-
-
+### AI Usage
+Ai was used to generate generic HTML files, the Python Scripts that are used as CGI example scripts and as a rubber duck for writing a tester.
 
 ## Implementation
 
-### Config Parsing
+### Config
 
 #### comments
 - every line where the first non whitespace charater is `#` is considered to be a comment and ignored during parsing
