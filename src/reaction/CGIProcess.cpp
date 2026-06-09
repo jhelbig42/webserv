@@ -166,11 +166,10 @@ bool CGIProcess::createEnv(Request& Req, Script& Script) {
 }
 
 //handling more ScriptTypes?
-
 bool CGIProcess::createArgs(Request &Req, std::string const &Path){ 
 	_args = (char **)malloc(sizeof(char *) * 3);
 	if (!_args)
-		return false;// error handling
+		return false; //error handling
 	const HttpHeaders::MediaType type = Req.getHeaders().getContentType();
 	switch (type){
 		case HttpHeaders::ApplicationSh:
@@ -203,9 +202,7 @@ bool CGIProcess::initForwardSocket(int & ForwardSocket) {
 		close(sv[1]);
         return false;
     }
-
     if (_pid == 0) { 
-		// Child
         close(sv[0]);
         dup2(sv[1], STDIN_FILENO);
         dup2(sv[1], STDOUT_FILENO);
@@ -214,14 +211,11 @@ bool CGIProcess::initForwardSocket(int & ForwardSocket) {
         execve(_path, _args, _env);
         _exit(EXECVE_ERR);
     }
-
-    // Parent
     close(sv[1]);
     ForwardSocket = sv[0];
 	_forwardSocket = sv[0]; // Adding this line to also set CGIProcess._forwardSocket
 	// Networking is accessing ForwardSocket(a member of Connection that has been passed through a chain of functions)
 	// However, Buffer::fileToBuf() sends to _fowardSocket
-
     return true;
 }
 

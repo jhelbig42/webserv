@@ -6,12 +6,10 @@ Script::Script() : _serverProtocol("HTTP/1.0"),
                     _serverSoftware("webserv/1.0"),
                     _serverInterface("CGI/1.1")
 {
-    //get the information from the serverconfig File here
 }
 
 Script::~Script()
 {
-    
 }
 
 void Script::setServerName(std::string &ServerName){

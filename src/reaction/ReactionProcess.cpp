@@ -69,13 +69,10 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
 }
 
 bool Reaction::checkOnChild(void){
-
-	//logging::log(logging::Debug, "checkOnChild()");
 	const pid_t pid = _cgi.getPid();
 	if (pid == -1) // no CGI
 		return true;
 	time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
-	//logging::log2(logging::Debug, "CGI time elapsed: ", timeElapsed);
 	if (timeElapsed > CGI_TIMEOUT) {
 		logging::log(logging::Debug, "CGI timed out.");
 		kill(pid, SIGKILL);
@@ -83,26 +80,21 @@ bool Reaction::checkOnChild(void){
 		initSendError(CODE_500);
 		return false;
 	}
-  
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
-
   	if (result == -1){
     	_cgi.setPid(-1);
 		initSendError(CODE_500);
 		return false; // waitpid failed => internal server error
 	}
-
 	if (result == 0) // child not finished yet
 		return true; //come back later
-	
 	if (WIFEXITED(status)) { //child somehow exited
 		_cgi.setChildProcessDone(true);
 		// find out how
     	if (WEXITSTATUS(status) == 0) {
       		logging::log(logging::Debug, "CGI exited normally with 0");
 			_cgi.setPid(-1);
-			
       		return true;
     	}
     	logging::log(logging::Debug, "CGI exited with error code");
@@ -117,15 +109,12 @@ bool Reaction::checkOnChild(void){
 
 void Reaction::sendToCGI(const size_t Bytes){
   if (_processType != CgiPost || _cgi.getInputDone())
-  	return; // should never happen
-
+	return; // should never happen
   logging::log(logging::Debug, "sendToCGI");
-
   // forward whatever is buffered — _buffer only holds data received but not yet forwarded
   const size_t toSend = _buffer.getUsed();
   if (toSend > 0)
     _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-
   // mark input done only once the full body is both received from the client
   // and drained from the buffer to CGI
   if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {

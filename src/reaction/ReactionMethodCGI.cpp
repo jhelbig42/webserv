@@ -9,9 +9,6 @@ void Reaction::initCGIMethod(const Request &Req){
 		_processType = CgiPost;
 		return;
   	}
-	// is CGI but not POST
-	// POST has a body to forward; all other methods are immediately done inputwise
 	_cgi.setInputDone(true);
 	_processType = CgiNotPost;
-	//we never write into Socket, just wait to be allowed to read
 }
