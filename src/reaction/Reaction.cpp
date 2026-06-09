@@ -132,10 +132,6 @@ void Reaction::initSendString(const int Code, const std::string &Body) {
   _processType = SendFile;
 }
 
-// TODO:
-// Check if recursion is safe and
-// potentially disable clang-tidy for this part.
-// think about splitting up
 void Reaction::initSendFile(const int Code, const char *File) {
   struct stat statbuf;
   if (!statbufPopulate(Code, File, statbuf))
@@ -197,7 +193,7 @@ bool Reaction::setFdIn(const int Code, const char *File) {
 bool Reaction::initPostBody(const Request &Req) {
   if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
     logging::log(logging::Debug, "POST: Content-Length header missing");
-    initSendError(CODE_411);
+    initSendError(CODE_400);
     return false;
   }
   _reqContLen = Req.getHeaders().getContentLength();
