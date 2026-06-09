@@ -16,7 +16,6 @@ static void printAutoindex(std::ostream &Os, const PathInfo &Info);
 static void printMaxReqBody(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
 static void printRoot(std::ostream &Os, const PathInfo &Info);
-static void printErrorPages(std::ostream &Os, const Location &Info);
 static bool isPrefix(const std::string &Prefix, const std::string &Str);
 static bool isFullMatch(const std::string &Compare, const std::string &Str);
 static bool match(const std::string &Path, const std::string &LocationPath);

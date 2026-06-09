@@ -8,13 +8,7 @@
 #include <exception>
 #include <list>
 
-
-#define CHUNK_SIZE 1024
 #define DEFAULT_CONFIG "test_configs/config.txt"
-
-#define METHOD "GET"
-#define PATH "/home/julia/projects/webserv/hello.txt"
-#define VERSION "HTTP/1.0"
 
 int main(int argc, char **argv) {
 

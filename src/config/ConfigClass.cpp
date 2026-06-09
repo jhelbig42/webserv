@@ -14,14 +14,6 @@ void Config::addWebsite(const Website &Site) {
   _websites.push_back(Site);
 }
 
-std::ostream &operator<<(std::ostream &Os, const Config &Conf) {
-  std::list<Website>::const_iterator it = Conf.getWebsites().begin();
-  while (it != Conf.getWebsites().end()) {
-    Os << *it++ << '\n';
-  }
-  return Os;
-}
-
 const std::list<Website> &Config::getWebsites(void) const {
   return _websites;
 }

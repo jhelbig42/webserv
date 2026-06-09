@@ -108,19 +108,20 @@ bool Reaction::checkOnChild(void){
 }
 
 void Reaction::sendToCGI(const size_t Bytes){
-  if (_processType != CgiPost || _cgi.getInputDone())
-	return; // should never happen
-  logging::log(logging::Debug, "sendToCGI");
-  // forward whatever is buffered — _buffer only holds data received but not yet forwarded
-  const size_t toSend = _buffer.getUsed();
-  if (toSend > 0)
-    _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-  // mark input done only once the full body is both received from the client
-  // and drained from the buffer to CGI
-  if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
-    logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
+	(void) Bytes;
+  	if (_processType != CgiPost || _cgi.getInputDone())
+		return; // should never happen
+  	logging::log(logging::Debug, "sendToCGI");
+  	// forward whatever is buffered — _buffer only holds data received but not yet forwarded
+  	const size_t toSend = _buffer.getUsed();
+  	if (toSend > 0)
+    	_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+  	// mark input done only once the full body is both received from the client
+  	// and drained from the buffer to CGI
+  	if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
+    	logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
     _cgi.setInputDone(true);
-  }
+  	}
 }
 
 void Reaction::receiveFromCGI(const size_t Bytes){
