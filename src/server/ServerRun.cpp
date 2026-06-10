@@ -63,7 +63,7 @@ void Server::serveAll(void) {
 
 void Server::process(void) {
 
-  sleep(1); // can be used to slow down loop for debugging
+  //sleep(1); // can be used to slow down loop for debugging
   //logging::log(logging::Debug, "Process");
   time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
@@ -71,7 +71,7 @@ void Server::process(void) {
   	int type = getSocketType(it->fd);
     handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
                           // new connections
-    std::cout << getFdInfoString(*it, it->fd, type);
+   // std::cout << getFdInfoString(*it, it->fd, type);
 	if (type == IS_CLIENT){
 		if (newCGISocketAdded(it->fd) != true){
       if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){

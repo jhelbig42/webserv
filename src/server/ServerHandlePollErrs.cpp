@@ -5,10 +5,10 @@
 #include <poll.h>
 #include <sstream>
 #include <stdexcept>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <vector>
-#include <string.h>
 
 // ServerHandlePollErrs.cpp
 //
@@ -118,8 +118,7 @@ void Server::handlePollhup(int Fd, int Type) {
   } else if (Type == IS_FWD) {
     logging::log3(logging::Debug,
                   "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
-                  ". Indicates at least one of the socket pairs closed?");
-   // _fwdMap.at(Fd)->scheduleFwdForDemolition();
+                  ". Indicates at least one of the socket pairs closed");
     return;
   }
   if (Type == IS_LISTENER) {
@@ -137,28 +136,26 @@ void Server::handlePollhup(int Fd, int Type) {
 
 void Server::handlePollerr(int Fd, int Type) {
   const std::ostringstream msg;
-  logging::log2(logging::Warning,
+  logging::log2(logging::Info,
                 "networking::process(): POLLERR \n\tclient/cgi may have "
-                "disconnected abruptly using RST, or socket is broken.\n fd = ",
-                Fd); // downgrade to Warning?
+                "disconnected abruptly using RST (forcible reset), or socket is broken.\n fd = ",
+                Fd);
   if (Type == IS_CLIENT) {
-    logging::log2(logging::Error, Fd, " is a client socket");
-    //markClientDeletion(Fd);
-		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollerr()");
+    logging::log2(logging::Info, Fd, " is a client socket");
+	//logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollerr()");
     _clientMap.at(Fd).scheduleForDemolition();
     return;
   }
   if (Type == IS_FWD) {
-    logging::log2(logging::Error, Fd, " is forward socket");
+    logging::log2(logging::Info, Fd, " is forward socket");
     int error;
     socklen_t len = sizeof(int);
     getsockopt(Fd, SOL_SOCKET, SO_ERROR, &error, &len);
-    logging::log2(logging::Warning, "POLLERR error = ", strerror(error));
+    logging::log2(logging::Info, "POLLERR error = ", strerror(error));
     return;
   }
   if (Type == IS_LISTENER) {
-    logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");
-    // TODO how to handle this
+    logging::log2(logging::Info, Fd, " is listening socket. This is truly bizarre.");
 	// TODO this whole debug print sequence could be done with a helper
     return;
   }
