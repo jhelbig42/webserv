@@ -132,6 +132,7 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 
 	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
+	//logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
 	//const ssize_t rc = _buffer.fileToBuf(5, Bytes);
 	if (rc < 0){ // when buffer is full
@@ -154,6 +155,7 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
     receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
+/* For Debugging
 std::string getProcessTypeStr(int type){
 	std::string str;
 	if (type == Reaction::NotInitialized)
@@ -168,16 +170,16 @@ std::string getProcessTypeStr(int type){
 		str = "CgiNotPost";
 	return (str);
 }
-
+*/
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
-  logging::log(logging::Debug, "Reaction::sendToClient()");
+  //logging::log(logging::Debug, "Reaction::sendToClient()");
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) 
   		&& _cgi.getInputDone()) 
   {
-	logging::log(logging::Debug, "CGI input is done");
+	//logging::log(logging::Debug, "CGI input is done");
     if (sendMetadataIfPending(Socket, Bytes)){
       return false;
 	}
@@ -208,7 +210,6 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (sendMetadataIfPending(Socket, Bytes)){
-	logging::log(logging::Debug, "sendMetadataIfPending() returned true");
 	return false;
   }
   if (!_body.empty())
