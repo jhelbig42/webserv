@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <vector>
+#include <string.h>
 
 // ServerHandlePollErrs.cpp
 //
@@ -136,8 +137,8 @@ void Server::handlePollhup(int Fd, int Type) {
 
 void Server::handlePollerr(int Fd, int Type) {
   const std::ostringstream msg;
-  logging::log2(logging::Error,
-                "networking::process(): POLLERR \n\tclient may have "
+  logging::log2(logging::Warning,
+                "networking::process(): POLLERR \n\tclient/cgi may have "
                 "disconnected abruptly using RST, or socket is broken.\n fd = ",
                 Fd); // downgrade to Warning?
   if (Type == IS_CLIENT) {
@@ -149,7 +150,10 @@ void Server::handlePollerr(int Fd, int Type) {
   }
   if (Type == IS_FWD) {
     logging::log2(logging::Error, Fd, " is forward socket");
-    // a series of returns
+    int error;
+    socklen_t len = sizeof(int);
+    getsockopt(Fd, SOL_SOCKET, SO_ERROR, &error, &len);
+    logging::log2(logging::Warning, "POLLERR error = ", strerror(error));
     return;
   }
   if (Type == IS_LISTENER) {

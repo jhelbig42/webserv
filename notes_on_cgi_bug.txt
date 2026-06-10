@@ -1,9 +1,20 @@
-Vague understanding of what's happening:
 
-The post_body.sh script runs, but somehow this is not being seen as finished.
+DEBUGGING NOTES
 
-The client fd is entirely silent (or we're not asking it for anything)
+Bug is patched. Some other potentially iffy things discovered in the process.
 
-Meanwhile the cgi has finished and of course we now get POLLERR on this socket, but it's not deleted yet because it's still attached to an active client.
+Turns out, the looping POLLERR was in fact a new problem (or set of problems), separate from what we were dealing with before. There's a lot going on here... Here's what I was able to see...
 
-Why is this happening with THIS particular script, when it didn't with others?
+1) Main issue: When the post_body.sh script finishes, the process ends and the forward socket becomes "broken" / abruptly disconnected before we've had a chance to read from it. (Still not sure why this is is happening in this specific case, and not with GET requests, or possibly POST requests with other scripts? Not thoroughly explored). Anyway, when this happens, poll() gets POLLERR and POLLIN simultaneously.
+
+Previously, when we got POLLERR, I did not bother trying to do anything else with the socket, figuring it was toast. In this case however, we CAN still read from the socket even though it's disconnected on one end.
+
+Fix for this: Calling getsockopt() to get more information about the cause of POLLERR became an accidental solution, because not only does it tell us the cause of the error, but resets POLLERR, allowing the server to process POLLIN on the next round. I'm going to nest this within (Type == IS_FWD) because I think this is the only case that we might want to continue trying a socket with POLLERR, and do not want to disrupt the removal of POLLERR clients.
+
+Other less-than-ideal things happening:
+
+2) When POSTing to a script, it sometimes (and only sometimes) happens that the script finishes running before we've had a chance to write to it.
+
+I don't know that there's any fix for this outside of putting some wait() condition in the script itself. I also don't think it's a problem with our server. I believe now that the other issue is solved, it will be handled okay by the CGI timeout. However, I haven't yet observed it happening again or tried hard to recreate it.
+
+3) In general, I think we may be looping a little too hard through poll(), due to multiple conditionsWanted... for instance, right now, when we have a CGI, we're immediately polling to be able to write to the client (Sockwrite), even when we haven't yet read anything from the CGI (Fsockread). I think we imagined these conditions would occur more or less simultaneously, but when some issue with the CGIoccurs, we end up wasting a lot of extra energy checking for client conditions that can't yet be acted upon. It would be more ideal to not set these conditionsWanted simultaneously?  In my opinion, let's try an evaluation without changing anything here, but with the awareness that it might come up.
