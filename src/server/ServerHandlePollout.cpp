@@ -50,11 +50,3 @@ void Server::handlePollout(int Fd, int Type) {
   	}
   
 }
-
-void Server::handlePollrdhup(int Fd, int Type) {
-
-  // TODO unset pollin from wanted conditions
-  (void)Fd;
-  (void)Type;
-  return;
-}

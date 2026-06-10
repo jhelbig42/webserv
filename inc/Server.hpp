@@ -48,8 +48,6 @@ class Server {
 	std::map<int, const Website*> _listenMap;
 	std::map<int, Connection> _clientMap;
 	std::map<int, Connection *const> _fwdMap;
-//	std::map<int, Connection&> _cgiWriteMap;
-//	std::map<int, Connection&> _cgiReadMap;
 	std::vector<pollfd> _newFdBatch;
 	std::map<int, int> _deleteFdBatch;
 	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
@@ -84,10 +82,7 @@ class Server {
 	void closeAndDeleteBatch(void);
 
 	// ServerHandlePoll.hpp
-	//bool reventsAreTerminal(int revents);
 	void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);
-	//void handleTerminalCondition(struct pollfd &polled);
-	//void handleServableCondition(struct pollfd &polled);
 	
 	// ServerHandlePollErrs.hpp
 	void handlePollnval(int Fd, int Type);
@@ -103,7 +98,6 @@ class Server {
 
 	// ServerHandlePollout.hpp
 	void handlePollout(int Fd, int Type);
-	void handlePollrdhup(int Fd, int Type);
 	void setSockWrite(int Fd);
 	void setFSockWrite(int Fd);
 
