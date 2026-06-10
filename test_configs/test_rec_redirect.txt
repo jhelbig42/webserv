@@ -1,6 +1,0 @@
-server{
-  location /js/ {
-    redirect    /yo/;
-    allow POST DELETE;
-  }
-}
