@@ -56,6 +56,7 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
+ //logging::log2(logging::Debug, "child finished for socket ", Socket);
  // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);
@@ -128,14 +129,12 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	if ((_processType != CgiPost && _processType != CgiNotPost)
 		|| !_cgi.getInputDone())
 			return;
-	logging::log(logging::Debug, "sendfromCGI");
 
 	// fill buffer from CGI socket — FSockRead guarantees data is available
 	_buffer.optimize(Bytes);
-	logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
+	//logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
 	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
 	//const ssize_t rc = _buffer.fileToBuf(5, Bytes);
-	logging::log2(logging::Debug, "In receiveFromCGI(), rc = ", rc);
 	if (rc < 0){ // when buffer is full
 		return ;
 	}
@@ -156,14 +155,34 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
     receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
+/* For Debugging
+std::string getProcessTypeStr(int type){
+	std::string str;
+	if (type == Reaction::NotInitialized)
+		str = "NotInitialized";
+	else if (type == Reaction::SendFile)
+		str = "SendFile";
+	else if	(type == Reaction::ReceiveFile)
+		str = "ReceiveFile";
+	else if (type == Reaction::CgiPost)
+		str = "CgiPost";
+	else if (type == Reaction::CgiNotPost)
+		str = "CgiNotPost";
+	return (str);
+}
+*/
+
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
+  //logging::log(logging::Debug, "Reaction::sendToClient()");
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) 
   		&& _cgi.getInputDone()) 
   {
-    if (sendMetadataIfPending(Socket, Bytes))
+	//logging::log(logging::Debug, "CGI input is done");
+    if (sendMetadataIfPending(Socket, Bytes)){
       return false;
+	}
 	const size_t used = _buffer.getUsed();
     if (used > 0)
 	{
@@ -190,8 +209,9 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
-  if (sendMetadataIfPending(Socket, Bytes))
-    return false;
+  if (sendMetadataIfPending(Socket, Bytes)){
+	return false;
+  }
   if (!_body.empty())
     return stringToSocket(Socket, _body, Bytes);
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
