@@ -1,5 +1,6 @@
 #include "Buffer.hpp"
 #include "CompileTimeConstants.hpp"
+#include "Logging.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -75,8 +76,11 @@ size_t Buffer::getFree(void) const {
 }
 
 ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
-  if (getUsed() == size)
-    return -1;
+  if (getUsed() == size){
+	logging::log(logging::Debug, "In fileToBuf, returning because getUsed() == size");
+	return -1;
+	//return (BUFFER_SIZE);
+  }
   // the following the second part of the or condition could turn out to
   // be a problem in the following case:
   // 1. getBlocked() is small
@@ -88,8 +92,11 @@ ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
-  if (rc < 0)
+  logging::log2(logging::Warning, "fileToBuf(), bytes read = ", rc); 
+  if (rc < 0){
+	logging::log2(logging::Warning, "fileToBuf() error on read: ", strerror(errno));
     throw std::runtime_error(strerror(errno));
+  }
   _end += (size_t)rc; // safe because rc >= 0 and rc <= getFree()
   return rc;
 }
