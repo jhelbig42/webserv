@@ -61,6 +61,13 @@ bool Connection::getCgiFinishedStatus(void) const {
 }
 
 /*
+unsigned int	Connection::getMaxRequestBody(void) const {
+	PathInfo info = _website.getPathInfo("TBD");
+	return (info.getMaxReqBody());
+}
+*/
+
+/*
 Conditions Connection::getConditions(void) const {
   if (_req.getState() == COMPLETE)
     return _react.getConditions();

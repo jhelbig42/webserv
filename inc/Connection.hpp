@@ -36,6 +36,7 @@ public:
   int getConditionsWanted(void) const;
   time_t getTimeLastActive(void) const;
   int getConditionsFulfilled(void) const;
+  unsigned int getMaxRequestBody(void) const;
 
   // setters
   void scheduleForDemolition(void);
