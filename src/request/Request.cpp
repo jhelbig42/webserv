@@ -32,13 +32,6 @@ void Request::reset() {
 	_headers.unsetAll();
 }
 
-
-Request::Request(std::string &Input)
-	: _method(Generic), _resource(""), _majorVersion(0), _minorVersion(0)
-{
-	this->parseRequestLine(Input);
-}  
-
 void Request::process(int Socket)
 {
     readFromSocket(Socket);  // fills _buf

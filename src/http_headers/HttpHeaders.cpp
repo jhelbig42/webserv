@@ -26,7 +26,7 @@ static const struct {
 
 static const size_t globalMimeSize = sizeof(globalMime) / sizeof(*globalMime);
 
-HttpHeaders::HttpHeaders(void) : _headersSet(0) {
+HttpHeaders::HttpHeaders(void) : _headersSet(0), _contentLength(0), _contentType(Unknown) {
 }
 
 HttpHeaders::HttpHeaders(const HttpHeaders &Other)

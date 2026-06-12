@@ -4,4 +4,4 @@
 #define BACKLOG 10
 #define BYTES_PER_CHUNK 1024
 #define TIMEOUT 60 // seconds of inactivity before client is marked for deletion
-#define CGI_TIMEOUT 3 // seconds of inactivity (not sending anything to buffer) before CGI process is killed
+#define CGI_TIMEOUT 5 // seconds of inactivity (not sending anything to buffer) before CGI process is killed
