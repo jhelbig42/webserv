@@ -6,7 +6,8 @@ OBJ_DIR		:= obj
 
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
-SRC			+= main.cpp
+SRC			+= Main.cpp
+SRC			+= Signals.cpp
 vpath %.cpp $(SRC_DIR)/server
 SRC			+= Server.cpp
 SRC			+= ServerInit.cpp

@@ -1,8 +1,7 @@
-
 #include "Config.hpp"
 #include "Logging.hpp"
-#include "Reaction.hpp"
 #include "Server.hpp"
+#include "Signals.hpp"
 #include "Website.hpp"
 #include <cstdlib>
 #include <exception>
@@ -11,6 +10,9 @@
 #define DEFAULT_CONFIG "configs/config.conf"
 
 int main(int argc, char **argv) {
+
+  if (registerSigint() < 0)
+    return 1;
 
   const char *configPath = DEFAULT_CONFIG;
   if (argc >= 2)
@@ -23,9 +25,10 @@ int main(int argc, char **argv) {
     throw std::runtime_error("config file contains 0 websites");
 	}
 	Server server(websites);
-	server.pollLoop();
+	if (server.pollLoop() < 0)
+      return 1;
   } catch (const std::exception &e) {
   	logging::log(logging::Error, e.what());
-	exit (1);
-  	}
+	  return 1;
+  }
 }
