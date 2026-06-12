@@ -54,7 +54,7 @@ Buffer::const_iterator Buffer::end() const {
   return _buffer + _end;
 }
 
-std::string Buffer::getStringFromBuffer(void) const{
+std::string Buffer::getStringFromBuffer(void) const {
   std::string const s(this->begin(), this->end());
   return (s);
 }
@@ -77,7 +77,7 @@ size_t Buffer::getFree(void) const {
 
 ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   if (getUsed() == size)
-	return -1;
+    return -1;
   // the following the second part of the or condition could turn out to
   // be a problem in the following case:
   // 1. getBlocked() is small
@@ -89,8 +89,9 @@ ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
-  if (rc < 0){
-//	logging::log2(logging::Warning, "fileToBuf() error on read: ", strerror(errno));
+  if (rc < 0) {
+    //	logging::log2(logging::Warning, "fileToBuf() error on read: ",
+    //strerror(errno));
     throw std::runtime_error(strerror(errno));
   }
   _end += (size_t)rc; // safe because rc >= 0 and rc <= getFree()
@@ -110,7 +111,6 @@ ssize_t Buffer::bufToFile(const int Fd, const size_t Bytes) {
     reset();
   return rc;
 }
-
 
 ssize_t Buffer::socketToBuf(const int Socket, const size_t Bytes) {
   if (getUsed() == size)

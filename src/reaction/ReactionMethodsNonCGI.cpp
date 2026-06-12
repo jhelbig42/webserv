@@ -10,28 +10,27 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <string.h>
+#include <string>
 #include <sys/stat.h>
 #include <unistd.h>
 
 void Reaction::initMethodNonCGI(const Request &Req) {
   logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-  switch (Req.getMethod()) 
-  {
-  	case Head:
-  	case Get:
-    	initHeadGet(Req);
-    	return;
-  	case Delete:
-    	initDelete();
-    	return;
-  	case Post:
-	  	initSendError(CODE_403);
-	  	return;
-  	case Generic:
-    	initSendError(CODE_501);
-    	return;
+  switch (Req.getMethod()) {
+  case Head:
+  case Get:
+    initHeadGet(Req);
+    return;
+  case Delete:
+    initDelete();
+    return;
+  case Post:
+    initSendError(CODE_403);
+    return;
+  case Generic:
+    initSendError(CODE_501);
+    return;
   }
 }
 
@@ -54,7 +53,8 @@ void Reaction::initHeadGet(const Request &Req) {
       return;
     }
     const std::list<std::string> &indexFiles = _pathInfo.getIndex();
-    for (std::list<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it) {
+    for (std::list<std::string>::const_iterator it = indexFiles.begin();
+         it != indexFiles.end(); ++it) {
       if (access(it->c_str(), F_OK) == 0) {
         initSendFile(CODE_200, it->c_str());
         if (Req.getMethod() == Head && _fdIn >= 0) {
@@ -102,18 +102,13 @@ void Reaction::initHeadGet(const Request &Req) {
   _fdIn = -1;
 }
 
-
-void Reaction::setTmpPathName(void){
-	std::stringstream sname;
-	sname << _finalPath << _sock;
-	_tmpPath = sname.str();
+void Reaction::setTmpPathName(void) {
+  std::stringstream sname;
+  sname << _finalPath << _sock;
+  _tmpPath = sname.str();
 }
 
-//also needs the Post path from config
-void Reaction::setFinalPathName(void){
-	_finalPath = _pathInfo.getRealPath();
+// also needs the Post path from config
+void Reaction::setFinalPathName(void) {
+  _finalPath = _pathInfo.getRealPath();
 }
-
-
-
-

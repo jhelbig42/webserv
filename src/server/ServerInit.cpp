@@ -30,13 +30,15 @@ void Server::initNetworking(const std::list<Website> &Websites) {
        itW != Websites.end(); itW++) {
     const std::list<Listen> interfaces = itW->getInterfaces();
     std::list<Listen>::const_iterator itI = interfaces.begin();
-    if(itI == interfaces.end()) {
-      throw std::runtime_error("Bad config file: missing \"listen: <IP:Port>\"");
+    if (itI == interfaces.end()) {
+      throw std::runtime_error(
+          "Bad config file: missing \"listen: <IP:Port>\"");
     }
     // iterate through each IP:port pair of a given website,
     // contained within the Website's Listen struct
     while (itI != interfaces.end()) {
-      //logging::log2(logging::Debug, "interface = ", itI->ip + ":" + itI->port);
+      // logging::log2(logging::Debug, "interface = ", itI->ip + ":" +
+      // itI->port);
       initListeningSocket(*itI, *itW);
       itI++;
     }
@@ -71,7 +73,7 @@ void Server::initListeningSocket(const Listen &Pair, const Website &Web) {
   freeaddrinfo(serverInfo);
 
   const pollfd newFd = {sock, POLLIN, 0};
-  //logging::log2(logging::Debug, "Listening socket created on socket ", sock);
+  // logging::log2(logging::Debug, "Listening socket created on socket ", sock);
   _fds.push_back(newFd);
   _listenMap.insert(std::make_pair(sock, &Web));
   return;

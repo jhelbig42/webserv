@@ -16,7 +16,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
 /// \brief reads data from a file descriptor and writes it to a socket
 ///
 /// A buffer is used to save the state of the transmission between calls.
@@ -52,136 +51,132 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
-bool Reaction::process(const int Socket, const size_t Bytes, const int Condition){
-  
+bool Reaction::process(const int Socket, const size_t Bytes,
+                       const int Condition) {
+
   if (!checkOnChild())
     return false;
- logging::log2(logging::Debug, "child finished for socket ", Socket);
- // we just polled for what we need
-  if (Condition & FSockRead)   
+  logging::log2(logging::Debug, "child finished for socket ", Socket);
+  // we just polled for what we need
+  if (Condition & FSockRead)
     receiveFromCGI(Bytes);
-  if (Condition & FSockWrite)  
+  if (Condition & FSockWrite)
     sendToCGI(Bytes);
-  if (Condition & SockRead)    
+  if (Condition & SockRead)
     recvFromClient(Socket, Bytes);
-  if (Condition & SockWrite)   
+  if (Condition & SockWrite)
     return sendToClient(Socket, Bytes);
   return false;
 }
 
-bool Reaction::checkOnChild(void){
-	const pid_t pid = _cgi.getPid();
-	if (pid == -1) // no CGI
-		return true;
-	time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
-	if (timeElapsed > CGI_TIMEOUT) {
-		logging::log(logging::Debug, "CGI timed out.");
-		kill(pid, SIGKILL);
-		_cgi.setPid(-1);
-		initSendError(CODE_500);
-		return false;
-	}
-  	int status;
-	const pid_t result = waitpid(pid, &status, WNOHANG);
-  	if (result == -1){
-    	_cgi.setPid(-1);
-		initSendError(CODE_500);
-		return false; // waitpid failed => internal server error
-	}
-	if (result == 0) // child not finished yet
-		return true; //come back later
-	if (WIFEXITED(status)) { //child somehow exited
-		_cgi.setChildProcessDone(true);
-		// find out how
-    	if (WEXITSTATUS(status) == 0) {
-      		logging::log(logging::Debug, "CGI exited normally with 0");
-			_cgi.setPid(-1);
-      		return true;
-    	}
-    	logging::log(logging::Debug, "CGI exited with error code");
-    } 
-	else if (WIFSIGNALED(status)) {
-        logging::log(logging::Debug, "CGI was killed by signal");
-    }
+bool Reaction::checkOnChild(void) {
+  const pid_t pid = _cgi.getPid();
+  if (pid == -1) // no CGI
+    return true;
+  time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
+  if (timeElapsed > CGI_TIMEOUT) {
+    logging::log(logging::Debug, "CGI timed out.");
+    kill(pid, SIGKILL);
     _cgi.setPid(-1);
     initSendError(CODE_500);
     return false;
+  }
+  int status;
+  const pid_t result = waitpid(pid, &status, WNOHANG);
+  if (result == -1) {
+    _cgi.setPid(-1);
+    initSendError(CODE_500);
+    return false; // waitpid failed => internal server error
+  }
+  if (result == 0)         // child not finished yet
+    return true;           // come back later
+  if (WIFEXITED(status)) { // child somehow exited
+    _cgi.setChildProcessDone(true);
+    // find out how
+    if (WEXITSTATUS(status) == 0) {
+      logging::log(logging::Debug, "CGI exited normally with 0");
+      _cgi.setPid(-1);
+      return true;
+    }
+    logging::log(logging::Debug, "CGI exited with error code");
+  } else if (WIFSIGNALED(status)) {
+    logging::log(logging::Debug, "CGI was killed by signal");
+  }
+  _cgi.setPid(-1);
+  initSendError(CODE_500);
+  return false;
 }
 
-void Reaction::sendToCGI(const size_t Bytes){
-	(void) Bytes;
-  	if (_processType != CgiPost || _cgi.getInputDone())
-		return; // should never happen
-  	logging::log(logging::Debug, "sendToCGI");
-  	// forward whatever is buffered — _buffer only holds data received but not yet forwarded
-  	const size_t toSend = _buffer.getUsed();
-  	if (toSend > 0)
-    	_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-  	// mark input done only once the full body is both received from the client
-  	// and drained from the buffer to CGI
-  	if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
-    	logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
+void Reaction::sendToCGI(const size_t Bytes) {
+  (void)Bytes;
+  if (_processType != CgiPost || _cgi.getInputDone())
+    return; // should never happen
+  logging::log(logging::Debug, "sendToCGI");
+  // forward whatever is buffered — _buffer only holds data received but not yet
+  // forwarded
+  const size_t toSend = _buffer.getUsed();
+  if (toSend > 0)
+    _buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+  // mark input done only once the full body is both received from the client
+  // and drained from the buffer to CGI
+  if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
+    logging::log(logging::Debug, "sendToCGI: body fully forwarded to CGI");
     _cgi.setInputDone(true);
-  	}
+  }
 }
 
-void Reaction::receiveFromCGI(const size_t Bytes){
-	if ((_processType != CgiPost && _processType != CgiNotPost)
-		|| !_cgi.getInputDone())
-			return;
+void Reaction::receiveFromCGI(const size_t Bytes) {
+  if ((_processType != CgiPost && _processType != CgiNotPost) ||
+      !_cgi.getInputDone())
+    return;
 
-	// fill buffer from CGI socket — FSockRead guarantees data is available
-	_buffer.optimize(Bytes);
-	//logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
-	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
-	//const ssize_t rc = _buffer.fileToBuf(5, Bytes);
-	if (rc < 0){ // when buffer is full
-		return ;
-	}
-	if (rc == 0) {
-		// EOF from forwardSocket transition to SendFile from remaining buffer
-		_fdIn = -1;
-		_processType = SendFile;
-	}
-	else {
-		_cgi.setTimeLastActive(time(NULL));
-	}
+  // fill buffer from CGI socket — FSockRead guarantees data is available
+  _buffer.optimize(Bytes);
+  // logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ",
+  // _cgi.getForwardSocket());
+  const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+  // const ssize_t rc = _buffer.fileToBuf(5, Bytes);
+  if (rc < 0) { // when buffer is full
+    return;
+  }
+  if (rc == 0) {
+    // EOF from forwardSocket transition to SendFile from remaining buffer
+    _fdIn = -1;
+    _processType = SendFile;
+  } else {
+    _cgi.setTimeLastActive(time(NULL));
+  }
 }
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
-	if (_processType == CgiPost && !_cgi.getInputDone())
-    	receiveBodyIntoServerBuffer(Socket, Bytes);
+  if (_processType == CgiPost && !_cgi.getInputDone())
+    receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
-
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
-  //logging::log(logging::Debug, "Reaction::sendToClient()");
+  // logging::log(logging::Debug, "Reaction::sendToClient()");
   if (_processType == SendFile)
     return sendFile(Socket, Bytes);
-  if ((_processType == CgiPost || _processType == CgiNotPost) 
-  		&& _cgi.getInputDone()) 
-  {
-	//logging::log(logging::Debug, "CGI input is done");
-    if (sendMetadataIfPending(Socket, Bytes)){
+  if ((_processType == CgiPost || _processType == CgiNotPost) &&
+      _cgi.getInputDone()) {
+    // logging::log(logging::Debug, "CGI input is done");
+    if (sendMetadataIfPending(Socket, Bytes)) {
       return false;
-	}
-	const size_t used = _buffer.getUsed();
-    if (used > 0)
-	{
-       const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
-	    if ((rc >= 0) && (size_t)rc == used && 
-				(_processType== ReceiveFile || _cgi.getChildProcessDone()))
-		{
-			logging::log2(logging::Debug,__func__, " returns true");
-  			return true;
-		}
-		return false;
-	}
-	return false;
+    }
+    const size_t used = _buffer.getUsed();
+    if (used > 0) {
+      const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
+      if ((rc >= 0) && (size_t)rc == used &&
+          (_processType == ReceiveFile || _cgi.getChildProcessDone())) {
+        logging::log2(logging::Debug, __func__, " returns true");
+        return true;
+      }
+      return false;
+    }
+    return false;
   }
   return false; // should never be reached
 }
-
 
 bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
   if (_metadataSent)
@@ -191,32 +186,34 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
-  if (sendMetadataIfPending(Socket, Bytes)){
-	return false;
+  if (sendMetadataIfPending(Socket, Bytes)) {
+    return false;
   }
   if (!_body.empty())
     return stringToSocket(Socket, _body, Bytes);
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
-void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes){
-	// fill buffer with new data from socket
-	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
-	logging::log2(logging::Debug, "Reaction: To receive for CGI Post Request: ", toReceive);
-	try {
-		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
-		if (received == -1) //not possible to read anything into the buffer
-			return ; //means we are just done for this round
-		_receivedContLen += static_cast<size_t>(received);
-		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
-	}
-	catch (std::runtime_error &){
-		initSendError(CODE_500);
-		return ;
-	}
-	return ;
+void Reaction::receiveBodyIntoServerBuffer(const int Socket,
+                                           const size_t Bytes) {
+  // fill buffer with new data from socket
+  const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
+  logging::log2(logging::Debug,
+                "Reaction: To receive for CGI Post Request: ", toReceive);
+  try {
+    const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
+    if (received == -1) // not possible to read anything into the buffer
+      return;           // means we are just done for this round
+    _receivedContLen += static_cast<size_t>(received);
+    logging::log3(logging::Debug,
+                  "Requested / Received Content Len: ", _reqContLen,
+                  _receivedContLen);
+  } catch (std::runtime_error &) {
+    initSendError(CODE_500);
+    return;
+  }
+  return;
 }
-
 
 // TODO: catching SIGPIPE still missing
 // TODO: handle rc < 0

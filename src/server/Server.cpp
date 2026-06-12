@@ -1,5 +1,5 @@
 #include "Server.hpp"
-#include <cstring>  // for memset()
+#include <cstring> // for memset()
 #include <list>
 #include <unistd.h> // for close()
 
