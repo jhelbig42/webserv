@@ -20,15 +20,13 @@ int main(int argc, char **argv) {
 
   try {
     const Config conf(configPath);
-	const std::list<Website> &websites = conf.getWebsites();
-	if (websites.empty()){
-    throw std::runtime_error("config file contains 0 websites");
-	}
-	Server server(websites);
-	if (server.pollLoop() < 0)
-      return 1;
+    const std::list<Website> &websites = conf.getWebsites();
+    if (websites.empty()) {
+      throw std::runtime_error("config file contains 0 websites");
+    }
+    Server server(websites);
   } catch (const std::exception &e) {
-  	logging::log(logging::Error, e.what());
-	  return 1;
+    logging::log(logging::Error, e.what());
+    return 1;
   }
 }
