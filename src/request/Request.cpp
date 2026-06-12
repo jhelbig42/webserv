@@ -104,7 +104,7 @@ void Request::readFromSocket(int Fd){
   	}
   	if (bytesRead < 0) {
     	logging::log(logging::Warning, "buf.fill() not successful");
-		logging::log2(logging::Warning, "bytesRead = ", bytesRead);
+	//	logging::log2(logging::Warning, "bytesRead = ", bytesRead);
     	return;
  	}
   	logging::log(logging::Debug, "readFromSocket() done");
