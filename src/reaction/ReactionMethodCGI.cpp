@@ -3,6 +3,10 @@
 #include "Request.hpp"
 
 void Reaction::initCGIMethod(const Request &Req){
+	if (access(Req.getResource().c_str(), X_OK) != 0 ){
+		initSendError(404);
+		return;
+	}
 	if (Req.getMethod() == Post) {
 		if (!initPostBody(Req))
 			return;
@@ -11,4 +15,5 @@ void Reaction::initCGIMethod(const Request &Req){
   	}
 	_cgi.setInputDone(true);
 	_processType = CgiNotPost;
+
 }
