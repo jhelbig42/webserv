@@ -34,6 +34,11 @@ Reaction::Reaction()
   _headers.unsetAll();
 }
 
+Reaction::~Reaction(){
+	if (_fdIn != -1)
+		close(_fdIn);
+}
+
 
 Reaction::ProcessType Reaction::getProcessType(void) const{
   return _processType;
