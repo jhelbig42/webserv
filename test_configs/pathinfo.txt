@@ -1,0 +1,29 @@
+#server {
+#  allow POST;
+#  root /trunk/;
+#  max_request_body 8000; 
+#  error_page 400 566 /err796.html;
+#
+## asdfasdf
+#
+#  location /volatile/ {
+#    root /root/;
+#    allow POST DELETE;
+#    max_request_body 2776 ;
+#    error_page 400 /err800.html;
+#    redirect /asdf/;
+#  }
+#
+#  location /volatile/hello/ {
+#  redirect /uo/;
+#  }
+#
+#}
+#
+
+server {
+  index asdf ffdfd  fff;
+  location /hello/ {
+  index yo yolo /brok;
+  }
+}
