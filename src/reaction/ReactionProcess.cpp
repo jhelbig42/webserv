@@ -149,28 +149,10 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 }
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
-  if (_processType == ReceiveFile)
-    receiveBodyIntoServerFile(Socket, Bytes);
-  else if (_processType == CgiPost && !_cgi.getInputDone())
-    receiveBodyIntoServerBuffer(Socket, Bytes);
+	if (_processType == CgiPost && !_cgi.getInputDone())
+    	receiveBodyIntoServerBuffer(Socket, Bytes);
 }
 
-/* For Debugging
-std::string getProcessTypeStr(int type){
-	std::string str;
-	if (type == Reaction::NotInitialized)
-		str = "NotInitialized";
-	else if (type == Reaction::SendFile)
-		str = "SendFile";
-	else if	(type == Reaction::ReceiveFile)
-		str = "ReceiveFile";
-	else if (type == Reaction::CgiPost)
-		str = "CgiPost";
-	else if (type == Reaction::CgiNotPost)
-		str = "CgiNotPost";
-	return (str);
-}
-*/
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   //logging::log(logging::Debug, "Reaction::sendToClient()");
@@ -232,50 +214,6 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes)
 		initSendError(CODE_500);
 		return ;
 	}
-	return ;
-}
-
-void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
-	// fill buffer with new data from socket
-	const size_t toReceive = std::min(_reqContLen - _receivedContLen, Bytes);
-	logging::log2(logging::Debug, "Reaction: To receive for Post Request: ", toReceive);
-	try {
-		const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
-		logging::log2(logging::Debug, "Reaction: read from Client into ServerBuffer: ", received);
-		if (received == -1) //not possible to read anything into the buffer
-			return ; //means we are just done
-	}
-	catch (std::runtime_error &){
-		fclose(_fdOut);
-		unlink(_tmpPath.c_str());
-		initSendError(CODE_500);
-		return ;
-	}
-
-	if (toReceive > 0)
-	{
-		const ssize_t copied = _buffer.bufToFile(fileno(_fdOut), toReceive);
-		logging::log2(logging::Debug, "Reaction: copied from Server Buffer into File: ", copied);
-		if (copied == -1)
-			return ;
-		_receivedContLen += static_cast<size_t>(copied);
-		logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen, _receivedContLen);
-	}
-
-	if (!(_receivedContLen == _reqContLen))
-		return ;
-	// if we received enough data in comparison to given content length
-	logging::log(logging::Debug, "Reaction: Received complete body for Post Request");
-	fclose(_fdOut);
-	unlink(_finalPath.c_str()); // fails if file does not exist, but we do not care
-	if (rename(_tmpPath.c_str(), _finalPath.c_str())){ //rename the just closed file
-		logging::log(logging::Debug, "Reaction: Renaming failed - should never happen");
-		initSendError(CODE_500);
-		return;
-	}
-	logging::log(logging::Debug, "Reaction: Renaming successfull");
-	_buffer.reset();
-	initSendFile(CODE_201, NULL);
 	return ;
 }
 

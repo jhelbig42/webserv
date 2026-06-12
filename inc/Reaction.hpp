@@ -9,6 +9,7 @@
 #include "Website.hpp"
 #include <string>
 #include <sys/types.h>
+#include <unistd.h>
 
 class Reaction {
 public:
@@ -22,6 +23,7 @@ public:
 	
 	Reaction();
     explicit Reaction(const Request &Req);
+	~Reaction();
 	
   /// @fn void init(const Request &Req)
   /// @brief initialize Reaction from Request
@@ -90,14 +92,11 @@ private:
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(void);
-  void initPost(const Request &Req);
   
   void initCGIMethod(const Request &Req);
 
   //for Post request
-  void receiveBodyIntoServerFile(const int Socket, const size_t Bytes);
   void receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
-
   
   // called by process()
   /// \fn checkOnChild(void)
@@ -124,7 +123,6 @@ private:
 
   int     		_fdIn;
   int     		_sock;
-  FILE    		*_fdOut;
   Buffer  		_buffer;
 
   std::string _finalPath;

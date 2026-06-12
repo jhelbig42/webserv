@@ -114,21 +114,6 @@ void Reaction::setFinalPathName(void){
 	_finalPath = _pathInfo.getRealPath();
 }
 
-void Reaction::initPost(const Request &Req){
-	logging::log3(logging::Debug, "Reaction: ", __func__, " called");
-	if (!initPostBody(Req))
-		return;
-
-	//create requested file with write access
-	setFinalPathName();
-	setTmpPathName();
-	_fdOut = fopen(_tmpPath.c_str(), "w");
-	if (!_fdOut)
-		initSendFile(CODE_500, NULL);
-	logging::log2(logging::Debug, "Reaction: File created for Post Request: ", _tmpPath);
-	_processType = ReceiveFile;
-	logging::log(logging::Debug, "Reaction: Post Request initialized successfully, SockRead and ReceiveFile");
-}
 
 
 
