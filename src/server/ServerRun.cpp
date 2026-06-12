@@ -1,7 +1,10 @@
 #include "Logging.hpp"
 #include "Server.hpp"
 
+#include "Signals.hpp" 
+
 #include <cerrno>
+#include <csignal>
 #include <cstdlib> // for exit
 #include <cstring>
 #include <unistd.h> // for close
@@ -17,19 +20,23 @@
  *	If poll fails (an unlikely system call failure), webserver exits.
  */
 
-void Server::pollLoop(void) {
+int Server::pollLoop(void) {
 
   logging::log(logging::Debug, "<pollLoop>");
 
   while (1) {
+    if (checkSignal() == SIGINT)
+      return 0;
     const int res =
         poll(_fds.data(), (nfds_t)_fds.size(), TIMEOUT * 1000); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
+    if (checkSignal() == SIGINT)
+      return 0;
     if (res == -1) {
       std::ostringstream msg;
       msg << "poll: " << std::strerror(errno);
       logging::log(logging::Error, msg.str());
-      exit(1);
+      return 1;
     }
     process();
   }

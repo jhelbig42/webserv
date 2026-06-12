@@ -6,7 +6,8 @@ OBJ_DIR		:= obj
 
 SRC			:= 
 vpath %.cpp $(SRC_DIR)
-SRC			+= main.cpp
+SRC			+= Main.cpp
+SRC			+= Signals.cpp
 vpath %.cpp $(SRC_DIR)/server
 SRC			+= Server.cpp
 SRC			+= ServerInit.cpp
@@ -107,7 +108,7 @@ DOXYGEN		:= doxygen
 DOXY_TIMESTAMP := $(DOXY_DIR)/.done
 
 # options
-ifneq ($(DEV), 0)
+ifeq ($(DEV), 1)
 	ASAN		:= 1
 	UBSAN		:= 1
 	DEBUG		:= 1

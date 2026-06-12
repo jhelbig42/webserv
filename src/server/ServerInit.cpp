@@ -1,10 +1,8 @@
-#include "Connection.hpp"
 #include "Logging.hpp"
 #include "Server.hpp"
 #include <cerrno>  // for errno
 #include <cstdlib> // exit()
 #include <cstring> // for strerror
-#include <exception>
 #include <map>
 #include <ostream>
 #include <poll.h>
@@ -94,7 +92,7 @@ void Server::checkPair(const Listen &Pair) {
            "pair.\nCheck config file for duplicates of the following:\n"
         << pair;
     logging::log(logging::Error, msg.str());
-    exit(1);
+    throw std::runtime_error("failed to initialize server");
   }
   _pairsInUse.insert(make_pair(pair, true));
 }
@@ -110,13 +108,13 @@ void Server::checkPort(const std::string &Str) {
   if (Str.length() < 1 || Str.length() > maxPortDigits) {
     const std::string msg(Str + " is not a valid port number");
     logging::log(logging::Error, msg);
-    exit(1);
+    throw std::runtime_error("failed to initialize server");
   }
   int port = std::atoi(Str.c_str());
   if (port < 0 || port > maxPortValue) {
     const std::string msg(Str + " is not a valid port number");
     logging::log(logging::Error, msg);
-    exit(1);
+    throw std::runtime_error("failed to initialize server");
   }
 }
 
@@ -166,7 +164,7 @@ int Server::getListeningSocket(struct addrinfo *Info, const Listen &Pair) {
       handleBindFailure(Pair, error);
     }
     freeaddrinfo(Info);
-    exit(1);
+    throw std::runtime_error("failed to initialize server");
   }
   setToListen(sock);
   // logging::log(logging::Debug, "server found socket. bind: success");

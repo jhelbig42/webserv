@@ -30,7 +30,7 @@ class Server {
 	bool socketIsFwd(int Fd);
 
 	// ServerRun.cpp
-	void pollLoop(void);
+	int pollLoop(void);
 
 
 	private:
