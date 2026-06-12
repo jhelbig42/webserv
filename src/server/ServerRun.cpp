@@ -159,20 +159,6 @@ short Server::determineEventsFwd(int ConditionsWanted){
 	return (events);
 }
 
-
-// currently not in use
-/*
-void Server::closeAndDelete(int Fd, int type) {
-  // TODO replace helper functions with type check
-  logging::log2(logging::Debug, "closing & deleting Fd: " , Fd);
-  close(Fd);
-  if (socketIsClient(Fd))
-    _clientMap.erase(Fd);
-  if (socketIsFwd(Fd))
-    _fwdMap.erase(Fd);
-}
-*/
-
 /* shouldBeDeleted is called only by Server::process, which
 	guarantees that Type will be IS_CLINET or IS_FWD */
 
