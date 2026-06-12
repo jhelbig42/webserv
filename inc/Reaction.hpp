@@ -7,6 +7,8 @@
 #include "Request.hpp"
 #include "Script.hpp"
 #include "Website.hpp"
+#include <cerrno>
+#include <cstring>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
