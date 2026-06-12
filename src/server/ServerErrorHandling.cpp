@@ -29,9 +29,6 @@ void Server::handleBindFailure(const Listen &Interface, const int Error) {
            "already running with the same config.\n"
         << "If bind continues to fail, check elsewhere for occupied "
            "interfaces, using ss or netstat & the flags -tulnp";
-
-    // TODO (optional) add specific troubleshooting tips for
-    // additional errno cases
   };
   logging::log(logging::Error, msg.str());
 }

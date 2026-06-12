@@ -76,17 +76,12 @@ int Server::createSocket(const struct addrinfo *P) {
  * Logs an error if setsockopt() fails, but does not exit or throw an error,
  * because setsockopt() is not always necessary.
  *
- * NOTE:
- * I have yet to encounter a situation where it's clearly
- * necessary to clear a socket, but apparently it happens.
- *
  * \param	Sock	fd of socket to be cleared.
  * Must be a socket which has already been created via socket(),
  * but not yet bound to an IP:Port pair.
  *
  * \return: 0 on success, -1 on failure
  */
-// TODO read more about setsockopt()
 
 int Server::clearSocket(const int Sock) {
   int yes = 1;
@@ -168,6 +163,5 @@ int Server::acceptConnection(const int ListenerFd, ClientAddr *Candidate) {
   logging::log2(logging::Debug, "Connection accepted on socket ",
                 Candidate->clientSock);
   // printFcntlFlags(Candidate->clientSock); // demonstrates that individual
-  // client sockets are blocking
   return (0);
 }

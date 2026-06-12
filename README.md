@@ -97,7 +97,7 @@ Defines interface port pairs on which the server should be listening. If added m
 
 *example:*
 ```
-interface 192.168.56.3:8080;
+listen 192.168.56.3:8080;
 ```
 
 ###### cgi

@@ -17,59 +17,6 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-
-/*
-*	markClientDeletion() finds the Connection that corresponds to Fd
-*	and calls scheduleForDemolition (a function belonging to Connection class)
-*	to mark it for disconnection. If no Connection corresponding to Fd
-*	is found, an error is logged.
-*
-*	This function is currently not in use because we are switching to a method
-* 	of revents handling that predetermines whether Fd is in clientMap or fwdMap.
-*
-*	// TODO delete this function after thorough testing with new method
-*/
-
-/*
-void Server::markClientDeletion(int Fd) {
-  try {
-    _clientMap.at(Fd).scheduleForDemolition();
-  } catch (const std::out_of_range &e) {
-    logging::log3(logging::Error, "markClientDeletion(): ", Fd,
-                  " could not be marked for deletion because there is "
-                  "no Connection in _clientMap with this fd."
-                  "(This should never happen).");
-  }
-}
-*/
-
-/*
-*	markFwdDeletion() finds the Connection that corresponds to a foward socket Fd
-*	and calls scheduleForDemolition (a function belonging to Connection class)
-*	to mark it for disconnection. If no Connection corresponding to Fd
-*	is found, an error is logged.
-*
-*	This function is currently not in use. I had thought it would come in handy
-*	but deleting Connections due to fwd socket error may not be something we ever
-*	want to do.
-*
-*	// TODO delete this function after more testing
-*/
-
-/*
-void Server::markFwdDeletion(int Fd) {
-
-  try {
-    _fwdMap.at(Fd)->scheduleForDemolition();
-  } catch (const std::out_of_range &e) {
-    logging::log3(logging::Error, "markFwdDeletion(): ", Fd,
-                  " could not be marked for deletion because there is "
-                  "no Connection in _fwdMap with this fd."
-                  "(This should never happen).");
-  }
-}
-*/
-
 // handlePollnval() handles POLLNVAL:
 // 		invalid request: fd not open.
 
@@ -80,21 +27,16 @@ void Server::handlePollnval(int Fd, int Type) {
                 Fd);
   if (Type == IS_CLIENT) {
     logging::log2(logging::Error, Fd, " is a client socket");
-    //markClientDeletion(Fd);
 		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollnval()");
 	  _fwdMap.at(Fd)->scheduleForDemolition();
 	return;
   }
   if (Type == IS_FWD) {
     logging::log2(logging::Error, Fd, " is forward socket");
-    // TODO how to handle this
-    // markFwdDeletion(Fd);
     return;
   }
   if (Type == IS_LISTENER) {
     logging::log2(logging::Error, Fd, " is listening socket");
-    // TODO how to handle this
-	// TODO this whole debug print sequence could be done with a helper
     return;
   }
 }
@@ -123,8 +65,6 @@ void Server::handlePollhup(int Fd, int Type) {
   }
   if (Type == IS_LISTENER) {
     logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");
-    // TODO how to handle this
-	// TODO this whole debug print sequence could be done with a helper
     return;
   }
 }
@@ -156,7 +96,6 @@ void Server::handlePollerr(int Fd, int Type) {
   }
   if (Type == IS_LISTENER) {
     logging::log2(logging::Info, Fd, " is listening socket. This is truly bizarre.");
-	// TODO this whole debug print sequence could be done with a helper
     return;
   }
 }
