@@ -25,8 +25,11 @@ int main(int argc, char **argv) {
       throw std::runtime_error("config file contains 0 websites");
     }
     Server server(websites);
+    if (server.pollLoop() < 0)
+      return 1;
   } catch (const std::exception &e) {
     logging::log(logging::Error, e.what());
     return 1;
   }
+  return 0;
 }
