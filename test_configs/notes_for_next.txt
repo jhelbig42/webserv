@@ -1,2 +1,0 @@
-Add forwardMap, and take account of whether a socket is a forward socket within handleServabaleConditions / which conditions are set.
-

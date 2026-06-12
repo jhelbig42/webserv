@@ -120,7 +120,14 @@ bool Request::parseRequestLineFromBuffer()
     const std::string s = _buf.getStringFromBuffer();
     const size_t pos = s.find("\r\n");
     if (pos == std::string::npos)
+    {
+        if (_buf.getFree() == 0) // line will never fit in the buffer
+        {
+            logging::log(logging::Debug, "Request line too long");
+            _state = INVALID;
+        }
         return false;  // line not complete yet - read more
+    }
     const std::string line = s.substr(0, pos);
     parseRequestLine(line);
     _buf.deleteFront(pos + 2);  // remove line + CRLF

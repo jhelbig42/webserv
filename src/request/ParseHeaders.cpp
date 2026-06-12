@@ -13,7 +13,14 @@ bool Request::parseHeadersFromBuffer()
     const std::string s = _buf.getStringFromBuffer();
     const size_t pos = s.find("\r\n");
     if (pos == std::string::npos)
+    {
+        if (_buf.getFree() == 0) // header line will never fit in the buffer
+        {
+            logging::log(logging::Debug, "Header line too long");
+            _state = INVALID;
+        }
         return false;  	// header line not complete
+    }
     if (pos == 0)		// buffer was "\r\n\r\n"
     {
         _buf.deleteFront(2);  // remove second "\r\n"

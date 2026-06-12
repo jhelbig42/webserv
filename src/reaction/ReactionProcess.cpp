@@ -56,7 +56,7 @@ bool Reaction::process(const int Socket, const size_t Bytes, const int Condition
   
   if (!checkOnChild())
     return false;
- //logging::log2(logging::Debug, "child finished for socket ", Socket);
+ logging::log2(logging::Debug, "child finished for socket ", Socket);
  // we just polled for what we need
   if (Condition & FSockRead)   
     receiveFromCGI(Bytes);

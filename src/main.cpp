@@ -8,7 +8,7 @@
 #include <exception>
 #include <list>
 
-#define DEFAULT_CONFIG "test_configs/config.txt"
+#define DEFAULT_CONFIG "configs/config.conf"
 
 int main(int argc, char **argv) {
 
