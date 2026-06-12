@@ -21,7 +21,7 @@ void Server::setSockWrite(int Fd) {
 }
 
 void Server::setFSockWrite(int Fd) {
-  const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
+  const std::map<int, Connection *const>::iterator itC = _fwdMap.find(Fd);
   if (itC != _fwdMap.end()) {
     (itC->second)->addToConditions(FSockWrite);
   } else {
@@ -42,11 +42,9 @@ void Server::handlePollout(int Fd, int Type) {
   if (Type == IS_FWD) {
     setFSockWrite(Fd);
     return;
-  }
-  else {
-    	logging::log3(logging::Error, "handleCondition(): fd ", Fd,
+  } else {
+    logging::log3(logging::Error, "handleCondition(): fd ", Fd,
                   "is not found in _clientMap or _fwdMap.");
-    	exit (1);
-  	}
-  
+    exit(1);
+  }
 }

@@ -142,9 +142,8 @@ clean:
 	$(RM) $(DEP)
 	$(RM) $(OBJ)
 	$(RM) $(OBJ_DIR)
-	$(RM) post
 
-fclean: clean clean_sa
+fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all

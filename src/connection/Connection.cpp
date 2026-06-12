@@ -10,13 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Conditions.hpp"
 #include "Connection.hpp"
+#include "Conditions.hpp"
 #include "Logging.hpp"
 #include "NetworkingDefines.hpp"
 #include "Reaction.hpp"
 #include "Request.hpp"
-#include <cerrno> // for errno
+#include <cerrno>  // for errno
 #include <cstring> // for strerror
 #include <stddef.h>
 #include <string.h>     // for memcpy, memset
@@ -26,8 +26,9 @@
 
 Connection::Connection(const int Sock, const sockaddr_storage &Addr,
                        const socklen_t Addr_size, const Website &website)
-    : _conditionsFulfilled(0), _conditionsWanted(SockRead), _sock(Sock), _sockForward(-1), _website(website), 
-	_delete(false), _cgiFinished(false), _addrSize(sizeof _addr)  {
+    : _conditionsFulfilled(0), _conditionsWanted(SockRead), _sock(Sock),
+      _sockForward(-1), _website(website), _delete(false), _cgiFinished(false),
+      _addrSize(sizeof _addr) {
 
   memset(&_info, 0, sizeof _info); // unneccessary? delete?
   memcpy(&_addr, &Addr, Addr_size);
@@ -45,8 +46,8 @@ int Connection::getSock(void) const {
   return (_sock);
 }
 
-int Connection::getSockForward(void) const{
-	return (_sockForward);
+int Connection::getSockForward(void) const {
+  return (_sockForward);
 }
 
 bool Connection::getDeleteStatus(void) const {
@@ -78,7 +79,7 @@ int Connection::getConditionsFulfilled(void) const {
 
 // Setters
 void Connection::scheduleForDemolition(void) {
-	logging::log(logging::Debug, "setting Connection up for Demolition ");
+  logging::log(logging::Debug, "setting Connection up for Demolition ");
   _delete = true;
 }
 
@@ -94,64 +95,65 @@ void Connection::resetSockFwd(void) {
   _sockForward = -1;
 }
 
-void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
-	switch (ProcessType){
-		case Reaction::SendFile:
-			_conditionsWanted = SockWrite;
-			break;
-		case Reaction::ReceiveFile:
-			_conditionsWanted = SockRead;
-			break;
-		case Reaction::CgiPost:
-			if (_react.getInputDone()){
-				if (_buf.getUsed() == 0){
-					_conditionsWanted = FSockRead;
-				}
-				else {
-					_conditionsWanted = SockWrite;
-				}
-			}
-			else
-				_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
-			break;
-		case Reaction::CgiNotPost:
-			_conditionsWanted = SockWrite | FSockRead;
-			break;
-		case Reaction::NotInitialized:
-		default:
-			_conditionsWanted = SockRead;
-
-	}
+void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
+  switch (ProcessType) {
+  case Reaction::SendFile:
+    _conditionsWanted = SockWrite;
+    break;
+  case Reaction::ReceiveFile:
+    _conditionsWanted = SockRead;
+    break;
+  case Reaction::CgiPost:
+    if (_react.getInputDone()) {
+      if (_buf.getUsed() == 0) {
+        _conditionsWanted = FSockRead;
+      } else {
+        _conditionsWanted = SockWrite;
+      }
+    } else
+      _conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+    break;
+  case Reaction::CgiNotPost:
+    _conditionsWanted = SockWrite | FSockRead;
+    break;
+  case Reaction::NotInitialized:
+  default:
+    _conditionsWanted = SockRead;
+  }
 }
 
 void Connection::serve(void) {
-	//if request is not yet complete, read and parse until it is
-	if( (_conditionsFulfilled & SockRead) 
-		&& _req.getState() != COMPLETE && _req.getState() != INVALID)
-		_req.process(_sock);
-	if (_req.getState() == CLIENTHUNGUP){
-		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve because CLIENTHUNGUP()");
-		scheduleForDemolition();
-		return ;
-	};
-	// if Request is complete, reaction can get initialized - NO Socket Access Required
-	// need a not initialized state for Reaction here
-	if((_req.getState() == COMPLETE || _req.getState() == INVALID) 
-		&& _react.getProcessType() == Reaction::NotInitialized)
-	{
-		_react.setPathInfo(_website.getPathInfo(_req.getResource())); // setting config details into Reaction
-		_react.init(_req, _sock, _sockForward);
-	}
-	// we have a initialized Reaction - act on it.
-	//we do not need the CGI sockets handed over here, as they are set in Reaction itself
-	else if(_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)){
-		// returns true if the creation and sending of the process is done
-		logging::log2(logging::Debug, getSock(), " scheduleForDemolition() in Connection::serve()");
-		scheduleForDemolition();
-	}
-	//update ConditionsWanted here - from Reaction
-	//before process is called in the next round
-	updateConditionsWanted(_react.getProcessType());
+  // if request is not yet complete, read and parse until it is
+  if ((_conditionsFulfilled & SockRead) && _req.getState() != COMPLETE &&
+      _req.getState() != INVALID)
+    _req.process(_sock);
+  if (_req.getState() == CLIENTHUNGUP) {
+    logging::log2(
+        logging::Debug, getSock(),
+        " scheduleForDemolition() in Connection::serve because CLIENTHUNGUP()");
+    scheduleForDemolition();
+    return;
+  };
+  // if Request is complete, reaction can get initialized - NO Socket Access
+  // Required need a not initialized state for Reaction here
+  if ((_req.getState() == COMPLETE || _req.getState() == INVALID) &&
+      _react.getProcessType() == Reaction::NotInitialized) {
+    _react.setPathInfo(_website.getPathInfo(
+        _req.getResource())); // setting config details into Reaction
+    _react.init(_req, _sock, _sockForward);
+  }
+  // we have a initialized Reaction - act on it.
+  // we do not need the CGI sockets handed over here, as they are set in
+  // Reaction itself
+  else if (_react.process(_sock, BYTES_PER_CHUNK, _conditionsFulfilled)) {
+    // returns true if the creation and sending of the process is done
+    logging::log2(logging::Debug, getSock(),
+                  " scheduleForDemolition() in Connection::serve()");
+    scheduleForDemolition();
+  }
+  // update ConditionsWanted here - from Reaction
+  // before process is called in the next round
+  updateConditionsWanted(_react.getProcessType());
 }
 
 // Conditions

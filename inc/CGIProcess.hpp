@@ -6,70 +6,71 @@
 
 class CGIProcess {
 public:
-    enum EnvMembers {
-        SERVER_NAME,
-        SERVER_PORT,
-        SERVER_PROTOCOL,
-        SERVER_SOFTWARE,
-        GATEWAY_INTERFACE,
-        REQUEST_METHOD,
-        SCRIPT_NAME,
-        QUERY_STRING,
-        CONTENT_LENGTH,
-        NB_OF_ENV
-    };
+  enum EnvMembers {
+    SERVER_NAME,
+    SERVER_PORT,
+    SERVER_PROTOCOL,
+    SERVER_SOFTWARE,
+    GATEWAY_INTERFACE,
+    REQUEST_METHOD,
+    SCRIPT_NAME,
+    QUERY_STRING,
+    CONTENT_LENGTH,
+    NB_OF_ENV
+  };
 
-    CGIProcess();
-    ~CGIProcess();
+  CGIProcess();
+  ~CGIProcess();
 
-	/// @fn bool init(Request Req, Script Script)
-    /// @brief initialize Reaction if Request calls for CGI execution
-    /// @param Req 
-    /// @param Script 
-    /// @return false on any error
-	/// This includes creating a child process using fork(). This child process
-	// will execute the CGI script. Within the function the environment 
-	/// variables and arguments that are needed for the scripts execution are 
-	/// set.
-	/// The filedescriptor leading of the created socket is saved a member of 
-	/// the CGIProcess Class. The coresponding instance of Connection will 
-	/// check for it an include it in the poll() map.
-    bool init(Request Req, Script Script, const std::string &Path, int &ForwardSocket);
-    bool createEnv(Request& Req, Script& Script);
-    bool createArgs(Request &Req, const std::string &Path);
-	bool initForwardSocket(int &ForwardSocket);
-    
-    //Getters
-    bool getInputDone() const;
-	int getPid() const ;
-    int getForwardSocket() const;
-    time_t  getTimeLastActive() const;
-	bool getChildProcessDone() const;
+  /// @fn bool init(Request Req, Script Script)
+  /// @brief initialize Reaction if Request calls for CGI execution
+  /// @param Req
+  /// @param Script
+  /// @return false on any error
+  /// This includes creating a child process using fork(). This child process
+  // will execute the CGI script. Within the function the environment
+  /// variables and arguments that are needed for the scripts execution are
+  /// set.
+  /// The filedescriptor leading of the created socket is saved a member of
+  /// the CGIProcess Class. The coresponding instance of Connection will
+  /// check for it an include it in the poll() map.
+  bool init(Request Req, Script Script, const std::string &Path,
+            int &ForwardSocket);
+  bool createEnv(Request &Req, Script &Script);
+  bool createArgs(Request &Req, const std::string &Path);
+  bool initForwardSocket(int &ForwardSocket);
 
-    //setters
-    void setPid(pid_t Pid);
-    void setInputDone(bool Done);
-	void setCGIPath(std::string const &Path);
-    void setTimeLastActive(time_t Time);
-	void setChildProcessDone(bool Done);
+  // Getters
+  bool getInputDone() const;
+  int getPid() const;
+  int getForwardSocket() const;
+  time_t getTimeLastActive() const;
+  bool getChildProcessDone() const;
 
-    
+  // setters
+  void setPid(pid_t Pid);
+  void setInputDone(bool Done);
+  void setCGIPath(std::string const &Path);
+  void setTimeLastActive(time_t Time);
+  void setChildProcessDone(bool Done);
+
 private:
-   
-    bool envMember(EnvMembers Index, const std::string& Key, const std::string& Value);
-    
-	void clearEnv();
+  bool envMember(EnvMembers Index, const std::string &Key,
+                 const std::string &Value);
 
-    std::string getEnvKey(EnvMembers Member) const;
-    std::string getEnvValue(EnvMembers Member, Request& Req, Script& Script) const;
+  void clearEnv();
 
-    char**      _env;
-    char**      _args;
-    char*       _path;
-    pid_t       _pid;
-    int         _forwardSocket;
-    std::string _output;
-    bool        _inputDone;
-    time_t      _timeLastActive;
-	bool		_childProcessDone;
+  std::string getEnvKey(EnvMembers Member) const;
+  std::string getEnvValue(EnvMembers Member, Request &Req,
+                          Script &Script) const;
+
+  char **_env;
+  char **_args;
+  char *_path;
+  pid_t _pid;
+  int _forwardSocket;
+  std::string _output;
+  bool _inputDone;
+  time_t _timeLastActive;
+  bool _childProcessDone;
 };

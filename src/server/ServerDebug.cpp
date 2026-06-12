@@ -41,22 +41,19 @@ std::string Server::interfaceInfoToStr(const Listen &Interface) {
   return (msg.str());
 }
 
-std::string Server::getTypeString(int Type){
+std::string Server::getTypeString(int Type) {
   if (Type == IS_CLIENT) {
     return ("client");
-  }
-  else if (Type == IS_FWD) {
+  } else if (Type == IS_FWD) {
     return ("forward");
-  }
-  else if (Type == IS_LISTENER) {
+  } else if (Type == IS_LISTENER) {
     return ("listener");
-  }
-  else {
+  } else {
     return ("nonsense");
   }
 }
-	
-std::string Server::getConditionsFulfilledString(int CFulfilled){
+
+std::string Server::getConditionsFulfilledString(int CFulfilled) {
   std::ostringstream fulfilled;
   if (CFulfilled & SockRead) {
     fulfilled << "SockRead ";
@@ -73,7 +70,7 @@ std::string Server::getConditionsFulfilledString(int CFulfilled){
   return (fulfilled.str());
 }
 
-std::string Server::getConditionsWantedString(int CWanted){
+std::string Server::getConditionsWantedString(int CWanted) {
   std::ostringstream wanted;
   if (CWanted & SockRead) {
     wanted << "SockRead ";
@@ -90,7 +87,7 @@ std::string Server::getConditionsWantedString(int CWanted){
   return (wanted.str());
 }
 
-std::string Server::getEventsString(short Events){
+std::string Server::getEventsString(short Events) {
   std::ostringstream msg;
   if (Events & POLLNVAL) {
     msg << "POLLNVAL ";
@@ -113,7 +110,7 @@ std::string Server::getEventsString(short Events){
   return (msg.str());
 }
 
-std::string Server::getReventsString(short Revents){
+std::string Server::getReventsString(short Revents) {
   std::ostringstream msg;
   if (Revents & POLLNVAL) {
     msg << "POLLNVAL ";
@@ -136,35 +133,36 @@ std::string Server::getReventsString(short Revents){
   return (msg.str());
 }
 
-std::string Server::getFdInfoString(pollfd &it, int Fd, int Type){
- std::ostringstream msg;
- msg << "\n"
- << "\tfd: " << Fd << "\n"
- <<  "\ttype: " << getTypeString(Type) << "\n";
- if (Type == IS_CLIENT) {
-    msg << "\t_sockForward = "
-    << _clientMap.at(Fd).getSockForward() << "\n"
-    << "\t_cgiFinished = " << _clientMap.at(Fd).getCgiFinishedStatus()
-    << "\n"
-    << "\t_conditionsWanted: "
-    << getConditionsWantedString(_clientMap.at(Fd).getConditionsWanted())
-    << "\n"
-    << "\t_conditionsFulfilled: "
-    << getConditionsFulfilledString(_clientMap.at(Fd).getConditionsFulfilled())
-    << "\n";
+std::string Server::getFdInfoString(pollfd &it, int Fd, int Type) {
+  std::ostringstream msg;
+  msg << "\n"
+      << "\tfd: " << Fd << "\n"
+      << "\ttype: " << getTypeString(Type) << "\n";
+  if (Type == IS_CLIENT) {
+    msg << "\t_sockForward = " << _clientMap.at(Fd).getSockForward() << "\n"
+        << "\t_cgiFinished = " << _clientMap.at(Fd).getCgiFinishedStatus()
+        << "\n"
+        << "\t_conditionsWanted: "
+        << getConditionsWantedString(_clientMap.at(Fd).getConditionsWanted())
+        << "\n"
+        << "\t_conditionsFulfilled: "
+        << getConditionsFulfilledString(
+               _clientMap.at(Fd).getConditionsFulfilled())
+        << "\n";
   }
-  if (Type == IS_FWD){
+  if (Type == IS_FWD) {
     msg << "\tbelongs to client: " << _fwdMap.at(Fd)->getSock() << "\n"
-    << "\t_conditionsWanted: "
-    << getConditionsWantedString(_fwdMap.at(Fd)->getConditionsWanted())
-    << "\n"
-    << "\t_conditionsFulfilled: "
-    << getConditionsFulfilledString(_fwdMap.at(Fd)->getConditionsFulfilled())
-    << "\n";
+        << "\t_conditionsWanted: "
+        << getConditionsWantedString(_fwdMap.at(Fd)->getConditionsWanted())
+        << "\n"
+        << "\t_conditionsFulfilled: "
+        << getConditionsFulfilledString(
+               _fwdMap.at(Fd)->getConditionsFulfilled())
+        << "\n";
   }
   msg << "\tevents: " << getReventsString(it.events) << "\n"
-  << "\trevents: " << getReventsString(it.revents) << "\n"
-  << "\n";
+      << "\trevents: " << getReventsString(it.revents) << "\n"
+      << "\n";
   return (msg.str());
 }
 

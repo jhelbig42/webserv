@@ -18,8 +18,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 void Server::handleCondition(struct pollfd &polled, int Type, time_t TimeNow) {
-  
-	if (polled.revents & POLLNVAL) {
+
+  if (polled.revents & POLLNVAL) {
     handlePollnval(polled.fd, Type);
     return;
   }

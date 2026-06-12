@@ -19,100 +19,93 @@ struct ClientAddr {
 };
 
 class Server {
-	
-	public:
-	
-	// Server.cpp
-	explicit Server(const std::list<Website>  &Websites);
-	~Server();
-	bool socketIsListener(int Fd);
-	bool socketIsClient(int Fd);
-	bool socketIsFwd(int Fd);
 
-	// ServerRun.cpp
-	int pollLoop(void);
+public:
+  // Server.cpp
+  explicit Server(const std::list<Website> &Websites);
+  ~Server();
+  bool socketIsListener(int Fd);
+  bool socketIsClient(int Fd);
+  bool socketIsFwd(int Fd);
 
+  // ServerRun.cpp
+  int pollLoop(void);
 
-	private:
-	    enum FdTypePolled {
-        IS_CLIENT,
-        IS_FWD,
-		IS_LISTENER
-    };
+private:
+  enum FdTypePolled { IS_CLIENT, IS_FWD, IS_LISTENER };
 
+  // variables
+  addrinfo _hints; // our specifications for getaddrinfo
+  std::vector<pollfd> _fds;
+  std::map<int, const Website *> _listenMap;
+  std::map<int, Connection> _clientMap;
+  std::map<int, Connection *const> _fwdMap;
+  std::vector<pollfd> _newFdBatch;
+  std::map<int, int> _deleteFdBatch;
+  std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
 
-	
-	// variables
-	addrinfo _hints; // our specifications for getaddrinfo
-	std::vector<pollfd> _fds;
-	std::map<int, const Website*> _listenMap;
-	std::map<int, Connection> _clientMap;
-	std::map<int, Connection *const> _fwdMap;
-	std::vector<pollfd> _newFdBatch;
-	std::map<int, int> _deleteFdBatch;
-	std::map<std::string, bool> _pairsInUse; // listening <IP:Port>
+  // ServerInit.hpp -- set up listening sockets, pollfds, listenMap
+  void initNetworking(const std::list<Website> &Websites);
+  void checkPair(const Listen &Pair);
+  void checkPort(const std::string &Str);
+  void initListeningSocket(const Listen &Pair, const Website &Web);
+  int getListeningSocket(struct addrinfo *Info, const Listen &Pair);
 
-	// ServerInit.hpp -- set up listening sockets, pollfds, listenMap
-	void initNetworking(const std::list<Website> &Websites);
-	void checkPair(const Listen &Pair);
-	void checkPort(const std::string &Str);
-	void initListeningSocket(const Listen &Pair, const Website &Web);
-	int getListeningSocket(struct addrinfo *Info, const Listen &Pair);
+  // ServerWrappers.hpp -- networking wrappers
+  struct addrinfo *getAddrInfo(const Listen &Pair);            // getaddrinfo()
+  int createSocket(const struct addrinfo *P);                  // socket()
+  int clearSocket(const int Sock);                             // setsockopt()
+  int bindToIP(const int Sock, const struct addrinfo *P);      // bind()
+  void setToListen(const int Sock);                            // listen()
+  int acceptConnection(int ListenerFd, ClientAddr *Candidate); // accept()
 
-	// ServerWrappers.hpp -- networking wrappers
-	struct addrinfo *getAddrInfo(const Listen &Pair); // getaddrinfo()
-	int createSocket(const struct addrinfo *P); // socket()
-	int clearSocket(const int Sock); // setsockopt()
-	int bindToIP(const int Sock, const struct addrinfo *P); //bind()
-	void setToListen(const int Sock); // listen()
-	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
-	
-	// ServerRun.hpp -- outer loop function PollLoop() is public
-	void process(void);
-	int  getSocketType(int Fd);
-	void serveAll(void);
-	void updateEvents(void);
-	short	 determineEventsClient(int Fd);
-	short  determineEventsFwd(int Fd);
-	bool shouldBeDeleted(int Fd, int Type);
-	bool newCGISocketAdded(int Fd);
-	//void closeAndDelete(int Fd, int Type); //currently not in use
-	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
-	short getForwardEvents(int ConditionsWanted);
-	void closeAndDeleteBatch(void);
+  // ServerRun.hpp -- outer loop function PollLoop() is public
+  void process(void);
+  int getSocketType(int Fd);
+  void serveAll(void);
+  void updateEvents(void);
+  short determineEventsClient(int Fd);
+  short determineEventsFwd(int Fd);
+  bool shouldBeDeleted(int Fd, int Type);
+  bool newCGISocketAdded(int Fd);
+  // void closeAndDelete(int Fd, int Type); //currently not in use
+  void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+  short getForwardEvents(int ConditionsWanted);
+  void closeAndDeleteBatch(void);
 
-	// ServerHandlePoll.hpp
-	void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);
-	
-	// ServerHandlePollErrs.hpp
-	void handlePollnval(int Fd, int Type);
-	void handlePollerr(int Fd, int Type);
-	void handlePollhup(int Fd, int Type);
-	void markClientDeletion(int Fd);
+  // ServerHandlePoll.hpp
+  void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);
 
-	// ServerHandlPollin.hpp
-	void handlePollin(int Fd, int Type);
-	void handleNewConnection(int Fd);
-	void setSockRead(int Fd);
-	void setFSockRead(int Fd);
+  // ServerHandlePollErrs.hpp
+  void handlePollnval(int Fd, int Type);
+  void handlePollerr(int Fd, int Type);
+  void handlePollhup(int Fd, int Type);
+  void markClientDeletion(int Fd);
 
-	// ServerHandlePollout.hpp
-	void handlePollout(int Fd, int Type);
-	void setSockWrite(int Fd);
-	void setFSockWrite(int Fd);
+  // ServerHandlPollin.hpp
+  void handlePollin(int Fd, int Type);
+  void handleNewConnection(int Fd);
+  void setSockRead(int Fd);
+  void setFSockRead(int Fd);
 
-	// ServerErrorHandling.hpp
-	void handleSocketFailure(const Listen &Interface, const int Error);
-	void handleBindFailure(const Listen &Interface, const int Error);
+  // ServerHandlePollout.hpp
+  void handlePollout(int Fd, int Type);
+  void setSockWrite(int Fd);
+  void setFSockWrite(int Fd);
 
-	// ServerDebug.hpp
-	std::string addrinfoToStr(const struct addrinfo *Info, const std::string &Msg);
-	std::string interfaceInfoToStr(const Listen &Interface);
-	void printFcntlFlags(const int Sock);
-	std::string getFdInfoString(pollfd &It, int Fd, int Type); 
-	std::string getTypeString(int Type);
-	std::string getConditionsWantedString(int CWanted);
-	std::string getConditionsFulfilledString(int CFulfilled);
-	std::string getEventsString(short Events);
-	std::string getReventsString(short Revents);
+  // ServerErrorHandling.hpp
+  void handleSocketFailure(const Listen &Interface, const int Error);
+  void handleBindFailure(const Listen &Interface, const int Error);
+
+  // ServerDebug.hpp
+  std::string addrinfoToStr(const struct addrinfo *Info,
+                            const std::string &Msg);
+  std::string interfaceInfoToStr(const Listen &Interface);
+  void printFcntlFlags(const int Sock);
+  std::string getFdInfoString(pollfd &It, int Fd, int Type);
+  std::string getTypeString(int Type);
+  std::string getConditionsWantedString(int CWanted);
+  std::string getConditionsFulfilledString(int CFulfilled);
+  std::string getEventsString(short Events);
+  std::string getReventsString(short Revents);
 };
