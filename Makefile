@@ -67,7 +67,7 @@ CXXFLAGS	+= -std=c++98
 CXXFLAGS	+= -Wall
 CXXFLAGS	+= -Wextra
 CXXFLAGS	+= -Werror
-CPPFLAGS 	+= -fstandalone-debug
+
 CPPFLAGS	:=
 CPPFLAGS	+= -MMD
 CPPFLAGS	+= -MP
@@ -104,11 +104,11 @@ ifeq ($(LOGCOLOR), 0)
 endif
 
 ifeq ($(DEBUG), 1)
-	CXXFLAGS += -O0
-	CXXFLAGS += -g3
-	CPPFLAGS += -O0
-	CPPFLAGS += -g3
-	
+	CXXFLAGS	+= -O0
+	CXXFLAGS	+= -g3
+	CPPFLAGS	+= -O0
+	CPPFLAGS	+= -g3
+	CPPFLAGS	+= -fstandalone-debug
 	CXXFLAGS	+= -Wno-unused-parameter
 	CXXFLAGS	+= -Wno-unused-function
 endif
