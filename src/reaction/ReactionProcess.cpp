@@ -115,8 +115,11 @@ void Reaction::sendToCGI(const size_t Bytes){
   	logging::log(logging::Debug, "sendToCGI");
   	// forward whatever is buffered — _buffer only holds data received but not yet forwarded
   	const size_t toSend = _buffer.getUsed();
-  	if (toSend > 0)
-    	_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+  	if (toSend > 0){
+		// see if CGI is still running
+    	if (checkOnChild() == true)	
+			_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+	}
   	// mark input done only once the full body is both received from the client
   	// and drained from the buffer to CGI
   	if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
@@ -138,7 +141,7 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	if (rc < 0){ // when buffer is full
 		return ;
 	}
-	if (rc == 0) {
+	if (rc == 0 && checkOnChild() != false) { // just transition to SendFile if CGI has finished
 		// EOF from forwardSocket transition to SendFile from remaining buffer
 		_fdIn = -1;
 		_processType = SendFile;
