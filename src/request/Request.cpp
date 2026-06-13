@@ -94,7 +94,7 @@ void Request::readFromSocket(int Fd){
 	try {
 		bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
 	} catch (std::runtime_error &e) {
-		// client disconnected (e.g. RST) before/while we tried to read
+		// client disconnected before/while we tried to read
 		logging::log3(logging::Info, "readFromSocket: read from client failed (",
 		              e.what(), "), treating as hangup");
 		_state = CLIENTHUNGUP;
