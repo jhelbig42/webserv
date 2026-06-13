@@ -107,9 +107,9 @@ void Request::readFromSocket(int Fd){
     // Logging for debug purposes as we build.
   	}
   	if (bytesRead == 0) {
-    	logging::log(logging::Warning, "read_data(): bytes_read == 0");
+    	logging::log(logging::Info, "read_data(): bytes_read == 0");
 		_state = CLIENTHUNGUP;
-    	logging::log(logging::Warning, "client appears to have hung up.");
+    	logging::log(logging::Info, "client appears to have hung up.");
     	return;
   	}
   	if (bytesRead < 0) {
