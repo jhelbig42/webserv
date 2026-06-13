@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstring>
 #include <stddef.h>
+#include <stdexcept>
 #include <stdio.h>
 #include <string>
 #include <sys/socket.h>
@@ -99,6 +100,8 @@ bool Reaction::checkOnChild(void){
       		return true;
     	}
     	logging::log(logging::Debug, "CGI exited with error code");
+		// do not attempt to send more to CGI as it finished
+		_cgi.setInputDone(true);
     } 
 	else if (WIFSIGNALED(status)) {
         logging::log(logging::Debug, "CGI was killed by signal");
@@ -117,8 +120,18 @@ void Reaction::sendToCGI(const size_t Bytes){
   	const size_t toSend = _buffer.getUsed();
   	if (toSend > 0){
 		// see if CGI is still running
-    	if (checkOnChild() == true)	
-			_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+    	if (checkOnChild() == true) {
+			try {
+				_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
+			} catch (std::runtime_error &e) {
+				// CGI died between checkOnChild() and our write to its socket
+				logging::log3(logging::Info, "sendToCGI: send to CGI failed (",
+							  e.what(), "), aborting CGI");
+				_cgi.setPid(-1);
+				initSendError(CODE_500);
+				return;
+			}
+		}
 	}
   	// mark input done only once the full body is both received from the client
   	// and drained from the buffer to CGI
@@ -189,8 +202,16 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
 	const size_t used = _buffer.getUsed();
     if (used > 0)
 	{
-       const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
-	    if ((rc >= 0) && (size_t)rc == used && 
+       ssize_t rc;
+       try {
+         rc = _buffer.bufToSocket(Socket, Bytes);
+       } catch (std::runtime_error &e) {
+         // client disconnected (e.g. RST) between becoming writable and our send()
+         logging::log3(logging::Info, "sendToClient: send to client failed (",
+                       e.what(), "), closing connection");
+         return true;
+       }
+	    if ((rc >= 0) && (size_t)rc == used &&
 				(_processType== ReceiveFile || _cgi.getChildProcessDone()))
 		{
 			logging::log2(logging::Debug,__func__, " returns true");
@@ -319,7 +340,15 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
   const size_t used = Buf.getUsed();
   if (used == 0) // nothing read from FileFd and no residue from last time
     return true;
-  const ssize_t rc = Buf.bufToSocket(Socket, Bytes);
+  ssize_t rc;
+  try {
+    rc = Buf.bufToSocket(Socket, Bytes);
+  } catch (std::runtime_error &e) {
+    // client disconnected (e.g. RST) between becoming writable and our send()
+    logging::log3(logging::Info, "fileToSocket: send to client failed (",
+                  e.what(), "), closing connection");
+    return true;
+  }
   if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used))
     return true;
   return false;
