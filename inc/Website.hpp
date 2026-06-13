@@ -30,6 +30,14 @@ private:
   const Location *_website;
 };
 
+// \brief returned to inform the reaction processing of what to do
+//
+// getAction() should be called to identify the required action
+// which can be either Default, Return or Cgi
+//
+// Return requres the server to immediately send a respnse with
+// the code acquired by getCode() and potentially (in case of 301 or similar)
+// a resource acquired by getRealPath()
 class PathInfo {
 public:
   typedef enum { Default, Return, Cgi } Action;
@@ -61,7 +69,7 @@ private:
   Action _action;
   unsigned int _code;
   int _allow;
-  unsigned int _maxReqBody;
+  unsigned int _maxReqBody
   std::string _root;
   std::list<const std::map<unsigned int, std::string> *> _errorPages;
   std::list<std::string> _index;
