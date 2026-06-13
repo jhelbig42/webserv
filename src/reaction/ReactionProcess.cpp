@@ -124,7 +124,7 @@ void Reaction::sendToCGI(const size_t Bytes){
 			try {
 				_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
 			} catch (std::runtime_error &e) {
-				// CGI died between checkOnChild() and our write to its socket
+				// CGI died between checkOnChild() and our write to its socket???
 				logging::log3(logging::Info, "sendToCGI: send to CGI failed (",
 							  e.what(), "), aborting CGI");
 				_cgi.setPid(-1);
@@ -206,7 +206,7 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
        try {
          rc = _buffer.bufToSocket(Socket, Bytes);
        } catch (std::runtime_error &e) {
-         // client disconnected (e.g. RST) between becoming writable and our send()
+         // client disconnected between poll() and send()
          logging::log3(logging::Info, "sendToClient: send to client failed (",
                        e.what(), "), closing connection");
          return true;
@@ -304,9 +304,6 @@ void Reaction::receiveBodyIntoServerFile(const int Socket, const size_t Bytes){
 }
 
 
-// TODO: catching SIGPIPE still missing
-// TODO: handle rc < 0
-// TODO: doublecheck error handling
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes) {
   if (Str.empty())
