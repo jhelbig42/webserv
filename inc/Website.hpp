@@ -69,7 +69,7 @@ private:
   Action _action;
   unsigned int _code;
   int _allow;
-  unsigned int _maxReqBody
+  unsigned int _maxReqBody;
   std::string _root;
   std::list<const std::map<unsigned int, std::string> *> _errorPages;
   std::list<std::string> _index;
