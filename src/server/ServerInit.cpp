@@ -86,14 +86,14 @@ void Server::initListeningSocket(const Listen &Pair, const Website &Web) {
 void Server::checkPair(const Listen &Pair) {
 
   std::string pair = Pair.ip + ":" + Pair.port;
-  logging::log2(logging::Debug, "checkpair():\n", pair);
+  //logging::log2(logging::Debug, "checkpair():\n", pair);
   if (_pairsInUse.find(pair) != _pairsInUse.end()) {
 
     std::ostringstream msg;
     msg << "Webserv does not support multiple websites with the same IP:Port "
            "pair.\nCheck config file for duplicates of the following:\n"
         << pair;
-    logging::log(logging::Error, msg.str());
+    logging::log(logging::Info, msg.str());
     throw std::runtime_error("failed to initialize server");
   }
   _pairsInUse.insert(make_pair(pair, true));

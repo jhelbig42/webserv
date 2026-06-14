@@ -149,7 +149,7 @@ void Server::setToListen(const int Sock) {
 
 int Server::acceptConnection(const int ListenerFd, ClientAddr *Candidate) {
 
-  logging::log2(logging::Debug, "acceptConnection() on socket ", ListenerFd);
+  //logging::log2(logging::Debug, "acceptConnection() on socket ", ListenerFd);
   Candidate->addrSize = sizeof(struct sockaddr_storage);
   Candidate->clientSock = accept(
       ListenerFd, (struct sockaddr *)&Candidate->addr, &Candidate->addrSize);

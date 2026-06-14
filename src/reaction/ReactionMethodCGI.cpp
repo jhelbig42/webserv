@@ -33,6 +33,6 @@ void Reaction::initCGIMethod(const Request &Req) {
     _processType = CgiPost;
     return;
   }
-  _cgi.setInputDone(true);
+  _cgi.setInputDone(true); // Here, setInputDone is set to true because Method is GET & there is nothing to send
   _processType = CgiNotPost;
 }

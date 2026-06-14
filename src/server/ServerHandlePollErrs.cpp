@@ -51,18 +51,18 @@ void Server::handlePollnval(int Fd, int Type) {
 // I've tried including at the top of main, and compiler still complains
 
 void Server::handlePollhup(int Fd, int Type) {
-  logging::log2(logging::Debug,
-                "networking::process(): POLLHUP.\n\t client hung up."
-                " fd = ",
-                Fd);
+  //logging::log2(logging::Debug,
+  //              "networking::process(): POLLHUP.\n\t client hung up."
+  //              " fd = ",
+  //              Fd);
   if (Type == IS_CLIENT) {
     logging::log2(logging::Debug, Fd,
                   " scheduleForDemolition() in handlePollhup()");
     _clientMap.at(Fd).scheduleForDemolition();
   } else if (Type == IS_FWD) {
-    logging::log3(logging::Debug,
-                  "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
-                  ". Indicates at least one of the socket pairs closed");
+    //logging::log3(logging::Debug,
+    //              "networking::handlePollhup(): got POLLHUP from fwd sock ", Fd,
+    //              ". Indicates at least one of the socket pairs closed");
     return;
   }
   if (Type == IS_LISTENER) {
@@ -79,13 +79,15 @@ void Server::handlePollhup(int Fd, int Type) {
 
 void Server::handlePollerr(int Fd, int Type) {
   const std::ostringstream msg;
+  /*
   logging::log2(logging::Info,
                 "networking::process(): POLLERR \n\tclient/cgi may have "
                 "disconnected abruptly using RST (forcible reset), or socket "
                 "is broken.\n fd = ",
                 Fd);
+  */
   if (Type == IS_CLIENT) {
-    logging::log2(logging::Info, Fd, " is a client socket");
+    logging::log2(logging::Info, Fd, " client socket got POLLERR");
     // logging::log2(logging::Debug, Fd, " scheduleForDemolition() in
     // handlePollerr()");
     _clientMap.at(Fd).scheduleForDemolition();

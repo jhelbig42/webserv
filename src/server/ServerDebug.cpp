@@ -161,8 +161,7 @@ std::string Server::getFdInfoString(pollfd &it, int Fd, int Type) {
         << "\n";
   }
   msg << "\tevents: " << getReventsString(it.events) << "\n"
-      << "\trevents: " << getReventsString(it.revents) << "\n"
-      << "\n";
+      << "\trevents: " << getReventsString(it.revents) << "\n";
   return (msg.str());
 }
 

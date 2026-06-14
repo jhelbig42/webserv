@@ -51,6 +51,24 @@ void Server::serveAll(void) {
   }
 }
 
+void Server::addAllNewFwdSockets(void) {
+  int fwdSock;
+  for (std::map<int, Connection>::iterator it = _clientMap.begin(); it != _clientMap.end(); it++) {
+    if (it->second.getCgiFinishedStatus() == true) {
+      return;
+    }
+    fwdSock = it->second.getSockForward();
+    if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
+      logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
+      _fwdMap.insert(std::make_pair(fwdSock, &it->second));
+    const pollfd newFd = {
+        fwdSock, determineEventsFwd(it->second.getConditionsWanted()), 0};
+    _newFdBatch.push_back(newFd);
+    }
+  }
+}
+
+
 /**
 *
 *	\brief	process() iterates through Server's vector of poll_fds
@@ -75,21 +93,27 @@ void Server::process(void) {
   // logging::log(logging::Debug, "Process");
   time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-
     int type = getSocketType(it->fd);
+    if (type != IS_LISTENER){
+      logging::log(logging::Debug, "");
+      logging::log3(logging::Debug, "------- in Server::process, handling sock ", it->fd, "-------");
+    }
     handleCondition(*it, type,
                     timeNow); // sets conditions in client Connection, or
                               // accepts new connections
-    // std::cout << getFdInfoString(*it, it->fd, type);
+    //std::cout << getFdInfoString(*it, it->fd, type);
+    if (type != IS_LISTENER){
+      logging::log2(logging::Debug, "After handleCondition(), which sets conditionsFulfilled:\n", getFdInfoString(*it, it->fd, type));
+    }
     if (type == IS_CLIENT) {
-      if (newCGISocketAdded(it->fd) != true) {
+      //if (newCGISocketAdded(it->fd) != true) {
         if (type == IS_CLIENT &&
             timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT) {
           logging::log2(logging::Debug, it->fd,
                         " scheduleForDemolition() in Server::process()");
           _clientMap.at(it->fd).scheduleForDemolition();
         }
-      }
+      //}
     }
     if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       _deleteFdBatch.insert(std::make_pair(it->fd, type));
@@ -98,7 +122,10 @@ void Server::process(void) {
     it++;
   }
   closeAndDeleteBatch();
+  logging::log(logging::Debug, "");
+  logging::log(logging::Debug, "Now serving all connections....");
   serveAll();
+  addAllNewFwdSockets();
   _fds.insert(_fds.end(), _newFdBatch.begin(), _newFdBatch.end());
   updateEvents();
   _newFdBatch.clear();
@@ -106,7 +133,6 @@ void Server::process(void) {
 
 bool Server::newCGISocketAdded(int Fd) {
   Connection *connection = &_clientMap.at(Fd);
-  // int potentialNewSocket = clientMap.at(Fd)->_socketForward;
   if (connection->getCgiFinishedStatus() == true) {
     return false;
   }

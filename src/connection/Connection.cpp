@@ -34,7 +34,7 @@ Connection::Connection(const int Sock, const sockaddr_storage &Addr,
   memcpy(&_addr, &Addr, Addr_size);
   memset(&_readBuf, 0, MAX_REQUEST);
   _timeLastActive = time(NULL);
-  logging::log(logging::Debug, "Connection created");
+  //logging::log(logging::Debug, "Connection created");
 }
 
 // Getters
@@ -96,28 +96,52 @@ void Connection::resetSockFwd(void) {
 }
 
 void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
+  logging::log2(logging::Debug, "In updateConditionsWanted() for Fd ", getSock());
+  
   switch (ProcessType) {
   case Reaction::SendFile:
+    logging::log(logging::Debug, "\t ProcessType == SendFile");
+    logging::log(logging::Debug, "\t _conditionsWanted = SockWrite");
     _conditionsWanted = SockWrite;
     break;
+  
   case Reaction::ReceiveFile:
+    logging::log(logging::Debug, "\t ProcessType == ReceiveFile");
+    logging::log(logging::Debug, "\t _conditionsWanted = SockRead");
     _conditionsWanted = SockRead;
     break;
   case Reaction::CgiPost:
+    logging::log(logging::Debug, "\t ProcessType == CgiPost");
     if (_react.getInputDone()) {
+      logging::log(logging::Debug, "\t\t_reaction.getInputDone() == true");
       if (_buf.getUsed() == 0) {
+        logging::log2(logging::Debug, "\t\t\t_buf.getUsed() = ", _buf.getUsed());
+        logging::log(logging::Debug, "\t\t\t_conditionsWanted = FSockRead");
         _conditionsWanted = FSockRead;
       } else {
+        logging::log2(logging::Debug, "\t\t\t_buf.getUsed() = ", _buf.getUsed());
+        logging::log(logging::Debug, "\t\t\t_conditionsWanted = SockWrite");
         _conditionsWanted = SockWrite;
       }
-    } else
-      _conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+    }
+    else {
+      logging::log(logging::Debug, "\t\t _reaction.getInputDone() == false");
+      //logging::log(logging::Debug, "\t\t\t_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead");
+      //_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+      logging::log(logging::Debug, "\t\t\t_conditionsWanted = FSockWrite");
+      _conditionsWanted = FSockWrite;
+      // I think while we haven't finished writing to CGI (getInputDone() != true), we should only poll for FSockWrite
+    }
     break;
   case Reaction::CgiNotPost:
+    logging::log(logging::Debug, "\t ProcessType == CgiNotPost");
+    logging::log(logging::Debug, "\t\t\t_conditionsWanted = SockWrite | FSockRead");
     _conditionsWanted = SockWrite | FSockRead;
     break;
   case Reaction::NotInitialized:
   default:
+    logging::log(logging::Debug, "\t ProcessType == NotInitialized");
+    logging::log(logging::Debug, "\t _conditionsWanted = SockRead");
     _conditionsWanted = SockRead;
   }
 }

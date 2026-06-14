@@ -89,6 +89,9 @@ ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
+  logging::log2(logging::Debug, "in fileToBuf() for Fd ", Fd);
+  logging::log2(logging::Debug, "\t_end = ", _end);
+  logging::log2(logging::Debug, "\trc (bytes read) = ", rc);
   if (rc < 0) {
     //	logging::log2(logging::Warning, "fileToBuf() error on read: ",
     //strerror(errno));
@@ -126,6 +129,7 @@ ssize_t Buffer::socketToBuf(const int Socket, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   errno = 0;
   const ssize_t rc = recv(Socket, _buffer + _end, amount, 0);
+  logging::log2(logging::Debug, "In Buffer::socketToBuf, rc = ", rc);
   if (rc < 0)
     throw std::runtime_error(strerror(errno));
   _end += (size_t)rc; // safe because rc >= 0 and rc <= getFree()
