@@ -32,18 +32,18 @@ void Request::process(int Socket) {
     if (_state == CLIENTHUNGUP)
       return;
     if (_state == STATUS_LINE) {
-      logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
+      logging::log2(logging::Debug, "Request::process() state is STATUS_LINE for Fd ", Socket);
       if (!parseRequestLineFromBuffer())
         return;
     } else if (_state == HEADERS) {
-      logging::log(logging::Debug, "Request::process() state is HEADERS");
+      logging::log2(logging::Debug, "Request::process() state is HEADERS for Fd ", Socket);
       if (!parseHeadersFromBuffer())
         return;
     } else if (_state == COMPLETE) {
-      logging::log(logging::Debug, "Request::process() state is COMPLETE");
+      logging::log2(logging::Debug, "Request::process() state is COMPLETE for Fd ", Socket);
       return;
     } else if (_state == INVALID) {
-      logging::log(logging::Debug, "Request::process() state is INVALID");
+      logging::log2(logging::Debug, "Request::process() state is INVALID for Fd ", Socket);
       return;
     }
   }
@@ -66,7 +66,7 @@ std::vector<std::string> split(const std::string &S,
 }
 
 void Request::readFromSocket(int Fd) {
-  logging::log(logging::Debug, "readFromSocket() starts");
+  logging::log2(logging::Debug, "readFromSocket() starts for Fd ", Fd);
   const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
 
   if (bytesRead == MAX_REQUEST) {
@@ -85,7 +85,7 @@ void Request::readFromSocket(int Fd) {
     //	logging::log2(logging::Warning, "bytesRead = ", bytesRead);
     return;
   }
-  logging::log(logging::Debug, "readFromSocket() done");
+  logging::log2(logging::Debug, "readFromSocket() done for Fd ", Fd);
 }
 
 Buffer Request::getBuffer() const {

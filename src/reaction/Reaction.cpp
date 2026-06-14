@@ -48,6 +48,11 @@ int Reaction::getForwardSocket(void) const {
   return _cgi.getForwardSocket();
 }
 
+// adding for Debug purposes
+int Reaction::getSocket(void) const {
+  return _sock;
+}
+
 bool Reaction::getInputDone(void) const {
   return _cgi.getInputDone();
 }

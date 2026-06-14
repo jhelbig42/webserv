@@ -72,6 +72,7 @@ private:
   void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
   short getForwardEvents(int ConditionsWanted);
   void closeAndDeleteBatch(void);
+  void addAllNewFwdSockets(void);
 
   // ServerHandlePoll.hpp
   void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);

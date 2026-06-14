@@ -54,9 +54,13 @@ static bool stringToSocket(const int Socket, std::string &Str,
 bool Reaction::process(const int Socket, const size_t Bytes,
                        const int Condition) {
 
-  if (!checkOnChild())
+  if (!checkOnChild()){
+    logging::log2(logging::Debug, "in Reaction::process, checkOnChild() returned false for Fd", Socket);
+    logging::log2(logging::Debug, "therefore returning false from Reaction::process() for Fd", Socket);
     return false;
-  logging::log2(logging::Debug, "child finished for socket ", Socket);
+  }
+  logging::log2(logging::Debug, "checkOnChild returned true for Fd ", Socket);
+  logging::log(logging::Debug, "This could mean: child is nonexistent / still running / exited normally ?");
   // we just polled for what we need
   if (Condition & FSockRead)
     receiveFromCGI(Bytes);
@@ -64,18 +68,26 @@ bool Reaction::process(const int Socket, const size_t Bytes,
     sendToCGI(Bytes);
   if (Condition & SockRead)
     recvFromClient(Socket, Bytes);
-  if (Condition & SockWrite)
+  if (Condition & SockWrite) {
+    logging::log2(logging::Debug, "In Reaction::process(), (Condition & SockWrite) == true", Socket);
+    logging::log(logging::Debug, "therefore calling sendToClient()");
     return sendToClient(Socket, Bytes);
+  }
   return false;
 }
 
 bool Reaction::checkOnChild(void) {
+  //sleep(1);
+  logging::log2(logging::Debug, "Reaction::checkOnChild() for Fd ", getSocket());
   const pid_t pid = _cgi.getPid();
-  if (pid == -1) // no CGI
+  if (pid == -1){ // no CGI
+    logging::log(logging::Debug, "\t pid == -1. Returning");
     return true;
+  }
+  logging::log2(logging::Debug, "\tpid == ", _cgi.getPid());
   time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
   if (timeElapsed > CGI_TIMEOUT) {
-    logging::log(logging::Debug, "CGI timed out.");
+    logging::log(logging::Debug, "\tCGI timed out...");
     kill(pid, SIGKILL);
     _cgi.setPid(-1);
     initSendError(CODE_500);
@@ -84,12 +96,16 @@ bool Reaction::checkOnChild(void) {
   int status;
   const pid_t result = waitpid(pid, &status, WNOHANG);
   if (result == -1) {
+    logging::log(logging::Debug, "\twaitpid() returned - 1 ... setting PID to -1 (this will result in checkOnChild always returning true), and calling initSendError(CODE_500)");
     _cgi.setPid(-1);
     initSendError(CODE_500);
     return false; // waitpid failed => internal server error
   }
-  if (result == 0)         // child not finished yet
+  logging::log2(logging::Debug, "\tresult of waitpid = ", result);
+  if (result == 0) {         // child not finished yet
+    logging::log(logging::Debug, "\tbeccause result == 0, returning True");
     return true;           // come back later
+  }
   if (WIFEXITED(status)) { // child somehow exited
     _cgi.setChildProcessDone(true);
     // find out how
@@ -103,6 +119,7 @@ bool Reaction::checkOnChild(void) {
     logging::log(logging::Debug, "CGI was killed by signal");
   }
   _cgi.setPid(-1);
+  logging::log(logging::Debug, "\tpid is now set to -1. Sending Error Code 500");
   initSendError(CODE_500);
   return false;
 }
@@ -140,6 +157,8 @@ void Reaction::receiveFromCGI(const size_t Bytes) {
     return;
   }
   if (rc == 0) {
+    logging::log(logging::Debug, "in receiveFromCGI(), rc = 0");
+    logging::log(logging::Debug, "setting _processType to SendFile");
     // EOF from forwardSocket transition to SendFile from remaining buffer
     _fdIn = -1;
     _processType = SendFile;
@@ -155,8 +174,10 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   // logging::log(logging::Debug, "Reaction::sendToClient()");
-  if (_processType == SendFile)
+  if (_processType == SendFile) {
+    logging::log2(logging::Debug, "In sendToClient(), _processType == SendFile for Fd ", Socket);
     return sendFile(Socket, Bytes);
+  }
   if ((_processType == CgiPost || _processType == CgiNotPost) &&
       _cgi.getInputDone()) {
     // logging::log(logging::Debug, "CGI input is done");
@@ -186,11 +207,19 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
+  logging::log2(logging::Debug, "in Reaction::sendFile() for Fd ", Socket);
   if (sendMetadataIfPending(Socket, Bytes)) {
+    logging::log(logging::Debug, "\tsendMetadataIfPending() == true");
+    logging::log(logging::Debug, "\ttherefore returning false");
     return false;
   }
-  if (!_body.empty())
+  if (!_body.empty()){
+    logging::log(logging::Debug, "\t_body.empty() == false");
+    logging::log(logging::Debug, "\ttherefore returning stringToSocket()");
     return stringToSocket(Socket, _body, Bytes);
+  }
+  logging::log(logging::Debug, "in sendFile(), _body.empty() == true");
+  logging::log(logging::Debug, "therefore returning fileToSocket");
   return fileToSocket(Socket, _fdIn, _buffer, Bytes);
 }
 
@@ -236,6 +265,7 @@ static bool stringToSocket(const int Socket, std::string &Str,
 // of Buffer::fill()
 static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes) {
+  logging::log2(logging::Debug, "in fileToSocket, FileFd = ", FileFd);
   if (FileFd >= 0) {
     Buf.optimize(Bytes);
     // edgecase = FileFd empties by exactly filling up Buf. Then empty FileFd
@@ -249,10 +279,15 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     }
   }
   const size_t used = Buf.getUsed();
-  if (used == 0) // nothing read from FileFd and no residue from last time
+  logging::log2(logging::Debug, "in fileToSocket, used = ", used);
+  if (used == 0) {// nothing read from FileFd and no residue from last time {
+    logging::log(logging::Debug, "in fileToSocket, returning true because used == 0");
     return true;
+  }
   const ssize_t rc = Buf.bufToSocket(Socket, Bytes);
-  if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used))
+  logging::log2(logging::Debug, "in fileToSocket, rc = ", rc);
+  if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used)){
     return true;
+  }
   return false;
 }

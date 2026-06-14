@@ -1,0 +1,376 @@
+2026-06-14 15:32:04 [DEBUG]   <pollLoop>
+2026-06-14 15:32:08 [DEBUG]   POLLIN: fd 3
+2026-06-14 15:32:08 [DEBUG]   Connection accepted on socket 4
+2026-06-14 15:32:08 [DEBUG]   
+
+*** Client connects
+ 
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 0
+2026-06-14 15:32:08 [DEBUG]   	 pid == -1. Returning
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+
+*** Why does socket start out as 0 for the Connection associated with Fd 4? Irrelevant though
+ 
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == NotInitialized
+2026-06-14 15:32:08 [DEBUG]   	 _conditionsWanted = SockRead
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   POLLIN: fd 4
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 4
+	type: client
+	_sockForward = -1
+	_cgiFinished = 0
+	_conditionsWanted: SockRead 
+	_conditionsFulfilled: SockRead 
+	events: POLLERR POLLIN POLLRDHUP POLLHUP 
+	revents: POLLIN 
+
+*** We get POLLIN from the client / there is a request to read 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   readFromSocket() starts for Fd 4
+2026-06-14 15:32:08 [DEBUG]   in fileToBuf() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	_end = 0
+2026-06-14 15:32:08 [DEBUG]   	rc (bytes read) = 66
+
+*** We read 66 bytes from the client
+
+2026-06-14 15:32:08 [DEBUG]   readFromSocket() done for Fd 4
+2026-06-14 15:32:08 [DEBUG]   Request::process() state is STATUS_LINE for Fd 4
+2026-06-14 15:32:08 [DEBUG]   parseStatusLine()
+2026-06-14 15:32:08 [DEBUG]   parse status_line: got method successfully
+2026-06-14 15:32:08 [DEBUG]   parse status_line: parse resource successfully
+2026-06-14 15:32:08 [DEBUG]   QueryString is: 
+2026-06-14 15:32:08 [DEBUG]   extension of resource is: .py
+2026-06-14 15:32:08 [DEBUG]   parse status_line: parse http version successfully
+2026-06-14 15:32:08 [DEBUG]   Request::process() state is HEADERS for Fd 4
+2026-06-14 15:32:08 [DEBUG]   parseHeaderLine()
+2026-06-14 15:32:08 [DEBUG]   Request::process() state is HEADERS for Fd 4
+2026-06-14 15:32:08 [DEBUG]   Request::process() state is COMPLETE for Fd 4
+2026-06-14 15:32:08 [DEBUG]   Reaction:: init  called
+2026-06-14 15:32:08 [DEBUG]   Req is a CGI
+
+*** We see that the client wants CGI and initialize this
+
+2026-06-14 15:32:08 [DEBUG]   initCGIMethodtrying to access the scriptfile
+2026-06-14 15:32:08 [DEBUG]   /usr/bin/python3
+2026-06-14 15:32:08 [DEBUG]   CGI Process init called
+
+*** CGI script is executed here
+
+2026-06-14 15:32:08 [DEBUG]   python3   /home/hallison/webserv/webserv_tester/www/demo/scripts/exit.py
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == CgiPost
+2026-06-14 15:32:08 [DEBUG]   		 _reaction.getInputDone() == false
+2026-06-14 15:32:08 [DEBUG]   			_conditionsWanted = FSockWrite
+2026-06-14 15:32:08 [DEBUG]   Got a new forward socket: 5
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: FSockWrite 
+	_conditionsFulfilled: 
+	events: POLLERR POLLHUP 
+	revents: 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+*** We want to write to the CGI socket, and we get a matching POLLOUT
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: FSockWrite 
+	_conditionsFulfilled: FSockWrite 
+	events: POLLERR POLLOUT POLLRDHUP POLLHUP 
+	revents: POLLOUT 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	pid == 50680
+2026-06-14 15:32:08 [DEBUG]   	result of waitpid = 0
+2026-06-14 15:32:08 [DEBUG]   	beccause result == 0, returning True
+
+*** Client 4's CGI process is still running
+
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+2026-06-14 15:32:08 [DEBUG]   sendToCGI
+2026-06-14 15:32:08 [DEBUG]   sendToCGI: body fully forwarded to CGI
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == CgiPost
+2026-06-14 15:32:08 [DEBUG]   		_reaction.getInputDone() == true
+2026-06-14 15:32:08 [DEBUG]   			_buf.getUsed() = 0
+2026-06-14 15:32:08 [DEBUG]   			_conditionsWanted = FSockRead
+
+*** We wrote the full request body to the CGI and now want to read from the CGI
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: FSockRead 
+	_conditionsFulfilled: 
+	events: POLLERR POLLHUP 
+	revents: 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [INFO]    5 is forward socket
+2026-06-14 15:32:08 [INFO]    POLLERR error = Connection reset by peer
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+*** We get simultaneous POLLERR / POLLIN / hangup from the CGI socket.
+*** This means that the write end of the socket was abruptly closed when the script exited
+*** But as we can see from POLLIN, there is something in the socket for us to read.
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: FSockRead 
+	_conditionsFulfilled: 
+	events: POLLERR POLLIN POLLRDHUP POLLHUP 
+	revents: POLLERR POLLIN POLLRDHUP POLLHUP 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+
+*** In checkOnChild(), it APPEARS that the CGI is still alive.
+*** waitpid = 0 means the process is still running. Since we just saw POLLERR, we are likely
+*** catching the process right when it's being torn down. waitpid()
+*** does not yet see that it has ended, although the script has exited.
+
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	pid == 50680
+2026-06-14 15:32:08 [DEBUG]   	result of waitpid = 0
+2026-06-14 15:32:08 [DEBUG]   	beccause result == 0, returning True
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+
+*** Since we didn't see that the process is exit(1)'ing, we proceed to read from the CGI socket. 
+
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == CgiPost
+2026-06-14 15:32:08 [DEBUG]   		_reaction.getInputDone() == true
+2026-06-14 15:32:08 [DEBUG]   			_buf.getUsed() = 0
+2026-06-14 15:32:08 [DEBUG]   			_conditionsWanted = FSockRead
+2026-06-14 15:32:08 [DEBUG]   
+
+*** Since we didn't see that the process is exit(1)'ing,
+*** we proceed to request FSockRead / POLLIN from the CGI socket. 
+
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: FSockRead 
+	_conditionsFulfilled: 
+	events: POLLERR POLLHUP 
+	revents: 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [DEBUG]   POLLIN: fd 5
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+*** And because there IS something to read in the CGI socket (spoiler: it's EOF)
+*** we get POLLIN...
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: FSockRead 
+	_conditionsFulfilled: FSockRead 
+	events: POLLERR POLLIN POLLRDHUP POLLHUP 
+	revents: POLLIN POLLRDHUP POLLHUP 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	pid == 50680
+2026-06-14 15:32:08 [DEBUG]   	result of waitpid = 0
+2026-06-14 15:32:08 [DEBUG]   	beccause result == 0, returning True
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+2026-06-14 15:32:08 [DEBUG]   in fileToBuf() for Fd 5
+2026-06-14 15:32:08 [DEBUG]   	_end = 0
+2026-06-14 15:32:08 [DEBUG]   	rc (bytes read) = 0
+2026-06-14 15:32:08 [DEBUG]   in receiveFromCGI(), rc = 0
+
+*** Here we just read 0 bytes from the CGI into the buffer
+*** and now we're getting ready to pass this on to the client
+
+2026-06-14 15:32:08 [DEBUG]   setting _processType to SendFile
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == SendFile
+2026-06-14 15:32:08 [DEBUG]   	 _conditionsWanted = SockWrite
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+*** We get POLLOUT from the client -- The client is ready for us to write to
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLOUT POLLRDHUP POLLHUP 
+	revents: POLLOUT 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLHUP 
+	revents: POLLHUP 
+
+
+*** We check on the child again. waitpid() is still returning 0.
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	pid == 50680
+2026-06-14 15:32:08 [DEBUG]   	result of waitpid = 0
+2026-06-14 15:32:08 [DEBUG]   	beccause result == 0, returning True
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+2026-06-14 15:32:08 [DEBUG]   In Reaction::process(), (Condition & SockWrite) == true4
+2026-06-14 15:32:08 [DEBUG]   therefore calling sendToClient()
+2026-06-14 15:32:08 [DEBUG]   In sendToClient(), _processType == SendFile for Fd 4
+
+*** _processType changes to sendFile. I'm not sure why we don't continue on to actual sending in this
+*** round -- something with sendMetadataIfPending()?
+
+2026-06-14 15:32:08 [DEBUG]   in Reaction::sendFile() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	sendMetadataIfPending() == true
+2026-06-14 15:32:08 [DEBUG]   	therefore returning false
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == SendFile
+2026-06-14 15:32:08 [DEBUG]   	 _conditionsWanted = SockWrite
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+
+*** But the client still gives us POLLOUT, so we can still send
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLOUT POLLRDHUP POLLHUP 
+	revents: POLLOUT 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLHUP 
+	revents: POLLHUP 
+
+*** We check on the child AGAIN (3rd time since getting POLLERR from CGI script process).
+*** waitpid() is STILL returning 0.
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
+2026-06-14 15:32:08 [DEBUG]   Reaction::checkOnChild() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	pid == 50680
+2026-06-14 15:32:08 [DEBUG]   	result of waitpid = 0
+2026-06-14 15:32:08 [DEBUG]   	beccause result == 0, returning True
+2026-06-14 15:32:08 [DEBUG]   checkOnChild returned true for Fd 4
+2026-06-14 15:32:08 [DEBUG]   This could mean: child is nonexistent / still running / exited normally ?
+2026-06-14 15:32:08 [DEBUG]   In Reaction::process(), (Condition & SockWrite) == true4
+2026-06-14 15:32:08 [DEBUG]   therefore calling sendToClient()
+
+*** Finally we are sending to the client. Or are we?
+
+2026-06-14 15:32:08 [DEBUG]   In sendToClient(), _processType == SendFile for Fd 4
+2026-06-14 15:32:08 [DEBUG]   in Reaction::sendFile() for Fd 4
+
+*** We recognize that _body is empty, so we call fileToSocket()
+
+2026-06-14 15:32:08 [DEBUG]   in sendFile(), _body.empty() == true
+2026-06-14 15:32:08 [DEBUG]   therefore returning fileToSocket
+2026-06-14 15:32:08 [DEBUG]   in fileToSocket, FileFd = -1
+2026-06-14 15:32:08 [DEBUG]   in fileToSocket, used = 0
+2026-06-14 15:32:08 [DEBUG]   in fileToSocket, returning true because used == 0
+
+*** We just saw that there is nothing in the buffer, so instead of sending, we
+*** simply return back to Connection::serve(), where the connection is marked for
+*** deletion.
+
+2026-06-14 15:32:08 [DEBUG]   4 scheduleForDemolition() in Connection::serve()
+2026-06-14 15:32:08 [DEBUG]   setting Connection up for Demolition 
+2026-06-14 15:32:08 [DEBUG]   In updateConditionsWanted() for Fd 4
+2026-06-14 15:32:08 [DEBUG]   	 ProcessType == SendFile
+2026-06-14 15:32:08 [DEBUG]   	 _conditionsWanted = SockWrite
+
+*** Irrelevant to our actual bug, but could add a second call to
+*** Server::closeAndDeleteBatch() here to avoid one extraneous poll() and process loop
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  4 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 4
+	type: client
+	_sockForward = 5
+	_cgiFinished = 0
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLOUT POLLRDHUP POLLHUP 
+	revents: POLLOUT 
+
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   ------- in Server::process, handling sock  5 -------
+2026-06-14 15:32:08 [DEBUG]   After handleCondition(), which sets conditionsFulfilled:
+
+	fd: 5
+	type: forward
+	belongs to client: 4
+	_conditionsWanted: SockWrite 
+	_conditionsFulfilled: SockWrite 
+	events: POLLERR POLLHUP 
+	revents: POLLHUP 
+
+2026-06-14 15:32:08 [DEBUG]   4  will be closed and deleted from map of type  client
+2026-06-14 15:32:08 [DEBUG]   5  will be closed and deleted from map of type  forward
+2026-06-14 15:32:08 [DEBUG]   4 will be removed from pollfd vector
+2026-06-14 15:32:08 [DEBUG]   5 will be removed from pollfd vector
+2026-06-14 15:32:08 [DEBUG]   
+2026-06-14 15:32:08 [DEBUG]   Now serving all connections....
