@@ -154,8 +154,13 @@ void Reaction::receiveFromCGI(const size_t Bytes){
 	if (rc < 0){ // when buffer is full
 		return ;
 	}
-	if (rc == 0 && checkOnChild() != false) { // just transition to SendFile if CGI has finished
-		// EOF from forwardSocket transition to SendFile from remaining buffer
+	if (rc == 0) { // EOF from forwardSocket: CGI closed its end
+		if (!checkOnChild()) // error already turned into a 500 response
+			return;
+		if (_cgi.getPid() != -1) // pipe closed (EOF), but exit status not clear yet - try later
+			return;
+		//here just on EOF, checkOnChild is true and PID set back to -1 from checkOnChild
+		//so we are sure exit status was 0
 		_fdIn = -1;
 		_processType = SendFile;
 	}
