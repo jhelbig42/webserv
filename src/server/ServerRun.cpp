@@ -1,7 +1,7 @@
 #include "Logging.hpp"
 #include "Server.hpp"
 
-#include "Signals.hpp" 
+#include "Signals.hpp"
 
 #include <cerrno>
 #include <csignal>
@@ -27,8 +27,9 @@ int Server::pollLoop(void) {
   while (1) {
     if (checkSignal() == SIGINT)
       return 0;
-    const int res =
-        poll(_fds.data(), (nfds_t)_fds.size(), TIMEOUT * 1000); // without restriction to _fds.size this cast is unsafe
+    const int res = poll(
+        _fds.data(), (nfds_t)_fds.size(),
+        TIMEOUT * 1000); // without restriction to _fds.size this cast is unsafe
     // logging::log(logging::Debug, "poll()");
     if (checkSignal() == SIGINT)
       return 0;
@@ -70,26 +71,29 @@ void Server::serveAll(void) {
 
 void Server::process(void) {
 
-  //sleep(1); // can be used to slow down loop for debugging
-  //logging::log(logging::Debug, "Process");
+  // sleep(1); // can be used to slow down loop for debugging
+  // logging::log(logging::Debug, "Process");
   time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-    
-  	int type = getSocketType(it->fd);
-    handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
-                          // new connections
-   // std::cout << getFdInfoString(*it, it->fd, type);
-	if (type == IS_CLIENT){
-		if (newCGISocketAdded(it->fd) != true){
-      if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
-		  logging::log2(logging::Debug, it->fd, " scheduleForDemolition() in Server::process()");
-        _clientMap.at(it->fd).scheduleForDemolition();
+
+    int type = getSocketType(it->fd);
+    handleCondition(*it, type,
+                    timeNow); // sets conditions in client Connection, or
+                              // accepts new connections
+    // std::cout << getFdInfoString(*it, it->fd, type);
+    if (type == IS_CLIENT) {
+      if (newCGISocketAdded(it->fd) != true) {
+        if (type == IS_CLIENT &&
+            timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT) {
+          logging::log2(logging::Debug, it->fd,
+                        " scheduleForDemolition() in Server::process()");
+          _clientMap.at(it->fd).scheduleForDemolition();
+        }
       }
     }
-	}
-	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
-    _deleteFdBatch.insert(std::make_pair(it->fd, type));
-  }
+    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+      _deleteFdBatch.insert(std::make_pair(it->fd, type));
+    }
     it->revents = 0;
     it++;
   }
@@ -101,80 +105,80 @@ void Server::process(void) {
 }
 
 bool Server::newCGISocketAdded(int Fd) {
-	Connection *connection  = &_clientMap.at(Fd);
-	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
+  Connection *connection = &_clientMap.at(Fd);
+  // int potentialNewSocket = clientMap.at(Fd)->_socketForward;
   if (connection->getCgiFinishedStatus() == true) {
     return false;
   }
-	int fwdSock = connection->getSockForward();
-	if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
-		logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
-		_fwdMap.insert(std::make_pair(fwdSock, connection));
-    const pollfd newFd = {fwdSock, determineEventsFwd(connection->getConditionsWanted()), 0};
+  int fwdSock = connection->getSockForward();
+  if (fwdSock != -1 && _fwdMap.find(fwdSock) == _fwdMap.end()) {
+    logging::log2(logging::Debug, "Got a new forward socket: ", fwdSock);
+    _fwdMap.insert(std::make_pair(fwdSock, connection));
+    const pollfd newFd = {
+        fwdSock, determineEventsFwd(connection->getConditionsWanted()), 0};
     _newFdBatch.push_back(newFd);
     return true;
-	}
+  }
   return false;
 }
 
-void Server::updateEvents(void){
+void Server::updateEvents(void) {
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
-  	int type = getSocketType(it->fd);
-	int conditionsWanted;
-	if (type == IS_LISTENER) {
-		it++;
-		continue;
-	}
-	if (type == IS_CLIENT) {
-		conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
-		it->events = determineEventsClient(conditionsWanted);
-	}
-	if (type == IS_FWD) {
-		Connection *clientConnection =_fwdMap.at(it->fd);
-		conditionsWanted = clientConnection->getConditionsWanted();
-		it->events = determineEventsFwd(conditionsWanted);
-	}
+    int type = getSocketType(it->fd);
+    int conditionsWanted;
+    if (type == IS_LISTENER) {
+      it++;
+      continue;
+    }
+    if (type == IS_CLIENT) {
+      conditionsWanted = _clientMap.at(it->fd).getConditionsWanted();
+      it->events = determineEventsClient(conditionsWanted);
+    }
+    if (type == IS_FWD) {
+      Connection *clientConnection = _fwdMap.at(it->fd);
+      conditionsWanted = clientConnection->getConditionsWanted();
+      it->events = determineEventsFwd(conditionsWanted);
+    }
     it++;
   }
 }
 
-short Server::determineEventsClient(int ConditionsWanted){
+short Server::determineEventsClient(int ConditionsWanted) {
 
-	short events = POLLERR | POLLHUP;
-	if (ConditionsWanted & SockWrite) {
-		events = events | POLLOUT | POLLRDHUP;
-		// TODO rdhup good here?
-	}
-	if (ConditionsWanted & SockRead) {
-		events = events | POLLIN | POLLRDHUP;
-		// TODO rdhup good here?
-	}
-	return (events);
+  short events = POLLERR | POLLHUP;
+  if (ConditionsWanted & SockWrite) {
+    events = events | POLLOUT | POLLRDHUP;
+    // TODO rdhup good here?
+  }
+  if (ConditionsWanted & SockRead) {
+    events = events | POLLIN | POLLRDHUP;
+    // TODO rdhup good here?
+  }
+  return (events);
 }
 
-short Server::determineEventsFwd(int ConditionsWanted){
+short Server::determineEventsFwd(int ConditionsWanted) {
 
-	short events = POLLERR | POLLHUP;
-	if (ConditionsWanted & FSockWrite) {
-		events = events | POLLOUT | POLLRDHUP;
-		// TODO rdhup good here?
-	}
-	if (ConditionsWanted & FSockRead) {
-		events = events | POLLIN | POLLRDHUP;
-		// TODO rdhup good here?
-	}
-	return (events);
+  short events = POLLERR | POLLHUP;
+  if (ConditionsWanted & FSockWrite) {
+    events = events | POLLOUT | POLLRDHUP;
+    // TODO rdhup good here?
+  }
+  if (ConditionsWanted & FSockRead) {
+    events = events | POLLIN | POLLRDHUP;
+    // TODO rdhup good here?
+  }
+  return (events);
 }
 
 /* shouldBeDeleted is called only by Server::process, which
-	guarantees that Type will be IS_CLINET or IS_FWD */
+  guarantees that Type will be IS_CLINET or IS_FWD */
 
 bool Server::shouldBeDeleted(int Fd, int Type) {
-  if (Type == IS_CLIENT){
-	  return (_clientMap.at(Fd).getDeleteStatus());
-  }
-  else if (Type == IS_FWD) {
-  	int clientFd = _fwdMap.at(Fd)->getSock();
+  if (Type == IS_CLIENT) {
+    return (_clientMap.at(Fd).getDeleteStatus());
+  } else if (Type == IS_FWD) {
+    int clientFd = _fwdMap.at(Fd)->getSock();
     // There are 3 instances where a forward socket should be deleted:
     // 1. if the client has already been deleted (not currently possible)
     if (_clientMap.find(clientFd) == _clientMap.end())
@@ -183,42 +187,42 @@ bool Server::shouldBeDeleted(int Fd, int Type) {
     if (_clientMap.at(clientFd).getCgiFinishedStatus() == true)
       return true;
     // 3. if the forward socket's client is marked for deletion
-  	return (_clientMap.at(clientFd).getDeleteStatus());
+    return (_clientMap.at(clientFd).getDeleteStatus());
+  } else {
+    logging::log(logging::Error, "Server::shouldBeDeleted "
+                                 "expected IS_CLIENT or IS_FWD fd");
+    exit(1);
   }
-  else {
-	logging::log(logging::Error, "Server::shouldBeDeleted "
-		"expected IS_CLIENT or IS_FWD fd");
-		exit (1);
-	}
 }
 
 void Server::closeAndDeleteBatch(void) {
-  for (std::map<int, int>::iterator it = _deleteFdBatch.begin(); it != _deleteFdBatch.end(); it++) {
-    logging::log3(logging::Debug, it->first, " will be closed and deleted from map of type ", getTypeString(it->second));
+  for (std::map<int, int>::iterator it = _deleteFdBatch.begin();
+       it != _deleteFdBatch.end(); it++) {
+    logging::log3(logging::Debug, it->first,
+                  " will be closed and deleted from map of type ",
+                  getTypeString(it->second));
     if (it->second == IS_FWD) {
       _fwdMap.erase(it->first);
-    }
-    else if (it->second == IS_CLIENT){
+    } else if (it->second == IS_CLIENT) {
       _clientMap.erase(it->first);
-    }
-    else {
+    } else {
       logging::log(logging::Error, "Server::closeAndDeleteBatch "
-          "expected IS_CLIENT or IS_FWD");
-        exit (1);
+                                   "expected IS_CLIENT or IS_FWD");
+      exit(1);
     }
     close(it->first);
   }
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
     if (_deleteFdBatch.find(it->fd) != _deleteFdBatch.end()) {
-      logging::log2(logging::Debug, it->fd, " will be removed from pollfd vector");
+      logging::log2(logging::Debug, it->fd,
+                    " will be removed from pollfd vector");
       it = _fds.erase(it);
-    }
-    else {
+    } else {
       it++;
     }
   }
   _deleteFdBatch.clear();
-}  
+}
 
 // adds new connection to _clientMap -- move to pollhandling??
 

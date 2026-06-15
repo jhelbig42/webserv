@@ -27,9 +27,10 @@ void Server::handlePollnval(int Fd, int Type) {
                 Fd);
   if (Type == IS_CLIENT) {
     logging::log2(logging::Error, Fd, " is a client socket");
-		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollnval()");
-	  _fwdMap.at(Fd)->scheduleForDemolition();
-	return;
+    logging::log2(logging::Debug, Fd,
+                  " scheduleForDemolition() in handlePollnval()");
+    _fwdMap.at(Fd)->scheduleForDemolition();
+    return;
   }
   if (Type == IS_FWD) {
     logging::log2(logging::Error, Fd, " is forward socket");
@@ -55,7 +56,8 @@ void Server::handlePollhup(int Fd, int Type) {
                 " fd = ",
                 Fd);
   if (Type == IS_CLIENT) {
-		logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollhup()");
+    logging::log2(logging::Debug, Fd,
+                  " scheduleForDemolition() in handlePollhup()");
     _clientMap.at(Fd).scheduleForDemolition();
   } else if (Type == IS_FWD) {
     logging::log3(logging::Debug,
@@ -64,7 +66,8 @@ void Server::handlePollhup(int Fd, int Type) {
     return;
   }
   if (Type == IS_LISTENER) {
-    logging::log2(logging::Error, Fd, " is listening socket. This is truly bizarre.");
+    logging::log2(logging::Error, Fd,
+                  " is listening socket. This is truly bizarre.");
     return;
   }
 }
@@ -78,11 +81,13 @@ void Server::handlePollerr(int Fd, int Type) {
   const std::ostringstream msg;
   logging::log2(logging::Info,
                 "networking::process(): POLLERR \n\tclient/cgi may have "
-                "disconnected abruptly using RST (forcible reset), or socket is broken.\n fd = ",
+                "disconnected abruptly using RST (forcible reset), or socket "
+                "is broken.\n fd = ",
                 Fd);
   if (Type == IS_CLIENT) {
     logging::log2(logging::Info, Fd, " is a client socket");
-	//logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollerr()");
+    // logging::log2(logging::Debug, Fd, " scheduleForDemolition() in
+    // handlePollerr()");
     _clientMap.at(Fd).scheduleForDemolition();
     return;
   }
@@ -95,7 +100,8 @@ void Server::handlePollerr(int Fd, int Type) {
     return;
   }
   if (Type == IS_LISTENER) {
-    logging::log2(logging::Info, Fd, " is listening socket. This is truly bizarre.");
+    logging::log2(logging::Info, Fd,
+                  " is listening socket. This is truly bizarre.");
     return;
   }
 }

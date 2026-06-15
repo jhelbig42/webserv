@@ -15,35 +15,35 @@
 
 class Reaction {
 public:
+  typedef enum {
+    NotInitialized,
+    SendFile,
+    ReceiveFile,
+    CgiPost,
+    CgiNotPost
+  } ProcessType;
 
-	typedef enum { 
-		NotInitialized,
-		SendFile,
-		ReceiveFile, 
-		CgiPost,
-		CgiNotPost } ProcessType;
-	
-	Reaction();
-    explicit Reaction(const Request &Req);
-	~Reaction();
-	
+  Reaction();
+  explicit Reaction(const Request &Req);
+  ~Reaction();
+
   /// @fn void init(const Request &Req)
   /// @brief initialize Reaction from Request
   /// @param Req
   /// The function processes the Request object. During this inavlid Requests
   /// cause a Error File to be send.
   /// Function also determines if Request is pointing to a CGI or not. It is
-  /// decided then will the specific function need to initialize a Response 
+  /// decided then will the specific function need to initialize a Response
   /// depending on the Request Method.
   ///
 
-	void init(const Request &Req, const int Socket, int &ForwardSocket);
+  void init(const Request &Req, const int Socket, int &ForwardSocket);
 
-  /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
-  /// \brief continues processing a Reaction object
+  /// \fn bool process(const int Socket, const size_t Bytes, const int
+  /// Condition); \brief continues processing a Reaction object
   ///
   /// Depending on the given Conditions, process() decides how to continue
-  /// processing the Reaction object. This funciton is also open to the 
+  /// processing the Reaction object. This funciton is also open to the
   /// possibilty that several Conditions can be true withinthis Connection.
   /// It is for instance possible that the Reaction receives from the CGI
   /// socket and sends to the client within one call.
@@ -58,7 +58,7 @@ public:
   ///
   /// If this Reaction is running a CGI, process() it will also call
   /// checkOnChild() to ensure the child did not exit with an error.
-  /// 
+  ///
   /// \param Socket socket associated with Reaction
   /// \param Bytes the maximum amount of Bytes to process by system calls
   /// \param Condition the Conditions that are fullfilled for the corresponding
@@ -69,11 +69,11 @@ public:
   /// after sending to the Client process can return true.
   bool process(const int Socket, const size_t Bytes, const int Condition);
 
-  ProcessType	getProcessType(void) const;
-  int			getForwardSocket(void) const;
-  bool			getInputDone(void) const;
-  void			setTmpPathName(void);
-  void			setFinalPathName(void);
+  ProcessType getProcessType(void) const;
+  int getForwardSocket(void) const;
+  bool getInputDone(void) const;
+  void setTmpPathName(void);
+  void setFinalPathName(void);
 
   void setPathInfo(const PathInfo &PathInfo);
 
@@ -94,12 +94,12 @@ private:
   void initMethodNonCGI(const Request &Req);
   void initHeadGet(const Request &Req);
   void initDelete(void);
-  
+
   void initCGIMethod(const Request &Req);
 
-  //for Post request
+  // for Post request
   void receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
-  
+
   // called by process()
   /// \fn checkOnChild(void)
   /// \brief checks if the child process belonging to a CGI is finished.
@@ -114,24 +114,24 @@ private:
 
   HttpHeaders _headers;
   ProcessType _processType;
-  bool        _http09;
-  size_t      _reqContLen;
-  size_t      _receivedContLen;
+  bool _http09;
+  size_t _reqContLen;
+  size_t _receivedContLen;
 
   // consider abstraction for metaData
-  bool			_metadataSent;
-  std::string 	_metadata;
-  std::string	_body;
+  bool _metadataSent;
+  std::string _metadata;
+  std::string _body;
 
-  int     		_fdIn;
-  int     		_sock;
-  Buffer  		_buffer;
+  int _fdIn;
+  int _sock;
+  Buffer _buffer;
 
   std::string _finalPath;
   std::string _tmpPath;
 
-  Script  		_script;
-  CGIProcess 	_cgi; 
+  Script _script;
+  CGIProcess _cgi;
 
-  PathInfo		_pathInfo;
+  PathInfo _pathInfo;
 };

@@ -1,8 +1,8 @@
 
+#include "Reaction.hpp"
 #include "CGIProcess.hpp"
 #include "HttpHeaders.hpp"
 #include "Logging.hpp"
-#include "Reaction.hpp"
 #include "Request.hpp"
 #include "StatusCodes.hpp"
 #include "Website.hpp"
@@ -30,17 +30,17 @@ void Reaction::setDefaults(void) {
 }
 
 Reaction::Reaction()
-    : _processType(NotInitialized), _http09(false), _metadataSent(false), _fdIn(-1) {
+    : _processType(NotInitialized), _http09(false), _metadataSent(false),
+      _fdIn(-1) {
   _headers.unsetAll();
 }
 
-Reaction::~Reaction(){
-	if (_fdIn != -1)
-		close(_fdIn);
+Reaction::~Reaction() {
+  if (_fdIn != -1)
+    close(_fdIn);
 }
 
-
-Reaction::ProcessType Reaction::getProcessType(void) const{
+Reaction::ProcessType Reaction::getProcessType(void) const {
   return _processType;
 }
 
@@ -52,8 +52,8 @@ bool Reaction::getInputDone(void) const {
   return _cgi.getInputDone();
 }
 
-void Reaction::setPathInfo(const PathInfo &PathInfo){
-	_pathInfo = PathInfo;
+void Reaction::setPathInfo(const PathInfo &PathInfo) {
+  _pathInfo = PathInfo;
 }
 
 void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
@@ -65,35 +65,37 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
     initSendError(CODE_400);
     return;
   }
-  if (!(_pathInfo.getAllowed() & Req.getMethod())){
-	logging::log(logging::Debug, "Requested method not allowed");
-  	initSendError(CODE_403);
-	return ;
+  if (!(_pathInfo.getAllowed() & Req.getMethod())) {
+    logging::log(logging::Debug, "Requested method not allowed");
+    initSendError(CODE_403);
+    return;
   }
-  
+
   _http09 = (Req.getMajorV() == 0 && Req.getMinorV() == 9);
   if (_http09) {
     if (Req.getMethod() != Get) {
       initSendError(CODE_400);
       return;
     }
-  } else if (!((Req.getMinorV() == 0
-        && (Req.getMajorV() == 1 || Req.getMajorV() == 2 || Req.getMajorV() == 3))
-      || (Req.getMajorV() == 1 && Req.getMinorV() == 1))) {
+  } else if (!((Req.getMinorV() == 0 &&
+                (Req.getMajorV() == 1 || Req.getMajorV() == 2 ||
+                 Req.getMajorV() == 3)) ||
+               (Req.getMajorV() == 1 && Req.getMinorV() == 1))) {
     // allow 1.0, 2.0, 3.0 and 1.1
     initSendFile(CODE_501, FILE_501);
     return;
   }
 
-  //check if Resource is a CGI script
-  if(_pathInfo.getCgiPath() == ""){
-	  logging::log(logging::Debug, "Req is NOT a CGI");
-	  if (Req.getQueryString() != ""){ // query strings are just allowed in CGI calls
-		  initSendError(CODE_400);
-		  return;
-	  }
-	  initMethodNonCGI(Req);
-	  return;
+  // check if Resource is a CGI script
+  if (_pathInfo.getCgiPath() == "") {
+    logging::log(logging::Debug, "Req is NOT a CGI");
+    if (Req.getQueryString() !=
+        "") { // query strings are just allowed in CGI calls
+      initSendError(CODE_400);
+      return;
+    }
+    initMethodNonCGI(Req);
+    return;
   }
 
   logging::log(logging::Debug, "Req is a CGI");
@@ -108,7 +110,8 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 }
 
 void Reaction::initSendError(const int Code) {
-  const char *configFile = _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
+  const char *configFile =
+      _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
   if (configFile != NULL) {
     std::string path;
     if (configFile[0] == '/')
@@ -156,7 +159,6 @@ void Reaction::initSendFile(const int Code, const char *File) {
   _processType = SendFile;
 }
 
-
 static void setMetadata(std::string &Metadata, const int Code,
                         const HttpHeaders &Hdrs) {
   std::ostringstream oss;
@@ -203,7 +205,9 @@ bool Reaction::initPostBody(const Request &Req) {
   }
   _reqContLen = Req.getHeaders().getContentLength();
   if (_reqContLen > _pathInfo.getMaxReqBody()) {
-    logging::log(logging::Debug, "requested Content Length exceeds Max Body Length allowed by Config");
+    logging::log(
+        logging::Debug,
+        "requested Content Length exceeds Max Body Length allowed by Config");
     initSendError(CODE_403);
     return false;
   }
@@ -229,7 +233,6 @@ bool Reaction::initError(const int Errno) {
     return false;
   }
 }
-
 
 static std::string getReasonPhrase(const int Code) {
   switch (Code) {

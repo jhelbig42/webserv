@@ -20,7 +20,7 @@ void Server::setSockRead(int Fd) {
 }
 
 void Server::setFSockRead(int Fd) {
-  const std::map<int, Connection * const>::iterator itC = _fwdMap.find(Fd);
+  const std::map<int, Connection *const>::iterator itC = _fwdMap.find(Fd);
   if (itC != _fwdMap.end()) {
     (itC->second)->addToConditions(FSockRead);
   } else {
@@ -33,8 +33,7 @@ void Server::handleNewConnection(int Fd) {
   ClientAddr candidate;
   if (acceptConnection(Fd, &candidate) != -1) {
     addConnectionToMap(Fd, candidate);
-    const short events =
-        POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
+    const short events = POLLIN | POLLERR | POLLHUP | POLLPRI | POLLRDHUP;
     const pollfd newFd = {candidate.clientSock, events, 0};
     _newFdBatch.push_back(newFd);
   }

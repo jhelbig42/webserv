@@ -4,21 +4,20 @@
 
 #define DATE_LENGTH 80
 
-std::string getCurrentTimeString()
-{
-    time_t rawtime;
-    time(&rawtime);
+std::string getCurrentTimeString() {
+  time_t rawtime;
+  time(&rawtime);
 
-    const struct tm* timeinfo = gmtime(&rawtime);
+  const struct tm *timeinfo = gmtime(&rawtime);
 
-    char buffer[DATE_LENGTH];
-    strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S %Z", timeinfo);
+  char buffer[DATE_LENGTH];
+  strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S %Z", timeinfo);
 
-    return (std::string)buffer;
+  return (std::string)buffer;
 }
 
-std::string getTimeStringFromTimespec(const struct timespec Time){
-	char buffer[DATE_LENGTH];
-	strftime(buffer, sizeof(buffer), "%d-%b-%Y %H:%M", gmtime(&Time.tv_sec));
-	return (std::string)buffer;
+std::string getTimeStringFromTimespec(const struct timespec Time) {
+  char buffer[DATE_LENGTH];
+  strftime(buffer, sizeof(buffer), "%d-%b-%Y %H:%M", gmtime(&Time.tv_sec));
+  return (std::string)buffer;
 }

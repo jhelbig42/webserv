@@ -22,7 +22,6 @@
 
 class Connection {
 public:
-   
   Connection(const int Sock, const sockaddr_storage &Addr,
              const socklen_t addrSize, const Website &website);
   ~Connection();
@@ -46,7 +45,7 @@ public:
   void resetSockFwd(void);
 
   // send & receive
-  //void readData(void);
+  // void readData(void);
   bool serve(const size_t Bytes);
   void serve(void);
   Request _req;
@@ -71,11 +70,12 @@ private:
   bool _delete; // set by scheduleForDemolition
   bool _cgiFinished;
   // _cgiFinished, aka "_deleteFwd"
-  // renamed because it is still used after the forward socket has already been deleted
+  // renamed because it is still used after the forward socket has already been
+  // deleted
   struct addrinfo _info;
   struct sockaddr_storage _addr; // client's IP
   socklen_t _addrSize;
-  
-  Buffer	_buf;
-  char		_readBuf[MAX_REQUEST];
+
+  Buffer _buf;
+  char _readBuf[MAX_REQUEST];
 };
