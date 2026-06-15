@@ -45,7 +45,6 @@ public:
   void resetSockFwd(void);
 
   // send & receive
-  // void readData(void);
   bool serve(const size_t Bytes);
   void serve(void);
   Request _req;
