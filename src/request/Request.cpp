@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include <stdexcept>
 #include "HttpMethods.hpp"
 #include "Logging.hpp"
 #include <string>
@@ -67,17 +68,26 @@ std::vector<std::string> split(const std::string &S,
 
 void Request::readFromSocket(int Fd) {
   logging::log(logging::Debug, "readFromSocket() starts");
-  const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
-
+  //const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+	ssize_t bytesRead;
+	try {
+		bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+	} catch (std::runtime_error &e) {
+		// client disconnected before/while we tried to read
+		logging::log3(logging::Info, "readFromSocket: read from client failed (",
+		              e.what(), "), treating as hangup");
+		_state = CLIENTHUNGUP;
+		return;
+	}
   if (bytesRead == MAX_REQUEST) {
     logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
     // May happen frequently, will be handled in chunks
     // Logging for debug purposes as we build.
   }
   if (bytesRead == 0) {
-    logging::log(logging::Warning, "read_data(): bytes_read == 0");
+    logging::log(logging::Info, "read_data(): bytes_read == 0");
     _state = CLIENTHUNGUP;
-    logging::log(logging::Warning, "client appears to have hung up.");
+    logging::log(logging::Info, "client appears to have hung up.");
     return;
   }
   if (bytesRead < 0) {
