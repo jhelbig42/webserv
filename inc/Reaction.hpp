@@ -39,8 +39,8 @@ public:
 
   void init(const Request &Req, const int Socket, int &ForwardSocket);
 
-  /// \fn bool process(const int Socket, const size_t Bytes, const int Condition);
-  /// \brief continues processing a Reaction object
+  /// \fn bool process(const int Socket, const size_t Bytes, const int
+  /// Condition); \brief continues processing a Reaction object
   ///
   /// Depending on the given Conditions, process() decides how to continue
   /// processing the Reaction object. This funciton is also open to the
@@ -77,11 +77,11 @@ public:
   void setTmpPathName(void);
   void setFinalPathName(void);
 ||||||| parent of 89d8821 (fix(clang-format all))
-  ProcessType	getProcessType(void) const;
-  int			getForwardSocket(void) const;
-  bool			getInputDone(void) const;
-  void			setTmpPathName(void);
-  void			setFinalPathName(void);
+  ProcessType getProcessType(void) const;
+  int getForwardSocket(void) const;
+  bool getInputDone(void) const;
+  void setTmpPathName(void);
+  void setFinalPathName(void);
 =======
   ProcessType getProcessType(void) const;
   int getForwardSocket(void) const;

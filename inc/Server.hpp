@@ -72,27 +72,27 @@ private:
   short getForwardEvents(int ConditionsWanted);
   void closeAndDeleteBatch(void);
   void addAllNewFwdSockets(void);
-	
-	// ServerWrappers.hpp -- networking wrappers
-	struct addrinfo *getAddrInfo(const Listen &Pair); // getaddrinfo()
-	int createSocket(const struct addrinfo *P); // socket()
-	int clearSocket(const int Sock); // setsockopt()
-	int bindToIP(const int Sock, const struct addrinfo *P); //bind()
-	void setToListen(const int Sock); // listen()
-	int acceptConnection(int ListenerFd, ClientAddr *Candidate); //accept()
-	
-	// ServerRun.hpp -- outer loop function PollLoop() is public
-	void process(void);
-	int  getSocketType(int Fd);
-	void serveAll(void);
-	void updateEvents(void);
-	short	 determineEventsClient(int Fd);
-	short  determineEventsFwd(int Fd);
-	bool shouldBeDeleted(int Fd, int Type);
-	bool newCGISocketAdded(int Fd);
-	void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
-	short getForwardEvents(int ConditionsWanted);
-	void closeAndDeleteBatch(void);
+
+  // ServerWrappers.hpp -- networking wrappers
+  struct addrinfo *getAddrInfo(const Listen &Pair);            // getaddrinfo()
+  int createSocket(const struct addrinfo *P);                  // socket()
+  int clearSocket(const int Sock);                             // setsockopt()
+  int bindToIP(const int Sock, const struct addrinfo *P);      // bind()
+  void setToListen(const int Sock);                            // listen()
+  int acceptConnection(int ListenerFd, ClientAddr *Candidate); // accept()
+
+  // ServerRun.hpp -- outer loop function PollLoop() is public
+  void process(void);
+  int getSocketType(int Fd);
+  void serveAll(void);
+  void updateEvents(void);
+  short determineEventsClient(int Fd);
+  short determineEventsFwd(int Fd);
+  bool shouldBeDeleted(int Fd, int Type);
+  bool newCGISocketAdded(int Fd);
+  void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
+  short getForwardEvents(int ConditionsWanted);
+  void closeAndDeleteBatch(void);
 
   // ServerHandlePoll.hpp
   void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);
