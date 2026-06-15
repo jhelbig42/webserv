@@ -93,6 +93,7 @@ void Server::process(void) {
   // logging::log(logging::Debug, "Process");
   time_t timeNow = time(NULL);
   for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end();) {
+<<<<<<< HEAD
     int type = getSocketType(it->fd);
     if (type != IS_LISTENER){
       logging::log(logging::Debug, "");
@@ -117,7 +118,47 @@ void Server::process(void) {
     }
     if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
       _deleteFdBatch.insert(std::make_pair(it->fd, type));
+||||||| parent of 89d8821 (fix(clang-format all))
+    
+  	int type = getSocketType(it->fd);
+    handleCondition(*it, type, timeNow); // sets conditions in client Connection, or accepts
+                          // new connections
+   // std::cout << getFdInfoString(*it, it->fd, type);
+	if (type == IS_CLIENT){
+		if (newCGISocketAdded(it->fd) != true){
+      if (type == IS_CLIENT && timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT){
+		  logging::log2(logging::Debug, it->fd, " scheduleForDemolition() in Server::process()");
+        _clientMap.at(it->fd).scheduleForDemolition();
+      }
+=======
+
+    int type = getSocketType(it->fd);
+    handleCondition(*it, type,
+                    timeNow); // sets conditions in client Connection, or
+                              // accepts new connections
+    // std::cout << getFdInfoString(*it, it->fd, type);
+    if (type == IS_CLIENT) {
+      if (newCGISocketAdded(it->fd) != true) {
+        if (type == IS_CLIENT &&
+            timeNow - _clientMap.at(it->fd).getTimeLastActive() >= TIMEOUT) {
+          logging::log2(logging::Debug, it->fd,
+                        " scheduleForDemolition() in Server::process()");
+          _clientMap.at(it->fd).scheduleForDemolition();
+        }
+      }
+>>>>>>> 89d8821 (fix(clang-format all))
     }
+<<<<<<< HEAD
+||||||| parent of 89d8821 (fix(clang-format all))
+	}
+	if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+    _deleteFdBatch.insert(std::make_pair(it->fd, type));
+  }
+=======
+    if (type != IS_LISTENER && shouldBeDeleted(it->fd, type) == true) {
+      _deleteFdBatch.insert(std::make_pair(it->fd, type));
+    }
+>>>>>>> 89d8821 (fix(clang-format all))
     it->revents = 0;
     it++;
   }
@@ -132,7 +173,15 @@ void Server::process(void) {
 }
 
 bool Server::newCGISocketAdded(int Fd) {
+<<<<<<< HEAD
   Connection *connection = &_clientMap.at(Fd);
+||||||| parent of 89d8821 (fix(clang-format all))
+	Connection *connection  = &_clientMap.at(Fd);
+	//int potentialNewSocket = clientMap.at(Fd)->_socketForward;
+=======
+  Connection *connection = &_clientMap.at(Fd);
+  // int potentialNewSocket = clientMap.at(Fd)->_socketForward;
+>>>>>>> 89d8821 (fix(clang-format all))
   if (connection->getCgiFinishedStatus() == true) {
     return false;
   }

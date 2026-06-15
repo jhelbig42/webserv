@@ -15,8 +15,16 @@ std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs) {
     Os << "\r\n";
   }
   Os << NAME_DATE << ": " << getCurrentTimeString() << "\r\n";
+<<<<<<< HEAD
   Os << NAME_SERVER << ": " << "FamilyRoomWebserv/2147483647.1"
      << "\r\n"; // get the name from Config File
+||||||| parent of 89d8821 (fix(clang-format all))
+  Os << NAME_SERVER << ": " << "FamilyRoomWebserv/2147483647.1" << "\r\n"; // get the name from Config File
+=======
+  Os << NAME_SERVER << ": "
+     << "FamilyRoomWebserv/2147483647.1"
+     << "\r\n"; // get the name from Config File
+>>>>>>> 89d8821 (fix(clang-format all))
   // other headers
   return Os;
 }

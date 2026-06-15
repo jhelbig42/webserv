@@ -161,7 +161,15 @@ std::string Server::getFdInfoString(pollfd &it, int Fd, int Type) {
         << "\n";
   }
   msg << "\tevents: " << getReventsString(it.events) << "\n"
+<<<<<<< HEAD
       << "\trevents: " << getReventsString(it.revents) << "\n";
+||||||| parent of 89d8821 (fix(clang-format all))
+  << "\trevents: " << getReventsString(it.revents) << "\n"
+  << "\n";
+=======
+      << "\trevents: " << getReventsString(it.revents) << "\n"
+      << "\n";
+>>>>>>> 89d8821 (fix(clang-format all))
   return (msg.str());
 }
 

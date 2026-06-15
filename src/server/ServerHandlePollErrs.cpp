@@ -87,9 +87,18 @@ void Server::handlePollerr(int Fd, int Type) {
                 Fd);
   */
   if (Type == IS_CLIENT) {
+<<<<<<< HEAD
     logging::log2(logging::Info, Fd, " client socket got POLLERR");
     // logging::log2(logging::Debug, Fd, " scheduleForDemolition() in
     // handlePollerr()");
+||||||| parent of 89d8821 (fix(clang-format all))
+    logging::log2(logging::Info, Fd, " is a client socket");
+	//logging::log2(logging::Debug, Fd, " scheduleForDemolition() in handlePollerr()");
+=======
+    logging::log2(logging::Info, Fd, " is a client socket");
+    // logging::log2(logging::Debug, Fd, " scheduleForDemolition() in
+    // handlePollerr()");
+>>>>>>> 89d8821 (fix(clang-format all))
     _clientMap.at(Fd).scheduleForDemolition();
     return;
   }

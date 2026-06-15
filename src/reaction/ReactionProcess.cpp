@@ -51,31 +51,59 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes);
 
+<<<<<<< HEAD
 bool Reaction::process(const int Socket, const size_t Bytes,
                        const int Condition) {
 
   if (!checkOnChild()){
     logging::log2(logging::Debug, "in Reaction::process, checkOnChild() returned false for Fd", Socket);
     logging::log2(logging::Debug, "therefore returning false from Reaction::process() for Fd", Socket);
+||||||| parent of 89d8821 (fix(clang-format all))
+bool Reaction::process(const int Socket, const size_t Bytes, const int Condition){
+  
+  if (!checkOnChild())
+=======
+bool Reaction::process(const int Socket, const size_t Bytes,
+                       const int Condition) {
+
+  if (!checkOnChild())
+>>>>>>> 89d8821 (fix(clang-format all))
     return false;
+<<<<<<< HEAD
   }
   logging::log2(logging::Debug, "checkOnChild returned true for Fd ", Socket);
   logging::log(logging::Debug, "This could mean: child is nonexistent / still running / exited normally ?");
   // we just polled for what we need
   if (Condition & FSockRead)
+||||||| parent of 89d8821 (fix(clang-format all))
+ logging::log2(logging::Debug, "child finished for socket ", Socket);
+ // we just polled for what we need
+  if (Condition & FSockRead)   
+=======
+  logging::log2(logging::Debug, "child finished for socket ", Socket);
+  // we just polled for what we need
+  if (Condition & FSockRead)
+>>>>>>> 89d8821 (fix(clang-format all))
     receiveFromCGI(Bytes);
   if (Condition & FSockWrite)
     sendToCGI(Bytes);
   if (Condition & SockRead)
     recvFromClient(Socket, Bytes);
+<<<<<<< HEAD
   if (Condition & SockWrite) {
     logging::log2(logging::Debug, "In Reaction::process(), (Condition & SockWrite) == true", Socket);
     logging::log(logging::Debug, "therefore calling sendToClient()");
+||||||| parent of 89d8821 (fix(clang-format all))
+  if (Condition & SockWrite)   
+=======
+  if (Condition & SockWrite)
+>>>>>>> 89d8821 (fix(clang-format all))
     return sendToClient(Socket, Bytes);
   }
   return false;
 }
 
+<<<<<<< HEAD
 bool Reaction::checkOnChild(void) {
   //sleep(1);
   logging::log2(logging::Debug, "Reaction::checkOnChild() for Fd ", getSocket());
@@ -89,9 +117,55 @@ bool Reaction::checkOnChild(void) {
   if (timeElapsed > CGI_TIMEOUT) {
     logging::log(logging::Debug, "\tCGI timed out...");
     kill(pid, SIGKILL);
+||||||| parent of 89d8821 (fix(clang-format all))
+bool Reaction::checkOnChild(void){
+	const pid_t pid = _cgi.getPid();
+	if (pid == -1) // no CGI
+		return true;
+	time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
+	if (timeElapsed > CGI_TIMEOUT) {
+		logging::log(logging::Debug, "CGI timed out.");
+		kill(pid, SIGKILL);
+		_cgi.setPid(-1);
+		initSendError(CODE_500);
+		return false;
+	}
+  	int status;
+	const pid_t result = waitpid(pid, &status, WNOHANG);
+  	if (result == -1){
+    	_cgi.setPid(-1);
+		initSendError(CODE_500);
+		return false; // waitpid failed => internal server error
+	}
+	if (result == 0) // child not finished yet
+		return true; //come back later
+	if (WIFEXITED(status)) { //child somehow exited
+		_cgi.setChildProcessDone(true);
+		// find out how
+    	if (WEXITSTATUS(status) == 0) {
+      		logging::log(logging::Debug, "CGI exited normally with 0");
+			_cgi.setPid(-1);
+      		return true;
+    	}
+    	logging::log(logging::Debug, "CGI exited with error code");
+    } 
+	else if (WIFSIGNALED(status)) {
+        logging::log(logging::Debug, "CGI was killed by signal");
+    }
+=======
+bool Reaction::checkOnChild(void) {
+  const pid_t pid = _cgi.getPid();
+  if (pid == -1) // no CGI
+    return true;
+  time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
+  if (timeElapsed > CGI_TIMEOUT) {
+    logging::log(logging::Debug, "CGI timed out.");
+    kill(pid, SIGKILL);
+>>>>>>> 89d8821 (fix(clang-format all))
     _cgi.setPid(-1);
     initSendError(CODE_500);
     return false;
+<<<<<<< HEAD
   }
   int status;
   const pid_t result = waitpid(pid, &status, WNOHANG);
@@ -122,6 +196,34 @@ bool Reaction::checkOnChild(void) {
   logging::log(logging::Debug, "\tpid is now set to -1. Sending Error Code 500");
   initSendError(CODE_500);
   return false;
+||||||| parent of 89d8821 (fix(clang-format all))
+=======
+  }
+  int status;
+  const pid_t result = waitpid(pid, &status, WNOHANG);
+  if (result == -1) {
+    _cgi.setPid(-1);
+    initSendError(CODE_500);
+    return false; // waitpid failed => internal server error
+  }
+  if (result == 0)         // child not finished yet
+    return true;           // come back later
+  if (WIFEXITED(status)) { // child somehow exited
+    _cgi.setChildProcessDone(true);
+    // find out how
+    if (WEXITSTATUS(status) == 0) {
+      logging::log(logging::Debug, "CGI exited normally with 0");
+      _cgi.setPid(-1);
+      return true;
+    }
+    logging::log(logging::Debug, "CGI exited with error code");
+  } else if (WIFSIGNALED(status)) {
+    logging::log(logging::Debug, "CGI was killed by signal");
+  }
+  _cgi.setPid(-1);
+  initSendError(CODE_500);
+  return false;
+>>>>>>> 89d8821 (fix(clang-format all))
 }
 
 void Reaction::sendToCGI(const size_t Bytes) {
@@ -147,6 +249,7 @@ void Reaction::receiveFromCGI(const size_t Bytes) {
       !_cgi.getInputDone())
     return;
 
+<<<<<<< HEAD
   // fill buffer from CGI socket — FSockRead guarantees data is available
   _buffer.optimize(Bytes);
   // logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ",
@@ -165,6 +268,41 @@ void Reaction::receiveFromCGI(const size_t Bytes) {
   } else {
     _cgi.setTimeLastActive(time(NULL));
   }
+||||||| parent of 89d8821 (fix(clang-format all))
+	// fill buffer from CGI socket — FSockRead guarantees data is available
+	_buffer.optimize(Bytes);
+	//logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ", _cgi.getForwardSocket());
+	const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+	//const ssize_t rc = _buffer.fileToBuf(5, Bytes);
+	if (rc < 0){ // when buffer is full
+		return ;
+	}
+	if (rc == 0) {
+		// EOF from forwardSocket transition to SendFile from remaining buffer
+		_fdIn = -1;
+		_processType = SendFile;
+	}
+	else {
+		_cgi.setTimeLastActive(time(NULL));
+	}
+=======
+  // fill buffer from CGI socket — FSockRead guarantees data is available
+  _buffer.optimize(Bytes);
+  // logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ",
+  // _cgi.getForwardSocket());
+  const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
+  // const ssize_t rc = _buffer.fileToBuf(5, Bytes);
+  if (rc < 0) { // when buffer is full
+    return;
+  }
+  if (rc == 0) {
+    // EOF from forwardSocket transition to SendFile from remaining buffer
+    _fdIn = -1;
+    _processType = SendFile;
+  } else {
+    _cgi.setTimeLastActive(time(NULL));
+  }
+>>>>>>> 89d8821 (fix(clang-format all))
 }
 
 void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
@@ -173,15 +311,36 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
+<<<<<<< HEAD
   // logging::log(logging::Debug, "Reaction::sendToClient()");
   if (_processType == SendFile) {
     logging::log2(logging::Debug, "In sendToClient(), _processType == SendFile for Fd ", Socket);
+||||||| parent of 89d8821 (fix(clang-format all))
+  //logging::log(logging::Debug, "Reaction::sendToClient()");
+  if (_processType == SendFile)
+=======
+  // logging::log(logging::Debug, "Reaction::sendToClient()");
+  if (_processType == SendFile)
+>>>>>>> 89d8821 (fix(clang-format all))
     return sendFile(Socket, Bytes);
+<<<<<<< HEAD
   }
   if ((_processType == CgiPost || _processType == CgiNotPost) &&
       _cgi.getInputDone()) {
     // logging::log(logging::Debug, "CGI input is done");
     if (sendMetadataIfPending(Socket, Bytes)) {
+||||||| parent of 89d8821 (fix(clang-format all))
+  if ((_processType == CgiPost || _processType == CgiNotPost) 
+  		&& _cgi.getInputDone()) 
+  {
+	//logging::log(logging::Debug, "CGI input is done");
+    if (sendMetadataIfPending(Socket, Bytes)){
+=======
+  if ((_processType == CgiPost || _processType == CgiNotPost) &&
+      _cgi.getInputDone()) {
+    // logging::log(logging::Debug, "CGI input is done");
+    if (sendMetadataIfPending(Socket, Bytes)) {
+>>>>>>> 89d8821 (fix(clang-format all))
       return false;
     }
     const size_t used = _buffer.getUsed();
@@ -207,11 +366,19 @@ bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
 }
 
 bool Reaction::sendFile(const int Socket, const size_t Bytes) {
+<<<<<<< HEAD
   logging::log2(logging::Debug, "in Reaction::sendFile() for Fd ", Socket);
   if (sendMetadataIfPending(Socket, Bytes)) {
     logging::log(logging::Debug, "\tsendMetadataIfPending() == true");
     logging::log(logging::Debug, "\ttherefore returning false");
     return false;
+||||||| parent of 89d8821 (fix(clang-format all))
+  if (sendMetadataIfPending(Socket, Bytes)){
+	return false;
+=======
+  if (sendMetadataIfPending(Socket, Bytes)) {
+    return false;
+>>>>>>> 89d8821 (fix(clang-format all))
   }
   if (!_body.empty()){
     logging::log(logging::Debug, "\t_body.empty() == false");

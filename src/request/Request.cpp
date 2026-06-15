@@ -26,6 +26,7 @@ void Request::reset() {
   _headers.unsetAll();
 }
 
+<<<<<<< HEAD
 void Request::process(int Socket) {
   readFromSocket(Socket); // fills _buf
   while (true) {
@@ -45,6 +46,57 @@ void Request::process(int Socket) {
     } else if (_state == INVALID) {
       logging::log2(logging::Debug, "Request::process() state is INVALID for Fd ", Socket);
       return;
+||||||| parent of 89d8821 (fix(clang-format all))
+void Request::process(int Socket)
+{
+    readFromSocket(Socket);  // fills _buf
+	while (true)
+    {
+		if (_state == CLIENTHUNGUP)
+			return ;
+        if (_state == STATUS_LINE)
+        {
+			logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
+            if (!parseRequestLineFromBuffer())
+                return ;
+        }
+        else if (_state == HEADERS)
+        {
+			logging::log(logging::Debug, "Request::process() state is HEADERS");
+            if (!parseHeadersFromBuffer())
+                return ;
+        }
+        else if (_state == COMPLETE)
+		{
+			logging::log(logging::Debug, "Request::process() state is COMPLETE");
+    		return ;
+		}
+		else if (_state == INVALID)
+		{
+			logging::log(logging::Debug, "Request::process() state is INVALID");
+    		return ;
+		}
+=======
+void Request::process(int Socket) {
+  readFromSocket(Socket); // fills _buf
+  while (true) {
+    if (_state == CLIENTHUNGUP)
+      return;
+    if (_state == STATUS_LINE) {
+      logging::log(logging::Debug, "Request::process() state is STATUS_LINE");
+      if (!parseRequestLineFromBuffer())
+        return;
+    } else if (_state == HEADERS) {
+      logging::log(logging::Debug, "Request::process() state is HEADERS");
+      if (!parseHeadersFromBuffer())
+        return;
+    } else if (_state == COMPLETE) {
+      logging::log(logging::Debug, "Request::process() state is COMPLETE");
+      return;
+    } else if (_state == INVALID) {
+      logging::log(logging::Debug, "Request::process() state is INVALID");
+      return;
+>>>>>>> 89d8821 (fix(clang-format all))
     }
   }
 }
@@ -65,14 +117,25 @@ std::vector<std::string> split(const std::string &S,
   return tokens;
 }
 
+<<<<<<< HEAD
 void Request::readFromSocket(int Fd) {
   logging::log2(logging::Debug, "readFromSocket() starts for Fd ", Fd);
   const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+||||||| parent of 89d8821 (fix(clang-format all))
+void Request::readFromSocket(int Fd){
+	logging::log(logging::Debug, "readFromSocket() starts");
+	const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+=======
+void Request::readFromSocket(int Fd) {
+  logging::log(logging::Debug, "readFromSocket() starts");
+  const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+>>>>>>> 89d8821 (fix(clang-format all))
 
   if (bytesRead == MAX_REQUEST) {
     logging::log(logging::Info, "read_data(): bytes_read == MAX REQUEST");
     // May happen frequently, will be handled in chunks
     // Logging for debug purposes as we build.
+<<<<<<< HEAD
   }
   if (bytesRead == 0) {
     logging::log(logging::Warning, "read_data(): bytes_read == 0");
@@ -86,6 +149,35 @@ void Request::readFromSocket(int Fd) {
     return;
   }
   logging::log2(logging::Debug, "readFromSocket() done for Fd ", Fd);
+||||||| parent of 89d8821 (fix(clang-format all))
+  	}
+  	if (bytesRead == 0) {
+    	logging::log(logging::Warning, "read_data(): bytes_read == 0");
+		_state = CLIENTHUNGUP;
+    	logging::log(logging::Warning, "client appears to have hung up.");
+    	return;
+  	}
+  	if (bytesRead < 0) {
+    	logging::log(logging::Warning, "buf.fill() not successful");
+	//	logging::log2(logging::Warning, "bytesRead = ", bytesRead);
+    	return;
+ 	}
+  	logging::log(logging::Debug, "readFromSocket() done");
+=======
+  }
+  if (bytesRead == 0) {
+    logging::log(logging::Warning, "read_data(): bytes_read == 0");
+    _state = CLIENTHUNGUP;
+    logging::log(logging::Warning, "client appears to have hung up.");
+    return;
+  }
+  if (bytesRead < 0) {
+    logging::log(logging::Warning, "buf.fill() not successful");
+    //	logging::log2(logging::Warning, "bytesRead = ", bytesRead);
+    return;
+  }
+  logging::log(logging::Debug, "readFromSocket() done");
+>>>>>>> 89d8821 (fix(clang-format all))
 }
 
 Buffer Request::getBuffer() const {

@@ -95,6 +95,7 @@ void Connection::resetSockFwd(void) {
   _sockForward = -1;
 }
 
+<<<<<<< HEAD
 void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
   logging::log2(logging::Debug, "In updateConditionsWanted() for Fd ", getSock());
   
@@ -144,6 +145,62 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
     logging::log(logging::Debug, "\t _conditionsWanted = SockRead");
     _conditionsWanted = SockRead;
   }
+||||||| parent of 89d8821 (fix(clang-format all))
+void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType){
+	switch (ProcessType){
+		case Reaction::SendFile:
+			_conditionsWanted = SockWrite;
+			break;
+		case Reaction::ReceiveFile:
+			_conditionsWanted = SockRead;
+			break;
+		case Reaction::CgiPost:
+			if (_react.getInputDone()){
+				if (_buf.getUsed() == 0){
+					_conditionsWanted = FSockRead;
+				}
+				else {
+					_conditionsWanted = SockWrite;
+				}
+			}
+			else
+				_conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+			break;
+		case Reaction::CgiNotPost:
+			_conditionsWanted = SockWrite | FSockRead;
+			break;
+		case Reaction::NotInitialized:
+		default:
+			_conditionsWanted = SockRead;
+
+	}
+=======
+void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
+  switch (ProcessType) {
+  case Reaction::SendFile:
+    _conditionsWanted = SockWrite;
+    break;
+  case Reaction::ReceiveFile:
+    _conditionsWanted = SockRead;
+    break;
+  case Reaction::CgiPost:
+    if (_react.getInputDone()) {
+      if (_buf.getUsed() == 0) {
+        _conditionsWanted = FSockRead;
+      } else {
+        _conditionsWanted = SockWrite;
+      }
+    } else
+      _conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+    break;
+  case Reaction::CgiNotPost:
+    _conditionsWanted = SockWrite | FSockRead;
+    break;
+  case Reaction::NotInitialized:
+  default:
+    _conditionsWanted = SockRead;
+  }
+>>>>>>> 89d8821 (fix(clang-format all))
 }
 
 void Connection::serve(void) {

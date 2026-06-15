@@ -89,12 +89,21 @@ ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   const size_t amount = std::min(Bytes, getFree());
   errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
+<<<<<<< HEAD
   logging::log2(logging::Debug, "in fileToBuf() for Fd ", Fd);
   logging::log2(logging::Debug, "\t_end = ", _end);
   logging::log2(logging::Debug, "\trc (bytes read) = ", rc);
   if (rc < 0) {
     //	logging::log2(logging::Warning, "fileToBuf() error on read: ",
     //strerror(errno));
+||||||| parent of 89d8821 (fix(clang-format all))
+  if (rc < 0){
+//	logging::log2(logging::Warning, "fileToBuf() error on read: ", strerror(errno));
+=======
+  if (rc < 0) {
+    //	logging::log2(logging::Warning, "fileToBuf() error on read: ",
+    //strerror(errno));
+>>>>>>> 89d8821 (fix(clang-format all))
     throw std::runtime_error(strerror(errno));
   }
   _end += (size_t)rc; // safe because rc >= 0 and rc <= getFree()

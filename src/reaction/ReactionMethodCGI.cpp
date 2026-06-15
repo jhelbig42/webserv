@@ -27,6 +27,7 @@ void Reaction::initCGIMethod(const Request &Req) {
     return;
   }
 
+<<<<<<< HEAD
   if (Req.getMethod() == Post) {
     if (!initPostBody(Req))
       return;
@@ -35,4 +36,23 @@ void Reaction::initCGIMethod(const Request &Req) {
   }
   _cgi.setInputDone(true); // Here, setInputDone is set to true because Method is GET & there is nothing to send
   _processType = CgiNotPost;
+||||||| parent of 89d8821 (fix(clang-format all))
+	if (Req.getMethod() == Post) {
+		if (!initPostBody(Req))
+			return;
+		_processType = CgiPost;
+		return;
+  	}
+	_cgi.setInputDone(true);
+	_processType = CgiNotPost;
+=======
+  if (Req.getMethod() == Post) {
+    if (!initPostBody(Req))
+      return;
+    _processType = CgiPost;
+    return;
+  }
+  _cgi.setInputDone(true);
+  _processType = CgiNotPost;
+>>>>>>> 89d8821 (fix(clang-format all))
 }
