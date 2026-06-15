@@ -111,7 +111,7 @@ void Connection::updateConditionsWanted(Reaction::ProcessType ProcessType) {
         _conditionsWanted = SockWrite;
       }
     } else
-      _conditionsWanted = SockWrite | SockRead | FSockWrite | FSockRead;
+      _conditionsWanted = SockRead | FSockWrite | FSockRead;
     break;
   case Reaction::CgiNotPost:
     _conditionsWanted = SockWrite | FSockRead;
