@@ -62,19 +62,19 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 
   logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
-    initSendError(CODE_400);
+    initSendCode(CODE_400);
     return;
   }
   if (!(_pathInfo.getAllowed() & Req.getMethod())) {
     logging::log(logging::Debug, "Requested method not allowed");
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return;
   }
 
   _http09 = (Req.getMajorV() == 0 && Req.getMinorV() == 9);
   if (_http09) {
     if (Req.getMethod() != Get) {
-      initSendError(CODE_400);
+      initSendCode(CODE_400);
       return;
     }
   } else if (!((Req.getMinorV() == 0 &&
@@ -82,34 +82,43 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
                  Req.getMajorV() == 3)) ||
                (Req.getMajorV() == 1 && Req.getMinorV() == 1))) {
     // allow 1.0, 2.0, 3.0 and 1.1
-    initSendFile(CODE_501, FILE_501);
+    initSendCode(CODE_501);
     return;
   }
 
   // check if Resource is a CGI script
-  if (_pathInfo.getCgiPath() == "") {
-    logging::log(logging::Debug, "Req is NOT a CGI");
-    if (Req.getQueryString() !=
-        "") { // query strings are just allowed in CGI calls
-      initSendError(CODE_400);
-      return;
-    }
-    initMethodNonCGI(Req);
-    return;
+  PathInfo::Action action = _pathInfo.getAction();
+  
+  switch (action){
+	case PathInfo::Default:
+    	logging::log(logging::Debug, "Req is NOT a CGI");
+    	if (Req.getQueryString() != "") { // query strings are just allowed in CGI calls
+      		initSendCode(CODE_400);
+      		return;
+    	}
+    	initMethodNonCGI(Req);
+    	return;
+	case PathInfo::Cgi:
+		logging::log(logging::Debug, "Req is a CGI");
+  		initCGIMethod(Req);
+  		if (_processType != CgiPost && _processType != CgiNotPost)
+    		return;
+  		_cgi.setCGIPath(_pathInfo.getCgiPath());
+  		if (!_cgi.init(Req, _script, _pathInfo.getRealPath(), ForwardSocket)) {
+    		initSendCode(CODE_500);
+    	return;
+  		}
+		return;
+	case PathInfo::Return:
+		initSendCode(_pathInfo.getCode());
   }
-
-  logging::log(logging::Debug, "Req is a CGI");
-  initCGIMethod(Req);
-  if (_processType != CgiPost && _processType != CgiNotPost)
-    return;
-  _cgi.setCGIPath(_pathInfo.getCgiPath());
-  if (!_cgi.init(Req, _script, _pathInfo.getRealPath(), ForwardSocket)) {
-    initSendError(CODE_500);
-    return;
-  }
+  return; 
 }
 
-void Reaction::initSendError(const int Code) {
+void Reaction::initSendCode(const int Code) {
+  std::string redir = "";
+  if (Code == CODE_301 || Code == CODE_302)
+	 redir = _pathInfo.getRealPath();
   const char *configFile =
       _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
   if (configFile != NULL) {
@@ -124,8 +133,11 @@ void Reaction::initSendError(const int Code) {
   std::string phrase = getReasonPhrase(Code);
   std::ostringstream body;
   body << "<!DOCTYPE html>\r\n<html>\r\n<head><title>" << Code << " " << phrase
-       << "</title></head>\r\n<body>\r\n<h1>" << Code << " " << phrase
-       << "</h1>\r\n</body>\r\n</html>";
+       << "</title></head>\r\n<body>\r\n<h1>" << Code << " " << phrase << "</h1>\r\n";
+  if(redir == "")
+	   body <<"</body>\r\n</html>";
+  else
+	body <<"Location: " << redir << "\r\n" << "</body>\r\n</html>";   
   initSendString(Code, body.str());
 }
 
@@ -200,7 +212,7 @@ bool Reaction::setFdIn(const int Code, const char *File) {
 bool Reaction::initPostBody(const Request &Req) {
   if (!Req.getHeaders().isSet(HttpHeaders::ContentLength)) {
     logging::log(logging::Debug, "POST: Content-Length header missing");
-    initSendError(CODE_400);
+    initSendCode(CODE_400);
     return false;
   }
   _reqContLen = Req.getHeaders().getContentLength();
@@ -208,7 +220,7 @@ bool Reaction::initPostBody(const Request &Req) {
     logging::log(
         logging::Debug,
         "requested Content Length exceeds Max Body Length allowed by Config");
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return false;
   }
   _buffer = Req.getBuffer();
@@ -223,13 +235,13 @@ static bool hasDefaultFile(const int Code) {
 bool Reaction::initError(const int Errno) {
   switch (Errno) {
   case EACCES:
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return false;
   case ENOENT:
-    initSendError(CODE_404);
+    initSendCode(CODE_404);
     return false;
   default:
-    initSendError(CODE_500);
+    initSendCode(CODE_500);
     return false;
   }
 }
