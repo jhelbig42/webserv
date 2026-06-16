@@ -1,6 +1,6 @@
 #include "Logging.hpp"
+#include "Request.hpp"
 #include "Server.hpp"
-
 #include "Signals.hpp"
 
 #include <cerrno>
@@ -194,7 +194,14 @@ short Server::determineEventsFwd(int ConditionsWanted) {
 
 bool Server::shouldBeDeleted(int Fd, int Type) {
   if (Type == IS_CLIENT) {
-    return (_clientMap.at(Fd).getDeleteStatus());
+    //return (_clientMap.at(Fd).getDeleteStatus());
+    if (_clientMap.at(Fd).getDeleteStatus() == true 
+		|| _clientMap.at(Fd)._react._hungUp == true)
+		|| _clientMap.at(Fd)._req.getState() == CLIENTHUNGUP {
+			return (true);
+	}
+	else
+		return (false);
   } else if (Type == IS_FWD) {
     int clientFd = _fwdMap.at(Fd)->getSock();
     // There are 3 instances where a forward socket should be deleted:
