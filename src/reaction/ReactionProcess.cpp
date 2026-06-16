@@ -70,45 +70,47 @@ bool Reaction::process(const int Socket, const size_t Bytes,
   return false;
 }
 
-bool Reaction::checkOnChild(void) {
-  const pid_t pid = _cgi.getPid();
-  if (pid == -1) // no CGI
-    return true;
-  time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
-  if (timeElapsed > CGI_TIMEOUT) {
-    logging::log(logging::Debug, "CGI timed out.");
-    kill(pid, SIGKILL);
+bool Reaction::checkOnChild(void){
+	const pid_t pid = _cgi.getPid();
+	if (pid == -1) // no CGI
+		return true;
+	time_t timeElapsed = time(NULL) - _cgi.getTimeLastActive();
+	if (timeElapsed > CGI_TIMEOUT) {
+		logging::log(logging::Debug, "CGI timed out.");
+		kill(pid, SIGKILL);
+		_cgi.setPid(-1);
+		initSendError(CODE_500);
+		return false;
+	}
+  	int status;
+	const pid_t result = waitpid(pid, &status, WNOHANG);
+  	if (result == -1){
+    	_cgi.setPid(-1);
+		initSendError(CODE_500);
+		return false; // waitpid failed => internal server error
+	}
+	if (result == 0) // child not finished yet
+		return true; //come back later
+	if (WIFEXITED(status)) { //child somehow exited
+		_cgi.setChildProcessDone(true);
+		_cgi.setInputDone(true);
+		// find out how
+    	if (WEXITSTATUS(status) == 0) {
+      		logging::log(logging::Debug, "CGI exited normally with 0");
+			_cgi.setPid(-1);
+      		return true;
+    	}
+    	logging::log(logging::Debug, "CGI exited with error code");
+		// do not attempt to send more to CGI as it finished
+    } 
+	else if (WIFSIGNALED(status)) {
+        logging::log(logging::Debug, "CGI was killed by signal");
+    }
     _cgi.setPid(-1);
     initSendError(CODE_500);
     return false;
-  }
-  int status;
-  const pid_t result = waitpid(pid, &status, WNOHANG);
-  if (result == -1) {
-    _cgi.setPid(-1);
-    initSendError(CODE_500);
-    return false; // waitpid failed => internal server error
-  }
-  if (result == 0)         // child not finished yet
-    return true;           // come back later
-  if (WIFEXITED(status)) { // child somehow exited
-    _cgi.setChildProcessDone(true);
-    // find out how
-    if (WEXITSTATUS(status) == 0) {
-      logging::log(logging::Debug, "CGI exited normally with 0");
-      _cgi.setPid(-1);
-      _cgi.setInputDone(true);
-      return true;
-    }
-    logging::log(logging::Debug, "CGI exited with error code");
-	_cgi.setInputDone(true);
-  } else if (WIFSIGNALED(status)) {
-    logging::log(logging::Debug, "CGI was killed by signal");
-  }
-  _cgi.setPid(-1);
-  initSendError(CODE_500);
-  return false;
 }
+
 
 void Reaction::sendToCGI(const size_t Bytes) {
   (void)Bytes;
@@ -264,7 +266,6 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
   const size_t used = Buf.getUsed();
   if (used == 0) // nothing read from FileFd and no residue from last time
     return true;
-
   ssize_t rc;
   try {
     rc = Buf.bufToSocket(Socket, Bytes);
