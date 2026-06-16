@@ -93,6 +93,7 @@ bool Reaction::checkOnChild(void){
 		return true; //come back later
 	if (WIFEXITED(status)) { //child somehow exited
 		_cgi.setChildProcessDone(true);
+		_cgi.setInputDone(true);
 		// find out how
     	if (WEXITSTATUS(status) == 0) {
       		logging::log(logging::Debug, "CGI exited normally with 0");
@@ -101,7 +102,6 @@ bool Reaction::checkOnChild(void){
     	}
     	logging::log(logging::Debug, "CGI exited with error code");
 		// do not attempt to send more to CGI as it finished
-		_cgi.setInputDone(true);
     } 
 	else if (WIFSIGNALED(status)) {
         logging::log(logging::Debug, "CGI was killed by signal");
