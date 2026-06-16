@@ -56,6 +56,10 @@ void Reaction::setPathInfo(const PathInfo &PathInfo) {
   _pathInfo = PathInfo;
 }
 
+bool Reaction::getHungUp() const{
+	return _hungUp;
+}
+
 void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
   setDefaults();
   _sock = Socket;

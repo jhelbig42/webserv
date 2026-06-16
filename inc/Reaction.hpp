@@ -78,6 +78,8 @@ public:
 
   void setPathInfo(const PathInfo &PathInfo);
 
+  bool getHungUp() const;
+
 private:
   // sending files + metadata
   bool sendFile(const int Socket, const size_t Bytes);

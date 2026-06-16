@@ -196,8 +196,8 @@ bool Server::shouldBeDeleted(int Fd, int Type) {
   if (Type == IS_CLIENT) {
     //return (_clientMap.at(Fd).getDeleteStatus());
     if (_clientMap.at(Fd).getDeleteStatus() == true 
-		|| _clientMap.at(Fd)._react._hungUp == true)
-		|| _clientMap.at(Fd)._req.getState() == CLIENTHUNGUP {
+		|| _clientMap.at(Fd)._react.getHungUp() == true
+		|| _clientMap.at(Fd)._req.getState() == CLIENTHUNGUP){
 			return (true);
 	}
 	else
