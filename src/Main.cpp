@@ -27,6 +27,9 @@ int main(int argc, char **argv) {
     Server server(websites);
     if (server.pollLoop() < 0)
       return 1;
+  } catch (const Config::UnexpectedTokenException &e) {
+    std::cerr << e.what();
+    return 1;
   } catch (const std::exception &e) {
     logging::log(logging::Error, e.what());
     return 1;

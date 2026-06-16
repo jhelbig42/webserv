@@ -40,7 +40,8 @@ public:
   void init(const Request &Req, const int Socket, int &ForwardSocket);
 
   /// \fn bool process(const int Socket, const size_t Bytes, const int
-  /// Condition); \brief continues processing a Reaction object
+  /// Condition);
+  /// \brief continues processing a Reaction object
   ///
   /// Depending on the given Conditions, process() decides how to continue
   /// processing the Reaction object. This funciton is also open to the

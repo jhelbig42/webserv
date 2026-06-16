@@ -22,8 +22,6 @@ void Parser::parse(void) {
       break;
     try {
       _config.addWebsite(server());
-    } catch (const UnexpectedTokenException &e) {
-      throw;
     } catch (...) {
       throw;
     }

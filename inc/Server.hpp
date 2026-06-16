@@ -14,8 +14,6 @@ struct ClientAddr {
   struct sockaddr_storage addr;
   int clientSock;
   socklen_t addrSize;
-  // char client_IP[INET6_ADDRSTRLEN];
-  // Beej uses this - do we need it?
 };
 
 class Server {

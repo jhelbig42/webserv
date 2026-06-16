@@ -157,13 +157,7 @@ void Reaction::receiveFromCGI(const size_t Bytes) {
   }
   if (rc == 0) {
     // EOF from forwardSocket transition to SendFile from remaining buffer
-	if (!checkOnChild()) // error already turned into a 500 response
-			return;
-		if (_cgi.getPid() != -1) // pipe closed (EOF), but exit status not clear yet - try later
-			return;
-		//here just on EOF, checkOnChild is true and PID set back to -1 from checkOnChild
-		//so we are sure exit status was 0
-	_fdIn = -1;
+    _fdIn = -1;
     _processType = SendFile;
   } else {
     _cgi.setTimeLastActive(time(NULL));
@@ -177,17 +171,8 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   // logging::log(logging::Debug, "Reaction::sendToClient()");
-  if (_processType == SendFile){
-    try{
-		return sendFile(Socket, Bytes);
-	}
-	catch (std::runtime_error &e) {
-         // client disconnected between poll() and send()
-         logging::log3(logging::Info, "sendToClient: send to client failed (",
-                       e.what(), "), closing connection");
-         return true;
-    }
-  }
+  if (_processType == SendFile)
+    return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) &&
       _cgi.getInputDone()) {
     // logging::log(logging::Debug, "CGI input is done");
@@ -196,16 +181,8 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
     }
     const size_t used = _buffer.getUsed();
     if (used > 0) {
-      ssize_t rc;
-	  try {
-			rc = _buffer.bufToSocket(Socket, Bytes);
-		} catch (std::runtime_error &e) {
-         // client disconnected between poll() and send()
-         logging::log3(logging::Info, "sendToClient: send to client failed (",
-                       e.what(), "), closing connection");
-         return true;
-       }
-	   if ((rc >= 0) && (size_t)rc == used &&
+      const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
+      if ((rc >= 0) && (size_t)rc == used &&
           (_processType == ReceiveFile || _cgi.getChildProcessDone())) {
         logging::log2(logging::Debug, __func__, " returns true");
         return true;
