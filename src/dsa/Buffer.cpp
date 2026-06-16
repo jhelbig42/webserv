@@ -90,8 +90,6 @@ ssize_t Buffer::fileToBuf(const int Fd, const size_t Bytes) {
   errno = 0;
   const ssize_t rc = read(Fd, _buffer + _end, amount);
   if (rc < 0) {
-    //	logging::log2(logging::Warning, "fileToBuf() error on read: ",
-    //strerror(errno));
     throw std::runtime_error(strerror(errno));
   }
   _end += (size_t)rc; // safe because rc >= 0 and rc <= getFree()

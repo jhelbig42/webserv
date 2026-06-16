@@ -17,6 +17,16 @@ public:
   const std::list<Website> &getWebsites(void) const;
   void addWebsite(const Website &Site);
 
+  class UnexpectedTokenException : public std::exception {
+  public:
+    UnexpectedTokenException(const std::string &Msg);
+    ~UnexpectedTokenException(void) throw();
+    const char *what(void) const throw();
+
+  private:
+    std::string _report;
+  };
+
 private:
   std::list<Website> _websites;
 };

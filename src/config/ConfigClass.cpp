@@ -6,8 +6,14 @@
 
 // class Config
 Config::Config(const char *File) {
-  Parser parser(*this, File);
-  parser.parse();
+  try {
+    Parser parser(*this, File);
+    parser.parse();
+  } catch (const Parser::UnexpectedTokenException &e) {
+    throw UnexpectedTokenException(e.what());
+  } catch (...) {
+    throw;
+  }
 }
 
 void Config::addWebsite(const Website &Site) {
@@ -16,4 +22,15 @@ void Config::addWebsite(const Website &Site) {
 
 const std::list<Website> &Config::getWebsites(void) const {
   return _websites;
+}
+
+Config::UnexpectedTokenException::UnexpectedTokenException(const std::string &Msg) {
+  _report = Msg;
+}
+
+const char *Config::UnexpectedTokenException::what() const throw() {
+  return _report.c_str();
+}
+
+Config::UnexpectedTokenException::~UnexpectedTokenException(void) throw() {
 }

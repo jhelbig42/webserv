@@ -1,7 +1,5 @@
 #pragma once
 
-#define DEFAULT_ERR_PATH "./default_err/"
-
 #define CODE_200 200
 #define CODE_201 201
 #define CODE_202 202
@@ -38,38 +36,3 @@
 #define REASON_502 "Bad Gateway"
 #define REASON_503 "Service Unavailable"
 
-#define FILE_NAME_200 "default_error.html"
-#define FILE_NAME_201 "default_error.html"
-#define FILE_NAME_202 "default_error.html"
-#define FILE_NAME_204 "default_error.html"
-#define FILE_NAME_301 "default_error.html"
-#define FILE_NAME_302 "default_error.html"
-#define FILE_NAME_304 "default_error.html"
-#define FILE_NAME_400 "code_400.html"
-#define FILE_NAME_401 "code_401.html"
-#define FILE_NAME_403 "code_403.html"
-#define FILE_NAME_404 "code_404.html"
-#define FILE_NAME_405 "code_405.html"
-#define FILE_NAME_411 "code_411.html"
-#define FILE_NAME_500 "code_500.html"
-#define FILE_NAME_501 "code_501.html"
-#define FILE_NAME_502 "code_502.html"
-#define FILE_NAME_503 "code_503.html"
-
-#define FILE_200 DEFAULT_ERR_PATH FILE_NAME_200
-#define FILE_201 DEFAULT_ERR_PATH FILE_NAME_201
-#define FILE_202 DEFAULT_ERR_PATH FILE_NAME_202
-#define FILE_204 DEFAULT_ERR_PATH FILE_NAME_204
-#define FILE_301 DEFAULT_ERR_PATH FILE_NAME_301
-#define FILE_302 DEFAULT_ERR_PATH FILE_NAME_302
-#define FILE_304 DEFAULT_ERR_PATH FILE_NAME_304
-#define FILE_400 DEFAULT_ERR_PATH FILE_NAME_400
-#define FILE_401 DEFAULT_ERR_PATH FILE_NAME_401
-#define FILE_403 DEFAULT_ERR_PATH FILE_NAME_403
-#define FILE_404 DEFAULT_ERR_PATH FILE_NAME_404
-#define FILE_405 DEFAULT_ERR_PATH FILE_NAME_405
-#define FILE_411 DEFAULT_ERR_PATH FILE_NAME_411
-#define FILE_500 DEFAULT_ERR_PATH FILE_NAME_500
-#define FILE_501 DEFAULT_ERR_PATH FILE_NAME_501
-#define FILE_502 DEFAULT_ERR_PATH FILE_NAME_502
-#define FILE_503 DEFAULT_ERR_PATH FILE_NAME_503

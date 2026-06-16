@@ -30,6 +30,14 @@ private:
   const Location *_website;
 };
 
+// \brief returned to inform the reaction processing of what to do
+//
+// getAction() should be called to identify the required action
+// which can be either Default, Return or Cgi
+//
+// Return requires the server to immediately send a response with
+// the code acquired by getCode() and potentially (in case of 301 or similar)
+// a resource acquired by getRealPath()
 class PathInfo {
 public:
   typedef enum { Default, Return, Cgi } Action;
