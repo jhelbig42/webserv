@@ -65,10 +65,9 @@ std::vector<std::string> split(const std::string &S) {
 
 void Request::readFromSocket(int Fd) {
   logging::log(logging::Debug, "readFromSocket() starts");
-  //const ssize_t bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
 	ssize_t bytesRead;
 	try {
-		bytesRead = _buf.fileToBuf(Fd, MAX_REQUEST);
+		bytesRead = _buf.socketToBuf(Fd, MAX_REQUEST);
 	} catch (std::runtime_error &e) {
 		// client disconnected before/while we tried to read
 		logging::log3(logging::Info, "readFromSocket: read from client failed (",

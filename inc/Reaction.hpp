@@ -112,6 +112,27 @@ private:
   void sendToCGI(const size_t Bytes);
   void recvFromClient(const int Socket, const size_t Bytes);
   bool sendToClient(const int Socket, const size_t Bytes);
+  /// \brief reads data from a file descriptor and writes it to a socket
+///
+/// A buffer is used to save the state of the transmission between calls.
+/// The buffer should not be changed between calls until the transmission
+/// is done.
+///
+/// side effects:
+/// Reads from FileFd
+/// Writes to Socket
+/// modifies Buf
+/// If there is nothing more to read from FileFd closes it and sets it to -1
+/// Logs and error if closing FileFd fails
+///
+/// \param Socket socket to send data to
+/// \param FileFd file to read data from, will be set to -1 if nothing more to
+/// read \param Buf buffer which is used to save the transmission state between
+/// calls \param Bytes amount of bytes which is attempted to be transmitted
+///
+/// \returns true if transmission is completed
+/// \returns false if transmission is not completed
+  bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf, const size_t Bytes);
 
   HttpHeaders _headers;
   ProcessType _processType;
@@ -134,5 +155,6 @@ private:
   Script _script;
   CGIProcess _cgi;
 
+  bool	_hungUp;
   PathInfo _pathInfo;
 };

@@ -17,29 +17,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/// \brief reads data from a file descriptor and writes it to a socket
-///
-/// A buffer is used to save the state of the transmission between calls.
-/// The buffer should not be changed between calls until the transmission
-/// is done.
-///
-/// side effects:
-/// Reads from FileFd
-/// Writes to Socket
-/// modifies Buf
-/// If there is nothing more to read from FileFd closes it and sets it to -1
-/// Logs and error if closing FileFd fails
-///
-/// \param Socket socket to send data to
-/// \param FileFd file to read data from, will be set to -1 if nothing more to
-/// read \param Buf buffer which is used to save the transmission state between
-/// calls \param Bytes amount of bytes which is attempted to be transmitted
-///
-/// \returns true if transmission is completed
-/// \returns false if transmission is not completed
-static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
-                         const size_t Bytes);
-
 /// \brief writes the content of an std::string object to a socket
 ///
 /// side effects:
@@ -57,7 +34,6 @@ bool Reaction::process(const int Socket, const size_t Bytes,
 
   if (!checkOnChild())
     return false;
-  logging::log2(logging::Debug, "child finished for socket ", Socket);
   // we just polled for what we need
   if (Condition & FSockRead)
     receiveFromCGI(Bytes);
@@ -124,17 +100,22 @@ void Reaction::sendToCGI(const size_t Bytes) {
 	// see if CGI is still running
     if (checkOnChild() == true) {
 		try {
-			_buffer.bufToSocket(_cgi.getForwardSocket(), toSend);
-			} catch (std::runtime_error &e) {
-				// CGI died between checkOnChild() and our write to its socket???
-				logging::log3(logging::Info, "sendToCGI: send to CGI failed (",
-							  e.what(), "), aborting CGI");
+			ssize_t rc = _buffer.bufToSocket(_cgi.getForwardSocket(), toSend); // never -1 as toSend > 0 
+			if (rc == 0){
 				_cgi.setPid(-1);
 				initSendCode(CODE_500);
-				return;
+				return;	
 			}
+		} catch (std::runtime_error &e) {
+			// CGI died between checkOnChild() and our write to its socket???
+			logging::log3(logging::Info, "sendToCGI: send to CGI failed (",
+						  e.what(), "), aborting CGI");
+			_cgi.setPid(-1);
+			initSendCode(CODE_500);
+			return;
 		}
 	}
+  }
   // mark input done only once the full body is both received from the client
   // and drained from the buffer to CGI
   if (_receivedContLen >= _reqContLen && _buffer.getUsed() == 0) {
@@ -173,23 +154,24 @@ bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
     return sendFile(Socket, Bytes);
   if ((_processType == CgiPost || _processType == CgiNotPost) &&
       _cgi.getInputDone()) {
-    // logging::log(logging::Debug, "CGI input is done");
     if (sendMetadataIfPending(Socket, Bytes)) {
       return false;
     }
     const size_t used = _buffer.getUsed();
     if (used > 0) {
-      const ssize_t rc = _buffer.bufToSocket(Socket, Bytes);
-      if ((rc >= 0) && (size_t)rc == used &&
+      const ssize_t rc = _buffer.bufToSocket(Socket, Bytes); // will never return -1 because used > 0
+	  if (rc == 0) {
+		_hungUp = true;
+		return false;
+	  }
+      if ((size_t)rc == used &&
           (_processType == ReceiveFile || _cgi.getChildProcessDone())) {
         logging::log2(logging::Debug, __func__, " returns true");
         return true;
       }
-      return false;
     }
-    return false;
   }
-  return false; // should never be reached
+  return false;
 }
 
 bool Reaction::sendMetadataIfPending(const int Socket, const size_t Bytes) {
@@ -218,12 +200,14 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket,
     const ssize_t received = _buffer.socketToBuf(Socket, toReceive);
     if (received == -1) // not possible to read anything into the buffer
       return;           // means we are just done for this round
-    _receivedContLen += static_cast<size_t>(received);
-    logging::log3(logging::Debug,
-                  "Requested / Received Content Len: ", _reqContLen,
-                  _receivedContLen);
+    if (received == 0){
+		_hungUp = true;
+		return;
+	}
+	  _receivedContLen += static_cast<size_t>(received);
+    logging::log3(logging::Debug, "Requested / Received Content Len: ", _reqContLen,_receivedContLen);
   } catch (std::runtime_error &) {
-    initSendCode(CODE_500);
+    _hungUp = true;
     return;
   }
   return;
@@ -245,15 +229,25 @@ static bool stringToSocket(const int Socket, std::string &Str,
 
 // for ideas about performance improvement check comments to implementations
 // of Buffer::fill()
-static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
+bool Reaction::fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
                          const size_t Bytes) {
   if (FileFd >= 0) {
     Buf.optimize(Bytes);
     // edgecase = FileFd empties by exactly filling up Buf. Then empty FileFd
     // would be passed one more time; theory: does not matter as FileFd will
     // spill just 0 next iteration and no exception will be thrown
-    const ssize_t rc = Buf.fileToBuf(FileFd, Bytes);
+    ssize_t rc;
+	try{ 
+		rc = Buf.fileToBuf(FileFd, Bytes);
+	}
+	catch (std::runtime_error &e){
+		logging::log2(logging::Error, "fileToSocket failed:" ,e.what());
+		initSendCode(CODE_500);
+		return false;
+	}
+	// if rc == -1, then buffer is full - so we send from buffer 
     if ((size_t)rc < Bytes && Buf.getFree() > 0) {
+	  errno = 0;
       if (close(FileFd) < 0)
         logging::log2(logging::Error, "close: ", strerror(errno));
       FileFd = -1;
@@ -264,12 +258,16 @@ static bool fileToSocket(const int Socket, int &FileFd, Buffer &Buf,
     return true;
   ssize_t rc;
   try {
-    rc = Buf.bufToSocket(Socket, Bytes);
+	rc = Buf.bufToSocket(Socket, Bytes);
   } catch (std::runtime_error &e) {
     // client disconnected (e.g. RST) between becoming writable and our send()
     logging::log3(logging::Info, "fileToSocket: send to client failed (",
                   e.what(), "), closing connection");
     return true;
+  }
+  if (rc == 0) {// can not be -1 because used != 0
+		_hungUp = true;
+		return false;
   }
   if (FileFd == -1 && ((rc >= 0) && (size_t)rc == used))
     return true;

@@ -31,7 +31,7 @@ void Reaction::setDefaults(void) {
 
 Reaction::Reaction()
     : _processType(NotInitialized), _http09(false), _metadataSent(false),
-      _fdIn(-1) {
+      _fdIn(-1), _hungUp(false) {
   _headers.unsetAll();
 }
 
