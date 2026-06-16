@@ -4,6 +4,7 @@
 #include "Request.hpp"
 #include "Script.hpp"
 
+#include <signal.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #define SH_DEFAULT_PATH "/home/jhelbig/Desktop/webserv/scripts"
 #define PY_DEFAULT_PATH "/usr/bin/python3"
 
@@ -39,6 +39,10 @@ CGIProcess::~CGIProcess() {
     free((void *)_args);
   }
   free(_path);
+ 
+  if (_pid != -1){
+	kill(_pid, SIGKILL);
+  }
 }
 
 bool CGIProcess::getInputDone() const {
