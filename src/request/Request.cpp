@@ -50,19 +50,16 @@ void Request::process(int Socket) {
   }
 }
 
-std::vector<std::string> split(const std::string &S,
-                               const std::string &Delimiter) {
+std::vector<std::string> split(const std::string &S) {
   std::vector<std::string> tokens;
+  std::stringstream iss(S);
   std::string token;
-  size_t last = 0;
-  size_t next = 0;
-  while ((next = S.find(Delimiter, last)) != std::string::npos) {
-    token = S.substr(last, next - last);
+
+  while ((iss >> token)) {
     tokens.push_back(token);
-    last = next + Delimiter.length();
   }
-  tokens.push_back(S.substr(last));
-  // logging::log(logging::Debug, "split Successfull");
+  logging::log2(logging::Debug, "size of tokens is ", tokens.size());
+  logging::log2(logging::Debug, "last token", tokens[tokens.size() -1]);
   return tokens;
 }
 
