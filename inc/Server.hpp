@@ -14,8 +14,6 @@ struct ClientAddr {
   struct sockaddr_storage addr;
   int clientSock;
   socklen_t addrSize;
-  // char client_IP[INET6_ADDRSTRLEN];
-  // Beej uses this - do we need it?
 };
 
 class Server {
@@ -72,6 +70,7 @@ private:
   void addConnectionToMap(int ListenerFd, const struct ClientAddr &Candidate);
   short getForwardEvents(int ConditionsWanted);
   void closeAndDeleteBatch(void);
+  void addAllNewFwdSockets(void);
 
   // ServerHandlePoll.hpp
   void handleCondition(struct pollfd &Polled, int Type, time_t TimeNow);

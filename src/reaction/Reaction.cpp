@@ -31,7 +31,7 @@ void Reaction::setDefaults(void) {
 
 Reaction::Reaction()
     : _processType(NotInitialized), _http09(false), _metadataSent(false),
-      _fdIn(-1) {
+      _fdIn(-1), _hungUp(false) {
   _headers.unsetAll();
 }
 
@@ -62,6 +62,10 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 
   logging::log3(logging::Debug, "Reaction::", __func__, " called");
   if (Req.getState() == INVALID) {
+    initSendCode(CODE_400);
+    return;
+  }
+  if (Req.getResource().find("..") != std::string::npos){
     initSendCode(CODE_400);
     return;
   }

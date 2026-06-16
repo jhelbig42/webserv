@@ -17,10 +17,13 @@ tester
 cgi_tester
 webserv_tester
 webserv_tester/*
+hilaryTester
+hilaryTester/*
 post/*
 YoupiBanane
 webserv
 TODO.md
 www
 www/*
+hilaryTester
 hilaryTester/*

@@ -79,5 +79,4 @@ private:
   std::string _queryString;
 };
 
-std::vector<std::string> split(const std::string &S,
-                               const std::string &Delimiter);
+std::vector<std::string> split(const std::string &S);

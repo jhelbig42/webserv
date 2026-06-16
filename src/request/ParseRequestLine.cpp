@@ -70,9 +70,8 @@ void Request::parseHttp(const std::string &Token) {
 
 void Request::parseRequestLine(const std::string &RequestLine) {
   logging::log(logging::Debug, "parseStatusLine()");
-  std::vector<std::string> status = split(RequestLine, " ");
-  if (status.size() ==
-      2) // HTTP/0.9 simple request: "METHOD /resource" — no version
+  std::vector<std::string> status = split(RequestLine);
+  if (status.size() == 2) // HTTP/0.9 simple request: "METHOD /resource" — no version
   {
     try {
       parseMethod(status[0]);
