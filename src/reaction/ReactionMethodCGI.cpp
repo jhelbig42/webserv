@@ -9,9 +9,9 @@ void Reaction::initCGIMethod(const Request &Req) {
   if (access(_pathInfo.getRealPath().c_str(), F_OK | R_OK) != 0) {
     logging::log(logging::Debug, "error in CGI path");
     if (errno == ENOENT)
-      initSendError(404);
+      initSendCode(404);
     else if (errno == EACCES)
-      initSendError(403);
+      initSendCode(403);
     else
       throw std::runtime_error(strerror(errno));
     return;
@@ -19,9 +19,9 @@ void Reaction::initCGIMethod(const Request &Req) {
   if (access(_pathInfo.getCgiPath().c_str(), F_OK | X_OK) != 0) {
     logging::log(logging::Debug, "error in script path");
     if (errno == ENOENT)
-      initSendError(404);
+      initSendCode(404);
     else if (errno == EACCES)
-      initSendError(403);
+      initSendCode(403);
     else
       throw std::runtime_error(strerror(errno));
     return;

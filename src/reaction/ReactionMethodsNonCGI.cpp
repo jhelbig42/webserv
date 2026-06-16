@@ -26,10 +26,10 @@ void Reaction::initMethodNonCGI(const Request &Req) {
     initDelete();
     return;
   case Post:
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return;
   case Generic:
-    initSendError(CODE_501);
+    initSendCode(CODE_501);
     return;
   }
 }
@@ -49,7 +49,7 @@ void Reaction::initHeadGet(const Request &Req) {
 
   if (stat(path.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
     if (path.empty() || path[path.size() - 1] != '/') {
-      initSendError(CODE_404);
+      initSendCode(CODE_404);
       return;
     }
     const std::list<std::string> &indexFiles = _pathInfo.getIndex();
@@ -72,7 +72,7 @@ void Reaction::initHeadGet(const Request &Req) {
       Autoindex ai;
       std::string const html = ai.autoindexStream(dir, Req.getResource());
       if (ai.getErrCode() != CODE_200) {
-        initSendError(ai.getErrCode());
+        initSendCode(ai.getErrCode());
         return;
       }
       initSendString(CODE_200, html);
@@ -80,16 +80,16 @@ void Reaction::initHeadGet(const Request &Req) {
         _body.clear();
       return;
     }
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return;
   }
 
   if (access(path.c_str(), F_OK) != 0) {
-    initSendError(CODE_404);
+    initSendCode(CODE_404);
     return;
   }
   if (access(path.c_str(), R_OK) != 0) {
-    initSendError(CODE_403);
+    initSendCode(CODE_403);
     return;
   }
 
@@ -108,7 +108,6 @@ void Reaction::setTmpPathName(void) {
   _tmpPath = sname.str();
 }
 
-// also needs the Post path from config
 void Reaction::setFinalPathName(void) {
   _finalPath = _pathInfo.getRealPath();
 }

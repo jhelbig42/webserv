@@ -79,14 +79,14 @@ bool Reaction::checkOnChild(void){
 		logging::log(logging::Debug, "CGI timed out.");
 		kill(pid, SIGKILL);
 		_cgi.setPid(-1);
-		initSendError(CODE_500);
+		initSendCode(CODE_500);
 		return false;
 	}
   	int status;
 	const pid_t result = waitpid(pid, &status, WNOHANG);
   	if (result == -1){
     	_cgi.setPid(-1);
-		initSendError(CODE_500);
+		initSendCode(CODE_500);
 		return false; // waitpid failed => internal server error
 	}
 	if (result == 0) // child not finished yet
@@ -107,7 +107,7 @@ bool Reaction::checkOnChild(void){
         logging::log(logging::Debug, "CGI was killed by signal");
     }
     _cgi.setPid(-1);
-    initSendError(CODE_500);
+    initSendCode(CODE_500);
     return false;
 }
 
@@ -227,7 +227,7 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket,
                   "Requested / Received Content Len: ", _reqContLen,
                   _receivedContLen);
   } catch (std::runtime_error &) {
-    initSendError(CODE_500);
+    initSendCode(CODE_500);
     return;
   }
   return;
