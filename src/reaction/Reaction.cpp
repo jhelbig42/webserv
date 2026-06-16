@@ -65,6 +65,10 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
     initSendCode(CODE_400);
     return;
   }
+  if (Req.getResource().find("..") != std::string::npos){
+    initSendCode(CODE_400);
+    return;
+  }
   if (!(_pathInfo.getAllowed() & Req.getMethod())) {
     logging::log(logging::Debug, "Requested method not allowed");
     initSendCode(CODE_403);
