@@ -177,8 +177,17 @@ void Reaction::recvFromClient(const int Socket, const size_t Bytes) {
 
 bool Reaction::sendToClient(const int Socket, const size_t Bytes) {
   // logging::log(logging::Debug, "Reaction::sendToClient()");
-  if (_processType == SendFile)
-    return sendFile(Socket, Bytes);
+  if (_processType == SendFile){
+    try{
+		return sendFile(Socket, Bytes);
+	}
+	catch (std::runtime_error &e) {
+         // client disconnected between poll() and send()
+         logging::log3(logging::Info, "sendToClient: send to client failed (",
+                       e.what(), "), closing connection");
+         return true;
+    }
+  }
   if ((_processType == CgiPost || _processType == CgiNotPost) &&
       _cgi.getInputDone()) {
     // logging::log(logging::Debug, "CGI input is done");
@@ -245,18 +254,15 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket,
   return;
 }
 
-// TODO: catching SIGPIPE still missing
-// TODO: handle rc < 0
-// TODO: doublecheck error handling
 static bool stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes) {
   if (Str.empty())
     return true;
   const size_t amount = std::min(Bytes, Str.size());
+  errno = 0; 
   const ssize_t rc = send(Socket, Str.c_str(), amount, MSG_DONTWAIT);
   if (rc < 0) {
-    logging::log3(logging::Error, __func__, ": ", strerror(errno));
-    return false;
+	throw std::runtime_error(strerror(errno));
   }
   Str.erase(0, (size_t)rc); // cast is safe because rc > 0
   return Str.empty();
