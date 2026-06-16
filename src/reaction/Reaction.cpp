@@ -88,6 +88,7 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 
   // check if Resource is a CGI script
   PathInfo::Action action = _pathInfo.getAction();
+  
   switch (action){
 	case PathInfo::Default:
     	logging::log(logging::Debug, "Req is NOT a CGI");
@@ -107,6 +108,7 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
     		initSendCode(CODE_500);
     	return;
   		}
+		return;
 	case PathInfo::Return:
 		initSendCode(_pathInfo.getCode());
   }
@@ -115,7 +117,7 @@ void Reaction::init(const Request &Req, const int Socket, int &ForwardSocket) {
 
 void Reaction::initSendCode(const int Code) {
   std::string redir = "";
-  if (Code == CODE_301)
+  if (Code == CODE_301 || Code == CODE_302)
 	 redir = _pathInfo.getRealPath();
   const char *configFile =
       _pathInfo.getErrorPage(static_cast<unsigned int>(Code));
@@ -131,7 +133,11 @@ void Reaction::initSendCode(const int Code) {
   std::string phrase = getReasonPhrase(Code);
   std::ostringstream body;
   body << "<!DOCTYPE html>\r\n<html>\r\n<head><title>" << Code << " " << phrase
-       << "</title></head>\r\n<body>\r\n<h1>" << Code << " " << phrase << "</h1>\r\n</body>\r\n</html>";
+       << "</title></head>\r\n<body>\r\n<h1>" << Code << " " << phrase << "</h1>\r\n";
+  if(redir == "")
+	   body <<"</body>\r\n</html>";
+  else
+	body <<"Location: " << redir << "\r\n" << "</body>\r\n</html>";   
   initSendString(Code, body.str());
 }
 
