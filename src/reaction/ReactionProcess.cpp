@@ -130,7 +130,7 @@ void Reaction::sendToCGI(const size_t Bytes) {
 				logging::log3(logging::Info, "sendToCGI: send to CGI failed (",
 							  e.what(), "), aborting CGI");
 				_cgi.setPid(-1);
-				initSendError(CODE_500);
+				initSendCode(CODE_500);
 				return;
 			}
 		}
@@ -150,15 +150,11 @@ void Reaction::receiveFromCGI(const size_t Bytes) {
 
   // fill buffer from CGI socket — FSockRead guarantees data is available
   _buffer.optimize(Bytes);
-  // logging::log2(logging::Debug, "receiveFromCGI - receiving from fd: ",
-  // _cgi.getForwardSocket());
   const ssize_t rc = _buffer.fileToBuf(_cgi.getForwardSocket(), Bytes);
-  // const ssize_t rc = _buffer.fileToBuf(5, Bytes);
   if (rc < 0) { // when buffer is full
     return;
   }
-  if (rc == 0) {
-    // EOF from forwardSocket transition to SendFile from remaining buffer
+  if (rc == 0) { // EOF from forwardSocket transition to SendFile from remaining buffer
     _fdIn = -1;
     _processType = SendFile;
   } else {
