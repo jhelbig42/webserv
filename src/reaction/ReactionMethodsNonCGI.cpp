@@ -108,7 +108,6 @@ void Reaction::setTmpPathName(void) {
   _tmpPath = sname.str();
 }
 
-// also needs the Post path from config
 void Reaction::setFinalPathName(void) {
   _finalPath = _pathInfo.getRealPath();
 }
