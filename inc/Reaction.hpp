@@ -100,6 +100,16 @@ private:
 
   // for Post request
   void receiveBodyIntoServerBuffer(const int Socket, const size_t Bytes);
+  /// \brief writes the content of an std::string object to a socket
+///
+/// side effects:
+/// if the entire string Str can't be sent
+/// it will be modified to represent the unsent data
+/// Writes to Socket
+///
+/// \returns true if transmission is completed
+/// \returns false if transmission is not completed
+  bool stringToSocket(const int Socket, std::string &Str, const size_t Bytes);
 
   // called by process()
   /// \fn checkOnChild(void)
