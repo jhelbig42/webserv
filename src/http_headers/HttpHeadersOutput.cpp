@@ -16,7 +16,7 @@ std::ostream &operator<<(std::ostream &Os, const HttpHeaders &Hdrs) {
   }
   Os << NAME_DATE << ": " << getCurrentTimeString() << "\r\n";
   Os << NAME_SERVER << ": "
-     << "FamilyRoomWebserv/2147483647.1"
+     << "FamilyRoomWebserv/2147483647.2"
      << "\r\n";
   // other headers
   return Os;
