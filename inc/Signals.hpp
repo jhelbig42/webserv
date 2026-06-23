@@ -1,4 +1,4 @@
 #pragma once
 
-int checkSignal(void);
-int registerSigint(void);
+bool receivedTerminationSignal(void);
+int registerSignals(void);

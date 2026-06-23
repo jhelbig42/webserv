@@ -11,8 +11,11 @@
 
 int main(int argc, char **argv) {
 
-  if (registerSigint() < 0)
+  int rc = registerSignals();
+  if (rc != 0) {
+    logging::log2(logging::Error, "registerSignals: ", strerror(rc));
     return 1;
+  }
 
   const char *configPath = DEFAULT_CONFIG;
   if (argc >= 2)
