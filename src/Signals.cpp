@@ -1,21 +1,33 @@
+#include <cerrno>
 #include <csignal>
 
-static volatile sig_atomic_t g_sig_val = 0;
+static void terminateHandler(int Signum);
 
-static void handler(int Signum) {
-  g_sig_val = Signum;
-}
+static volatile sig_atomic_t terminate = 0;
 
-int checkSignal(void) {
-  return g_sig_val;
-}
+bool receivedTerminationSignal(void) { return terminate; }
 
-int registerSigint(void) {
+int registerSignals(void) {
   struct sigaction sa;
-  sa.sa_handler = handler;
+  sa.sa_handler = terminateHandler;
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
+
   if (sigaction(SIGINT, &sa, NULL) < 0)
-    return -1;
+    return errno;
+  if (sigaction(SIGTERM, &sa, NULL) < 0)
+    return errno;
+
+  sa.sa_handler = SIG_IGN;
+  sa.sa_flags = 0;
+
+  if (sigaction(SIGPIPE, &sa, NULL) < 0)
+    return errno;
+
   return 0;
+}
+
+static void terminateHandler(int Signum) {
+  (void)Signum;
+  terminate = 1;
 }
