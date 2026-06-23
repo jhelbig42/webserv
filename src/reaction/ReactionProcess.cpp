@@ -17,17 +17,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/// \brief writes the content of an std::string object to a socket
-///
-/// side effects:
-/// if the entire string Str can't be sent
-/// it will be modified to represent the unsent data
-/// Writes to Socket
-///
-/// \returns true if transmission is completed
-/// \returns false if transmission is not completed
-static bool stringToSocket(const int Socket, std::string &Str,
-                           const size_t Bytes);
 
 bool Reaction::process(const int Socket, const size_t Bytes,
                        const int Condition) {
@@ -185,9 +174,24 @@ bool Reaction::sendFile(const int Socket, const size_t Bytes) {
   if (sendMetadataIfPending(Socket, Bytes)) {
     return false;
   }
-  if (!_body.empty())
-    return stringToSocket(Socket, _body, Bytes);
-  return fileToSocket(Socket, _fdIn, _buffer, Bytes);
+  if (!_body.empty()){
+	try{
+		return(stringToSocket(Socket, _body, Bytes));
+	}
+	catch (std::runtime_error &e){
+		logging::log2(logging::Debug,"SendFile Caught Error from stringToScoket: ", e.what());
+		_hungUp = true;
+		return false;
+	}
+   }
+  try{
+	return fileToSocket(Socket, _fdIn, _buffer, Bytes);
+  } 
+  catch (std::runtime_error &e){
+		logging::log2(logging::Debug,"SendFile Caught Error from FileToScoket: ", e.what());
+		_hungUp = true;
+		return false;
+  }
 }
 
 void Reaction::receiveBodyIntoServerBuffer(const int Socket,
@@ -213,7 +217,7 @@ void Reaction::receiveBodyIntoServerBuffer(const int Socket,
   return;
 }
 
-static bool stringToSocket(const int Socket, std::string &Str,
+bool Reaction::stringToSocket(const int Socket, std::string &Str,
                            const size_t Bytes) {
   if (Str.empty())
     return true;
@@ -222,6 +226,10 @@ static bool stringToSocket(const int Socket, std::string &Str,
   const ssize_t rc = send(Socket, Str.c_str(), amount, MSG_DONTWAIT);
   if (rc < 0) {
 	throw std::runtime_error(strerror(errno));
+  }
+  if (rc == 0){ // we could not send to socket --> hungUp
+	_hungUp = true;
+	return false;
   }
   Str.erase(0, (size_t)rc); // cast is safe because rc > 0
   return Str.empty();
